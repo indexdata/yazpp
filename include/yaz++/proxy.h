@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.12 2003-10-08 08:53:08 adam Exp $
+ * $Id: proxy.h,v 1.13 2003-10-08 09:32:48 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -15,6 +15,8 @@
 #endif
 
 class Yaz_Proxy;
+
+#define MAX_ZURL_PLEX 10
 
 struct Yaz_RecordCache_Entry;
 
@@ -169,6 +171,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
 
     Z_APDU *handle_query_validation(Z_APDU *apdu);
     Z_APDU *handle_syntax_validation(Z_APDU *apdu);
+    const char *load_balance(const char **url);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

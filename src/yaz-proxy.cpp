@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.51 2003-10-08 08:15:01 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.52 2003-10-08 09:32:49 adam Exp $
  */
 
 #include <assert.h>
@@ -158,6 +158,35 @@ char *Yaz_Proxy::get_proxy(Z_OtherInformation **otherInfo)
     return 0;
 }
 
+const char *Yaz_Proxy::load_balance(const char **url)
+{
+    int zurl_in_use[MAX_ZURL_PLEX];
+    Yaz_ProxyClient *c;
+    int i;
+
+    for (i = 0; i<MAX_ZURL_PLEX; i++)
+	zurl_in_use[i] = 0;
+    for (c = m_parent->m_clientPool; c; c = c->m_next)
+    {
+	for (i = 0; url[i]; i++)
+	    if (!strcmp(url[i], c->get_hostname()))
+		zurl_in_use[i]++;
+    }
+    int min = 100000;
+    const char *ret = 0;
+    for (i = 0; url[i]; i++)
+    {
+	yaz_log(LOG_LOG, "%s zurl=%s use=%d",
+		m_session_str, url[i], zurl_in_use[i]);
+	if (min > zurl_in_use[i])
+	{
+	    ret = url[i];
+	    min = zurl_in_use[i];
+	}
+    }
+    return ret;
+}
+
 Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 {
     assert (m_parent);
@@ -170,6 +199,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 
     if (!m_proxyTarget)
     {
+	const char *url[MAX_ZURL_PLEX];
 	const char *proxy_host = get_proxy(oi);
 	if (proxy_host)
 	{
@@ -178,9 +208,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    proxy_host = m_default_target;
 	}
 	
-	const char *url = 0;
 	int client_idletime = -1;
-	m_config.get_target_info(proxy_host, &url, &m_keepalive, &m_bw_max,
+	m_config.get_target_info(proxy_host, url, &m_keepalive, &m_bw_max,
 				 &m_pdu_max, &m_max_record_retrieve,
 				 &m_target_idletime, &client_idletime,
 				 &parent->m_max_clients);
@@ -189,12 +218,12 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    m_client_idletime = client_idletime;
 	    timeout(m_client_idletime);
 	}
-	if (!url)
+	if (!url[0])
 	{
 	    yaz_log(LOG_LOG, "%s No default target", m_session_str);
 	    return 0;
 	}
-	m_proxyTarget = (char*) xstrdup(url);
+	m_proxyTarget = (char*) xstrdup(load_balance(url));
     }
     if (cookie && *cookie)
     {

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.5 2003-10-08 08:15:01 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.6 2003-10-08 09:32:49 adam Exp $
  */
 
 #include <ctype.h>
@@ -126,6 +126,7 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *target_idletime,
 					 int *client_idletime)
 {
+    int no_url = 0;
     ptr = ptr->children;
     for (; ptr; ptr = ptr->next)
     {
@@ -133,8 +134,11 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 	    && !strcmp((const char *) ptr->name, "url"))
 	{
 	    const char *t = get_text(ptr);
-	    if (t)
-		*url = t;
+	    if (t && no_url < MAX_ZURL_PLEX)
+	    {
+		url[no_url++] = t;
+		url[no_url] = 0;
+	    }
 	}
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "keepalive"))
@@ -452,9 +456,11 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
     xmlNodePtr ptr;
     if (!m_proxyPtr)
     {
-	*url = name;
+	url[0] = name;
+	url[1] = 0;
 	return;
     }
+    url[0] = 0;
     for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
     {
 	if (ptr->type == XML_ELEMENT_NODE &&
@@ -473,7 +479,10 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
     if (ptr)
     {
 	if (name)
-	    *url = name;
+	{
+	    url[0] = name;
+	    url[1] = 0;
+	}
 	return_target_info(ptr, url, keepalive, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime);
     }
