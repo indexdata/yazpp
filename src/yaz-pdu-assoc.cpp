@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.17  2000-10-11 11:58:16  adam
+ * Revision 1.18  2000-10-24 12:29:57  adam
+ * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
+ * two Yaz_Proxy's (fatal).
+ *
+ * Revision 1.17  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -169,7 +173,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		{
 		    logf (m_log, "Connection closed by peer");
 		    close();
-		    m_PDU_Observer->failNotify();
+		    m_PDU_Observer->failNotify(); // problem here..
 		    return;
 		}
 		// lock it, so we know if recv_PDU deletes it.

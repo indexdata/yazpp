@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.4  2000-10-11 11:58:17  adam
+ * Revision 1.5  2000-10-24 12:29:57  adam
+ * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
+ * two Yaz_Proxy's (fatal).
+ *
+ * Revision 1.4  2000/10/11 11:58:17  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -279,7 +283,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
     switch (apdu_request->which)
     {
     case Z_APDU_initRequest:
-        logf (LOG_LOG, "got InitRequest");
+        logf (LOG_LOG, "got InitRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_initResponse);
 	recv_Z_init (apdu_request->u.initRequest,
 		     apdu_response->u.initResponse);
@@ -290,7 +294,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	send_Z_PDU(apdu_response);
         break;
     case Z_APDU_searchRequest:
-        logf (LOG_LOG, "got SearchRequest");
+        logf (LOG_LOG, "got SearchRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_searchResponse);
 	recv_Z_search (apdu_request->u.searchRequest,
 		       apdu_response->u.searchResponse);
@@ -302,7 +306,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	send_Z_PDU(apdu_response);
         break;
     case Z_APDU_presentRequest:
-        logf (LOG_LOG, "got PresentRequest");
+        logf (LOG_LOG, "got PresentRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_presentResponse);
 	recv_Z_present (apdu_request->u.presentRequest,
 			apdu_response->u.presentResponse);

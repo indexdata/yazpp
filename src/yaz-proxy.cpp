@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.19  2000-10-11 11:58:16  adam
+ * Revision 1.20  2000-10-24 12:29:57  adam
+ * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
+ * two Yaz_Proxy's (fatal).
+ *
+ * Revision 1.19  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -108,7 +112,7 @@ IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
-    new_proxy->timeout(120);
+    new_proxy->timeout(500);
     new_proxy->set_proxyTarget(m_proxyTarget);
     new_proxy->set_APDU_log(get_APDU_log());
     return new_proxy;
@@ -167,7 +171,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     if (!m_proxyTarget)
 	return 0;
 
-    if (cookie)
+    if (cookie && *cookie)
     {
 	logf (LOG_LOG, "lookup of clients cookie=%s target=%s",
 	      cookie, m_proxyTarget);
@@ -205,10 +209,15 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		c->m_last_resultCount = 0;
 		c->m_sr_transform = 0;
 		c->m_waiting = 0;
-		c->timeout(600);
+		c->timeout(600); 
 	    }
 	    c->m_seqno = parent->m_seqno;
+	    if (c->m_server && c->m_server != this)
+		c->m_server->m_client = 0;
+	    c->m_server = this;
+	    c->m_seqno = parent->m_seqno;
 	    (parent->m_seqno)++;
+	    yaz_log (LOG_LOG, "get_client 1 %p %p", this, c);
 	    return c;
 	}
     }
@@ -241,7 +250,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    {
 		logf (LOG_LOG, "Yaz_Proxy::get_client re-init session %d",
 		      c->m_seqno);
-		if (c->m_server)
+		if (c->m_server && c->m_server != this)
 		    delete c->m_server;
 		c->m_server = 0;
 	    }
@@ -254,7 +263,13 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		else
 		    c->m_cookie[0] = '\0';
 		c->m_seqno = parent->m_seqno;
+		if (c->m_server && c->m_server != this)
+		{
+		    c->m_server->m_client = 0;
+		    delete c->m_server;
+		}
 		(parent->m_seqno)++;
+		yaz_log (LOG_LOG, "get_client 2 %p %p", this, c);
 		return c;
 	    }
 	}
@@ -287,6 +302,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 
 	(parent->m_seqno)++;
     }
+    yaz_log (LOG_LOG, "get_client 3 %p %p", this, c);
     return c;
 }
 
@@ -406,6 +422,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     if (m_client->send_Z_PDU(apdu) < 0)
     {
 	delete m_client;
+	m_client = 0;
 	delete this;
     }
     else
@@ -422,11 +439,16 @@ void Yaz_Proxy::shutdown()
     // only keep if keep_alive flag and cookie is set...
     if (m_keepalive && m_client && m_client->m_cookie[0])
     {
+	if (m_client->m_waiting == 2)
+	    abort();
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
     }
-    else
+    else if (m_client)
     {
+	yaz_log (LOG_LOG, "deleting %p %p", this, m_client);
+	if (m_client->m_waiting == 2)
+	    abort();
 	delete m_client;
     }
     delete this;
@@ -465,11 +487,10 @@ IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
 Yaz_ProxyClient::~Yaz_ProxyClient()
 {
     if (m_prev)
-    {
 	*m_prev = m_next;
-	if (m_next)
-	    m_next->m_prev = m_prev;
-    }
+    if (m_next)
+	m_next->m_prev = m_prev;
+    m_waiting = 2;     // for debugging purposes only.
     delete m_last_query;
 }
 

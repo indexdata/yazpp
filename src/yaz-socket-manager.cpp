@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.11  2000-10-11 11:58:17  adam
+ * Revision 1.12  2000-10-24 12:29:57  adam
+ * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
+ * two Yaz_Proxy's (fatal).
+ *
+ * Revision 1.11  2000/10/11 11:58:17  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -234,6 +238,10 @@ int Yaz_SocketManager::processEvent()
     }
     return 0;
 }
+
+
+//    n p    n p  ......   n p    n p
+//   front                        back
 
 void Yaz_SocketManager::putEvent(YazSocketEvent *event)
 {
