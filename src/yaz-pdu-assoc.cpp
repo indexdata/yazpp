@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.3  1999-02-02 14:01:20  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:20  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:44  adam
@@ -106,6 +109,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    assoc->m_socketObservable->maskObserver(assoc,
 						    YAZ_SOCKET_OBSERVE_READ|
 						    YAZ_SOCKET_OBSERVE_EXCEPT);
+	    if (m_idleTime)
+		assoc->m_socketObservable->timeoutObserver(assoc, m_idleTime);
 	}
     }
     else if (m_state == Ready)
@@ -136,6 +141,10 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		if (destroyed)   // it really was destroyed, return now.
 		    return;
 	    } while (m_cs && cs_more (m_cs));
+	}
+	if (event & YAZ_SOCKET_OBSERVE_TIMEOUT)
+	{
+	    m_PDU_Observer->timeoutNotify();
 	}
     }
 }
@@ -299,6 +308,11 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
     m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 				     YAZ_SOCKET_OBSERVE_EXCEPT);
     m_state = Listen;
+}
+
+void Yaz_PDU_Assoc::idleTime(int idleTime)
+{
+    m_idleTime = idleTime;
 }
 
 void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,

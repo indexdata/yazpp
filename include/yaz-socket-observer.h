@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-observer.h,v $
- * Revision 1.2  1999-02-02 14:01:17  adam
+ * Revision 1.3  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.2  1999/02/02 14:01:17  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.1.1.1  1999/01/28 09:41:07  adam
@@ -18,7 +21,7 @@
 #define YAZ_SOCKET_OBSERVE_READ 1
 #define YAZ_SOCKET_OBSERVE_WRITE 2
 #define YAZ_SOCKET_OBSERVE_EXCEPT 4
-#define YAZ_SOCKET_OBSERVE_TIME 8
+#define YAZ_SOCKET_OBSERVE_TIMEOUT 8
 
 /**
    Forward reference

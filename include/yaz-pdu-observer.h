@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-observer.h,v $
- * Revision 1.3  1999-02-02 14:01:14  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:14  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:41  adam
@@ -41,6 +44,8 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     virtual IYaz_PDU_Observable *clone() = 0;
     /// Destroy completely
     virtual void destroy() = 0;
+    /// Set Idle Time
+    virtual void idleTime (int timeout) = 0;
 };
 
 /** Protocol Data Unit Observer.
@@ -55,6 +60,8 @@ class YAZ_EXPORT IYaz_PDU_Observer {
     virtual void connectNotify() = 0;
     /// Called whenever the connection was closed
     virtual void failNotify() = 0;
+    /// Called whenever the connection was closed
+    virtual void timeoutNotify() = 0;
     /// Make clone of observer using IYaz_PDU_Observable interface
     virtual IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable) = 0;
 };

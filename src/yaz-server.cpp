@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.3  1999-02-02 14:01:22  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:22  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:47  adam
@@ -27,6 +30,7 @@ public:
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
     void failNotify();
+    void timeoutNotify();
 private:
     int m_no;
 };
@@ -59,7 +63,7 @@ void MyServer::recv_Z_PDU(Z_APDU *apdu)
 
 IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable)
 {
-    logf (LOG_LOG, "clone %d", m_no);
+    logf (LOG_LOG, "child no %d", m_no);
     m_no++;
     return new MyServer(the_PDU_Observable);
 }
@@ -70,16 +74,25 @@ MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
     m_no = 0;
 }
 
+void MyServer::timeoutNotify()
+{
+    logf (LOG_LOG, "connection timed out");
+    delete this;
+}
+
 void MyServer::failNotify()
 {
+    logf (LOG_LOG, "connection closed by client");
     delete this;
 }
 
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
+    Yaz_PDU_Assoc *my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager, 0);
 
-    MyServer z(new Yaz_PDU_Assoc(&mySocketManager, 0));
+    my_PDU_Assoc->idleTime(20);
+    MyServer z(my_PDU_Assoc);
     
     if (argc <= 1)
 	z.server("@:9999");

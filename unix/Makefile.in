@@ -1,15 +1,17 @@
 # Copyright (C) 1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1999-01-28 09:41:07 adam Exp $
+# $Id: Makefile.in,v 1.2 1999-03-23 14:17:57 adam Exp $
 SHELL=/bin/sh
 MAKE=make
 
-.PHONY: all doc clean distclean
+.PHONY: all doc clean distclean depend
 
 all:
 	cd ../src; $(MAKE)
 
+depend:
+	cd ../src; $(MAKE) depend
 doc:
 	cd ../include; doc++ -H -d ../doc *.h
 

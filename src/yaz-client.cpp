@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.3  1999-02-02 14:01:18  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:18  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:42  adam
@@ -20,6 +23,7 @@
 #include <yaz-ir-assoc.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
+#include <yaz-z-query.h>
 
 class YAZ_EXPORT MyClient : public Yaz_IR_Assoc {
 public:
@@ -27,6 +31,16 @@ public:
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable);
     void init();
+    void search(Yaz_Z_Query *query);
+    void present(int start, int number);
+    void set_databaseNames (int num, char **list);
+    void set_syntax (const char *syntax);
+    void set_elementSetName (const char *elementSetName);
+private:
+    int m_num_databaseNames;
+    char **m_databaseNames;
+    int m_recordSyntax;
+    Z_ElementSetNames *m_elementSetNames;
 };
 
 void MyClient::recv_Z_PDU(Z_APDU *apdu)
@@ -40,6 +54,9 @@ void MyClient::recv_Z_PDU(Z_APDU *apdu)
     case Z_APDU_searchResponse:
         logf (LOG_LOG, "got searchResponse");
         break;
+    case Z_APDU_presentResponse:
+        logf (LOG_LOG, "got presentResponse");
+        break;
     }
 }
 
@@ -51,6 +68,97 @@ IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
 MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_IR_Assoc (the_PDU_Observable)
 {
+    m_num_databaseNames = 0;
+    m_databaseNames = 0;
+    m_recordSyntax = VAL_NONE;
+}
+
+void MyClient::set_databaseNames (int num, char **list)
+{
+    int i;
+    for (i = 0; i<m_num_databaseNames; i++)
+	delete m_databaseNames[i];
+    delete m_databaseNames;
+    m_databaseNames = 0;
+    m_num_databaseNames = num;
+    m_databaseNames = new (char*) [num];
+    for (i = 0; i<m_num_databaseNames; i++)
+    {
+	m_databaseNames[i] = new char[strlen(list[i])+1];
+	strcpy (m_databaseNames[i], list[i]);
+    }
+}
+
+void MyClient::set_syntax (const char *syntax)
+{
+    m_recordSyntax = VAL_NONE;
+    if (syntax && *syntax)
+	m_recordSyntax = oid_getvalbyname (syntax);
+}
+
+void MyClient::set_elementSetName (const char *elementSetName)
+{
+    if (m_elementSetNames)
+	delete [] m_elementSetNames->u.generic;
+    delete m_elementSetNames;
+    m_elementSetNames = 0;
+    if (elementSetName && *elementSetName)
+    {
+	m_elementSetNames = new Z_ElementSetNames;
+	m_elementSetNames->which = Z_ElementSetNames_generic;
+	m_elementSetNames->u.generic = new char[strlen(elementSetName)+1];
+	strcpy (m_elementSetNames->u.generic, elementSetName);
+    }
+}
+
+void MyClient::search(Yaz_Z_Query *query)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
+    Z_SearchRequest *req = apdu->u.searchRequest;
+
+    req->num_databaseNames = m_num_databaseNames;
+    req->databaseNames = m_databaseNames;
+    req->query = query->get_Z_Query();
+
+    int oid_syntax[OID_SIZE];
+    oident prefsyn;
+    if (m_recordSyntax != VAL_NONE)
+    {
+	prefsyn.proto = PROTO_Z3950;
+	prefsyn.oclass = CLASS_RECSYN;
+	prefsyn.value = (enum oid_value) m_recordSyntax;
+	oid_ent_to_oid(&prefsyn, oid_syntax);
+	req->preferredRecordSyntax = oid_syntax;
+    }
+    send_Z_PDU(apdu);
+}
+
+void MyClient::present(int start, int number)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
+    Z_PresentRequest *req = apdu->u.presentRequest;
+
+    req->resultSetStartPoint = &start;
+    req->numberOfRecordsRequested = &number;
+
+    int oid_syntax[OID_SIZE];
+    oident prefsyn;
+    if (m_recordSyntax != VAL_NONE)
+    {
+	prefsyn.proto = PROTO_Z3950;
+	prefsyn.oclass = CLASS_RECSYN;
+	prefsyn.value = (enum oid_value) m_recordSyntax;
+	oid_ent_to_oid(&prefsyn, oid_syntax);
+	req->preferredRecordSyntax = oid_syntax;
+    }
+    Z_RecordComposition compo;
+    if (m_elementSetNames)
+    {
+	req->recordComposition = &compo;
+        compo.which = Z_RecordComp_simple;
+        compo.u.simple = m_elementSetNames;
+    }
+    send_Z_PDU(apdu);
 }
 
 void MyClient::init()

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.h,v $
- * Revision 1.2  1999-02-02 14:01:16  adam
+ * Revision 1.3  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.2  1999/02/02 14:01:16  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.1.1.1  1999/01/28 09:41:07  adam
@@ -13,6 +16,7 @@
  */
 
 #include <yaz-socket-observer.h>
+#include <time.h>
 
 /** Simple Socket Manager.
     Implements a stand-alone simple model that uses select(2) to
@@ -25,6 +29,7 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
 	int fd;
 	unsigned mask;
 	unsigned timeout;
+	time_t last_activity;
 	YazSocketEntry *next;
     };
     YazSocketEntry *m_observers;       // all registered observers

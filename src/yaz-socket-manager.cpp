@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.3  1999-02-02 14:01:23  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:23  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:48  adam
@@ -54,6 +57,8 @@ void Yaz_SocketManager::addObserver(int fd, IYazSocketObserver *observer)
     }
     se->fd = fd;
     se->mask = 0;
+    se->last_activity = 0;
+    se->timeout = 0;
 }
 
 void Yaz_SocketManager::deleteObserver(IYazSocketObserver *observer)
@@ -104,6 +109,7 @@ int Yaz_SocketManager::processEvent()
 {
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
+    unsigned timeout = 0;
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -115,21 +121,15 @@ int Yaz_SocketManager::processEvent()
     int res;
     int max = 0;
     int no = 0;
-    struct timeval to;
-    struct timeval *timeout = &to;
 
     FD_ZERO(&in);
     FD_ZERO(&out);
     FD_ZERO(&except);
 
-    timeout = &to; /* hang on select */
-    to.tv_sec = 60;
-    to.tv_usec = 0;
-
+    time_t now = time(0);
     for (p = m_observers; p; p = p->next)
     {
 	int fd = p->fd;
-	logf (LOG_LOG, "fd = %d mask=%d", fd, p->mask);
 	if (p->mask)
 	    no++;
 	if (p->mask & YAZ_SOCKET_OBSERVE_READ)
@@ -140,13 +140,29 @@ int Yaz_SocketManager::processEvent()
 	    FD_SET(fd, &except);
 	if (fd > max)
 	    max = fd;
+	if (p->timeout)
+	{
+	    unsigned timeout_this;
+	    timeout_this = p->timeout;
+	    if (p->last_activity)
+		timeout_this -= now - p->last_activity;
+	    if (timeout_this < 1)
+		timeout_this = 1;
+	    if (!timeout || timeout_this < timeout)
+		timeout = timeout_this;
+	}
     }
     if (!no)
 	return 0;
-    while ((res = select(max + 1, &in, &out, &except, timeout)) < 0)
+
+    struct timeval to;
+    to.tv_sec = timeout;
+    to.tv_usec = 0;
+
+    while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;
-
+    now = time(0);
     for (p = m_observers; p; p = p->next)
     {
 	int fd = p->fd;
@@ -163,8 +179,17 @@ int Yaz_SocketManager::processEvent()
 	if (mask)
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
+	    p->last_activity = now;
 	    event->observer = p->observer;
 	    event->event = mask;
+	    putEvent (event);
+	}
+	else if (p->timeout && now >= p->last_activity + (int) (p->timeout))
+	{
+	    YazSocketEvent *event = new YazSocketEvent;
+	    p->last_activity = now;
+	    event->observer = p->observer;
+	    event->event = YAZ_SOCKET_OBSERVE_TIMEOUT;
 	    putEvent (event);
 	}
     }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.3  1999-02-02 14:01:19  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:19  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:43  adam
@@ -110,6 +113,11 @@ void Yaz_IR_Assoc::failNotify()
     logf (LOG_LOG, "failNotify");
 }
 
+void Yaz_IR_Assoc::timeoutNotify()
+{
+    logf (LOG_LOG, "timeoutNotify");
+}
+
 void Yaz_IR_Assoc::client(const char *addr)
 {
     m_PDU_Observable->connect (this, addr);
@@ -120,3 +128,7 @@ void Yaz_IR_Assoc::server(const char *addr)
     m_PDU_Observable->listen (this, addr);
 }
 
+ODR Yaz_IR_Assoc::odr_encode()
+{
+    return m_odr_out;
+}

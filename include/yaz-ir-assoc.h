@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.h,v $
- * Revision 1.3  1999-02-02 14:01:12  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:12  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:39  adam
@@ -37,6 +40,8 @@ class YAZ_EXPORT Yaz_IR_Assoc : public IYaz_PDU_Observer {
     void connectNotify();
     /// Failure notification
     void failNotify();
+    /// Timeout notification
+    void timeoutNotify();
     /// Begin Z39.50 client role
     void client(const char *addr);
     /// Begin Z39.50 server role
@@ -48,12 +53,14 @@ class YAZ_EXPORT Yaz_IR_Assoc : public IYaz_PDU_Observer {
     /// Send Z39.50 PDU
     int send_Z_PDU(Z_APDU *apdu);
     /// Receive Z39.50 PDU
-    virtual void recv_Z_PDU (Z_APDU *apdu) = 0;
-    /// Create Z39.50 with reasonable defaults
+    virtual void recv_Z_PDU(Z_APDU *apdu) = 0;
+    /// Create Z39.50 PDU with reasonable defaults
     Z_APDU *create_Z_PDU(int type);
+    /// Request Alloc
+    ODR odr_encode ();
+ private:
     static int yaz_init_flag;
     static int yaz_init_func();
- private:
     IYaz_PDU_Observable *m_PDU_Observable;
     ODR m_odr_in;
     ODR m_odr_out;

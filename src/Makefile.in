@@ -1,7 +1,7 @@
-# Copyright (C) 1999, Index Data 
+# Copyright (C) 1999, Index Data ApS
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.2 1999-01-28 10:04:47 adam Exp $
+# $Id: Makefile.in,v 1.3 1999-03-23 14:17:57 adam Exp $
 
 SHELL=/bin/sh
 
@@ -27,9 +27,10 @@ PROGO2=yaz-server.o
 PROG3=yaz-proxy
 PROGO3=yaz-proxy-main.o
 LIB=libyaz++.lib
-PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-ir-assoc.o yaz-proxy.o
+PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-ir-assoc.o yaz-proxy.o \
+	yaz-z-query.o
 
-.SUFFIXES: .cc
+.SUFFIXES: .cpp
 
 all: $(PROG1) $(PROG2) $(PROG3)
 
@@ -49,7 +50,7 @@ $(PROG3): $(PROGO3) $(YAZLIBS) $(LIB)
 
 alll:
 
-.cc.o:
+.cpp.o:
 	$(CXX) -c $(DEFS) $(CXXFLAGS) $<
 
 .c.o:
@@ -57,11 +58,11 @@ alll:
 
 clean:
 	rm -f *.[oa] test core mon.out gmon.out errlist
-	rm -f $(PROG1) $(PROG2) $(PROG3)
+	rm -f $(PROG1) $(PROG2) $(PROG3) $(LIB)
 
 depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
-	$(CXXCPP) $(DEFS) -M *.cc >>Makefile.tmp
+	$(CXXCPP) $(DEFS) -M *.cpp >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
 
 #Depend --- DOT NOT DELETE THIS LINE

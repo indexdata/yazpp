@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.h,v $
- * Revision 1.3  1999-02-02 14:01:13  adam
+ * Revision 1.4  1999-03-23 14:17:57  adam
+ * More work on timeout handling. Work on yaz-client.
+ *
+ * Revision 1.3  1999/02/02 14:01:13  adam
  * First WIN32 port of YAZ++.
  *
  * Revision 1.2  1999/01/28 13:08:40  adam
@@ -49,6 +52,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     PDU_Queue *m_queue_out;
     int Yaz_PDU_Assoc::flush_PDU();
     int *m_destroyed;
+    int m_idleTime;
  public:
     /// Create object using specified socketObservable
     Yaz_PDU_Assoc(IYazSocketObservable *socketObservable, COMSTACK cs);
@@ -68,4 +72,6 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     void close();
     /// Close and destroy
     void destroy();
+    /// Set Idle Time
+    void idleTime (int timeout);
 };
