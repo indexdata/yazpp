@@ -1,4 +1,6 @@
 
+--- 0.8 not yet released
+
 Proxy now a separate project. See http://indexdata.dk/yazproxy/
 
 For proxy, fix duplicate reporting for SRW diagnostic 7, details query.
