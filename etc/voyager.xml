@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.12 2004-02-23 12:55:02 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.13 2004-03-17 10:51:25 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
@@ -76,13 +76,14 @@
       identifier="http://www.loc.gov/mods"
       >
       <title>MODS v2</title>
-      <name>mods</name>
+      <name>mods2</name>
     </syntax>
     <syntax type="xml" marcxml="1" stylesheet="MARC21slim2MODS3.xsl"
       identifier="info:srw/schema/1/mods-v3.0"
       >
       <title>MODS v3</title>
       <name>mods3</name>
+      <name>mods</name>
     </syntax>
 
     <syntax type="*" error="238"/>
@@ -105,11 +106,11 @@
       </databaseInfo>
       
       <indexInfo>
-	<set identifier="http://www.loc.gov/zing/cql/context-sets/cql/v1.1/"
+	<set identifier="info:srw/cql-context-set/1/cql-v1.1"
 	  name="cql"/>
-	<set identifier="http://www.loc.gov/zing/cql/dc-indexes/v1.0/"
+	<set identifier="info:srw/cql-context-set/1/dc-v1.1"
 	  name="dc"/>
-	<set identifier="http://www.loc.gov/zing/cql/context-sets/bath/v1.1/"
+	<set identifier="http://zing.z3950.org/cql/bath/2.0/"
 	  name="bath"/>
 	
 	<index id="4">
@@ -172,12 +173,21 @@
 	  <title>Dublin Core</title>
 	</schema>
 	
+	<schema identifier="http://www.loc.gov/mods"
+	  sort="false" name="mods2">
+	  <title>MODS v2</title>
+	</schema>
+
 	<schema identifier="info:srw/schema/1/mods-v3.0"
 	  sort="false" name="mods">
-	  <title>MODS</title>
+	  <title>MODS v3</title>
 	</schema>
+
       </schemaInfo>
-      
+
+      <configInfo>
+        <default type="numberOfRecords">0</default>
+      </configInfo>
     </explain>
    <cql2rpn>pqf.properties</cql2rpn>
   </target>
