@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.99 2004-02-11 10:01:54 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.100 2004-02-12 20:40:22 adam Exp $
  */
 
 #include <assert.h>
@@ -1997,19 +1997,22 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 	{
 	    if (handle_init_response_for_invalid_session(apdu))
 		return;
-	    Z_APDU *apdu2 = m_client->m_initResponse;
-	    apdu2->u.initResponse->otherInfo = 0;
-	    if (m_client->m_cookie && *m_client->m_cookie)
-		set_otherInformationString(apdu2, VAL_COOKIE, 1,
-					   m_client->m_cookie);
-	    apdu2->u.initResponse->referenceId =
-		apdu->u.initRequest->referenceId;
-	    apdu2->u.initResponse->options = m_client->m_initResponse_options;
-	    apdu2->u.initResponse->protocolVersion = 
-		m_client->m_initResponse_version;
-
-	    send_to_client(apdu2);
-	    return;
+	    if (m_client->m_initResponse)
+	    {
+		Z_APDU *apdu2 = m_client->m_initResponse;
+		apdu2->u.initResponse->otherInfo = 0;
+		if (m_client->m_cookie && *m_client->m_cookie)
+		    set_otherInformationString(apdu2, VAL_COOKIE, 1,
+					       m_client->m_cookie);
+		apdu2->u.initResponse->referenceId =
+		    apdu->u.initRequest->referenceId;
+		apdu2->u.initResponse->options = m_client->m_initResponse_options;
+		apdu2->u.initResponse->protocolVersion = 
+		    m_client->m_initResponse_version;
+		
+		send_to_client(apdu2);
+		return;
+	    }
 	}
 	m_client->m_init_flag = 1;
     }

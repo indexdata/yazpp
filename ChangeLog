@@ -1,6 +1,8 @@
+Fixed SEGV bug that occured when duplicate init requests was received and
+no cached init response was available.
 
 Add MODS version 3 conversion, MARC21slim2MODS3.xsl. Update voyager.xml,
-config.xml to use it.
+config.xml to use it. Default "mods" is still MODS v2.
 
 --- 0.7.7 2004/02/10 Internal release.
 
