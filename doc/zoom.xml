@@ -1,24 +1,24 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.5 2002-10-09 23:11:31 mike Exp $ -->
+ <!-- $Id: zoom.xml,v 1.6 2002-10-10 22:48:10 mike Exp $ -->
  <title>ZOOM-C++</title>
 
 
  <sect1 id="zoom-introduction">
   <title>Introduction</title>
   <para>
-   <ulink url="http://staging.zoom.z3950.org/">ZOOM</ulink>
+   <ulink url="http://zoom.z3950.org/">ZOOM</ulink>
    is the emerging standard API for information retrieval programming
    using the Z39.50 protocol.  ZOOM's
-   <ulink url="http://staging.zoom.z3950.org/api/">Abstract API</ulink>
+   <ulink url="http://zoom.z3950.org/api/">Abstract API</ulink>
    specifies semantics for classes representing key IR concepts such as
    connections, queries, result sets and records; and there are various
-   <ulink url="http://staging.zoom.z3950.org/bind/">bindings</ulink>
+   <ulink url="http://zoom.z3950.org/bind/">bindings</ulink>
    specifying how those concepts should be represented in various
    programming languages.
   </para>
   <para>
    The Yaz++ library includes an implementation of the <ulink
-   url="http://staging.zoom.z3950.org/bind/cplusplus/"
+   url="http://zoom.z3950.org/bind/cplusplus/"
 	>C++ binding</ulink>
    for ZOOM, enabling quick, easy development of client applications.
   </para>
@@ -148,13 +148,13 @@
    <itemizedlist>
     <listitem>
      <para>
-      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.2"
+      <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.2"
 	>Section 3.2 (Connection) of the ZOOM Abstract API</ulink>
      </para>
     </listitem>
     <listitem>
      <para>
-      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.html#zoom.connections"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.php#zoom.connections"
 	>The Connections section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -174,9 +174,6 @@
 
   <sect2>
    <title><literal>ZOOM::prefixQuery</literal></title>
-   <para>
-    The class has this declaration:
-   </para>
    <synopsis>
     class prefixQuery : public query {
     public:
@@ -185,18 +182,15 @@
     };
    </synopsis>
    <para>
-    It enables a query to be created from Yaz's cryptic but
-    powerful
-    <ulink url="file:///usr/local/src/z39.50/yaz/doc/tools.html#PQF"
+    This class enables a query to be created by compiling Yaz's
+    cryptic but powerful
+    <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#PQF"
 	>Prefix Query Notation (PQN)</ulink>.
    </para>
   </sect2>
 
   <sect2>
    <title><literal>ZOOM::CCLQuery</literal></title>
-   <para>
-    The class has this declaration:
-   </para>
    <synopsis>
     class CCLQuery : public query {
     public:
@@ -205,13 +199,20 @@
     };
    </synopsis>
    <para>
-    It enables a query to be created using the simpler but less
-    expressive
-    <ulink url="file:///usr/local/src/z39.50/yaz/doc/tools.html#CCL"
+    This class enables a query to be created using the simpler but
+    less expressive
+    <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#CCL"
 	>Common Command Language (CCL)</ulink>.
     The qualifiers recognised by the CCL parser are specified in an
     external configuration file in the format described by the Yaz
     documentation.
+   </para>
+   <para>
+    If query construction fails for either type of
+    <literal>query</literal> object - typically because the query
+    string itself is not valid PQN or CCL - then an
+    <link linkend="zoom-exception"><literal>exception</literal></link>
+    is thrown.
    </para>
   </sect2>
 
@@ -247,13 +248,13 @@
    <itemizedlist>
     <listitem>
      <para>
-      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.3"
+      <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.3"
 	>Section 3.3 (Query) of the ZOOM Abstract API</ulink>
      </para>
     </listitem>
     <listitem>
      <para>
-      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.query.html"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.query.php"
 	>The Queries section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -292,8 +293,8 @@
    which is passed a <literal>connection</literal>, indicating the
    server on which the search is to be performed, and a
    <literal>query</literal>, indicating what search to perform.  If
-   the search fails - for example, because the query is malformed -
-   then an
+   the search fails - for example, because the query uses attributes
+   that the server doesn't implement - then an
    <link linkend="zoom-exception"><literal>exception</literal></link>
    is thrown.
   </para>
@@ -318,7 +319,10 @@
    Finally, the <literal>getRecord</literal> method returns the
    <parameter>i</parameter>th record from the result set, where
    <parameter>i</parameter> is zero-based: that is, legitmate values
-   range from zero up to one less than the result-set size.
+   range from zero up to one less than the result-set size.  If the
+   method fails, for example because the requested record is out of
+   range, it <literal>throw</literal>s an
+   <link linkend="zoom-exception"><literal>exception</literal></link>.
   </para>
 
   <sect2>
@@ -326,13 +330,13 @@
    <itemizedlist>
     <listitem>
      <para>
-      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.4"
+      <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.4"
 	>Section 3.4 (Result Set) of the ZOOM Abstract API</ulink>
      </para>
     </listitem>
     <listitem>
      <para>
-      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.resultsets.html"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.resultsets.php"
 	>The Result Sets section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -364,21 +368,105 @@
     };
   </synopsis>
   <para>
-   ### discusson
+   Records returned from Z39.50 servers are encoded using a record
+   syntax: the various national MARC formats are commonly used for
+   bibliographic data, GRS-1 or XML for complex structured data, SUTRS
+   for simple human-readable text, etc.  The
+   <literal>record::syntax</literal> enumeration specifies constants
+   representing common record syntaxes, and the
+   <literal>recsyn()</literal> method returns the value corresponding
+   to the record-syntax of the record on which it is invoked.
+   <note>
+    <para>
+     Because this interface uses an enumeration, it is difficult to
+     extend to other record syntaxes - for example, DANMARC, the MARC
+     variant widely used in Denmark.  We might either grow the
+     enumeration substantially, or change the interface to return
+     either an integer or a string.
+    </para>
+   </note>
   </para>
+  <para>
+   The simplest thing to do with a retrieved record is simply to
+   <literal>render()</literal> it.  This returns a human-readable, but
+   not necessarily very pretty, representation of the contents of the
+   record.  This is useful primarily for testing and debugging, since
+   the application has no control over how the record appears.
+   (The application must <emphasis>not</emphasis>
+   <literal>delete</literal> the returned string - it is ``owned'' by
+   the record object.)
+  </para>
+  <para>
+   More sophisticated applications will want to deal with the raw data
+   themselves: the <literal>rawdata()</literal> method returns it.
+   Its format will vary depending on the record syntax: SUTRS, MARC
+   and XML records are returned ``as is'', and GRS-1 records as a
+   pointer to their top-level node, which is a
+   <literal>Z_GenericRecord</literal> structure as defined in the
+   <literal>&lt;yaz/z-grs.h&gt;</literal> header file.
+   (The application must <emphasis>not</emphasis>
+   <literal>delete</literal> the returned data - it is ``owned'' by
+   the record object.)
+  </para>
+  <para>
+   Perceptive readers will notice that there are no methods for access
+   to individual fields within a record.  That's because the different
+   record syntaxes are so different that there is no even a uniform
+   notion of what a field is across them all, let alone a sensible way
+   to implement such a function.  Fetch the raw data instead, and pick
+   it apart ``by hand''.
+  </para>
+
+  <sect2>
+   <title>Memory Management</title>
+   <para>
+    The <literal>record</literal> obejcts returned from
+    <literal>resultSet::getRecord()</literal> are ``owned'' by the
+    result set object: that means that the application is not
+    responsible for <literal>delete</literal>ing them - each
+    <literal>record</literal> is automatically deallocated when the
+    <literal>resultSet</literal> that owns it is
+    <literal>delete</literal>d.
+   </para>
+   <para>
+    Usually that's what you want: it means that you can easily fetch a
+    record, use it and forget all about it, like this:
+   </para>
+   <screen>
+    resultSet rs(conn, query);
+    cout &lt;&lt; rs.getRecord(0)-&gt;render();
+   </screen>
+   <para>
+    But sometimes you want a <literal>record</literal> to live on past
+    the lifetime of the <literal>resultSet</literal> from which it was
+    fetched.  In this case, the <literal>clone(f)</literal> method can
+    be used to make an autonomous copy.  The application must
+    <literal>delete</literal> it when it doesn't need it any longer:
+   </para>
+   <screen>
+    record *rec;
+    {
+        resultSet rs(conn, query);
+        rec = rs.getRecord(0)-&gt;clone();
+        // `rs' goes out of scope here, and is deleted
+    }
+    cout &lt;&lt; rec-&gt;render();
+    delete rec;
+   </screen>
+  </sect2>
 
   <sect2>
    <title>References</title>
    <itemizedlist>
     <listitem>
      <para>
-      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.5"
+      <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.5"
 	>Section 3.5 (Record) of the ZOOM Abstract API</ulink>
      </para>
     </listitem>
     <listitem>
      <para>
-      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.records.html"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.records.php"
 	>The Records section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -392,7 +480,20 @@
   <para>
    The <literal>ZOOM::exception</literal> class is a virtual base
    class, representing a diagnostic generated by the ZOOM-C++ library
-   or returned from a server.  ###
+   or returned from a server.  Its subclasses represent particular
+   kinds of error.
+  </para>
+  <para>
+   When any of the ZOOM methods fail, they respond by
+   <literal>throw</literal>ing an object of type
+   <literal>exception</literal> or one of its subclasses.  This most
+   usually happens with the <literal>connection</literal> constructor,
+   the various query constructors, the <literal>resultSet</literal>
+   constructor (which is actually the searching method) and
+   <literal>resultSet::getRecord()</literal>.
+  </para>
+  <para>
+    The base class has this declaration:
   </para>
   <synopsis>
     class exception {
@@ -403,14 +504,11 @@
     };
   </synopsis>
   <para>
-   This class has three (so far) concrete subclasses:
+   It has three concrete subclasses:
   </para>
 
   <sect2>
    <title><literal>ZOOM::systemException</literal></title>
-   <para>
-    The class has this declaration:
-   </para>
    <synopsis>
     class systemException: public exception {
     public:
@@ -419,13 +517,19 @@
       const char *errmsg () const;
     };
    </synopsis>
+   <para>
+    Represents a ``system error'', typically indicating that a system
+    call failed - often in the low-level networking code that
+    underlies Z39.50.  <literal>errcode()</literal> returns the value
+    that the system variable <literal>errno</literal> had at the time
+    the exception was constructed; and <literal>errmsg()</literal>
+    returns a human-readable error-message corresponidng to that error
+    code.
+   </para>
   </sect2>
 
   <sect2>
    <title><literal>ZOOM::bib1Exception</literal></title>
-   <para>
-    The class has this declaration:
-   </para>
    <synopsis>
     class bib1Exception: public exception {
     public:
@@ -435,13 +539,26 @@
       const char *addinfo () const;
     };
    </synopsis>
+   <para>
+    Represents an error condition communicated by a Z39.50 server.
+    <literal>errcode()</literal> returns the BIB-1 diagnostic code of
+    the error, and <literal>errmsg()</literal> a human-readable error
+    message corresponding to that code.  <literal>addinfo()</literal>
+    returns any additional information associated with the error.
+   </para>
+   <para>
+    For example, if a ZOOM application tries to search in the
+    ``Voyager'' database of a server that does not have a database of
+    that name, a <literal>bib1Exception</literal> will be thrown in
+    which <literal>errcode()</literal> returns 109,
+    <literal>errmsg()</literal> returns the corresponding error
+    message ``Database unavailable'' and <literal>addinfo()</literal>
+    returns the name of the requested, but unavailable, database.
+   </para>
   </sect2>
 
   <sect2>
    <title><literal>ZOOM::queryException</literal></title>
-   <para>
-    The class has this declaration:
-   </para>
    <synopsis>
     class queryException: public exception {
     public:
@@ -453,12 +570,16 @@
       const char *addinfo () const;
     };
    </synopsis>
-  </sect2>
-
-  <sect2>
-   <title>Discussion</title>
    <para>
-    ### discusson
+    This class represents an error in parsing a query into a form that
+    a Z39.50 can understand.  It must be created with the
+    <literal>qtype</literal> parameter equal to one of the query-type
+    constants, which can be retrieved via the
+    <literal>errcode()</literal> method; <literal>errmsg()</literal>
+    returns an error-message specifying which kind of query was
+    malformed; and <literal>addinfo()</literal> returns a copy of the
+    query itself (that is, the value of <literal>source</literal> with
+    which the exception object was created.)
    </para>
   </sect2>
 
@@ -467,8 +588,16 @@
    <itemizedlist>
     <listitem>
      <para>
-      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.7"
+      <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.7"
 	>Section 3.7 (Exception) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="http://lcweb.loc.gov/z3950/agency/defns/bib1diag.html"
+	>Bib-1 Diagnostics</ulink> on the
+      <ulink url="http://lcweb.loc.gov/z3950/agency/"
+	>Z39.50 Maintenance Agency</ulink> site.
      </para>
     </listitem>
    </itemizedlist>
@@ -478,7 +607,7 @@
     <literal>exception</literal> class and its subclasses.  The
     closest thing is the <literal>ZOOM_connection_error</literal>
     function described in
-    <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.html#zoom.connections"
+    <ulink url="http://www.indexdata.dk/yaz/doc/zoom.php#zoom.connections"
 	>The Connections section</ulink> of the documentation.
    </para>
   </sect2>
