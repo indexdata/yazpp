@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.10  2000-09-04 08:29:22  adam
+ * Revision 1.11  2000-09-04 08:59:16  adam
+ * Changed call to logging functions (yaz_ added).
+ *
+ * Revision 1.10  2000/09/04 08:29:22  adam
  * Fixed memory leak(s). Added re-use of associations, rather than
  * re-init, when maximum number of targets are in use.
  *
@@ -154,7 +157,7 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
              odr_errmsg(odr_geterror(m_odr_in)),
              odr_offset(m_odr_in));
         logf(LOG_LOG, "PDU dump:");
-        odr_dumpBER(log_file(), buf, len);
+        odr_dumpBER(yaz_log_file(), buf, len);
         return 0;
     }
     else

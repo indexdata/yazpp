@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.9  2000-08-07 14:19:59  adam
+ * Revision 1.10  2000-09-04 08:59:16  adam
+ * Changed call to logging functions (yaz_ added).
+ *
+ * Revision 1.9  2000/08/07 14:19:59  adam
  * Fixed serious bug regarding timeouts. Improved logging for proxy.
  *
  * Revision 1.8  2000/07/04 13:48:49  adam
@@ -76,7 +79,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    proxy->set_proxyTarget(arg);
 	    break;
 	case 'v':
-	    log_init_level (log_mask_str(arg));
+	    yaz_log_init_level (yaz_log_mask_str(arg));
 	    break;
 	case 'c':
 	    proxy->set_max_clients(atoi(arg));
