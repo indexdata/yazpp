@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.22 2003-12-16 11:26:42 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.23 2004-01-05 11:31:04 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -44,7 +44,7 @@ void Yaz_SocketManager::addObserver(int fd, IYazSocketObserver *observer)
     se->fd = fd;
     se->mask = 0;
     se->last_activity = 0;
-    se->timeout = 0;
+    se->timeout = -1;
 }
 
 void Yaz_SocketManager::deleteObserver(IYazSocketObserver *observer)
@@ -87,7 +87,7 @@ void Yaz_SocketManager::maskObserver(IYazSocketObserver *observer, int mask)
 }
 
 void Yaz_SocketManager::timeoutObserver(IYazSocketObserver *observer,
-					unsigned timeout)
+					int timeout)
 {
     YazSocketEntry *se;
 
@@ -100,7 +100,7 @@ int Yaz_SocketManager::processEvent()
 {
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
-    unsigned timeout = 0;
+    int timeout = -1;
     yaz_log (m_log, "Yaz_SocketManager::processEvent manager=%p", this);
     if (event)
     {
@@ -141,7 +141,7 @@ int Yaz_SocketManager::processEvent()
         }
 	if (fd > max)
 	    max = fd;
-	if (p->timeout)
+	if (p->timeout >= 0)
 	{
 	    unsigned timeout_this;
 	    timeout_this = p->timeout;
@@ -149,9 +149,9 @@ int Yaz_SocketManager::processEvent()
 		timeout_this -= now - p->last_activity;
 	    else
 		p->last_activity = now;
-	    if (timeout_this < 1 || timeout_this > 2147483646)
-		timeout_this = 1;
-	    if (!timeout || timeout_this < timeout)
+	    if (timeout_this < 0 || timeout_this > 2147483646)
+		timeout_this = 0;
+	    if (timeout == -1 || timeout_this < timeout)
 		timeout = timeout_this;
             p->timeout_this = timeout_this;
             yaz_log (m_log, "Yaz_SocketManager::select timeout_this=%d", 
@@ -172,7 +172,8 @@ int Yaz_SocketManager::processEvent()
     
     yaz_log (m_log, "Yaz_SocketManager::select begin no=%d timeout=%d",
              no, timeout);
-    while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
+    while ((res = select(max + 1, &in, &out, &except,
+			 timeout== -1 ? 0 : &to)) < 0)
 	if (errno != EINTR)
 	{
 	    yaz_log (LOG_LOG|LOG_WARN, "select");

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.75 2004-01-05 09:31:09 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.76 2004-01-05 11:31:04 adam Exp $
  */
 
 #include <assert.h>

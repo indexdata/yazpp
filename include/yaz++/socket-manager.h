@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-manager.h,v 1.2 2002-10-23 21:23:01 adam Exp $
+ * $Id: socket-manager.h,v 1.3 2004-01-05 11:31:04 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -21,8 +21,8 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
 	IYazSocketObserver *observer;
 	int fd;
 	unsigned mask;
-	unsigned timeout;
-        unsigned timeout_this;
+	int timeout;
+        int timeout_this;
 	time_t last_activity;
 	YazSocketEntry *next;
     };
@@ -53,7 +53,7 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
     virtual void maskObserver(IYazSocketObserver *observer, int mask);
     /// Set timeout
     virtual void timeoutObserver(IYazSocketObserver *observer,
-				 unsigned timeout);
+				 int timeout);
     /// Process one event. return > 0 if event could be processed;
     int processEvent();
     Yaz_SocketManager();

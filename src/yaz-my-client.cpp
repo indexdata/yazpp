@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.14 2003-10-16 10:26:58 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.15 2004-01-05 11:31:04 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -454,7 +454,7 @@ int MyClient::cmd_connect(char *host)
     client (host);
     timeout (10);
     wait ();
-    timeout (0);
+    timeout (-1);
     return 1;
 }
 
@@ -463,7 +463,7 @@ int MyClient::cmd_open(char *host)
     client (host);
     timeout (10);
     wait ();
-    timeout (0);
+    timeout (-1);
     send_initRequest();
     wait ();
     return 1;
@@ -676,7 +676,7 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
 	client (host);
         timeout (10);
 	wait ();
-        timeout (0);
+        timeout (-1);
 	send_initRequest();
 	wait ();
     }

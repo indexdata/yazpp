@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.26 2003-10-24 12:19:23 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.27 2004-01-05 11:31:04 adam Exp $
  */
 
 #include <signal.h>
@@ -27,6 +27,7 @@ void usage(char *prog)
 static char *pid_fname = 0;
 static char *uid = 0;
 static char *log_file = 0;
+static int debug = 0;
 
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
@@ -35,7 +36,8 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:U:", argv, argc, &arg)) != -2)
+    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:U:X",
+			  argv, argc, &arg)) != -2)
     {
 	int err;
         switch (ret)
@@ -89,6 +91,9 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
         case 'T':
 	    proxy->set_target_idletime(atoi(arg));
 	    break;
+	case 'X':
+	    debug = 1;
+	    break;
 	case 'p':
 	    if (!pid_fname)
 		pid_fname = xstrdup(arg);
@@ -104,7 +109,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     }
     if (addr)
     {
-	yaz_log(LOG_LOG, "Starting proxy pid=%ld", (long) getpid());
+	yaz_log(LOG_LOG, "0 Starting proxy " VERSION );
 	if (proxy->server(addr))
 	{
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "listen %s", addr);
@@ -127,18 +132,10 @@ static void sighup_handler(int num)
 	static_yaz_proxy->reconfig();
 }
 
-int main(int argc, char **argv)
+
+static void child_run(Yaz_SocketManager *m)
 {
-    static int mk_pid = 0;
-    Yaz_SocketManager mySocketManager;
-    Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
-
-    static_yaz_proxy = &proxy;
-
-    signal(SIGHUP, sighup_handler);
-
-    args(&proxy, argc, argv);
-
+    yaz_log(LOG_LOG, "0 proxy pid=%ld", (long) getpid());
     if (pid_fname)
     {
 	FILE *f = fopen(pid_fname, "w");
@@ -174,9 +171,86 @@ int main(int argc, char **argv)
 	xfree(uid);
     }
 
-    while (mySocketManager.processEvent() > 0)
+    while (m->processEvent() > 0)
 	;
 
+    exit (0);
+}
+
+int main(int argc, char **argv)
+{
+    int cont = 1;
+    static int mk_pid = 0;
+    Yaz_SocketManager mySocketManager;
+    Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
+
+    static_yaz_proxy = &proxy;
+
+    signal(SIGHUP, sighup_handler);
+
+    args(&proxy, argc, argv);
+
+    if (debug)
+    {
+	child_run(&mySocketManager);
+	exit(0);
+    }
+    while (cont)
+    {
+	pid_t p = fork();
+	if (p == (pid_t) -1)
+	{
+	    yaz_log(LOG_FATAL|LOG_ERRNO, "fork");
+	    exit(1);
+	}
+	else if (p == 0)
+	{
+	    child_run(&mySocketManager);
+	}
+	pid_t p1;
+	int status;
+	p1 = wait(&status);
+	if (p1 != p)
+	{
+	    yaz_log(LOG_FATAL, "p1=%d != p=%d", p1, p);
+	    exit(1);
+	}
+	if (WIFSIGNALED(status))
+	{
+	    switch(WTERMSIG(status)) {
+	    case SIGILL:
+		yaz_log(LOG_WARN, "Received SIGILL from child %ld", (long) p);
+		cont = 1;
+		break;
+	    case SIGABRT:
+		yaz_log(LOG_WARN, "Received SIGABRT from child %ld", (long) p);
+		cont = 1;
+		break ;
+	    case SIGSEGV:
+		yaz_log(LOG_WARN, "Received SIGSEGV from child %ld", (long) p);
+		cont = 1;
+		break;
+	    case SIGTERM:
+		yaz_log(LOG_LOG, "Received SIGTERM from child %ld",
+			WTERMSIG(status), (long) p);
+		cont = 0;
+		break;
+	    default:
+		yaz_log(LOG_WARN, "Received SIG %d from child %ld",
+			WTERMSIG(status), (long) p);
+		cont = 0;
+	    }
+	}
+	else if (status == 0)
+	    cont = 0;
+	else
+	{
+	    yaz_log(LOG_LOG, "Exit %d from child %ld", status, (long) p);
+	    cont = 1;
+	}
+	if (cont)
+	    sleep(1);
+    }
     exit (0);
     return 0;
 }
