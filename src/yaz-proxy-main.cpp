@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.7  1999-12-06 13:52:45  adam
+ * Revision 1.8  2000-07-04 13:48:49  adam
+ * Implemented upper-limit on proxy-to-target sessions.
+ *
+ * Revision 1.7  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -39,7 +42,7 @@
 
 void usage(char *prog)
 {
-    fprintf (stderr, "%s: [-v log] [-t target] @:port\n", prog);
+    fprintf (stderr, "%s: [-c num] [-v log] [-t target] @:port\n", prog);
     exit (1);
 }
 
@@ -51,7 +54,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("t:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("t:v:c:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -68,6 +71,9 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    break;
 	case 'v':
 	    log_init_level (log_mask_str(arg));
+	    break;
+	case 'c':
+	    proxy->set_max_clients(atoi(arg));
 	    break;
         default:
 	    usage(prog);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.11  1999-12-06 13:52:45  adam
+ * Revision 1.12  2000-07-04 13:48:49  adam
+ * Implemented upper-limit on proxy-to-target sessions.
+ *
+ * Revision 1.11  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -59,6 +62,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_seqno = 1;
     m_keepalive = 1;
     m_proxyTarget = 0;
+    m_max_clients = 20;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
@@ -80,7 +84,7 @@ IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
-    new_proxy->timeout(20);
+    new_proxy->timeout(120);
     new_proxy->set_proxyTarget(m_proxyTarget);
     return new_proxy;
 }
@@ -137,6 +141,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    if (!strcmp(cookie,c->m_cookie))
 	    {
 		logf (LOG_LOG, "Yaz_Proxy::get_client found cached target");
+		c->m_seqno = parent->m_seqno;
 		return c;
 	    }
 	}	
@@ -161,19 +166,53 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	}
 	if (!m_proxyTarget)
 	    return 0;
-	logf (LOG_LOG, "Yaz_Proxy::get_client creating new");
-	c = new Yaz_ProxyClient(m_PDU_Observable->clone());
-	c->m_next = parent->m_clientPool;
-	if (c->m_next)
-	    c->m_next->m_prev = &c->m_next;
-	parent->m_clientPool = c;
-	c->m_prev = &parent->m_clientPool;
 
+	Yaz_ProxyClient *c_min = 0;
+	int min_seq = -1;
+	int no_of_clients = 0;
+	for (c = parent->m_clientPool; c; c = c->m_next)
+	{
+	    no_of_clients++;
+	    logf (LOG_LOG, "found seqno = %d", c->m_seqno);
+	    if (min_seq < 0 || c->m_seqno < min_seq)
+	    {
+		min_seq = c->m_seqno;
+		c_min = c;
+	    }
+	}
+	if (no_of_clients >= parent->m_max_clients)
+	{
+	    c = c_min;
+	    logf (LOG_LOG, "Yaz_Proxy::get_client re-using session %d",
+		  c->m_seqno);
+	    if (c->m_server)
+		delete c->m_server;
+	    c->m_server = 0;
+	}
+	else
+	{
+	    logf (LOG_LOG, "Yaz_Proxy::get_client making new session");
+	    c = new Yaz_ProxyClient(m_PDU_Observable->clone());
+	    c->m_next = parent->m_clientPool;
+	    if (c->m_next)
+		c->m_next->m_prev = &c->m_next;
+	    parent->m_clientPool = c;
+	    c->m_prev = &parent->m_clientPool;
+	}
 	sprintf (c->m_cookie, "%d", parent->m_seqno);
-	(parent->m_seqno)++;
-
+	logf (LOG_LOG, "Yaz_Proxy::get_client new session %s", c->m_cookie);
+	c->m_seqno = parent->m_seqno;
 	c->client(m_proxyTarget);
+	c->m_init_flag = 0;
+
+	delete c->m_last_query;
+	c->m_last_query = 0;
+	c->m_last_resultCount = 0;
+	c->m_sr_transform = 0;
+
 	c->timeout(600);
+
+	(parent->m_seqno)++;
     }
     return c;
 }
@@ -329,7 +368,7 @@ void Yaz_Proxy::failNotify()
 
 void Yaz_ProxyClient::failNotify()
 {
-    logf (LOG_LOG, "connection closed by server");
+    logf (LOG_LOG, "connection closed by target");
     shutdown();
 }
 

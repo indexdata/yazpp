@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-proxy.h,v 1.9 1999-12-06 13:52:45 adam Exp $
+ * $Id: yaz-proxy.h,v 1.10 2000-07-04 13:48:49 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -30,6 +30,7 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     Yaz_Z_Query *m_last_query;
     int m_last_resultCount;
     int m_sr_transform;
+    int m_seqno;
 };
 
 /// Information Retrieval Proxy Server.
@@ -46,6 +47,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_ProxyClient *m_clientPool;
     Yaz_Proxy *m_parent;
     int m_seqno;
+    int m_max_clients;
     int m_keepalive;
     char *m_proxyTarget;
  public:
@@ -58,5 +60,6 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void connectNotify();
     void set_proxyTarget(const char *target);
     char *get_proxyTarget() { return m_proxyTarget; };
+    void set_max_clients(int m) { m_max_clients = m; };
 };
 

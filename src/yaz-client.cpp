@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.10  2000-05-30 03:12:27  ian
+ * Revision 1.11  2000-07-04 13:48:49  adam
+ * Implemented upper-limit on proxy-to-target sessions.
+ *
+ * Revision 1.10  2000/05/30 03:12:27  ian
  * minor change to stop g++ 2.95.2 complaining about taking the address
  * of a member function.
  *
@@ -86,6 +89,7 @@ public:
     void connectNotify();
     void failNotify();
     void timeoutNotify();
+    char *get_cookie (Z_OtherInformation **oi);
     int processCommand(const char *cmd);
     const char *MyClient::getCommand();
     int cmd_open(char *host);
@@ -137,15 +141,40 @@ MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable,
 
 void usage(char *prog)
 {
-    fprintf (stderr, "%s: [-v log] [-p proxy] [zurl]\n", prog);
+    fprintf (stderr, "%s: [-v log] [-c cookie] [-p proxy] [zurl]\n", prog);
     exit (1);
+}
+
+char *MyClient::get_cookie(Z_OtherInformation **otherInfo)
+{
+    int oid[OID_SIZE];
+    Z_OtherInformationUnit *oi;
+    struct oident ent;
+    ent.proto = PROTO_Z3950;
+    ent.oclass = CLASS_USERINFO;
+    ent.value = (oid_value) VAL_COOKIE;
+
+    if (oid_ent_to_oid (&ent, oid) && 
+	(oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
+	oi->which == Z_OtherInfo_characterInfo)
+	return oi->information.characterInfo;
+    return 0;
 }
 
 void MyClient::recv_initResponse(Z_InitResponse *initResponse)
 {
     printf ("Got InitResponse. Status ");
     if (*initResponse->result)
+    {
 	printf ("Ok\n");
+
+	const char *p = get_cookie (&initResponse->otherInfo);
+	if (p)
+	{
+	    printf ("cookie = %s\n", p);
+	    set_cookie(p);
+	}
+    }
     else
 	printf ("Fail\n");
 }

@@ -12,7 +12,7 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
-  --with-yazconfig        Path for yaz-config"
+  --with-yazconfig=DIR      yaz-config in DIR (example /home/yaz-1.6)"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -1139,7 +1139,7 @@ if test "x$yazpath" != "xNONE"; then
 else
 	for i in ../../yaz* ../../yaz; do
 		if test -d $i; then
-			if test -r $i/include/yaz/yaz-version.h; then
+			if test -r $i/yaz-config; then
 				yazconfig=$i/yaz-config
 			fi
 		fi
