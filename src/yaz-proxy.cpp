@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.80 2004-01-07 20:56:03 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.81 2004-01-07 21:04:10 adam Exp $
  */
 
 #include <assert.h>
@@ -742,9 +742,9 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     soap_package->u.generic->ns = soap_handlers[0].ns;
     soap_package->u.generic->p = (void *) srw_pdu;
     soap_package->ns = m_soap_ns;
-    z_soap_codec_enc(o, &soap_package,
-		     &hres->content_buf, &hres->content_len,
-		     soap_handlers, 0, 0);
+    z_soap_codec_enc_xsl(o, &soap_package,
+			 &hres->content_buf, &hres->content_len,
+			 soap_handlers, 0, 0);
     if (m_log_mask & PROXY_LOG_REQ_CLIENT)
     {
 	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
