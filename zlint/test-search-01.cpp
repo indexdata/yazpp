@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-search-01.cpp,v 1.1 2004-03-25 23:14:07 adam Exp $
+ * $Id: test-search-01.cpp,v 1.2 2004-09-06 07:50:51 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -161,6 +161,7 @@ Zlint_code Zlint_test_search_01::sendTest(Zlint *z)
     }
     else
     {
+	printf ("finished...\n");
 	return TEST_FINISHED;
     }
     return TEST_CONTINUE;

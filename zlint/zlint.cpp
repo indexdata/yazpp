@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.5 2004-03-25 23:14:07 adam Exp $
+ * $Id: zlint.cpp,v 1.6 2004-09-06 07:50:51 adam Exp $
  */
 
 #include <stdio.h>
@@ -57,6 +57,7 @@ void Zlint::set_host(const char *cp)
     xfree(m_host);
     m_host = xstrdup(cp);
     client(m_host);
+    timeout(30);
 
     const char *basep;
     cs_get_host_args(m_host, &basep);
@@ -74,6 +75,7 @@ void Zlint::timeoutNotify()
 	{
 	    close();
 	    client(m_host);
+	    timeout(30);
 	    return;
 	}
     }
@@ -88,6 +90,7 @@ void Zlint::failNotify()
 	{
 	    close();
 	    client(m_host);
+	    timeout(30);
 	    return;
 	}
     }
@@ -115,6 +118,7 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	{
 	    close();
 	    client(m_host);
+	    timeout(30);
 	    return;
 	}
     }
@@ -128,6 +132,7 @@ void Zlint::close_goto_next()
 	m_cur_test = m_cur_test->m_next;
     if (m_cur_test)
 	client(m_host);
+    timeout(30);
 }
 
 IYaz_PDU_Observer *Zlint::sessionNotify(
