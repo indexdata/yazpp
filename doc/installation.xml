@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.4 2002-10-22 13:07:06 mike Exp $ -->
+  <!-- $Id: installation.xml,v 1.5 2002-10-23 12:22:18 mike Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -63,7 +63,7 @@
      <varlistentry>
       <term><literal>src/yaz-proxy</literal></term> 
       <listitem><para>
-        The Yaz <link linkend="proxy">Z39.50 Proxy</link> utility.
+        The YAZ <link linkend="proxy">Z39.50 Proxy</link> utility.
 	This program gets installed in your binaries directory
 	(<parameter>prefix</parameter><literal>/bin</literal>).
        </para></listitem>

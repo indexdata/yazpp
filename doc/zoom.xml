@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.9 2002-10-22 21:21:54 adam Exp $ -->
+ <!-- $Id: zoom.xml,v 1.10 2002-10-23 12:22:19 mike Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -17,7 +17,7 @@
    programming languages.
   </para>
   <para>
-   The Yaz++ library includes an implementation of the <ulink
+   The YAZ++ library includes an implementation of the <ulink
    url="http://zoom.z3950.org/bind/cplusplus/"
 	>C++ binding</ulink>
    for ZOOM, enabling quick, easy development of client applications.
@@ -52,7 +52,7 @@
     </para>
    </note>
   <para>
-   Yaz++'s implementation of the C++ binding is a thin layer over Yaz's
+   YAZ++'s implementation of the C++ binding is a thin layer over YAZ's
    implementation of the C binding.  For information on the supported
    options and other such details, see the ZOOM-C documentation, which
    can be found on-line at
@@ -185,7 +185,7 @@
     };
    </synopsis>
    <para>
-    This class enables a query to be created by compiling Yaz's
+    This class enables a query to be created by compiling YAZ's
     cryptic but powerful
     <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#PQF"
 	>Prefix Query Notation (PQN)</ulink>.
@@ -207,7 +207,7 @@
     <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#CCL"
 	>Common Command Language (CCL)</ulink>.
     The qualifiers recognised by the CCL parser are specified in an
-    external configuration file in the format described by the Yaz
+    external configuration file in the format described by the YAZ
     documentation.
    </para>
    <para>
