@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.13 2003-10-24 10:21:24 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.14 2003-11-25 21:54:18 adam Exp $
  */
 
 #include <ctype.h>
@@ -276,7 +276,7 @@ int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptrl,
 			    *addinfo = odr_strdup(odr, addinfo_str);
 			return atoi(match_error);
 		    }
-		    return 0;
+		    break;
 		}
 	    }
 	}
