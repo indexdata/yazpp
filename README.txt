@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.11 2002-10-23 13:32:57 mike Exp $
+$Id: README.txt,v 1.12 2003-10-09 16:06:42 adam Exp $
  
 
 Introduction
@@ -36,7 +36,7 @@ Directory structure of the YAZ++ package:
 Installation, Unix
 ------------------
 
-Make sure you have a C and C++ compiler available.  gcc and g++ work fine.
+Make sure you have a C and C++ compiler available. gcc and g++ work fine.
 
 Before compilation can take place YAZ must be installed. It goes, roughly,
 like this:
@@ -49,12 +49,22 @@ like this:
   $ ^D
   $ cd ..
 
+The YAZ proxy uses a configuration file in XML and libxml2 is required
+in order for the config facility to work. Many systems already have
+libxml2 installed. In that, case remember to get the devel version
+of that as well (not just the runtime). Libxml2 can also be compiled
+easily on most systems. See http://www.xmlsoft.org/ for more
+information.
+
 Then, build YAZ++:
 
   $ cd yaz++-<version>
   $ ./configure
   $ make
 
+If you do have libxml2 installed and configure above does not find it,
+use option --with-xml2=PREFIX to specify its location. yaz++ configure
+looks for PREFIX/bin/xml2-config.
 
 Installation, Windows
 ---------------------
