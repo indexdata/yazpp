@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.7 2002-10-30 10:27:37 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.8 2003-10-24 11:18:51 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -56,6 +56,15 @@
     For the whole list of <literal>configure</literal> options, refer
     to the help:
     <literal>./configure --help</literal>.
+   </para>
+   <para>
+    Configure uses GCC's C/C++ compiler if available. To specify another
+    compiler, set <literal>CXX</literal>. To use other compiler flags,
+    specify <literal>CXXFLAGS</literal>. To use <literal>CC</literal> 
+    with debugging you could use:
+    <screen>
+     CXXFLAGS="-g" CXX=CC ./configure
+    </screen>
    </para>
    <para>
     This is what you have after successful compilation:
