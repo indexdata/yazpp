@@ -52,7 +52,7 @@
      };
     </synopsis>
    </section>
-   <section id="IYazSocketObserver"><title>IYazZSocketObserver</title>
+   <section id="IYazSocketObserver"><title>IYazSocketObserver</title>
     <para>
      This interface is interested in socket events supporting
      the <link linkend="IYazSocketObservable">IYazSocketObservable</link>
