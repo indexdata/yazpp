@@ -35,5 +35,5 @@
   <target name="*">
     <!-- everything else -->
   </target>
-  <max-clients>100</max-clients>
+  <max-clients>500</max-clients>
 </proxy>

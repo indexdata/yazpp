@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.52 2003-10-08 09:32:49 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.53 2003-10-08 09:49:05 adam Exp $
  */
 
 #include <assert.h>
@@ -176,7 +176,7 @@ const char *Yaz_Proxy::load_balance(const char **url)
     const char *ret = 0;
     for (i = 0; url[i]; i++)
     {
-	yaz_log(LOG_LOG, "%s zurl=%s use=%d",
+	yaz_log(LOG_DEBUG, "%s zurl=%s use=%d",
 		m_session_str, url[i], zurl_in_use[i]);
 	if (min > zurl_in_use[i])
 	{
@@ -223,7 +223,13 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    yaz_log(LOG_LOG, "%s No default target", m_session_str);
 	    return 0;
 	}
-	m_proxyTarget = (char*) xstrdup(load_balance(url));
+	// we don't handle multiplexing for cookie session, so we just
+	// pick the first one in this case (anonymous users will be able
+	// to use any backend)
+	if (cookie && *cookie)
+	    m_proxyTarget = (char*) xstrdup(url[0]);
+	else
+	    m_proxyTarget = (char*) xstrdup(load_balance(url));
     }
     if (cookie && *cookie)
     {
@@ -331,10 +337,10 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	int min_seq = -1;
 	int no_of_clients = 0;
 	if (parent->m_clientPool)
-	    yaz_log (LOG_LOG, "Existing sessions");
+	    yaz_log (LOG_DEBUG, "Existing sessions");
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
-	    yaz_log (LOG_LOG, " Session %-3d wait=%d %s cookie=%s", c->m_seqno,
+	    yaz_log (LOG_DEBUG, " Session %-3d wait=%d %s cookie=%s", c->m_seqno,
 			       c->m_waiting, c->get_hostname(),
 			       c->m_cookie ? c->m_cookie : "");
 	    no_of_clients++;
