@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.2 2001-03-26 14:43:49 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -19,8 +19,16 @@
     listen method.
  */
 class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
+    friend class Yaz_PDU_AssocThread;
  private:
-    enum { Connecting, Listen, Ready, Closed } m_state;
+    enum { 
+	Connecting,
+	Listen,
+	Ready,
+	Closed,
+	Writing,
+	Accepting
+    } m_state;
     class PDU_Queue {
     public:
 	PDU_Queue(const char *buf, int len);
@@ -42,10 +50,14 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     int *m_destroyed;
     int m_idleTime;
     int m_log;
+    void init(IYazSocketObservable *socketObservable);
  public:
-    COMSTACK comstack();
+    COMSTACK comstack(const char *type_and_host, void **vp);
     /// Create object using specified socketObservable
     Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
+    /// Create Object using existing comstack
+    Yaz_PDU_Assoc(IYazSocketObservable *socketObservable,
+		  COMSTACK cs);
     /// Close socket and destroy object.
     /// virtual ~Yaz_PDU_Assoc();
     /// Clone the object
@@ -56,8 +68,6 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     void connect(IYaz_PDU_Observer *observer, const char *addr);
     /// listen for clients (server role)
     void listen(IYaz_PDU_Observer *observer, const char *addr);
-    /// open with existing socket
-    void socket(IYaz_PDU_Observer *observer, int fd);
     /// Socket notification
     void socketNotify(int event);
     /// Close socket
@@ -67,7 +77,15 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     /// Set Idle Time
     void idleTime (int timeout);
     /// Child start...
-    virtual void childNotify(int fd);
+    virtual void childNotify(COMSTACK cs);
 };
 
+class YAZ_EXPORT Yaz_PDU_AssocThread : public Yaz_PDU_Assoc {
+ public:
+    Yaz_PDU_AssocThread(IYazSocketObservable *socketObservable);
+ private:
+    void childNotify(COMSTACK cs);
+
+};
 #endif
+

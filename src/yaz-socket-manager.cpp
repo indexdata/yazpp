@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.14  2000-11-20 14:17:36  adam
+ * Revision 1.15  2001-03-26 14:43:49  adam
+ * New threaded PDU association.
+ *
+ * Revision 1.14  2000/11/20 14:17:36  adam
  * Yet another WIN32 fix for connect notify.
  *
  * Revision 1.13  2000/11/20 11:27:33  adam
@@ -143,7 +146,7 @@ int Yaz_SocketManager::processEvent()
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
     unsigned timeout = 0;
-    logf (m_log, "processEvent");
+    logf (m_log, "Yaz_SocketManager::processEvent manager=%p", this);
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -168,17 +171,17 @@ int Yaz_SocketManager::processEvent()
 	    no++;
 	if (p->mask & YAZ_SOCKET_OBSERVE_READ)
         {
-            yaz_log (m_log, "select fd=%d: read fd", fd);
+            yaz_log (m_log, "Yaz_SocketManager::select fd=%d read", fd);
 	    FD_SET(fd, &in);
         }
 	if (p->mask & YAZ_SOCKET_OBSERVE_WRITE)
         {
-            yaz_log (m_log, "select fd=%d: write fd", fd);
+            yaz_log (m_log, "Yaz_SocketManager::select fd=%d write", fd);
 	    FD_SET(fd, &out);
         }
 	if (p->mask & YAZ_SOCKET_OBSERVE_EXCEPT)
         {
-            yaz_log (m_log, "select fd=%d: except fd", fd);
+            yaz_log (m_log, "Yaz_SocketManager::select fd=%d except", fd);
 	    FD_SET(fd, &except);
         }
 	if (fd > max)
@@ -209,7 +212,7 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = timeout;
     to.tv_usec = 0;
     
-    logf (m_log, "select pending=%d timeout=%d", no, timeout);
+    logf (m_log, "Yaz_SocketManager::select no=%d timeout=%d", no, timeout);
     while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz++-config.in,v 1.2 2000-10-11 12:21:00 adam Exp $
+# $Id: yaz++-config.in,v 1.3 2001-03-26 14:43:49 adam Exp $
 yazppprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -8,6 +8,7 @@ yaz_echo_tabs=no
 yaz_echo_source=yes
 yaz_echo_lalibs=no
 yazpp_src_root=@YAZPP_SRC_ROOT@
+yazpp_build_root=@YAZPP_BUILD_ROOT@
 
 yazlibs="@YAZLIB@ @LIBS@"
 YAZPPVERSION=@VERSION@
@@ -68,8 +69,8 @@ while test $# -gt 0; do
 done
 
 if test "$yaz_echo_source" = "yes"; then
-    YAZPPLIB="-L${yazpp_src_root}/src/.libs -lyaz++ $yazlibs"
-    YAZPPLALIB="${yazpp_src_root}/src/libyaz++.la $yazlibs"
+    YAZPPLIB="-L${yazpp_build_root}/src/.libs -lyaz++ $yazlibs"
+    YAZPPLALIB="${yazpp_build_root}/src/libyaz++.la $yazlibs"
     YAZPPINC="@YAZINC@ -I${yazpp_src_root}/include"
 else
 

@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2000, Index Data.
+ * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.6  2001-01-29 11:18:24  adam
+ * Revision 1.7  2001-03-26 14:43:49  adam
+ * New threaded PDU association.
+ *
+ * Revision 1.6  2001/01/29 11:18:24  adam
  * Server sets OPTIONS search and present.
  *
  * Revision 1.5  2000/10/24 12:29:57  adam
@@ -287,7 +290,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
     switch (apdu_request->which)
     {
     case Z_APDU_initRequest:
-        logf (LOG_LOG, "got InitRequest p=%p", this);
+        yaz_log (LOG_LOG, "got InitRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_initResponse);
         req = apdu_request->u.initRequest->options;
         res = apdu_response->u.initResponse->options;
@@ -305,7 +308,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	send_Z_PDU(apdu_response);
         break;
     case Z_APDU_searchRequest:
-        logf (LOG_LOG, "got SearchRequest p=%p", this);
+        yaz_log (LOG_LOG, "got SearchRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_searchResponse);
 	recv_Z_search (apdu_request->u.searchRequest,
 		       apdu_response->u.searchResponse);
@@ -317,7 +320,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	send_Z_PDU(apdu_response);
         break;
     case Z_APDU_presentRequest:
-        logf (LOG_LOG, "got PresentRequest p=%p", this);
+        yaz_log (LOG_LOG, "got PresentRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_presentResponse);
 	recv_Z_present (apdu_request->u.presentRequest,
 			apdu_response->u.presentResponse);

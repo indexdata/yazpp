@@ -1,12 +1,12 @@
-## $Id: Makefile.am,v 1.1 2000-10-11 11:58:16 adam Exp $
+## $Id: Makefile.am,v 1.2 2001-03-26 14:43:49 adam Exp $
 
-INCLUDES=$(YAZINC) -I../include
+INCLUDES=$(YAZINC) -I$(srcdir)/../include
 
 lib_LTLIBRARIES = libyaz++.la
 
 libyaz___la_SOURCES=yaz-socket-manager.cpp yaz-pdu-assoc.cpp \
 	yaz-z-assoc.cpp yaz-proxy.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
-	yaz-z-server.cpp
+	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp
 
 libyaz___la_LDFLAGS=-version-info 0:0:0
 

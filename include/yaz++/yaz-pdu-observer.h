@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-observer.h,v 1.2 2000-11-01 14:22:59 adam Exp $
+ * $Id: yaz-pdu-observer.h,v 1.3 2001-03-26 14:43:49 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -32,8 +32,6 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     virtual void destroy() = 0;
     /// Set Idle Time
     virtual void idleTime (int timeout) = 0;
-    /// open with existing socket
-    virtual void socket(IYaz_PDU_Observer *observer, int fd) = 0;
 };
 
 /** Protocol Data Unit Observer.
@@ -51,8 +49,8 @@ class YAZ_EXPORT IYaz_PDU_Observer {
     /// Called whenever there is a timeout
     virtual void timeoutNotify() = 0;
     /// Make clone of observer using IYaz_PDU_Observable interface
-    virtual IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable,
-				     int fd) = 0;
+    virtual IYaz_PDU_Observer *sessionNotify(
+	IYaz_PDU_Observable *the_PDU_Observable, int fd) = 0;
 };
 
 #endif

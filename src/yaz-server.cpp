@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.14  2000-11-01 14:22:59  adam
+ * Revision 1.15  2001-03-26 14:43:49  adam
+ * New threaded PDU association.
+ *
+ * Revision 1.14  2000/11/01 14:22:59  adam
  * Added fd parameter for method IYaz_PDU_Observer::clone.
  *
  * Revision 1.13  2000/10/11 11:58:16  adam
@@ -72,8 +75,8 @@ public:
 			Z_RecordComposition *comp,
 			Z_NamePlusRecord *namePlusRecord,
 			Z_Records *records);
-    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable,
-			     int fd);
+    IYaz_PDU_Observer* sessionNotify(IYaz_PDU_Observable *the_PDU_Observable,
+				     int fd);
     void failNotify();
     void timeoutNotify();
     void connectNotify();
@@ -1557,7 +1560,7 @@ static char *marc_records[] = {
 void MyServer::recv_Z_init (Z_InitRequest *initRequest,
 			    Z_InitResponse *initResponse)
 {
-    logf (LOG_LOG, "MyServer::recv_Z_init");
+    yaz_log (LOG_LOG, "MyServer::recv_Z_init");
 }
 
 static MyServer *myServer = 0;
@@ -1565,7 +1568,7 @@ static MyServer *myServer = 0;
 void MyServer::recv_Z_search (Z_SearchRequest *searchRequest,
 			      Z_SearchResponse *searchResponse)
 {
-    logf (LOG_LOG, "MyServer::recv_Z_search");
+    yaz_log (LOG_LOG, "MyServer::recv_Z_search");
     if (searchRequest->query->which == Z_Query_type_1)
     {
 	Z_RPNStructure *s = searchRequest->query->u.type_1->RPNStructure;
@@ -1586,7 +1589,7 @@ void MyServer::recv_Z_search (Z_SearchRequest *searchRequest,
 void MyServer::recv_Z_present (Z_PresentRequest *presentRequest,
 			       Z_PresentResponse *presentResponse)
 {
-    logf (LOG_LOG, "MyServer::recv_Z_present");
+    yaz_log (LOG_LOG, "MyServer::recv_Z_present");
 }
 
 void MyServer::recv_Z_record (const char *resultSetName,
@@ -1596,7 +1599,7 @@ void MyServer::recv_Z_record (const char *resultSetName,
 			      Z_NamePlusRecord *namePlusRecord,
 			      Z_Records *records)
 {
-    logf (LOG_LOG, "MyServer::recv_Z_record");
+    yaz_log (LOG_LOG, "MyServer::recv_Z_record");
     int max = sizeof(marc_records) / sizeof(*marc_records);
     int eff_pos = (position-1) % max;
     create_databaseRecord (namePlusRecord, 0, VAL_USMARC,
@@ -1604,11 +1607,10 @@ void MyServer::recv_Z_record (const char *resultSetName,
 			   strlen(marc_records[eff_pos]));
 }
 
-IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable,
-				   int fd)
+IYaz_PDU_Observer *MyServer::sessionNotify(
+    IYaz_PDU_Observable *the_PDU_Observable, int fd)
 {
     MyServer *new_server;
-    logf (LOG_LOG, "child no %d", m_no);
     m_no++;
     new_server = new MyServer(the_PDU_Observable);
     new_server->timeout(900);
@@ -1623,13 +1625,13 @@ MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
 
 void MyServer::timeoutNotify()
 {
-    logf (LOG_LOG, "connection timed out");
+    yaz_log (LOG_LOG, "connection timed out");
     delete this;
 }
 
 void MyServer::failNotify()
 {
-    logf (LOG_LOG, "connection closed by client");
+    yaz_log (LOG_LOG, "connection closed by client");
     delete this;
 }
 
@@ -1642,7 +1644,7 @@ int main(int argc, char **argv)
     while (1)
     {
 	Yaz_SocketManager mySocketManager;
-	Yaz_PDU_Assoc *my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
+	Yaz_PDU_AssocThread *my_PDU_Assoc = new Yaz_PDU_AssocThread(&mySocketManager);
 	
 	myServer = new MyServer(my_PDU_Assoc);
 

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.17  2001-01-04 14:25:25  heikki
+ * Revision 1.18  2001-03-26 14:43:49  adam
+ * New threaded PDU association.
+ *
+ * Revision 1.17  2001/01/04 14:25:25  heikki
  * No SIGPIPES in windows...
  *
  * Revision 1.16  2000/12/14 16:00:39  adam
@@ -140,6 +143,10 @@ void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
     if (apdu)
     {
 	recv_Z_PDU (apdu);
+    }
+    else
+    {
+	close();
     }
 }
 

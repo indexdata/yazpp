@@ -8,15 +8,17 @@ AC_HEADER_STDC
 AM_DISABLE_SHARED
 AM_PROG_LIBTOOL
 
-YAZ_INIT
+YAZ_INIT(threads)
 
-YAZPP_SRC_ROOT=`pwd`
 AC_SUBST(YAZPP_SRC_ROOT)
+AC_SUBST(YAZPP_BUILD_ROOT)
+YAZPP_SRC_ROOT=`cd ${srcdir}; pwd`
+YAZPP_BUILD_ROOT=`pwd`
 
-if test -f src/yaz++-config.in; then
-        rm src/yaz++-config.in
+if test -f ${srcdir}/src/yaz++-config.in; then
+        rm ${srcdir}/src/yaz++-config.in
 fi
-sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz++-config.in >src/yaz++-config.in
+sed s%yaz_echo_source=yes%yaz_echo_source=no%g < ${srcdir}/yaz++-config.in >${srcdir}/src/yaz++-config.in
 AC_OUTPUT([
 	Makefile
 	src/Makefile

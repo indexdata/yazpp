@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.22  2000-11-20 11:27:33  adam
+ * Revision 1.23  2001-03-26 14:43:49  adam
+ * New threaded PDU association.
+ *
+ * Revision 1.22  2000/11/20 11:27:33  adam
  * Fixes for connect operation (timeout and notify fix).
  *
  * Revision 1.21  2000/11/01 14:22:59  adam
@@ -113,8 +116,8 @@ void Yaz_Proxy::set_proxyTarget(const char *target)
 	m_proxyTarget = (char *) xstrdup (target);
 }
 
-IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
-				    *the_PDU_Observable, int fd)
+IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
+					    *the_PDU_Observable, int fd)
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
@@ -486,8 +489,8 @@ void Yaz_ProxyClient::connectNotify()
     timeout(600);
 }
 
-IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
-					  *the_PDU_Observable, int fd)
+IYaz_PDU_Observer *Yaz_ProxyClient::sessionNotify(IYaz_PDU_Observable
+						  *the_PDU_Observable, int fd)
 {
     return new Yaz_ProxyClient(the_PDU_Observable);
 }
