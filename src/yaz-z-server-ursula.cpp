@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ursula.cpp,v $
- * Revision 1.1  2001-04-04 14:02:49  adam
+ * Revision 1.2  2001-04-05 15:12:24  adam
+ * WIN32 updates.
+ *
+ * Revision 1.1  2001/04/04 14:02:49  adam
  * URSULA / Z-ruth service.
  *
  */
@@ -11,6 +14,7 @@
 #include <yaz/log.h>
 #include <yaz++/yaz-z-server.h>
 
+#if HAVE_YAZ_URSULA_H
 int Yaz_Facility_Ursula::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
 			      Z_InitResponse *initResponse)
 {
@@ -54,3 +58,4 @@ int Yaz_Facility_Ursula::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     s->send_Z_PDU(apdu_response);
     return 1;
 }
+#endif

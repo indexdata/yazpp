@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.3  2001-04-05 13:09:44  adam
+ * Revision 1.4  2001-04-05 15:12:24  adam
+ * WIN32 updates.
+ *
+ * Revision 1.3  2001/04/05 13:09:44  adam
  * Removed ursula dependancy.
  *
  * Revision 1.2  2001/04/04 14:02:49  adam
@@ -421,7 +424,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
 	case VAL_SIGLEMARC:
 	case VAL_ISDSMARC:
 	case VAL_RUSMARC:
-	    marc_display((char*) record->u.octet_aligned->buf,stdout);
+	    marc_display((char*) record->u.octet_aligned->buf,0);
 	    break;
 	default:
 	    recv_textRecord((int) ent->value,

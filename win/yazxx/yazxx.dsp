@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../include" /I "../../../yaz/include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../include" /I "../../../yaz/include" /I "../../../yaz-ursula/include" /D "_WINDOWS" /D "WIN32" /D "NDEBUG" /D HAVE_YAZ_URSULA=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -75,7 +75,7 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).dll $(ProjDir)\..\..\..\bin
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../../yaz/include" /I "../../yaz++/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../yaz++/include" /I "../../include" /I "../../../yaz/include" /I "../../../yaz-ursula/include" /D "_WINDOWS" /D "WIN32" /D "_DEBUG" /D HAVE_YAZ_URSULA=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
@@ -100,49 +100,6 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).dll $(ProjDir)\..\..\..\bin
 
 # Name "yazxx - Win32 Release"
 # Name "yazxx - Win32 Debug"
-# Begin Source File
-
-SOURCE=..\..\src\ursula.asn
-
-!IF  "$(CFG)" == "yazxx - Win32 Release"
-
-# Begin Custom Build
-WkspDir=.
-InputPath=..\..\src\ursula.asn
-
-BuildCmds= \
-	cd $(WkspDir)\..\src \
-	"C:\Program Files\Tcl\bin\tclsh82.exe" ..\..\yaz\util\yaz-comp -I ..\include -i yaz -d ..\..\yaz\z39.50\z.tcl -d ursula.tcl ursula.asn \
-	
-
-"$(WkspDir)\..\src\zes-ursula.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(WkspDir)\..\include\yaz\zes-ursula.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
-
-# Begin Custom Build - ASN.1 compiling...
-WkspDir=.
-InputPath=..\..\src\ursula.asn
-
-BuildCmds= \
-	cd $(WkspDir)\..\src \
-	"C:\Program Files\Tcl\bin\tclsh82.exe" ..\..\yaz\util\yaz-comp -I ..\include -i yaz -d ..\..\yaz\z39.50\z.tcl -d ursula.tcl ursula.asn \
-	
-
-"$(WkspDir)\..\src\zes-ursula.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(WkspDir)\..\include\yaz\zes-ursula.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
 # Begin Source File
 
 SOURCE="..\..\src\yaz-ir-assoc.cpp"
@@ -222,28 +179,6 @@ SOURCE="..\..\src\yaz-z-server.cpp"
 # Begin Source File
 
 SOURCE="..\..\include\yaz++\yaz-z-server.h"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\src\zes-ursula.c"
-
-!IF  "$(CFG)" == "yazxx - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\include\yaz\zes-ursula.h"
-
-!IF  "$(CFG)" == "yazxx - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # End Target
 # End Project
