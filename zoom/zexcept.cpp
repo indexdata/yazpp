@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.1 2002-08-08 16:06:08 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.2 2002-10-08 23:57:29 mike Exp $
 
 // Z39.50 Exception classes
 
@@ -39,15 +39,34 @@ namespace ZOOM {
     }
 
 
-
+    
     bib1Exception::bib1Exception(int errcode, const char *addinfo) :
 	exception::exception(errcode) {
 	info = new char[strlen(addinfo)+1];
 	strcpy((char*) info, addinfo);
+	//fprintf(stderr, "made new bib1Exception 0x%lx (%d, 0x%lx=%s)\n",
+		//(long) this, code, (long) info, info);
     }
 
+#if 0
+    bib1Exception::bib1Exception(bib1Exception& src) :
+	exception::exception(src) {
+        code = src.code;
+	info = new char[strlen(src.info)+1];
+	strcpy((char*) info, src.info);
+	//fprintf(stderr, "copied bib1Exception 0x%lx to 0x%lx (%d, 0x%lx=%s)\n",
+		//(long) &src, (long) this, code, (long) info, info);
+    }
+#endif
+
     bib1Exception::~bib1Exception() {
-	delete info;
+	//fprintf(stderr, "deleting bib1Exception 0x%lx (%d, 0x%lx=%s)\n",
+		//(long) this, code, (long) info, info);
+	//delete info;
+	//  ###	Don't actually do the deletion for now.  Exception
+	//  reference semantics are too weird for me to grok so I'm
+	//  doing The Wrong Thing in the knowledge that it will more
+	//  or less work -- it just leaks memory.
     }
 
     int bib1Exception::errcode() const {
