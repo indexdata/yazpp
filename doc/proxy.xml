@@ -268,8 +268,9 @@
     <literal>-c</literal> followed by the filename of a config file.
     </para>
    <para>
-    The config file is in XML format. The YAZ proxy must be compiled
-    with <ulink url="http://www.xmlsoft.org/">libxml2</ulink> support in
+    The config file is in XML format. The YAZ proxy must be compiled 
+    with <ulink url="http://www.xmlsoft.org/">libxml2</ulink> and
+    <ulink url="http://xmlsoft.org/XSLT/">libXSLT</ulink> support in
     order for the config file facility to be enabled.
    </para>
    <tip>

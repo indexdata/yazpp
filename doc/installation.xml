@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.8 2003-10-24 11:18:51 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.9 2004-01-07 11:49:03 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -50,6 +50,15 @@
         look for <filename>yaz-config</filename> in directories of the
         <envar>PATH</envar> environment - which is nearly always
         what you want.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>--with-xslt </literal>directory</term>
+      <listitem><para>
+        Specifies prefix for libxslt (and libxml2).
+	configure must be able to locate <command>xslt-config</command>
+	in PREFIX/bin. If this option is omitted, configure looks
+	for <command>xslt-config</command> in the current PATH.
        </para></listitem>
      </varlistentry>
     </variablelist>
