@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.98 2004-02-10 15:02:19 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.99 2004-02-11 10:01:54 adam Exp $
  */
 
 #include <assert.h>
@@ -638,7 +638,7 @@ void Yaz_Proxy::convert_xsl_delay()
 	    xsltFreeStylesheet(m_stylesheet_xsp);
 	m_stylesheet_xsp = 0;
 	timeout(m_client_idletime);
-	int r = send_PDU_convert(m_stylesheet_apdu);
+	send_PDU_convert(m_stylesheet_apdu);
     }
     else
 	timeout(0);

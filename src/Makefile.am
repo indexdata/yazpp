@@ -1,8 +1,9 @@
-## $Id: Makefile.am,v 1.21 2004-01-05 09:31:09 adam Exp $
+## $Id: Makefile.am,v 1.22 2004-02-11 10:01:54 adam Exp $
 
 AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include $(XSLT_CFLAGS)
 
-noinst_LTLIBRARIES = libyazcpp.la
+lib_LTLIBRARIES = libyazcpp.la
+libyazcpp_la_LDFLAGS=-version-info 1:0:0
 
 libyazcpp_la_SOURCES=yaz-socket-manager.cpp yaz-pdu-assoc.cpp \
 	yaz-z-assoc.cpp yaz-proxy.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \

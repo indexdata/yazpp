@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
-AM_INIT_AUTOMAKE("yaz++",0.7.7)
+AM_INIT_AUTOMAKE("yaz++",0.7.8)
 
 AC_PROG_CC
 AC_PROG_CPP
@@ -102,7 +102,6 @@ AC_OUTPUT([
 	include/yaz++/Makefile
 	yaz++-config
 	zoom/Makefile
-	lib/Makefile
 	doc/Makefile
 	doc/yaz++.xml
 	doc/yazprint.dsl doc/yazphp.dsl doc/yazhtml.dsl
