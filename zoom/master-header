@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.9 2002-11-12 22:43:56 mike Exp $
+// $Id: master-header,v 1.10 2002-11-13 11:48:07 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -26,9 +26,6 @@ namespace ZOOM {
 
   const char *option (const char *key);
   const char *option (const char *key, const char *val);
-  int errcode ();
-  char *errmsg ();
-  char *addinfo ();
 
   class YAZ_EXPORT connection {
 *   ZOOM_connection c;
