@@ -1,8 +1,9 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.4 2002-10-09 11:44:44 mike Exp $ -->
+ <!-- $Id: zoom.xml,v 1.5 2002-10-09 23:11:31 mike Exp $ -->
  <title>ZOOM-C++</title>
 
- <sect1 id="zoom.introduction">
+
+ <sect1 id="zoom-introduction">
   <title>Introduction</title>
   <para>
    <ulink url="http://staging.zoom.z3950.org/">ZOOM</ulink>
@@ -98,13 +99,9 @@
   </para>
  </sect1>
 
- <sect1>
+
+ <sect1 id="zoom-connection">
   <title><literal>ZOOM::connection</literal></title>
-  <para>
-   SEE ALSO
-   <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.2"
-	>Section 3.2 (Connection) of the ZOOM Abstract API</ulink>
-  </para>
   <para>
    A <literal>ZOOM::connection</literal> object represents an open
    connection to a Z39.50 server.  Such a connection is forged by
@@ -123,21 +120,56 @@
     };
   </synopsis>
   <para>
-   ### discusson
+   When a new <literal>connection</literal> is created, the hostname
+   and port number of a Z39.50 server must be supplied, and the
+   network connection is forged and wrapped in the new object.  If the
+   connection can't be established - perhaps because the hostname
+   couldn't be resolved, or there is no server listening on the
+   specified port - then an
+   <link linkend="zoom-exception"><literal>exception</literal></link>
+   is thrown.
   </para>
+  <para>
+   The only other methods on a <literal>connection</literal> object
+   are for getting and setting options.  Any name-value pair of
+   strings may be set as options, and subsequently retrieved, but
+   certain options have special meanings which are understood by the
+   ZOOM code and affect the behaviour of the object that carries
+   them.  For example, the value of the
+   <literal>databaseName</literal> option is used as the name of the
+   database to query when a search is executed against the
+   <literal>connection</literal>.  For a full list of such special
+   options, see the ZOOM abstract API and the ZOOM-C documentation
+   (links below).
+  </para>
+
+  <sect2>
+   <title>References</title>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.2"
+	>Section 3.2 (Connection) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.html#zoom.connections"
+	>The Connections section of the ZOOM-C documentation</ulink>
+     </para>
+    </listitem>
+   </itemizedlist>
+  </sect2>
  </sect1>
 
- <sect1>
+
+ <sect1 id="zoom-query">
   <title><literal>ZOOM::query</literal> and subclasses</title>
-  <para>
-   SEE ALSO
-   <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.3"
-	>Section 3.3 (Query) of the ZOOM Abstract API</ulink>
-  </para>
   <para>
    The <literal>ZOOM::query</literal> class is a virtual base class,
    representing a query to be submitted to a server.  This class has
-   no methods, but two (so far) concrete subclasses:
+   no methods, but two (so far) concrete subclasses, each implementing
+   a specific query notation.
   </para>
 
   <sect2>
@@ -152,6 +184,12 @@
       ~prefixQuery ();
     };
    </synopsis>
+   <para>
+    It enables a query to be created from Yaz's cryptic but
+    powerful
+    <ulink url="file:///usr/local/src/z39.50/yaz/doc/tools.html#PQF"
+	>Prefix Query Notation (PQN)</ulink>.
+   </para>
   </sect2>
 
   <sect2>
@@ -166,6 +204,15 @@
       ~CCLQuery ();
     };
    </synopsis>
+   <para>
+    It enables a query to be created using the simpler but less
+    expressive
+    <ulink url="file:///usr/local/src/z39.50/yaz/doc/tools.html#CCL"
+	>Common Command Language (CCL)</ulink>.
+    The qualifiers recognised by the CCL parser are specified in an
+    external configuration file in the format described by the Yaz
+    documentation.
+   </para>
   </sect2>
 
   <sect2>
@@ -177,22 +224,54 @@
     <literal>resultSet</literal> class's constructor.
    </para>
    <para>
-    ### discusson
+    Given a suitable set of CCL qualifiers, the following pairs of
+    queries are equivalent:
    </para>
+   <screen>
+    prefixQuery("dinosaur");
+    CCLQuery("dinosaur");
+
+    prefixQuery("@and complete dinosaur");
+    CCLQuery("complete and dinosaur");
+
+    prefixQuery("@and complete @or dinosaur pterosaur");
+    CCLQuery("complete and (dinosaur or pterosaur)");
+
+    prefixQuery("@attr 1=7 0253333490");
+    CCLQuery("isbn=0253333490");
+   </screen>
+  </sect2>
+
+  <sect2>
+   <title>References</title>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.3"
+	>Section 3.3 (Query) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.query.html"
+	>The Queries section of the ZOOM-C documentation</ulink>
+     </para>
+    </listitem>
+   </itemizedlist>
   </sect2>
  </sect1>
 
- <sect1>
+
+ <sect1 id="zoom-resultset">
   <title><literal>ZOOM::resultSet</literal></title>
   <para>
-   SEE ALSO
-   <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.4"
-	>Section 3.4 (Result Set) of the ZOOM Abstract API</ulink>
-  </para>
-  <para>
    A <literal>ZOOM::resultSet</literal> object represents a set of
-   record identified by a query that has been executed against a
-   particular connection.
+   records identified by a query that has been executed against a
+   particular connection.  The sole purpose of both
+   <literal>connection</literal> and <literal>query</literal> objects
+   is that they can be used to create new
+   <literal>resultSet</literal>s - that is, to perform a search on the
+   server on the remote end of the connection.
   </para>
   <para>
    The class has this declaration:
@@ -209,17 +288,61 @@
     };
   </synopsis>
   <para>
-   ### discusson
+   New <literal>resultSet</literal>s are created by the constructor,
+   which is passed a <literal>connection</literal>, indicating the
+   server on which the search is to be performed, and a
+   <literal>query</literal>, indicating what search to perform.  If
+   the search fails - for example, because the query is malformed -
+   then an
+   <link linkend="zoom-exception"><literal>exception</literal></link>
+   is thrown.
   </para>
+  <para>
+   Like <literal>connection</literal>s, <literal>resultSet</literal>
+   objects can carry name-value options.  The special options which
+   affect ZOOM-C++'s behaviour are the same as those for ZOOM-C and
+   are described in its documentation (link below).  In particular,
+   the <literal>preferredRecordSyntax</literal> option may be set to
+   a string such as ``USMARC'', ``SUTRS'' etc. to indicate what the
+   format in which records should be retrieved; and the
+   <literal>elementSetName</literal> option indicates whether brief
+   records (``B''), full records (``F'') or some other composition
+   should be used.
+  </para>
+  <para>
+   The <literal>size()</literal> method returns the number of records
+   in the result set.  Zero is a legitimate value: a search that finds
+   no records is not the same as a search that fails.
+  </para>
+  <para>
+   Finally, the <literal>getRecord</literal> method returns the
+   <parameter>i</parameter>th record from the result set, where
+   <parameter>i</parameter> is zero-based: that is, legitmate values
+   range from zero up to one less than the result-set size.
+  </para>
+
+  <sect2>
+   <title>References</title>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.4"
+	>Section 3.4 (Result Set) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.resultsets.html"
+	>The Result Sets section of the ZOOM-C documentation</ulink>
+     </para>
+    </listitem>
+   </itemizedlist>
+  </sect2>
  </sect1>
 
- <sect1>
+
+ <sect1 id="zoom-record">
   <title><literal>ZOOM::record</literal></title>
-  <para>
-   SEE ALSO
-   <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.5"
-	>Section 3.5 (Record) of the ZOOM Abstract API</ulink>
-  </para>
   <para>
    A <literal>ZOOM::record</literal> object represents a chunk of data
    from a <literal>resultSet</literal> returned from a server.
@@ -243,15 +366,29 @@
   <para>
    ### discusson
   </para>
+
+  <sect2>
+   <title>References</title>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.5"
+	>Section 3.5 (Record) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.records.html"
+	>The Records section of the ZOOM-C documentation</ulink>
+     </para>
+    </listitem>
+   </itemizedlist>
+  </sect2>
  </sect1>
 
- <sect1>
+
+ <sect1 id="zoom-exception">
   <title><literal>ZOOM::exception</literal> and subclasses</title>
-  <para>
-   SEE ALSO
-   <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.7"
-	>Section 3.7 (Exception) of the ZOOM Abstract API</ulink>
-  </para>
   <para>
    The <literal>ZOOM::exception</literal> class is a virtual base
    class, representing a diagnostic generated by the ZOOM-C++ library
@@ -322,6 +459,27 @@
    <title>Discussion</title>
    <para>
     ### discusson
+   </para>
+  </sect2>
+
+  <sect2>
+   <title>References</title>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <ulink url="http://staging.zoom.z3950.org/api/zoom-1.3.html#3.7"
+	>Section 3.7 (Exception) of the ZOOM Abstract API</ulink>
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    Because C does not support exceptions, ZOOM-C has no API element
+    that corresponds directly with ZOOM-C++'s
+    <literal>exception</literal> class and its subclasses.  The
+    closest thing is the <literal>ZOOM_connection_error</literal>
+    function described in
+    <ulink url="file:///usr/local/src/z39.50/yaz/doc/zoom.html#zoom.connections"
+	>The Connections section</ulink> of the documentation.
    </para>
   </sect2>
  </sect1>
