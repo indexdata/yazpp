@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.29 2004-01-07 13:40:06 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.30 2004-01-12 22:35:26 adam Exp $
  */
 
 #include <signal.h>
@@ -180,13 +180,17 @@ static void child_run(Yaz_SocketManager *m, int run)
 
 int main(int argc, char **argv)
 {
+#if HAVE_XSLT
+    xmlInitMemory();
+    
+    LIBXML_TEST_VERSION
+#endif
     int cont = 1;
     int run = 1;
     Yaz_SocketManager mySocketManager;
     Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
 
     static_yaz_proxy = &proxy;
-
 
     args(&proxy, argc, argv);
 
