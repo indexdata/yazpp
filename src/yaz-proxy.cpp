@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.109 2004-03-15 22:49:13 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.110 2004-03-17 10:49:22 adam Exp $
  */
 
 #include <unistd.h>
@@ -639,7 +639,9 @@ void Yaz_Proxy::convert_xsl_delay()
 	Z_External *r = npr->u.databaseRecord;
 	if (r->which == Z_External_octet)
 	{
+#if 0
 	    fwrite((char*) r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, stdout);
+#endif
 	    xmlDocPtr res, doc = xmlParseMemory(
 		(char*) r->u.octet_aligned->buf,
 		r->u.octet_aligned->len);
@@ -1368,8 +1370,8 @@ void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
 
     m_bytes_recv += len;
     
-    if (m_log_mask & PROXY_LOG_APDU_CLIENT)
-	yaz_log (LOG_DEBUG, "%sReceiving %s from client %d bytes",
+    if (m_log_mask & PROXY_LOG_REQ_CLIENT)
+	yaz_log (LOG_LOG, "%sReceiving %s from client %d bytes",
 		 m_session_str, gdu_name(apdu), len);
 
     if (m_bw_hold_PDU)     // double incoming PDU. shutdown now.
