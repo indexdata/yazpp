@@ -9,7 +9,7 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.8 2002-10-24 09:13:17 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.9 2003-07-02 10:31:42 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -22,6 +22,7 @@
    <year>2000</year>
    <year>2001</year>
    <year>2002</year>
+   <year>2003</year>
    <holder>Index Data Aps and Mike Taylor</holder>
   </copyright>
   <abstract>
