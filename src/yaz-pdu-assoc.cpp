@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.11  2000-09-04 08:29:22  adam
+ * Revision 1.12  2000-09-06 14:23:45  adam
+ * WIN32 updates.
+ *
+ * Revision 1.11  2000/09/04 08:29:22  adam
  * Fixed memory leak(s). Added re-use of associations, rather than
  * re-init, when maximum number of targets are in use.
  *
@@ -174,6 +177,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		m_destroyed = &destroyed;
 
 		m_PDU_Observer->recv_PDU(m_input_buf, res);
+                m_destroyed = 0;
 		if (destroyed)   // it really was destroyed, return now.
 		    return;
 	    } while (m_cs && cs_more (m_cs));
@@ -393,6 +397,8 @@ void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)
 }
 
 #if 1
+
+// Single-threaded... Only useful for non-blocking handlers
 void Yaz_PDU_Assoc::childNotify(int fd)
 {
     /// Clone PDU Observable (keep socket manager)
@@ -407,40 +413,56 @@ void Yaz_PDU_Assoc::childNotify(int fd)
 #else
 
 #include <yaz-socket-manager.h>
+
+#ifdef WIN32
+#include <process.h>
+#else
 #include <pthread.h>
+#endif
 
-class thread_info {
-    Yaz_SocketManager *socketManager;
-    IYaz_PDU_Observable *
-
-};
-
-static void *events(void *p)
+void
+#ifdef WIN32
+__cdecl
+#endif 
+    events(void *p)
 {
     Yaz_SocketManager *s = (Yaz_SocketManager *) p;
-    
+
+    logf (LOG_LOG, "thread started");
     while (s->processEvent() > 0)
 	;
+    logf (LOG_LOG, "thread finished");
+#ifdef WIN32
+#else
     return 0;
+#endif
 }
 
 void Yaz_PDU_Assoc::childNotify(int fd)
 {
-    Yaz_SocketManager *socket_observable = new Yaz_SocketManager;  
-    IYaz_PDU_Observable *new_observable = clone();
+    Yaz_SocketManager *socket_observable = new Yaz_SocketManager;
+    Yaz_PDU_Assoc *new_observable = new Yaz_PDU_Assoc (socket_observable);
     
-    m_socketObservable = socket_observable;
-
     /// Clone PDU Observer
     IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable);
     
     /// Attach new socket to it
     new_observable->socket(observer, fd);
-    
+
+#ifdef WIN32
+    long t_id;
+    t_id = _beginthread (events, 0, socket_observable);
+    if (t_id == -1)
+    {
+        logf (LOG_FATAL|LOG_ERRNO, "_beginthread failed");
+        exit (1);
+    }
+#else
     pthread_t type;
 
     int id = pthread_create (&type, 0, events, socket_observable);
     logf (LOG_LOG, "pthread_create returned id=%d", id);
-}
 #endif
-
+}
+// Threads end
+#endif

@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.12  2000-05-10 11:36:58  ian
+ * Revision 1.13  2000-09-06 14:23:45  adam
+ * WIN32 updates.
+ *
+ * Revision 1.12  2000/05/10 11:36:58  ian
  * Added default parameters for refid to request functions.
  * Added default parameter for result set name to search and present request.
  * Commented out forced logging of PDU contents.
@@ -73,6 +75,7 @@ void Yaz_IR_Assoc::get_databaseNames (int *num, char ***list)
     *list = m_databaseNames;
 }
 
+typedef char *charp;
 void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 {
     int i;
@@ -81,7 +84,8 @@ void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 	delete [] m_databaseNames[i];
     delete [] m_databaseNames;
     m_num_databaseNames = num;
-    m_databaseNames = new (char*) [num];
+
+    m_databaseNames = new char *[num];
     for (i = 0; i<m_num_databaseNames; i++)
     {
 	m_databaseNames[i] = new char[strlen(list[i])+1];
@@ -91,7 +95,7 @@ void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 
 void Yaz_IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
 {
-    const char **list = new (const char*) [strlen(dblist)];
+    const char **list = new const char* [strlen(dblist)];
     char *dbtmp = new char[strlen(dblist)+1];
     strcpy(dbtmp, dblist);
     int num = 0;
@@ -422,13 +426,12 @@ int Yaz_IR_Assoc::send_initRequest(char* pRefId)
     return send_Z_PDU(apdu);
 }
 
-int Yaz_IR_Assoc::send_deleteResultSetRequest(char* pResultSetId = NULL, char* pRefId = NULL)
+int Yaz_IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
 {
     char* ResultSetIds[1];
 
     Z_APDU *apdu = create_Z_PDU(Z_APDU_deleteResultSetRequest);
     Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
-
 
     if ( pResultSetId )
     {

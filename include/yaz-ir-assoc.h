@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-ir-assoc.h,v 1.9 2000-05-10 11:36:58 ian Exp $
+ * $Id: yaz-ir-assoc.h,v 1.10 2000-09-06 14:23:45 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -57,7 +57,7 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
     int send_initRequest(char* pRefId=NULL);
     int send_searchRequest(Yaz_Z_Query *query, char* pResultSetId = NULL, char* pRefId = NULL);
     int send_presentRequest(int start, int number, char* pResultSetId = NULL, char* pRefId = NULL);
-    int send_deleteResultSetRequest(char* pResultSetId = NULL, char* pRefId = NULL);
+    int send_deleteResultSetRequest(char* pResultSetId = 0, char* pRefId = 0);
     
     /// Recv Services
     virtual void recv_initRequest(Z_InitRequest *initRequest);
