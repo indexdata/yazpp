@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.14 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.15 2003-12-20 22:42:53 adam Exp $
  */
 
 #include <yaz++/z-query.h>
@@ -179,10 +179,9 @@ int Yaz_Z_Query::rpn2pquery(Z_RPNStructure *s, WRBUF buf)
 
 WRBUF Yaz_Z_Query::zquery2pquery(Z_Query *q)
 {
-    WRBUF buf = wrbuf_alloc();
-
     if (q->which != Z_Query_type_1 && q->which != Z_Query_type_101) 
 	return 0;
+    WRBUF buf = wrbuf_alloc();
     if (q->u.type_1->attributeSetId) {
 	/* Output attribute set ID */
 	wrbuf_puts(buf, "@attrset ");
