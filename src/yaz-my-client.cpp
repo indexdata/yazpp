@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.5  2001-04-10 10:48:08  adam
+ * Revision 1.6  2001-04-17 16:21:21  heikki
+ * Working on UrsulaRenewal, Request, and Update
+ *
+ * Revision 1.5  2001/04/10 10:48:08  adam
  * Fixed problem where proxy could cash bad result sets.
  *
  * Revision 1.4  2001/04/05 15:12:24  adam
@@ -615,6 +618,7 @@ int MyClient::cmd_proxy(char *args)
 }
 
 #if HAVE_YAZ_URSULA_H
+#if TEST_URSULA_REF
 int MyClient::cmd_ursula(char *args)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
@@ -664,6 +668,52 @@ int MyClient::cmd_ursula(char *args)
 	wait();
     return 1;
 }
+#else // not request testing
+
+int MyClient::cmd_ursula(char *args)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+
+    req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003");
+    
+    Z_External *ext = (Z_External *) odr_malloc(odr_encode(), sizeof(*ext));
+    req->taskSpecificParameters = ext;
+    ext->direct_reference = req->packageType;
+    ext->descriptor = 0;
+    ext->indirect_reference = 0;
+    
+    ext->which = Z_External_octet;
+    ext->u.single_ASN1_type = (Odr_oct *)
+	odr_malloc (odr_encode(), sizeof(Odr_oct));
+
+    Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
+    pdu->which = Z_UrsPDU_renewal;
+    pdu->u.renewal = (Z_UrsRenewal *)
+	   odr_malloc (odr_encode(), sizeof(*pdu->u.renewal));
+    pdu->u.renewal->libraryNo = odr_strdup(odr_encode(), "000200");
+    pdu->u.renewal->borrowerTicketNo = 0;
+
+    if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
+    {
+	yaz_log (LOG_LOG, "ursula encoding failed");
+	return 1;
+    }
+    char *buf = 
+	odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
+    
+    ext->u.single_ASN1_type->buf = (unsigned char*)
+	odr_malloc (odr_encode(), ext->u.single_ASN1_type->len);
+    memcpy (ext->u.single_ASN1_type->buf, buf, ext->u.single_ASN1_type->len);
+    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len;
+    
+    if (send_Z_PDU(apdu) >= 0)
+	wait();
+    return 1;
+}
+
+#endif
+
 #endif
 
 int MyClient::processCommand(const char *commandLine)
