@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.83 2004-01-07 22:19:05 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.84 2004-01-07 22:28:08 adam Exp $
  */
 
 #include <assert.h>
@@ -1572,6 +1572,13 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	if (srw_pdu->which == Z_SRW_searchRetrieve_request)
 	{
 	    Z_SRW_searchRetrieveRequest *srw_req = srw_pdu->u.request;
+
+	    // recordXPath unsupported.
+	    if (srw_req->recordXPath)
+            {
+	        send_to_srw_client_error(72);
+	        return;
+            }
 
 	    // save stylesheet
 	    if (srw_req->stylesheet)
