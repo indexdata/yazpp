@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.106 2004-03-01 17:01:52 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.107 2004-03-01 17:18:39 adam Exp $
  */
 
 #include <unistd.h>
@@ -2311,7 +2311,7 @@ void Yaz_Proxy::pre_init()
 			{
 			    if (c->m_server == 0)
 				if (c->m_waiting)
-				    spare_waiting;
+				    spare_waiting++;
 				else
 				    spare++;
 			    else
