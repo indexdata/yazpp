@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
+ * Revision 1.5  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.4  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  * Revision 1.3  1999/02/02 14:01:18  adam
@@ -20,166 +23,266 @@
  */
 
 #include <log.h>
+#include <options.h>
 #include <yaz-ir-assoc.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
-#include <yaz-z-query.h>
+
+extern "C" {
+#if HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+#endif
+#if HAVE_READLINE_HISTORY_H
+#include <readline/history.h>
+#endif
+}
 
 class YAZ_EXPORT MyClient : public Yaz_IR_Assoc {
-public:
-    MyClient(IYaz_PDU_Observable *the_PDU_Observable);
-    void recv_Z_PDU(Z_APDU *apdu);
-    IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable);
-    void init();
-    void search(Yaz_Z_Query *query);
-    void present(int start, int number);
-    void set_databaseNames (int num, char **list);
-    void set_syntax (const char *syntax);
-    void set_elementSetName (const char *elementSetName);
 private:
-    int m_num_databaseNames;
-    char **m_databaseNames;
-    int m_recordSyntax;
-    Z_ElementSetNames *m_elementSetNames;
+    int m_interactive_flag;
+    char m_thisCommand[1024];
+    char m_lastCommand[1024];
+    Yaz_SocketManager *m_socketManager;
+public:
+    MyClient(IYaz_PDU_Observable *the_PDU_Observable,
+	     Yaz_SocketManager *the_SocketManager);
+    IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable);
+    int args(Yaz_SocketManager *socketManager, int argc, char **argv);
+    int interactive(Yaz_SocketManager *socketManager);
+    int wait();
+    void recv_initResponse(Z_InitResponse *initResponse);
+    void recv_searchResponse(Z_SearchResponse *searchResponse);
+    int processCommand(const char *cmd);
+    const char *MyClient::getCommand();
+    int cmd_open(char *host);
+    int cmd_quit(char *args);
+    int cmd_close(char *args);
+    int cmd_find(char *args);
 };
-
-void MyClient::recv_Z_PDU(Z_APDU *apdu)
-{
-    logf (LOG_LOG, "recv_APDU");
-    switch (apdu->which)
-    {
-    case Z_APDU_initResponse:
-        logf (LOG_LOG, "got InitResponse");
-        break;
-    case Z_APDU_searchResponse:
-        logf (LOG_LOG, "got searchResponse");
-        break;
-    case Z_APDU_presentResponse:
-        logf (LOG_LOG, "got presentResponse");
-        break;
-    }
-}
 
 IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
 {
-    return new MyClient(the_PDU_Observable);
+    return new MyClient(the_PDU_Observable, m_socketManager);
 }
 
-MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable) :
+MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable,
+		   Yaz_SocketManager *the_socketManager) :
     Yaz_IR_Assoc (the_PDU_Observable)
 {
-    m_num_databaseNames = 0;
-    m_databaseNames = 0;
-    m_recordSyntax = VAL_NONE;
+    m_interactive_flag = 1;
+    m_thisCommand[0] = '\0';
+    m_lastCommand[0] = '\0';
+    m_socketManager = the_socketManager;
 }
 
-void MyClient::set_databaseNames (int num, char **list)
+void usage(char *prog)
 {
-    int i;
-    for (i = 0; i<m_num_databaseNames; i++)
-	delete m_databaseNames[i];
-    delete m_databaseNames;
-    m_databaseNames = 0;
-    m_num_databaseNames = num;
-    m_databaseNames = new (char*) [num];
-    for (i = 0; i<m_num_databaseNames; i++)
+    fprintf (stderr, "%s: [-v log] [-p proxy] [zurl]\n", prog);
+    exit (1);
+}
+
+void MyClient::recv_initResponse(Z_InitResponse *initResponse)
+{
+    printf ("Got InitResponse. Status ");
+    if (*initResponse->result)
+	printf ("Ok\n");
+    else
+	printf ("Fail\n");
+}
+
+void MyClient::recv_searchResponse(Z_SearchResponse *searchResponse)
+{
+    printf ("Got SearchResponse. Status ");
+    if (!*searchResponse->searchStatus)
     {
-	m_databaseNames[i] = new char[strlen(list[i])+1];
-	strcpy (m_databaseNames[i], list[i]);
+	printf ("Fail\n");
+	return;
     }
+    printf ("Ok\n");
+    printf ("Hits: %d\n", *searchResponse->resultCount);
 }
 
-void MyClient::set_syntax (const char *syntax)
+int MyClient::wait()
 {
-    m_recordSyntax = VAL_NONE;
-    if (syntax && *syntax)
-	m_recordSyntax = oid_getvalbyname (syntax);
-}
-
-void MyClient::set_elementSetName (const char *elementSetName)
-{
-    if (m_elementSetNames)
-	delete [] m_elementSetNames->u.generic;
-    delete m_elementSetNames;
-    m_elementSetNames = 0;
-    if (elementSetName && *elementSetName)
+    set_lastReceived(0);
+    while (m_socketManager->processEvent() > 0)
     {
-	m_elementSetNames = new Z_ElementSetNames;
-	m_elementSetNames->which = Z_ElementSetNames_generic;
-	m_elementSetNames->u.generic = new char[strlen(elementSetName)+1];
-	strcpy (m_elementSetNames->u.generic, elementSetName);
+	if (get_lastReceived())
+	    return 1;
     }
+    return 0;
 }
 
-void MyClient::search(Yaz_Z_Query *query)
+#define C_PROMPT "Z>"
+
+int MyClient::cmd_open(char *host)
 {
-    Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
-    Z_SearchRequest *req = apdu->u.searchRequest;
-
-    req->num_databaseNames = m_num_databaseNames;
-    req->databaseNames = m_databaseNames;
-    req->query = query->get_Z_Query();
-
-    int oid_syntax[OID_SIZE];
-    oident prefsyn;
-    if (m_recordSyntax != VAL_NONE)
-    {
-	prefsyn.proto = PROTO_Z3950;
-	prefsyn.oclass = CLASS_RECSYN;
-	prefsyn.value = (enum oid_value) m_recordSyntax;
-	oid_ent_to_oid(&prefsyn, oid_syntax);
-	req->preferredRecordSyntax = oid_syntax;
-    }
-    send_Z_PDU(apdu);
+    client (host);
+    if (send_initRequest() >= 0)
+	wait();
+    else
+	close();
+    return 1;
 }
 
-void MyClient::present(int start, int number)
+int MyClient::cmd_quit(char *args)
 {
-    Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
-    Z_PresentRequest *req = apdu->u.presentRequest;
-
-    req->resultSetStartPoint = &start;
-    req->numberOfRecordsRequested = &number;
-
-    int oid_syntax[OID_SIZE];
-    oident prefsyn;
-    if (m_recordSyntax != VAL_NONE)
-    {
-	prefsyn.proto = PROTO_Z3950;
-	prefsyn.oclass = CLASS_RECSYN;
-	prefsyn.value = (enum oid_value) m_recordSyntax;
-	oid_ent_to_oid(&prefsyn, oid_syntax);
-	req->preferredRecordSyntax = oid_syntax;
-    }
-    Z_RecordComposition compo;
-    if (m_elementSetNames)
-    {
-	req->recordComposition = &compo;
-        compo.which = Z_RecordComp_simple;
-        compo.u.simple = m_elementSetNames;
-    }
-    send_Z_PDU(apdu);
+    return 0;
 }
 
-void MyClient::init()
+int MyClient::cmd_close(char *args)
 {
-    Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
-    Z_InitRequest *req = apdu->u.initRequest;
+    close();
+    return 1;
+}
+
+int MyClient::cmd_find(char *args)
+{
+    Yaz_Z_Query query;
+
+    if (query.set_rpn(args) <= 0)
+    {
+	printf ("Bad RPN query\n");
+	return 1;
+    }
+    if (send_searchRequest(&query) >= 0)
+	wait();
+    return 1;
+}
+
+int MyClient::processCommand(const char *commandLine)
+{
+    char cmdStr[1024], cmdArgs[1024];
+    cmdArgs[0] = '\0';
+    cmdStr[0] = '\0';
+    static struct {
+        char *cmd;
+        int (MyClient::*fun)(char *arg);
+        char *ad;
+    } cmd[] = {
+	{"open", &cmd_open, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
+        {"quit", &cmd_quit, ""},
+	{"close", &cmd_close, ""},
+	{"find", &cmd_find, ""},
+	{0,0,0}
+    };
     
-    ODR_MASK_SET(req->options, Z_Options_search);
-    ODR_MASK_SET(req->options, Z_Options_present);
-    ODR_MASK_SET(req->options, Z_Options_namedResultSets);
-    ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
-    ODR_MASK_SET(req->options, Z_Options_scan);
-    ODR_MASK_SET(req->options, Z_Options_sort);
-    ODR_MASK_SET(req->options, Z_Options_extendedServices);
-    ODR_MASK_SET(req->options, Z_Options_delSet);
+    if (sscanf(commandLine, "%s %[^;]", cmdStr, cmdArgs) < 1)
+	return 1;
+    int i;
+    for (i = 0; cmd[i].cmd; i++)
+	if (!strncmp(cmd[i].cmd, cmdStr, strlen(cmdStr)))
+	    break;
+    
+    int res = 1;
+    if (cmd[i].cmd) // Invoke command handler
+	res = (this->*cmd[i].fun)(cmdArgs);
+    else            // Dump help screen
+    {
+	printf("Unknown command: %s.\n", cmdStr);
+	printf("Currently recognized commands:\n");
+	for (i = 0; cmd[i].cmd; i++)
+	    printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+    }
+    return res;
+}
 
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
+const char *MyClient::getCommand()
+{
+#if HAVE_READLINE_READLINE_H
+    // Read using GNU readline
+    char *line_in;
+    line_in=readline(C_PROMPT);
+    if (!line_in)
+	return 0;
+#if HAVE_READLINE_HISTORY_H
+    if (*line_in)
+	add_history(line_in);
+#endif
+    strncpy(m_thisCommand,line_in, 1023);
+    m_thisCommand[1023] = '\0';
+    free (line_in);
+#else    
+    // Read using fgets(3)
+    printf (C_PROMPT);
+    fflush(stdout);
+    if (!fgets(m_thisCommand, 1023, stdin))
+	return 0;
+#endif
+    // Remove trailing whitespace
+    char *cp = m_thisCommand + strlen(m_thisCommand);
+    while (cp != m_thisCommand && strchr("\t \n", cp[-1]))
+	cp--;
+    *cp = '\0';
+    cp = m_thisCommand;
+    // Remove leading spaces...
+    while (strchr ("\t \n", *cp))
+	cp++;
+    // Save command if non-empty
+    if (*cp != '\0')
+	strcpy (m_lastCommand, cp);
+    return m_lastCommand;
+}
 
-    send_Z_PDU(apdu);
+int MyClient::interactive(Yaz_SocketManager *socketManager)
+{
+    const char *cmd;
+    if (!m_interactive_flag)
+	return 0;
+    while ((cmd = getCommand()))
+    {
+	if (!processCommand(cmd))
+	    break;
+    }
+    return 0;
+}
+
+int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
+{
+    char *host = 0;
+    char *proxy = 0;
+    char *arg;
+    char *prog = argv[0];
+    int ret;
+
+    while ((ret = options("p:v:q", argv, argc, &arg)) != -2)
+    {
+        switch (ret)
+        {
+        case 0:
+            if (host)
+	    {
+		usage(prog);
+		return 1;
+	    }
+	    host = arg;
+            break;
+        case 'p':
+	    if (proxy)
+	    {
+		usage(prog);
+		return 1;
+	    }
+	    set_proxy(arg);
+	    break;
+	case 'v':
+	    log_init_level (log_mask_str(arg));
+	    break;
+	case 'q':
+	    m_interactive_flag = 0;
+	    break;
+        default:
+	    usage(prog);
+	    return 1;
+        }
+    }
+    if (host)
+    {
+	client (host);
+	send_initRequest();
+	wait ();
+    }
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -187,11 +290,10 @@ int main(int argc, char **argv)
     Yaz_SocketManager mySocketManager;
     Yaz_PDU_Assoc *some = new Yaz_PDU_Assoc(&mySocketManager, 0);
 
-    MyClient z(some);
+    MyClient z(some, &mySocketManager);
 
-    z.client(argc < 2 ? "localhost:9999" : argv[1]);
-    z.init();
-    while (mySocketManager.processEvent() > 0)
-	;
-    return 0;
+    if (z.args(&mySocketManager, argc, argv))
+	exit (1);
+    if (z.interactive(&mySocketManager))
+	exit (1);
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
+ * Revision 1.5  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.4  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  * Revision 1.3  1999/02/02 14:01:20  adam
@@ -55,7 +58,7 @@ Yaz_PDU_Assoc::~Yaz_PDU_Assoc()
 
 void Yaz_PDU_Assoc::socketNotify(int event)
 {
-    logf (LOG_LOG, "socketNotify p=%p event = %d", this, event);
+    logf (LOG_LOG, "Yaz_PDU_Assoc::socketNotify p=%p event = %d", this, event);
     if (m_state == Connected)
     {
 	m_state = Ready;
@@ -215,9 +218,12 @@ Yaz_PDU_Assoc::PDU_Queue::~PDU_Queue()
 int Yaz_PDU_Assoc::flush_PDU()
 {
     int r;
-
+    
+    logf (LOG_LOG, "Yaz_PDU_Assoc::flush_PDU");
     if (m_state != Ready)
+    {
 	return 1;
+    }
     PDU_Queue *q = m_queue_out;
     if (!q)
     {
@@ -237,13 +243,12 @@ int Yaz_PDU_Assoc::flush_PDU()
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 					 YAZ_SOCKET_OBSERVE_EXCEPT|
 					 YAZ_SOCKET_OBSERVE_WRITE);
-        logf (LOG_LOG, "put %d bytes (incomplete write)", q->m_len);
+        logf (LOG_LOG, "flush_PDU put %d bytes (incomplete write)", q->m_len);
         return r;
     }
-    logf (LOG_LOG, "put %d bytes fd=%d", q->m_len, cs_fileno(m_cs));
+    logf (LOG_LOG, "flush_PDU put %d bytes fd=%d", q->m_len, cs_fileno(m_cs));
     // whole packet sent... delete this and proceed to next ...
     m_queue_out = q->m_next;
-    logf (LOG_LOG, "m_queue_out = %p", m_queue_out);
     delete q;
     // don't select on write if queue is empty ...
     if (!m_queue_out)
@@ -254,7 +259,7 @@ int Yaz_PDU_Assoc::flush_PDU()
 
 int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
 {
-    logf (LOG_LOG, "send_PDU");
+    logf (LOG_LOG, "Yaz_PDU_Assoc::send_PDU");
     PDU_Queue **pq = &m_queue_out;
     int is_idle = (*pq ? 0 : 1);
     
@@ -267,13 +272,9 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
         pq = &(*pq)->m_next;
     *pq = new PDU_Queue(buf, len);
     if (is_idle)
-    {
         return flush_PDU ();
-    }
     else
-    {
 	logf (LOG_LOG, "cannot send_PDU fd=%d", cs_fileno(m_cs));
-    }
     return 0;
 }
 
@@ -342,8 +343,14 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 					 YAZ_SOCKET_OBSERVE_EXCEPT|
 					 YAZ_SOCKET_OBSERVE_WRITE);
 	if (res == 1)
+	{
+	    logf (LOG_LOG, "Connect pending");
 	    m_state = Connecting;
+	}
 	else
+	{
+	    logf (LOG_LOG, "Connect complete");
 	    m_state = Connected;
+	}
     }
 }

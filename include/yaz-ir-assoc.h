@@ -4,65 +4,80 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.h,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
- * Revision 1.3  1999/02/02 14:01:12  adam
- * First WIN32 port of YAZ++.
- *
- * Revision 1.2  1999/01/28 13:08:39  adam
- * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
- * yaz-socket-manager.cc.
- *
- * Revision 1.1.1.1  1999/01/28 09:41:07  adam
- * First implementation of YAZ++.
+ * Revision 1.5  1999-04-09 11:47:23  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
  *
  */
 
-
-#include <proto.h>
-#include <odr.h>
-#include <yaz-pdu-observer.h>
+#include <yaz-z-assoc.h>
+#include <yaz-z-query.h>
 
 /** Information Retrieval Assocation.
     This object implements the client - and server role of a generic
     Z39.50 Association.
 */
-class YAZ_EXPORT Yaz_IR_Assoc : public IYaz_PDU_Observer {
+class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
  public:
     /// Create object using the PDU Observer specified
     Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
     /// Destroy assocation and close PDU Observer
     virtual ~Yaz_IR_Assoc();
-    /// Receive PDU
-    void recv_PDU(const char *buf, int len);
-    /// Connect notification
-    void connectNotify();
-    /// Failure notification
-    void failNotify();
-    /// Timeout notification
-    void timeoutNotify();
-    /// Begin Z39.50 client role
-    void client(const char *addr);
-    /// Begin Z39.50 server role
-    void server(const char *addr);
-    /// Decode Z39.50 PDU.
-    Z_APDU *decode_Z_PDU(const char *buf, int len);
-    /// Encode Z39.50 PDU.
-    int encode_Z_PDU(Z_APDU *apdu, char **buf, int *len);
-    /// Send Z39.50 PDU
-    int send_Z_PDU(Z_APDU *apdu);
     /// Receive Z39.50 PDU
-    virtual void recv_Z_PDU(Z_APDU *apdu) = 0;
-    /// Create Z39.50 PDU with reasonable defaults
-    Z_APDU *create_Z_PDU(int type);
-    /// Request Alloc
-    ODR odr_encode ();
+    void recv_Z_PDU(Z_APDU *apdu);
+    /// Set Database Names
+    void set_databaseNames (int num, const char **list);
+    void set_databaseNames(const char *dblist, const char *sep);
+    /// Get Database Names
+    void get_databaseNames (int *num, char ***list);
+
+    void client(const char *addr);
+
+    /// Set Preferred Record Syntax
+    void set_preferredRecordSyntax (int value);
+    void set_preferredRecordSyntax (const char *syntax);
+    /// Get Preferred Record Syntax
+    void get_preferredRecordSyntax (int *val);
+    void get_preferredRecordSyntax (const char **syntax);
+
+    /// Set ElementSetName
+    void set_elementSetName (const char *elementSetName);
+    /// Get ElementSetName
+    void get_elementSetName (const char **elementSetName);
+    void get_elementSetName (Z_ElementSetNames **elementSetNames);
+
+    int get_lastReceived();
+    void set_lastReceived(int lastReceived);
+
+    /// OtherInformation
+    Z_OtherInformationUnit *set_otherInformation(
+	Z_OtherInformation **otherInformationP, int *oid,
+	int categoryValue);
+    void set_otherInformationString (Z_OtherInformation **otherInformationP,
+				     int *oid, int categoryValue,
+				     const char *str);
+
+    /// Settings
+    void set_proxy(const char *str);
+    const char *get_proxy();
+    const char *get_host();
+
+    /// Send Services
+    int send_initRequest();
+    int send_searchRequest(Yaz_Z_Query *query);
+    int send_presentRequest(int start, int number);
+    /// Recv Services
+    virtual void recv_initRequest(Z_InitRequest *initRequest);
+    virtual void recv_initResponse(Z_InitResponse *initResponse);
+    virtual void recv_searchRequest(Z_SearchRequest *searchRequest);
+    virtual void recv_presentRequest(Z_PresentRequest *presentRequest);
+    virtual void recv_searchResponse(Z_SearchResponse *searchResponse);
+    virtual void recv_presentResponse(Z_PresentResponse *presentResponse);
  private:
-    static int yaz_init_flag;
-    static int yaz_init_func();
-    IYaz_PDU_Observable *m_PDU_Observable;
-    ODR m_odr_in;
-    ODR m_odr_out;
-    ODR m_odr_print;
+    char *m_proxy;
+    char *m_host;
+    int m_num_databaseNames;
+    char **m_databaseNames;
+    int m_preferredRecordSyntax;
+    Z_ElementSetNames *m_elementSetNames;
+    int m_lastReceived;
 };

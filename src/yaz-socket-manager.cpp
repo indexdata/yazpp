@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
+ * Revision 1.5  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.4  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  * Revision 1.3  1999/02/02 14:01:23  adam
@@ -110,6 +113,7 @@ int Yaz_SocketManager::processEvent()
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
     unsigned timeout = 0;
+    logf (LOG_LOG, "processEvent");
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -153,7 +157,12 @@ int Yaz_SocketManager::processEvent()
 	}
     }
     if (!no)
+    {
+	logf (LOG_LOG, "no pending events return 0");
+	if (!m_observers)
+	    logf (LOG_LOG, "no observers");
 	return 0;
+    }
 
     struct timeval to;
     to.tv_sec = timeout;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
+ * Revision 1.5  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.4  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  * Revision 1.3  1999/02/02 14:01:22  adam
@@ -20,11 +23,11 @@
  */
 
 #include <log.h>
-#include <yaz-ir-assoc.h>
+#include <yaz-z-assoc.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
 
-class MyServer : public Yaz_IR_Assoc {
+class MyServer : public Yaz_Z_Assoc {
 public:
     MyServer(IYaz_PDU_Observable *the_PDU_Observable);
     void recv_Z_PDU(Z_APDU *apdu);
@@ -69,7 +72,7 @@ IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable)
 }
 
 MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
-    Yaz_IR_Assoc (the_PDU_Observable)
+    Yaz_Z_Assoc (the_PDU_Observable)
 {
     m_no = 0;
 }

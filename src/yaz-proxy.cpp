@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.2  1999-01-28 13:08:46  adam
+ * Revision 1.3  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.2  1999/01/28 13:08:46  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -20,7 +23,7 @@
 #include <yaz-proxy.h>
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
-    Yaz_IR_Assoc(the_PDU_Observable)
+    Yaz_Z_Assoc(the_PDU_Observable)
 {
     m_PDU_Observable = the_PDU_Observable;
     m_maps = 0;
@@ -73,7 +76,7 @@ IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
 }
 
 Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
-    Yaz_IR_Assoc (the_PDU_Observable)
+    Yaz_Z_Assoc (the_PDU_Observable)
 {
     
 }

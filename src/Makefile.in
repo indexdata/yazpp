@@ -1,7 +1,7 @@
 # Copyright (C) 1999, Index Data ApS
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.3 1999-03-23 14:17:57 adam Exp $
+# $Id: Makefile.in,v 1.4 1999-04-09 11:46:57 adam Exp $
 
 SHELL=/bin/sh
 
@@ -18,8 +18,7 @@ LIBDIR=../../yaz/lib
 INCLUDE=-I../../yaz/z39.50 -I../../yaz/include -I../include
 DEFS=$(INCLUDE) $(CDEFS)
 YAZLIBS=$(LIBDIR)/libasn.a \
-  $(LIBDIR)/libcomstack.a $(LIBDIR)/ccl.a \
-  $(LIBDIR)/libodr.a $(LIBDIR)/libutil.a 
+  $(LIBDIR)/libcomstack.a $(LIBDIR)/libodr.a $(LIBDIR)/libutil.a 
 PROG1=yaz-client
 PROGO1=yaz-client.o
 PROG2=yaz-server
@@ -27,8 +26,8 @@ PROGO2=yaz-server.o
 PROG3=yaz-proxy
 PROGO3=yaz-proxy-main.o
 LIB=libyaz++.lib
-PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-ir-assoc.o yaz-proxy.o \
-	yaz-z-query.o
+PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-z-assoc.o yaz-proxy.o \
+	yaz-z-query.o yaz-ir-assoc.o
 
 .SUFFIXES: .cpp
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-observer.h,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
+ * Revision 1.5  1999-04-09 11:47:23  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.4  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  * Revision 1.3  1999/02/02 14:01:14  adam
@@ -60,7 +63,7 @@ class YAZ_EXPORT IYaz_PDU_Observer {
     virtual void connectNotify() = 0;
     /// Called whenever the connection was closed
     virtual void failNotify() = 0;
-    /// Called whenever the connection was closed
+    /// Called whenever there is a timeout
     virtual void timeoutNotify() = 0;
     /// Make clone of observer using IYaz_PDU_Observable interface
     virtual IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable) = 0;

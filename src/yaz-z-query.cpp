@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.1  1999-03-23 14:17:57  adam
+ * Revision 1.2  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
+ *
+ * Revision 1.1  1999/03/23 14:17:57  adam
  * More work on timeout handling. Work on yaz-client.
  *
  */
@@ -18,7 +21,7 @@ Yaz_Z_Query::Yaz_Z_Query()
     odr_decode = odr_createmem (ODR_DECODE);
 }
 
-void Yaz_Z_Query::set_rpn (const char *rpn)
+int Yaz_Z_Query::set_rpn (const char *rpn)
 {
     buf = 0;
     odr_reset (odr_encode);
@@ -26,10 +29,11 @@ void Yaz_Z_Query::set_rpn (const char *rpn)
     query->which = Z_Query_type_1;
     query->u.type_1 = p_query_rpn (odr_encode, PROTO_Z3950, rpn);
     if (!query->u.type_1)
-	return;
+	return -1;
     if (!z_Query (odr_encode, &query, 0))
-	return;
+	return -1;
     buf = odr_getbuf (odr_encode, &len, 0);
+    return len;
 }
 
 void Yaz_Z_Query::set_Z_Query(Z_Query *z_query)

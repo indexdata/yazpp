@@ -4,131 +4,414 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.4  1999-03-23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
- * Revision 1.3  1999/02/02 14:01:19  adam
- * First WIN32 port of YAZ++.
- *
- * Revision 1.2  1999/01/28 13:08:43  adam
- * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
- * yaz-socket-manager.cc.
- *
- * Revision 1.1.1.1  1999/01/28 09:41:07  adam
- * First implementation of YAZ++.
+ * Revision 1.5  1999-04-09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
  *
  */
+
+#include <assert.h>
 
 #include <log.h>
 #include <yaz-ir-assoc.h>
 
-int Yaz_IR_Assoc::yaz_init_func()
-{
-    logf (LOG_LOG, "nmem_init");
-    nmem_init();
-    logf (LOG_LOG, "done");
-    return 1;
-}
-
-int Yaz_IR_Assoc::yaz_init_flag = Yaz_IR_Assoc::yaz_init_func();
-
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
+    : Yaz_Z_Assoc(the_PDU_Observable)
 {
-    m_PDU_Observable = the_PDU_Observable;
-    m_odr_in = odr_createmem (ODR_DECODE);
-    m_odr_out = odr_createmem (ODR_ENCODE);
-    m_odr_print = odr_createmem (ODR_PRINT);
+    m_num_databaseNames = 0;
+    m_databaseNames = 0;
+    m_preferredRecordSyntax = VAL_NONE;
+    m_elementSetNames = 0;
+    m_lastReceived = 0;
+    m_host = 0;
+    m_proxy = 0;
+
+    const char *db = "Default";
+    set_databaseNames(1, &db);
 }
 
 Yaz_IR_Assoc::~Yaz_IR_Assoc()
 {
-    m_PDU_Observable->destroy();
-    delete m_PDU_Observable;
-    odr_destroy (m_odr_print);
-    odr_destroy (m_odr_out);
-    odr_destroy (m_odr_in);
+    if (m_elementSetNames)
+	delete [] m_elementSetNames->u.generic;
+    delete m_elementSetNames;
 }
 
-void Yaz_IR_Assoc::recv_PDU(const char *buf, int len)
+void Yaz_IR_Assoc::get_databaseNames (int *num, char ***list)
 {
-    logf (LOG_LOG, "recv_PDU len=%d", len);
-    Z_APDU *apdu = decode_Z_PDU (buf, len);
-    if (apdu)
-         recv_Z_PDU (apdu);
+    *num = m_num_databaseNames;
+    *list = m_databaseNames;
 }
 
-Z_APDU *Yaz_IR_Assoc::create_Z_PDU(int type)
+void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 {
-    return zget_APDU(m_odr_out, type);
-}
-
-int Yaz_IR_Assoc::send_Z_PDU(Z_APDU *apdu)
-{
-    char *buf;
-    int len;
-    if (encode_Z_PDU(apdu, &buf, &len) > 0)
-	return m_PDU_Observable->send_PDU(buf, len);
-    return -1;
-}
-
-Z_APDU *Yaz_IR_Assoc::decode_Z_PDU(const char *buf, int len)
-{
-    Z_APDU *apdu;
-
-    odr_reset (m_odr_in);
-    odr_setbuf (m_odr_in, (char*) buf, len, 0);
-
-    if (!z_APDU(m_odr_in, &apdu, 0))
+    int i;
+    logf (LOG_LOG, "Yaz_IR_Assoc::set_databaseNames num=%d", num);
+    for (i = 0; i<m_num_databaseNames; i++)
+	delete [] m_databaseNames[i];
+    delete [] m_databaseNames;
+    m_num_databaseNames = num;
+    m_databaseNames = new (char*) [num];
+    for (i = 0; i<m_num_databaseNames; i++)
     {
-        logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
-             odr_errmsg(odr_geterror(m_odr_in)),
-             odr_offset(m_odr_in));
-        logf(LOG_LOG, "PDU dump:");
-        odr_dumpBER(log_file(), buf, len);
-        return 0;
+	m_databaseNames[i] = new char[strlen(list[i])+1];
+	strcpy(m_databaseNames[i], list[i]);
+    }
+}
+
+void Yaz_IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
+{
+    const char **list = new (const char*) [strlen(dblist)];
+    char *dbtmp = new char[strlen(dblist)+1];
+    strcpy(dbtmp, dblist);
+    int num = 0;
+    int len = 0;
+    for (char *cp = dbtmp; ; cp++)
+	if (*cp && !strchr(sep, *cp))
+	    len++;
+	else
+	{
+	    if (len)
+	    {
+		list[num] = cp - len;
+		num++;
+	    }
+	    if (!*cp)
+		break;
+	    *cp = '\0';
+	    len = 0;
+	}
+    set_databaseNames (num, list);
+    delete [] dbtmp;
+    delete [] list;
+}
+
+void Yaz_IR_Assoc::set_preferredRecordSyntax (int value)
+{
+    m_preferredRecordSyntax = value;
+}
+
+void Yaz_IR_Assoc::set_preferredRecordSyntax (const char *syntax)
+{
+    m_preferredRecordSyntax = VAL_NONE;
+    if (syntax && *syntax)
+	m_preferredRecordSyntax = oid_getvalbyname (syntax);
+}
+
+void Yaz_IR_Assoc::get_preferredRecordSyntax (int *value)
+{
+    *value = m_preferredRecordSyntax;
+}
+
+void Yaz_IR_Assoc::get_preferredRecordSyntax (const char **dst)
+{
+    struct oident ent;
+    ent.proto = PROTO_Z3950;
+    ent.oclass = CLASS_RECSYN;
+    ent.value = (enum oid_value) m_preferredRecordSyntax;
+
+    int oid[OID_SIZE];
+    oid_ent_to_oid (&ent, oid);
+    struct oident *entp = oid_getentbyoid (oid);
+    
+    *dst = entp ? entp->desc : "";
+}
+
+void Yaz_IR_Assoc::set_elementSetName (const char *elementSetName)
+{
+    if (m_elementSetNames)
+	delete [] m_elementSetNames->u.generic;
+    delete m_elementSetNames;
+    m_elementSetNames = 0;
+    if (elementSetName && *elementSetName)
+    {
+	m_elementSetNames = new Z_ElementSetNames;
+	m_elementSetNames->which = Z_ElementSetNames_generic;
+	m_elementSetNames->u.generic = new char[strlen(elementSetName)+1];
+	strcpy (m_elementSetNames->u.generic, elementSetName);
+    }
+}
+
+void Yaz_IR_Assoc::get_elementSetName (Z_ElementSetNames **elementSetNames)
+{
+    *elementSetNames = m_elementSetNames;
+}
+
+void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
+{
+    if (!m_elementSetNames ||
+	m_elementSetNames->which != Z_ElementSetNames_generic)
+    {
+	*elementSetName = 0;
+	return;
+    }
+    *elementSetName = m_elementSetNames->u.generic;
+}
+
+void Yaz_IR_Assoc::set_otherInformationString (
+    Z_OtherInformation **otherInformation,
+    int *oid, int categoryValue,
+    const char *str)
+{
+    Z_OtherInformationUnit *oi =
+	set_otherInformation(otherInformation, oid, categoryValue);
+    if (!oi)
+	return;
+    oi->information.characterInfo = odr_strdup (odr_encode(), str);
+}
+
+Z_OtherInformationUnit *Yaz_IR_Assoc::set_otherInformation (
+    Z_OtherInformation **otherInformationP,
+    int *oid, int categoryValue)
+{
+    int i;
+    Z_OtherInformation *otherInformation = *otherInformationP;
+    if (!otherInformation)
+    {
+	otherInformation = *otherInformationP = (Z_OtherInformation *)
+	    odr_malloc (odr_encode(), sizeof(*otherInformation));
+	otherInformation->num_elements = 0;
+	otherInformation->list = (Z_OtherInformationUnit **)
+	    odr_malloc (odr_encode(), 8*sizeof(*otherInformation));
+	for (i = 0; i<8; i++)
+	    otherInformation->list[i] = 0;
+    }
+    for (i = 0; i<otherInformation->num_elements; i++)
+    {
+	assert (otherInformation->list[i]);
+	if (!oid)
+	{
+	    if (!otherInformation->list[i]->category)
+		return otherInformation->list[i];
+	}
+	else
+	{
+	    if (otherInformation->list[i]->category &&
+		categoryValue ==
+		*otherInformation->list[i]->category->categoryValue &&
+		!oid_oidcmp (oid, otherInformation->list[i]->category->
+			     categoryTypeId))
+		return otherInformation->list[i];
+	}
+    }
+    otherInformation->list[i] = (Z_OtherInformationUnit*)
+	odr_malloc (odr_encode(), sizeof(Z_OtherInformationUnit));
+    if (oid)
+    {
+	otherInformation->list[i]->category = (Z_InfoCategory*)
+	    odr_malloc (odr_encode(), sizeof(Z_InfoCategory));
+	otherInformation->list[i]->category->categoryTypeId = (int*)
+	    odr_oiddup (odr_encode(), oid);
+	otherInformation->list[i]->category->categoryValue = (int*)
+	    odr_malloc (odr_encode(), sizeof(int));
+	*otherInformation->list[i]->category->categoryValue =
+	    categoryValue;
     }
     else
+	otherInformation->list[i]->category = 0;
+    otherInformation->list[i]->which = Z_OtherInfo_characterInfo;
+    otherInformation->list[i]->information.characterInfo = 0;
+    
+    otherInformation->num_elements = i+1;
+    return otherInformation->list[i];
+}
+
+void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
+{
+    logf (LOG_LOG, "recv_Z_PDU");
+    m_lastReceived = apdu->which;
+    switch (apdu->which)
     {
-        logf (LOG_LOG, "decoded ok");
-        return apdu;
+    case Z_APDU_initResponse:
+	logf (LOG_LOG, "recv InitResponse");
+	recv_initResponse(apdu->u.initResponse);
+	break;
+    case Z_APDU_initRequest:
+        logf (LOG_LOG, "recv InitRequest");
+	recv_initRequest(apdu->u.initRequest);
+        break;
+    case Z_APDU_searchRequest:
+        logf (LOG_LOG, "recv searchRequest");
+	recv_searchRequest(apdu->u.searchRequest);
+        break;
+    case Z_APDU_searchResponse:
+	logf (LOG_LOG, "recv searchResponse"); 
+	recv_searchResponse(apdu->u.searchResponse);
+	break;
+    case Z_APDU_presentRequest:
+        logf (LOG_LOG, "recv presentRequest");
+	recv_presentRequest(apdu->u.presentRequest);
+        break;
+    case Z_APDU_presentResponse:
+        logf (LOG_LOG, "recv presentResponse");
+	recv_presentResponse(apdu->u.presentResponse);
+        break;
     }
 }
 
-int Yaz_IR_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
+int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
 {
-    if (!z_APDU(m_odr_out, &apdu, 0))
-        return -1;
-    *buf = odr_getbuf (m_odr_out, len, 0);
-    odr_reset (m_odr_out);
-    return *len;
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
+    Z_SearchRequest *req = apdu->u.searchRequest;
+    int recordSyntax;
+
+    req->query = query->get_Z_Query();
+    if (!req->query)
+	return -1;
+    get_databaseNames (&req->num_databaseNames, &req->databaseNames);
+    for (int i = 0; i<req->num_databaseNames; i++)
+	logf (LOG_LOG, "Database %s", req->databaseNames[i]);
+    int oid_syntax[OID_SIZE];
+    oident prefsyn;
+    get_preferredRecordSyntax(&recordSyntax);
+    if (recordSyntax != VAL_NONE)
+    {
+	prefsyn.proto = PROTO_Z3950;
+	prefsyn.oclass = CLASS_RECSYN;
+	prefsyn.value = (enum oid_value) recordSyntax;
+	oid_ent_to_oid(&prefsyn, oid_syntax);
+	req->preferredRecordSyntax = oid_syntax;
+    }
+    logf (LOG_LOG, "send_searchRequest");
+    return send_Z_PDU(apdu);
 }
 
-void Yaz_IR_Assoc::connectNotify()
+int Yaz_IR_Assoc::send_presentRequest(int start, int number)
 {
-    logf (LOG_LOG, "connectNotify");
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
+    Z_PresentRequest *req = apdu->u.presentRequest;
+
+    req->resultSetStartPoint = &start;
+    req->numberOfRecordsRequested = &number;
+
+    int oid_syntax[OID_SIZE];
+    oident prefsyn;
+    int recordSyntax;
+    get_preferredRecordSyntax (&recordSyntax);
+    if (recordSyntax != VAL_NONE)
+    {
+	prefsyn.proto = PROTO_Z3950;
+	prefsyn.oclass = CLASS_RECSYN;
+	prefsyn.value = (enum oid_value) recordSyntax;
+	oid_ent_to_oid(&prefsyn, oid_syntax);
+	req->preferredRecordSyntax = oid_syntax;
+    }
+    Z_RecordComposition compo;
+    Z_ElementSetNames *elementSetNames;
+    get_elementSetName (&elementSetNames);
+    if (elementSetNames)
+    {
+	req->recordComposition = &compo;
+        compo.which = Z_RecordComp_simple;
+        compo.u.simple = elementSetNames;
+    }
+    return send_Z_PDU(apdu);
 }
 
-void Yaz_IR_Assoc::failNotify()
+void Yaz_IR_Assoc::set_proxy(const char *str)
 {
-    logf (LOG_LOG, "failNotify");
-}
-
-void Yaz_IR_Assoc::timeoutNotify()
-{
-    logf (LOG_LOG, "timeoutNotify");
+    delete m_proxy;
+    m_proxy = new char[strlen(str)+1];
+    strcpy (m_proxy, str);
 }
 
 void Yaz_IR_Assoc::client(const char *addr)
 {
-    m_PDU_Observable->connect (this, addr);
+    delete [] m_host;
+    m_host = new char[strlen(addr)+1];
+    strcpy(m_host, addr);
+    const char *zurl_p = (m_proxy ? m_proxy : m_host);
+    char *zurl = new char[strlen(zurl_p)+1];
+    strcpy(zurl, zurl_p);
+    char *dbpart = strchr(zurl, '/');
+    if (dbpart)
+    {
+	set_databaseNames (dbpart+1, "+ ");
+	*dbpart = '\0';
+    }
+    Yaz_Z_Assoc::client(zurl);
+    delete [] zurl;
 }
 
-void Yaz_IR_Assoc::server(const char *addr)
+const char *Yaz_IR_Assoc::get_proxy()
 {
-    m_PDU_Observable->listen (this, addr);
+    return m_proxy;
 }
 
-ODR Yaz_IR_Assoc::odr_encode()
+const char *Yaz_IR_Assoc::get_host()
 {
-    return m_odr_out;
+    return m_host;
 }
+
+void Yaz_IR_Assoc::recv_searchRequest(Z_SearchRequest *searchRequest)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_searchResponse);
+    send_Z_PDU(apdu);
+}
+
+void Yaz_IR_Assoc::recv_presentRequest(Z_PresentRequest *presentRequest)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_presentResponse);
+    send_Z_PDU(apdu);
+}
+
+void Yaz_IR_Assoc::recv_initRequest(Z_InitRequest *initRequest)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_initResponse);
+    send_Z_PDU(apdu);
+}
+
+void Yaz_IR_Assoc::recv_searchResponse (Z_SearchResponse *searchResponse)
+{
+}
+
+void Yaz_IR_Assoc::recv_presentResponse (Z_PresentResponse *presentResponse)
+{
+}
+
+void Yaz_IR_Assoc::recv_initResponse(Z_InitResponse *initResponse)
+{
+}
+
+int Yaz_IR_Assoc::get_lastReceived()
+{
+    return m_lastReceived;
+}
+
+void Yaz_IR_Assoc::set_lastReceived(int lastReceived)
+{
+    m_lastReceived = lastReceived;
+}
+
+int Yaz_IR_Assoc::send_initRequest()
+{
+
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
+    Z_InitRequest *req = apdu->u.initRequest;
+    
+    ODR_MASK_SET(req->options, Z_Options_search);
+    ODR_MASK_SET(req->options, Z_Options_present);
+    ODR_MASK_SET(req->options, Z_Options_namedResultSets);
+    ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
+    ODR_MASK_SET(req->options, Z_Options_scan);
+    ODR_MASK_SET(req->options, Z_Options_sort);
+    ODR_MASK_SET(req->options, Z_Options_extendedServices);
+    ODR_MASK_SET(req->options, Z_Options_delSet);
+
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
+
+    if (m_proxy && m_host)
+    {
+	int oid[OID_SIZE];
+	struct oident ent;
+	ent.proto = PROTO_Z3950;
+	ent.oclass = CLASS_USERINFO;
+	ent.value = VAL_PROXY;
+	oid_ent_to_oid (&ent, oid);
+	logf (LOG_LOG, "proxy host %s", m_host);
+	set_otherInformationString(&req->otherInfo, oid, 1, m_host);
+    }
+    return send_Z_PDU(apdu);
+}
+
