@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.37 2004-01-30 11:45:25 adam Exp $
+ * $Id: proxy.h,v 1.38 2004-02-02 15:11:40 adam Exp $
  */
 
 #include <sys/time.h>
@@ -281,6 +281,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     struct timeval m_time_tv;
     void logtime();
     Z_ElementSetNames *mk_esn_from_schema(ODR o, const char *schema);
+    Z_ReferenceId **m_referenceId;
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);

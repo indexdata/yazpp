@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.96 2004-02-02 11:17:45 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.97 2004-02-02 15:11:41 adam Exp $
  */
 
 #include <assert.h>
@@ -100,6 +100,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_config_fname = 0;
     m_request_no = 0;
     m_invalid_session = 0;
+    m_referenceId = 0;
     m_config = 0;
     m_marcxml_flag = 0;
     m_stylesheet_xsp = 0;
@@ -978,6 +979,11 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu)
 int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 {
     int kill_session = 0;
+    Z_ReferenceId **new_id = get_referenceIdP(apdu);
+
+    if (new_id && m_referenceId)
+	*new_id = *m_referenceId;
+    
     if (apdu->which == Z_APDU_searchResponse)
     {
 	Z_SearchResponse *sr = apdu->u.searchResponse;
@@ -1917,6 +1923,8 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 	m_mem_invalid_session = odr_extract_mem(odr_decode());
 	apdu = m_initRequest_apdu;
     }
+    
+    m_referenceId = get_referenceIdP(apdu);
 
     // Determine our client.
     Z_OtherInformation **oi;
