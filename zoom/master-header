@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.14 2003-07-02 10:25:13 adam Exp $
+// $Id: master-header,v 1.15 2003-09-22 12:45:26 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -85,7 +85,6 @@ namespace ZOOM {
   class YAZ_EXPORT record {
 *   const resultSet &owner;
 *   ZOOM_record r;
-*   friend class resultSet; // so it can use this constructor
   public:
     class syntax {
     public:
@@ -135,7 +134,7 @@ namespace ZOOM {
   // bib1Exception::errcode() returns a code from the
   // Bib-1 Diagnostic Set.
   class YAZ_EXPORT bib1Exception: public exception {
-*   const std::string &info;
+*   std::string info;
   public:
 *   ~bib1Exception ();
     bib1Exception (int code, const std::string &addinfo);
@@ -144,7 +143,7 @@ namespace ZOOM {
   };
 
   class YAZ_EXPORT queryException : public exception {
-*   const std::string &q;
+*   std::string q;
   public:
 *   ~queryException ();
     enum { PREFIX, CCL };
