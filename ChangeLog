@@ -1,4 +1,8 @@
 
+--- 0.7.6 2004/02/05 Internal release.
+
+Force correct referenceID's.
+
 Log libxml2/libxslt errors in yaz log.
 
 Update proxy to work with SRW diagnostic code as a URI/string.
