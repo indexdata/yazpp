@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-ir-assoc.h,v 1.2 2001-04-26 12:17:49 heikki Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -65,6 +65,7 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
     virtual void recv_presentRequest(Z_PresentRequest *presentRequest);
     virtual void recv_searchResponse(Z_SearchResponse *searchResponse);
     virtual void recv_presentResponse(Z_PresentResponse *presentResponse);
+    virtual void recv_extendedServicesResponse(Z_ExtendedServicesResponse *extendedServicesResponse);
  private:
     char *m_proxy;
     char *m_host;

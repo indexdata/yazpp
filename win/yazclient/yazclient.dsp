@@ -73,7 +73,7 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).exe $(ProjDir)\..\..\..\bin
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../../yaz/include" /I "../../../yaz-ursula/include" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "_DEBUG" /D HAVE_YAZ_URSULA_H=1 /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../../yaz/include" /I "../../../yaz-ursula/include" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "_DEBUG" /D HAVE_YAZ_URSULA_H=1 /FR /YX /FD /c
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
 # ADD RSC /l 0x406 /d "_DEBUG"
 BSC32=bscmake.exe

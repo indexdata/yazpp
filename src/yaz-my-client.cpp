@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.6  2001-04-17 16:21:21  heikki
+ * Revision 1.7  2001-04-26 12:17:49  heikki
+ * Ursula stuff, mostly in the test client
+ *
+ * Revision 1.6  2001/04/17 16:21:21  heikki
  * Working on UrsulaRenewal, Request, and Update
  *
  * Revision 1.5  2001/04/10 10:48:08  adam
@@ -126,6 +129,9 @@ public:
 		     const char *databaseName);
     void recv_textRecord(int type, const char *buf, size_t len);
     void recv_genericRecord(Z_GenericRecord *r);
+#if HAVE_YAZ_URSULA_H
+    void recv_extendedServicesResponse(Z_ExtendedServicesResponse *extendedServicesResponse);
+#endif
     void display_genericRecord(Z_GenericRecord *r, int level);
     void display_variant(Z_Variant *v, int level);
     void connectNotify();
@@ -146,6 +152,7 @@ public:
     int cmd_proxy(char *args);
 #if HAVE_YAZ_URSULA_H
     int cmd_ursula(char *args);
+    int cmd_ursula_renew(char *args);
 #endif
 };
 
@@ -517,6 +524,19 @@ void MyClient::recv_presentResponse(Z_PresentResponse *presentResponse)
     recv_records (presentResponse->records);
 }
 
+#if HAVE_YAZ_URSULA_H
+void MyClient::recv_extendedServicesResponse(Z_ExtendedServicesResponse *extendedServicesResponse)
+{
+    printf("Got ESresponse\n");
+    printf(" OperationStatus=%d with %d diagnostics:\n", 
+        *extendedServicesResponse->operationStatus,
+         extendedServicesResponse->num_diagnostics);
+    recv_diagrecs(extendedServicesResponse->diagnostics,
+                  extendedServicesResponse->num_diagnostics);
+    //TODO: Add more info !
+}
+#endif
+
 int MyClient::wait()
 {
     set_lastReceived(0);
@@ -527,6 +547,7 @@ int MyClient::wait()
     }
     return 0;
 }
+
 
 #define C_PROMPT "Z>"
 
@@ -618,13 +639,13 @@ int MyClient::cmd_proxy(char *args)
 }
 
 #if HAVE_YAZ_URSULA_H
-#if TEST_URSULA_REF
 int MyClient::cmd_ursula(char *args)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
 
     req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003");
+//  req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003.9.1000.105.3");
     
     Z_External *ext = (Z_External *) odr_malloc(odr_encode(), sizeof(*ext));
     req->taskSpecificParameters = ext;
@@ -649,6 +670,7 @@ int MyClient::cmd_ursula(char *args)
     pdu->u.request->counter = 0;
     pdu->u.request->priority = 0;
     pdu->u.request->disposalNote = 0;
+    pdu->u.renewal->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
     pdu->u.request->overrule = 0;
 
     if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
@@ -668,9 +690,8 @@ int MyClient::cmd_ursula(char *args)
 	wait();
     return 1;
 }
-#else // not request testing
 
-int MyClient::cmd_ursula(char *args)
+int MyClient::cmd_ursula_renew(char *args)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -692,7 +713,14 @@ int MyClient::cmd_ursula(char *args)
     pdu->u.renewal = (Z_UrsRenewal *)
 	   odr_malloc (odr_encode(), sizeof(*pdu->u.renewal));
     pdu->u.renewal->libraryNo = odr_strdup(odr_encode(), "000200");
-    pdu->u.renewal->borrowerTicketNo = 0;
+    pdu->u.renewal->borrowerTicketNo = odr_strdup(odr_encode(),"123456");
+    pdu->u.renewal->num_copies=1;
+    pdu->u.renewal->copies = (Z_InternationalString **)
+            odr_malloc(odr_encode(),1* sizeof(Z_InternationalString *) );
+    pdu->u.renewal->copies[0]= odr_strdup(odr_encode(), "firstcopy");
+    pdu->u.renewal->newReturnDate=odr_strdup(odr_encode(), "20011224");
+    pdu->u.renewal->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
+    *pdu->u.renewal->overrule=false;
 
     if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
     {
@@ -712,7 +740,6 @@ int MyClient::cmd_ursula(char *args)
     return 1;
 }
 
-#endif
 
 #endif
 
@@ -738,6 +765,10 @@ int MyClient::processCommand(const char *commandLine)
 	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
 #if HAVE_YAZ_URSULA_H
 	{"ursula", &MyClient::cmd_ursula, ""},
+	{"ursula_request", &MyClient::cmd_ursula, ""},
+	{"ursreq", &MyClient::cmd_ursula, ""},
+	{"ursnew", &MyClient::cmd_ursula_renew, ""},
+	{"ursula_renew", &MyClient::cmd_ursula_renew, ""},
 #endif
 	{0,0,0}
     };

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.14  2000-10-11 11:58:16  adam
+ * Revision 1.15  2001-04-26 12:17:49  heikki
+ * Ursula stuff, mostly in the test client
+ *
+ * Revision 1.14  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -193,28 +196,32 @@ void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
-	logf (m_log, "recv InitResponse");
-	recv_initResponse(apdu->u.initResponse);
-	break;
+	    logf (m_log, "recv InitResponse");
+	    recv_initResponse(apdu->u.initResponse);
+	    break;
     case Z_APDU_initRequest:
         logf (m_log, "recv InitRequest");
-	recv_initRequest(apdu->u.initRequest);
+	    recv_initRequest(apdu->u.initRequest);
         break;
     case Z_APDU_searchRequest:
         logf (m_log, "recv searchRequest");
-	recv_searchRequest(apdu->u.searchRequest);
+	    recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-	logf (m_log, "recv searchResponse"); 
-	recv_searchResponse(apdu->u.searchResponse);
-	break;
+	    logf (m_log, "recv searchResponse"); 
+	    recv_searchResponse(apdu->u.searchResponse);
+	    break;
     case Z_APDU_presentRequest:
         logf (m_log, "recv presentRequest");
-	recv_presentRequest(apdu->u.presentRequest);
+	    recv_presentRequest(apdu->u.presentRequest);
         break;
     case Z_APDU_presentResponse:
         logf (m_log, "recv presentResponse");
-	recv_presentResponse(apdu->u.presentResponse);
+	    recv_presentResponse(apdu->u.presentResponse);
+        break;
+    case Z_APDU_extendedServicesResponse:
+        logf (m_log, "recv extendedServiceResponse");
+        recv_extendedServicesResponse(apdu->u.extendedServicesResponse);
         break;
     }
 }
@@ -387,6 +394,10 @@ void Yaz_IR_Assoc::recv_presentResponse (Z_PresentResponse *presentResponse)
 }
 
 void Yaz_IR_Assoc::recv_initResponse(Z_InitResponse *initResponse)
+{
+}
+
+void Yaz_IR_Assoc::recv_extendedServicesResponse(Z_ExtendedServicesResponse *ExtendedServicesResponse)
 {
 }
 
