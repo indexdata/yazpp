@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.27 2004-02-26 23:42:27 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.28 2004-10-23 12:44:10 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -209,16 +209,12 @@ int Yaz_SocketManager::processEvent()
 
 	    yaz_log (m_log, "putEvent I/O mask=%d", mask);
 	}
-	else if (
-	    (p->timeout > 0 ||
-	     (p->timeout == 0 && (p->mask & YAZ_SOCKET_OBSERVE_WRITE) == 0))
-	    &&
-	    (now - p->last_activity) >= p->timeout)
+	else if (res == 0 && p->timeout_this == timeout)
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
             assert (p->last_activity);
-	    yaz_log (m_log, "putEvent timeout, now = %ld last_activity=%ld timeout=%d",
-                     now, p->last_activity, p->timeout);
+	    yaz_log (m_log, "putEvent timeout fd=%d, now = %ld last_activity=%ld timeout=%d",
+                     p->fd, now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;
 	    event->event = YAZ_SOCKET_OBSERVE_TIMEOUT;
@@ -231,7 +227,7 @@ int Yaz_SocketManager::processEvent()
 	delete event;
 	return 1;
     }
-    yaz_log (LOG_WARN, "unhandled event in processEvent");
+    yaz_log(LOG_WARN, "unhandled event in processEvent res=%d", res);
     return 1;
 }
 
