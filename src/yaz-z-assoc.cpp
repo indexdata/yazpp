@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.5  1999-11-10 10:02:34  adam
+ * Revision 1.6  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.5  1999/11/10 10:02:34  adam
  * Work on proxy.
  *
  * Revision 1.4  1999/09/13 12:53:44  adam
@@ -26,15 +30,13 @@
 
 #include <assert.h>
 
-#include <log.h>
+#include <yaz/log.h>
 #include <yaz-z-assoc.h>
-#include <otherinfo.h>
+#include <yaz/otherinfo.h>
 
 int Yaz_Z_Assoc::yaz_init_func()
 {
-    logf (LOG_LOG, "nmem_init");
     nmem_init();
-    logf (LOG_LOG, "done");
     return 1;
 }
 
@@ -46,6 +48,7 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_odr_in = odr_createmem (ODR_DECODE);
     m_odr_out = odr_createmem (ODR_ENCODE);
     m_odr_print = odr_createmem (ODR_PRINT);
+    m_log = LOG_DEBUG;
 }
 
 Yaz_Z_Assoc::~Yaz_Z_Assoc()
@@ -59,7 +62,7 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
 
 void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
 {
-    logf (LOG_LOG, "recv_PDU len=%d", len);
+    logf (m_log, "recv_PDU len=%d", len);
     Z_APDU *apdu = decode_Z_PDU (buf, len);
     if (apdu)
     {
@@ -85,7 +88,6 @@ int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu)
 {
     char *buf;
     int len;
-    logf (LOG_LOG, "Yaz_Z_Assoc:send_Z_PDU");
     if (encode_Z_PDU(apdu, &buf, &len) > 0)
 	return m_PDU_Observable->send_PDU(buf, len);
     return -1;
@@ -127,21 +129,6 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
     return *len;
 }
 
-void Yaz_Z_Assoc::connectNotify()
-{
-    logf (LOG_LOG, "connectNotify");
-}
-
-void Yaz_Z_Assoc::failNotify()
-{
-    logf (LOG_LOG, "failNotify");
-}
-
-void Yaz_Z_Assoc::timeoutNotify()
-{
-    logf (LOG_LOG, "timeoutNotify");
-}
-
 void Yaz_Z_Assoc::client(const char *addr)
 {
     m_PDU_Observable->connect (this, addr);
@@ -175,6 +162,7 @@ void Yaz_Z_Assoc::timeout(int timeout)
 {
     m_PDU_Observable->idleTime(timeout);
 }
+
 
 void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 {

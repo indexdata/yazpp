@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-socket-manager.h,v 1.4 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-socket-manager.h,v 1.5 1999-12-06 13:52:45 adam Exp $
  */
 
 #include <yaz-socket-observer.h>
@@ -38,6 +38,7 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
     YazSocketEvent *Yaz_SocketManager::getEvent();
     void putEvent(YazSocketEvent *event);
     void removeEvent(IYazSocketObserver *observer);
+    int m_log;
  public:
     /// Add an observer
     virtual void addObserver(int fd, IYazSocketObserver *observer);

@@ -3,10 +3,10 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-pdu-assoc.h,v 1.6 1999-11-10 10:02:34 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.7 1999-12-06 13:52:45 adam Exp $
  */
 
-#include <comstack.h>
+#include <yaz/comstack.h>
 #include <yaz-socket-observer.h>
 #include <yaz-pdu-observer.h>
 
@@ -18,7 +18,7 @@
  */
 class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
  private:
-    enum { Connecting, Connected, Listen, Ready, Closed } m_state;
+    enum { Connecting, Listen, Ready, Closed } m_state;
     class PDU_Queue {
     public:
 	PDU_Queue(const char *buf, int len);
@@ -40,9 +40,10 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     int Yaz_PDU_Assoc::flush_PDU();
     int *m_destroyed;
     int m_idleTime;
+    int m_log;
  public:
     /// Create object using specified socketObservable
-    Yaz_PDU_Assoc(IYazSocketObservable *socketObservable, COMSTACK cs = 0);
+    Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
     /// Close socket and destroy object.
     virtual ~Yaz_PDU_Assoc();
     /// Clone the object
@@ -53,6 +54,8 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     void connect(IYaz_PDU_Observer *observer, const char *addr);
     /// listen for clients (server role)
     void listen(IYaz_PDU_Observer *observer, const char *addr);
+    /// open with existing socket
+    void socket(IYaz_PDU_Observer *observer, int fd);
     /// Socket notification
     void socketNotify(int event);
     /// Close socket
@@ -61,4 +64,6 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     void destroy();
     /// Set Idle Time
     void idleTime (int timeout);
+    /// Child start...
+    virtual void childNotify(int fd);
 };

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.10  1999-04-29 07:33:28  adam
+ * Revision 1.11  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.10  1999/04/29 07:33:28  adam
  * Changed setting of host in connect/proxy setting. YAZ' strtoaddr now
  * ignores database part of host.
  *
@@ -28,7 +32,7 @@
 
 #include <assert.h>
 
-#include <log.h>
+#include <yaz/log.h>
 #include <yaz-ir-assoc.h>
 
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
@@ -42,6 +46,7 @@ Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_host = 0;
     m_proxy = 0;
     m_cookie = 0;
+    m_log = LOG_DEBUG;
     const char *db = "Default";
     set_databaseNames(1, &db);
 }
@@ -65,7 +70,7 @@ void Yaz_IR_Assoc::get_databaseNames (int *num, char ***list)
 void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 {
     int i;
-    logf (LOG_LOG, "Yaz_IR_Assoc::set_databaseNames num=%d", num);
+    logf (m_log, "Yaz_IR_Assoc::set_databaseNames num=%d", num);
     for (i = 0; i<m_num_databaseNames; i++)
 	delete [] m_databaseNames[i];
     delete [] m_databaseNames;
@@ -169,32 +174,32 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
 
 void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
 {
-    logf (LOG_LOG, "recv_Z_PDU");
+    logf (m_log, "recv_Z_PDU");
     m_lastReceived = apdu->which;
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
-	logf (LOG_LOG, "recv InitResponse");
+	logf (m_log, "recv InitResponse");
 	recv_initResponse(apdu->u.initResponse);
 	break;
     case Z_APDU_initRequest:
-        logf (LOG_LOG, "recv InitRequest");
+        logf (m_log, "recv InitRequest");
 	recv_initRequest(apdu->u.initRequest);
         break;
     case Z_APDU_searchRequest:
-        logf (LOG_LOG, "recv searchRequest");
+        logf (m_log, "recv searchRequest");
 	recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-	logf (LOG_LOG, "recv searchResponse"); 
+	logf (m_log, "recv searchResponse"); 
 	recv_searchResponse(apdu->u.searchResponse);
 	break;
     case Z_APDU_presentRequest:
-        logf (LOG_LOG, "recv presentRequest");
+        logf (m_log, "recv presentRequest");
 	recv_presentRequest(apdu->u.presentRequest);
         break;
     case Z_APDU_presentResponse:
-        logf (LOG_LOG, "recv presentResponse");
+        logf (m_log, "recv presentResponse");
 	recv_presentResponse(apdu->u.presentResponse);
         break;
     }
@@ -221,7 +226,7 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
 	oid_ent_to_oid(&prefsyn, oid_syntax);
 	req->preferredRecordSyntax = oid_syntax;
     }
-    logf (LOG_LOG, "send_searchRequest");
+    logf (m_log, "send_searchRequest");
     assert (req->otherInfo == 0);
     if (m_cookie)
     {

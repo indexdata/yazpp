@@ -1,7 +1,7 @@
 # Copyright (C) 1999, Index Data ApS
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.5 1999-07-12 07:57:27 adam Exp $
+# $Id: Makefile.in,v 1.6 1999-12-06 13:52:45 adam Exp $
 
 SHELL=/bin/sh
 
@@ -13,12 +13,10 @@ RANLIB=@RANLIB@
 CDEFS=@DEFS@
 LIBS=@LIBS@
 
-LIBDIR=../../yaz/lib
-
-INCLUDE=-I../../yaz/include -I../include
+YAZLIB=@YAZLIB@ 
+INCLUDE=-I../include @YAZINC@
 DEFS=$(INCLUDE) $(CDEFS)
-YAZLIBS=$(LIBDIR)/libyaz.a 
-PROG1=yaz-client
+PROG1=yaz-clientx
 PROGO1=yaz-client.o
 PROG2=yaz-server
 PROGO2=yaz-server.o
@@ -37,14 +35,14 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-$(PROG1): $(PROGO1) $(YAZLIBS) $(LIB)
-	$(CXX) $(CXXFLAGS) -o $(PROG1) $(PROGO1) $(LIB) $(YAZLIBS) $(LIBS) 
+$(PROG1): $(PROGO1) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG1) $(PROGO1) $(LIB) $(YAZLIB) $(LIBS) 
 
-$(PROG2): $(PROGO2) $(YAZLIBS) $(LIB)
-	$(CXX) $(CXXFLAGS) -o $(PROG2) $(PROGO2) $(LIB) $(YAZLIBS) $(LIBS) 
+$(PROG2): $(PROGO2) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG2) $(PROGO2) $(LIB) $(YAZLIB) $(LIBS) 
 
-$(PROG3): $(PROGO3) $(YAZLIBS) $(LIB)
-	$(CXX) $(CXXFLAGS) -o $(PROG3) $(PROGO3) $(LIB) $(YAZLIBS) $(LIBS) 
+$(PROG3): $(PROGO3) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG3) $(PROGO3) $(LIB) $(YAZLIB) $(LIBS) 
 
 alll:
 

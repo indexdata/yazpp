@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.5  1999-04-27 07:52:13  adam
+ * Revision 1.6  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.5  1999/04/27 07:52:13  adam
  * Improved proxy; added query match for result set re-use.
  *
  * Revision 1.4  1999/04/21 12:09:01  adam
@@ -24,7 +28,7 @@
  */
 
 #include <yaz-z-query.h>
-#include <pquery.h>
+#include <yaz/pquery.h>
 
 Yaz_Z_Query::Yaz_Z_Query()
 {

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.6  1999-11-10 10:02:34  adam
+ * Revision 1.7  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.6  1999/11/10 10:02:34  adam
  * Work on proxy.
  *
  * Revision 1.5  1999/04/21 12:09:01  adam
@@ -26,8 +30,8 @@
  *
  */
 
-#include <log.h>
-#include <options.h>
+#include <yaz/log.h>
+#include <yaz/options.h>
 
 #include <yaz-socket-manager.h>
 #include <yaz-pdu-assoc.h>
@@ -47,7 +51,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("p:v:q", argv, argc, &arg)) != -2)
+    while ((ret = options("t:v:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -60,7 +64,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    addr = arg;
             break;
         case 't':
-	    proxy->proxyTarget(arg);
+	    proxy->set_proxyTarget(arg);
 	    break;
 	case 'v':
 	    log_init_level (log_mask_str(arg));
@@ -74,9 +78,13 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     {
 	proxy->server(addr);
     }
+    else
+    {
+	usage(prog);
+	return 1;
+    }
     return 0;
 }
-
 
 int main(int argc, char **argv)
 {

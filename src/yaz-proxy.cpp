@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.10  1999-11-10 10:02:34  adam
+ * Revision 1.11  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.10  1999/11/10 10:02:34  adam
  * Work on proxy.
  *
  * Revision 1.9  1999/09/13 12:53:44  adam
@@ -42,8 +46,7 @@
 
 #include <assert.h>
 
-#include <log.h>
-
+#include <yaz/log.h>
 #include <yaz-proxy.h>
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
@@ -64,7 +67,7 @@ Yaz_Proxy::~Yaz_Proxy()
 }
 
 
-void Yaz_Proxy::proxyTarget(const char *target)
+void Yaz_Proxy::set_proxyTarget(const char *target)
 {
     xfree (m_proxyTarget);
     m_proxyTarget = 0;
@@ -77,7 +80,8 @@ IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
-    new_proxy->timeout(120);
+    new_proxy->timeout(20);
+    new_proxy->set_proxyTarget(m_proxyTarget);
     return new_proxy;
 }
 
@@ -132,25 +136,31 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    assert (*c->m_prev == c);
 	    if (!strcmp(cookie,c->m_cookie))
 	    {
-		logf (LOG_LOG, "Yaz_Proxy::get_client cached");
+		logf (LOG_LOG, "Yaz_Proxy::get_client found cached target");
 		return c;
 	    }
-	}
-	
+	}	
     }
     if (!m_client)
     {
-	const char *proxy_host = 0;
 	if (apdu->which == Z_APDU_initRequest)
 	{
 	    logf (LOG_LOG, "got InitRequest");
 	    
-	    char *proxy_host = get_proxy(&apdu->u.initRequest->otherInfo);
-	    if (!proxy_host)
-		proxy_host = m_proxyTarget;
-	    if (!proxy_host)
-		return 0;
+	    const char *proxy_host =
+		get_proxy(&apdu->u.initRequest->otherInfo);
+	    if (proxy_host)
+		set_proxyTarget(proxy_host);
+	    logf (LOG_LOG, "proxy_host = %s", m_proxyTarget ?
+		  m_proxyTarget:"none");
 	}
+	else
+	{
+	    logf (LOG_LOG, "no first INIT!");
+	    return 0;
+	}
+	if (!m_proxyTarget)
+	    return 0;
 	logf (LOG_LOG, "Yaz_Proxy::get_client creating new");
 	c = new Yaz_ProxyClient(m_PDU_Observable->clone());
 	c->m_next = parent->m_clientPool;
@@ -162,12 +172,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	sprintf (c->m_cookie, "%d", parent->m_seqno);
 	(parent->m_seqno)++;
 
-	if (apdu->which == Z_APDU_initRequest)
-	{
-	    logf (LOG_LOG, "got InitRequest");
-	    
-	    c->client(proxy_host);
-	}
+	c->client(m_proxyTarget);
 	c->timeout(600);
     }
     return c;
@@ -289,9 +294,13 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     }
 }
 
-void Yaz_Proxy::failNotify()
+void Yaz_Proxy::connectNotify()
 {
-    logf (LOG_LOG, "failNotity server");
+}
+
+void Yaz_Proxy::shutdown()
+{
+    logf (LOG_LOG, "shutdown (client to proxy)");
     if (m_keepalive)
     {
 	// Tell client (if any) that no server connection is there..
@@ -305,11 +314,28 @@ void Yaz_Proxy::failNotify()
     delete this;
 }
 
-void Yaz_ProxyClient::failNotify()
+void Yaz_ProxyClient::shutdown()
 {
-    logf (LOG_LOG, "failNotity client");
+    logf (LOG_LOG, "shutdown (proxy to server)");
     delete m_server;
     delete this;
+}
+
+void Yaz_Proxy::failNotify()
+{
+    logf (LOG_LOG, "connection closed by client");
+    shutdown();
+}
+
+void Yaz_ProxyClient::failNotify()
+{
+    logf (LOG_LOG, "connection closed by server");
+    shutdown();
+}
+
+void Yaz_ProxyClient::connectNotify()
+{
+    logf (LOG_LOG, "connection accepted by target");
 }
 
 IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
@@ -331,12 +357,14 @@ Yaz_ProxyClient::~Yaz_ProxyClient()
 
 void Yaz_Proxy::timeoutNotify()
 {
-    failNotify();
+    logf (LOG_LOG, "timeout (client to proxy)");
+    shutdown();
 }
 
 void Yaz_ProxyClient::timeoutNotify()
 {
-    failNotify();
+    logf (LOG_LOG, "timeout (proxy to target)");
+    shutdown();
 }
 
 Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :

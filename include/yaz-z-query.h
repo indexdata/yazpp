@@ -3,10 +3,10 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-query.h,v 1.5 1999-04-27 07:52:13 adam Exp $
+ * $Id: yaz-z-query.h,v 1.6 1999-12-06 13:52:45 adam Exp $
  */
 
-#include <proto.h>
+#include <yaz/proto.h>
 #include <yaz-query.h>
 
 /** Z39.50 Query

@@ -3,11 +3,11 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-assoc.h,v 1.4 1999-09-13 12:53:44 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.5 1999-12-06 13:52:45 adam Exp $
  */
 
-#include <proto.h>
-#include <odr.h>
+#include <yaz/proto.h>
+#include <yaz/odr.h>
 #include <yaz-pdu-observer.h>
 
 /** Z39.50 Assocation.
@@ -23,11 +23,11 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     /// Receive PDU
     void recv_PDU(const char *buf, int len);
     /// Connect notification
-    void connectNotify();
+    virtual void connectNotify() = 0;
     /// Failure notification
-    void failNotify();
+    virtual void failNotify() = 0;
     /// Timeout notification
-    void timeoutNotify();
+    virtual void timeoutNotify() = 0;
     /// Timeout specify
     void timeout(int timeout);
     /// Begin Z39.50 client role
@@ -76,4 +76,5 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     ODR m_odr_in;
     ODR m_odr_out;
     ODR m_odr_print;
+    int m_log;
 };

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.8  1999-11-10 10:02:34  adam
+ * Revision 1.9  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.8  1999/11/10 10:02:34  adam
  * Work on proxy.
  *
  * Revision 1.7  1999/04/21 12:09:01  adam
@@ -33,9 +37,9 @@
  *
  */
 
-#include <log.h>
-#include <options.h>
-#include <diagbib1.h>
+#include <yaz/log.h>
+#include <yaz/options.h>
+#include <yaz/diagbib1.h>
 #include <yaz-ir-assoc.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
@@ -75,16 +79,41 @@ public:
     void recv_genericRecord(Z_GenericRecord *r);
     void display_genericRecord(Z_GenericRecord *r, int level);
     void display_variant(Z_Variant *v, int level);
+    void connectNotify();
+    void failNotify();
+    void timeoutNotify();
     int processCommand(const char *cmd);
     const char *MyClient::getCommand();
     int cmd_open(char *host);
+    int cmd_connect(char *host);
     int cmd_quit(char *args);
     int cmd_close(char *args);
     int cmd_find(char *args);
     int cmd_show(char *args);
     int cmd_cookie(char *args);
     int cmd_init(char *args);
+    int cmd_format(char *args);
+    int cmd_proxy(char *args);
 };
+
+
+void MyClient::connectNotify()
+{
+    printf ("Connection accepted by target\n");
+    set_lastReceived(-1);
+}
+
+void MyClient::timeoutNotify()
+{
+    printf ("Connection timeout\n");
+    close();
+}
+
+void MyClient::failNotify()
+{
+    printf ("Connection closed by target\n");
+    set_lastReceived(-1);
+}
 
 IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
 { 
@@ -392,10 +421,23 @@ int MyClient::wait()
 
 #define C_PROMPT "Z>"
 
+int MyClient::cmd_connect(char *host)
+{
+    client (host);
+    timeout (10);
+    wait ();
+    timeout (0);
+    return 1;
+}
+
 int MyClient::cmd_open(char *host)
 {
     client (host);
-    m_socketManager->processEvent();
+    timeout (10);
+    wait ();
+    timeout (0);
+    send_initRequest();
+    wait ();
     return 1;
 }
 
@@ -430,6 +472,8 @@ int MyClient::cmd_find(char *args)
     }
     if (send_searchRequest(&query) >= 0)
 	wait();
+    else
+	printf ("Not connected\n");
     return 1;
 }
 
@@ -441,12 +485,26 @@ int MyClient::cmd_show(char *args)
     m_setOffset = start;
     if (send_presentRequest(start, number) >= 0)
 	wait();
+    else
+	printf ("Not connected\n");
     return 1;
 }
 
 int MyClient::cmd_cookie(char *args)
 {
     set_cookie(*args ? args : 0);
+    return 1;
+}
+
+int MyClient::cmd_format(char *args)
+{
+    set_preferredRecordSyntax(args);
+    return 1;
+}
+
+int MyClient::cmd_proxy(char *args)
+{
+    set_proxy(args);
     return 1;
 }
 
@@ -461,12 +519,15 @@ int MyClient::processCommand(const char *commandLine)
         char *ad;
     } cmd[] = {
 	{"open", &cmd_open, "<host>[':'<port>][/<database>]"},
-        {"quit", &cmd_quit, ""},
+	{"connect", &cmd_connect, "<host>[':'<port>][/<database>]"},
+	{"quit", &cmd_quit, ""},
 	{"close", &cmd_close, ""},
 	{"find", &cmd_find, "<query>"},
 	{"show", &cmd_show, "[<start> [<number>]]"},
 	{"cookie", &cmd_cookie, "<cookie>"},
 	{"init", &cmd_init, ""},
+	{"format", &cmd_format, "<record-syntax>"},
+	{"proxy", &cmd_proxy, "<host>:[':'<port>]"},
 	{0,0,0}
     };
     
@@ -548,7 +609,7 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("p:v:q", argv, argc, &arg)) != -2)
+    while ((ret = options("c:p:v:q", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -568,6 +629,9 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
 	    }
 	    set_proxy(arg);
 	    break;
+	case 'c':
+	    set_cookie(arg);
+	    break;
 	case 'v':
 	    log_init_level (log_mask_str(arg));
 	    break;
@@ -582,6 +646,9 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
     if (host)
     {
 	client (host);
+        timeout (10);
+	wait ();
+        timeout (0);
 	send_initRequest();
 	wait ();
     }

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.7  1999-04-28 13:02:08  adam
+ * Revision 1.8  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.7  1999/04/28 13:02:08  adam
  * Added include of string.h.
  *
  * Revision 1.6  1999/04/21 12:09:01  adam
@@ -39,7 +43,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include <log.h>
+#include <yaz/log.h>
 #include <yaz-socket-manager.h>
 
 
@@ -121,7 +125,7 @@ int Yaz_SocketManager::processEvent()
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
     unsigned timeout = 0;
-    logf (LOG_LOG, "processEvent");
+    logf (m_log, "processEvent");
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -166,9 +170,9 @@ int Yaz_SocketManager::processEvent()
     }
     if (!no)
     {
-	logf (LOG_LOG, "no pending events return 0");
+	logf (m_log, "no pending events return 0");
 	if (!m_observers)
-	    logf (LOG_LOG, "no observers");
+	    logf (m_log, "no observers");
 	return 0;
     }
 
@@ -176,7 +180,7 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = timeout;
     to.tv_usec = 0;
     
-    logf (LOG_LOG, "timeout=%d", timeout);
+    logf (m_log, "select pending=%d timeout=%d", no, timeout);
     while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;
@@ -283,6 +287,7 @@ Yaz_SocketManager::Yaz_SocketManager()
     m_observers = 0;
     m_queue_front = 0;
     m_queue_back = 0;
+    m_log = LOG_DEBUG;
 }
 
 Yaz_SocketManager::~Yaz_SocketManager()

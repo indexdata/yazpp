@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-pdu-observer.h,v 1.6 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-pdu-observer.h,v 1.7 1999-12-06 13:52:45 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -33,6 +33,8 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     virtual void destroy() = 0;
     /// Set Idle Time
     virtual void idleTime (int timeout) = 0;
+    /// open with existing socket
+    virtual void socket(IYaz_PDU_Observer *observer, int fd) = 0;
 };
 
 /** Protocol Data Unit Observer.
@@ -43,7 +45,7 @@ class YAZ_EXPORT IYaz_PDU_Observer {
  public:
     /// A PDU has been received
     virtual void recv_PDU(const char *buf, int len) = 0;
-    /// Called when Iyaz_PDU_Observabvle::connect was successful.
+    /// Called when Iyaz_PDU_Observable::connect was successful.
     virtual void connectNotify() = 0;
     /// Called whenever the connection was closed
     virtual void failNotify() = 0;

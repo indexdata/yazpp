@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.6  1999-04-21 12:09:01  adam
+ * Revision 1.7  1999-12-06 13:52:45  adam
+ * Modified for new location of YAZ header files. Experimental threaded
+ * operation.
+ *
+ * Revision 1.6  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -26,7 +30,7 @@
  *
  */
 
-#include <log.h>
+#include <yaz/log.h>
 #include <yaz-z-assoc.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
@@ -38,6 +42,7 @@ public:
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
     void failNotify();
     void timeoutNotify();
+    void connectNotify();
 private:
     int m_no;
 };
@@ -96,10 +101,14 @@ void MyServer::failNotify()
     delete this;
 }
 
+void MyServer::connectNotify()
+{
+}
+
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
-    Yaz_PDU_Assoc *my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager, 0);
+    Yaz_PDU_Assoc *my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
 
     MyServer z(my_PDU_Assoc);
 
