@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.16 2003-12-20 22:44:30 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.17 2003-12-22 15:16:23 adam Exp $
  */
 
 #include <ctype.h>
@@ -118,8 +118,7 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *keepalive_limit_bw,
 					 int *keepalive_limit_pdu,
 					 int *pre_init,
-					 const char **cql2rpn,
-					 const char **zeerex)
+					 const char **cql2rpn)
 {
     *pre_init = 0;
     int no_url = 0;
@@ -182,13 +181,6 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 	    const char *t = get_text(ptr);
 	    if (t)
 		*cql2rpn = t;
-	}
-	if (ptr->type == XML_ELEMENT_NODE 
-	    && !strcmp((const char *) ptr->name, "zeerex"))
-	{
-	    const char *t = get_text(ptr);
-	    if (t)
-		*zeerex = t;
 	}
     }
 }
@@ -342,7 +334,7 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 #if HAVE_XML2
     xmlNodePtr ptr;
     
-    ptr = find_target_node(name);
+    ptr = find_target_node(name, 0);
     if (ptr)
     {
 	if (query->which == Z_Query_type_1 || query->which == Z_Query_type_101)
@@ -358,7 +350,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 #if HAVE_XML2
     xmlNodePtr ptr;
     
-    ptr = find_target_node(name);
+    ptr = find_target_node(name, 0);
     if (!ptr)
 	return 0;
     for(ptr = ptr->children; ptr; ptr = ptr->next)
@@ -425,7 +417,34 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 }
 
 #if HAVE_XML2
-xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
+xmlNodePtr Yaz_ProxyConfig::find_target_db(xmlNodePtr ptr, const char *db)
+{
+    xmlNodePtr dptr;
+    if (!db)
+	return ptr;
+    if (!ptr)
+	return 0;
+    for (dptr = ptr->children; dptr; dptr = dptr->next)
+	if (dptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) dptr->name, "database"))
+	{
+	    struct _xmlAttr *attr;
+	    for (attr = dptr->properties; attr; attr = attr->next)
+		if (!strcmp((const char *) attr->name, "name"))
+		{
+		    if (attr->children
+			&& attr->children->type==XML_TEXT_NODE
+			&& attr->children->content 
+			&& (!strcmp((const char *) attr->children->content, db)
+			    || !strcmp((const char *) attr->children->content,
+				       "*")))
+			return dptr;
+		}
+	}
+    return ptr;
+}
+    
+xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name, const char *db)
 {
     xmlNodePtr ptr;
     if (!m_proxyPtr)
@@ -446,7 +465,9 @@ xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 		    {
 			xmlChar *t = attr->children->content;
 			if (!t || *t == '1')
-			    return ptr;
+			{
+			    return find_target_db(ptr, db);
+			}
 		    }
 	    }
 	    else
@@ -464,7 +485,7 @@ xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 				|| !strcmp((const char *) attr->children->content,
 					   "*")))
 			{
-			    return ptr;
+			    return find_target_db(ptr, db);
 			}
 		    }
 	    }
@@ -486,8 +507,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *keepalive_limit_bw,
 				   int *keepalive_limit_pdu,
 				   int *pre_init,
-				   const char **cql2rpn,
-				   const char **zeerex)
+				   const char **cql2rpn)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -512,7 +532,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 				   target_idletime, client_idletime,
 				   keepalive_limit_bw, keepalive_limit_pdu,
-				   pre_init, cql2rpn, zeerex);
+				   pre_init, cql2rpn);
 		return 1;
 	    }
 	    i++;
@@ -580,6 +600,43 @@ void Yaz_ProxyConfig::get_generic_info(int *log_mask,
 #endif
 }
 
+char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
+				   int *len)
+{
+#if HAVE_XML2
+    xmlNodePtr ptr = find_target_node(name, db);
+    if (ptr)
+    {
+	ptr = ptr->children;
+	for (; ptr; ptr = ptr->next)
+	    if (ptr->type == XML_ELEMENT_NODE &&
+		!strcmp((const char *) ptr->name, "explain"))
+	    {
+		xmlNodePtr ptr2 = xmlCopyNode(ptr, 1);
+
+		xmlDocPtr doc = xmlNewDoc((const xmlChar *) "1.0");
+		
+		xmlDocSetRootElement(doc, ptr2);
+		
+		xmlChar *buf_out;
+		int len_out;
+		xmlDocDumpMemory(doc, &buf_out, len);
+		char *content = (char*) odr_malloc(odr, *len);
+		memcpy(content, buf_out, *len);
+		
+		xmlFree(buf_out);
+		xmlFreeDoc(doc);
+		return content;
+	    }
+    }
+    else
+	yaz_log(LOG_WARN, "No explain node 1");
+
+#endif
+    yaz_log(LOG_WARN, "No explain node");
+    return 0;
+}
+
 void Yaz_ProxyConfig::get_target_info(const char *name,
 				      const char **url,
 				      int *limit_bw,
@@ -591,8 +648,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *keepalive_limit_bw,
 				      int *keepalive_limit_pdu,
 				      int *pre_init,
-				      const char **cql2rpn,
-				      const char **zeerex)
+				      const char **cql2rpn)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -617,7 +673,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	    }
 	}
     }
-    ptr = find_target_node(name);
+    ptr = find_target_node(name, 0);
     if (ptr)
     {
 	if (name)
@@ -628,7 +684,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
 			   keepalive_limit_bw, keepalive_limit_pdu,
-			   pre_init, cql2rpn, zeerex);
+			   pre_init, cql2rpn);
     }
 #else
     *url = name;

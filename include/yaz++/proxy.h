@@ -2,9 +2,10 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.23 2003-12-20 22:44:30 adam Exp $
+ * $Id: proxy.h,v 1.24 2003-12-22 15:16:23 adam Exp $
  */
 
+#include <sys/time.h>
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
@@ -43,8 +44,7 @@ public:
 		      int *keepalive_limit_bw,
 		      int *keepalive_limit_pdu,
 		      int *pre_init,
-		      const char **cql2rpn,
-		      const char **zeerex);
+		      const char **cql2rpn);
     
     void get_generic_info(int *log_mask, int *max_clients);
 
@@ -54,12 +54,13 @@ public:
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
 			 int *pre_init,
-			 const char **cql2rpn,
-			 const char **zeerex);
+			 const char **cql2rpn);
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
 		     Odr_oid *syntax, char **addinfo);
+    char *get_explain(ODR odr, const char *name, const char *db,
+		      int *len);
 private:
     void operator=(const Yaz_ProxyConfig &conf);
     int mycmp(const char *hay, const char *item, size_t len);
@@ -70,13 +71,13 @@ private:
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
 			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			    int *pre_init, const char **cql2rpn,
-			    const char **zeerex);
+			    int *pre_init, const char **cql2rpn);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
 		     char **addinfo);
-    xmlNodePtr find_target_node(const char *name);
+    xmlNodePtr find_target_node(const char *name, const char *db);
+    xmlNodePtr find_target_db(xmlNodePtr ptr, const char *db);
     const char *get_text(xmlNodePtr ptr);
     int check_type_1_attributes(ODR odr, xmlNodePtr ptr,
 				Z_AttributeList *attrs,
@@ -258,11 +259,13 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_http_keepalive;
     const char *m_http_version;
     Yaz_cql2rpn m_cql2rpn;
-    const char *m_zeerex_fname;
+    struct timeval m_time_tv;
+    void logtime();
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);
     ~Yaz_Proxy();
+    void inc_request_no();
     void recv_GDU(Z_GDU *apdu, int len);
     void handle_incoming_HTTP(Z_HTTP_Request *req);
     void handle_incoming_Z_PDU(Z_APDU *apdu);

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.72 2003-12-20 22:44:30 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.73 2003-12-22 15:16:23 adam Exp $
  */
 
 #include <assert.h>
@@ -114,7 +114,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_http_version = 0;
     m_soap_ns = 0;
     m_s2z_packing = Z_SRW_recordPacking_string;
-    m_zeerex_fname = 0;
+    m_time_tv.tv_sec = 0;
+    m_time_tv.tv_usec = 0;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
@@ -314,8 +315,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 				 &m_keepalive_limit_bw,
 				 &m_keepalive_limit_pdu,
 				 &pre_init,
-				 &cql2rpn_fname,
-				 &m_zeerex_fname);
+				 &cql2rpn_fname);
 	}
 	if (client_idletime != -1)
 	{
@@ -633,6 +633,22 @@ void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
     yaz_marc_destroy(mt);
 }
 
+void Yaz_Proxy::logtime()
+{
+    if (m_time_tv.tv_sec)
+    {
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	long diff = (tv.tv_sec - m_time_tv.tv_sec)*1000000 +
+	    (tv.tv_usec - m_time_tv.tv_usec);
+	if (diff >= 0)
+	    yaz_log(LOG_LOG, "%sElapsed %ld.%03ld", m_session_str,
+		    diff/1000000, (diff/1000)%1000);
+    }
+    m_time_tv.tv_sec = 0;
+    m_time_tv.tv_usec = 0;
+}
+
 int Yaz_Proxy::send_http_response(int code)
 {
     ODR o = odr_encode();
@@ -642,8 +658,15 @@ int Yaz_Proxy::send_http_response(int code)
     if (m_http_version)
 	hres->version = odr_strdup(o, m_http_version);
     m_http_keepalive = 0;
+    if (m_log_mask & PROXY_LOG_REQ_CLIENT)
+    {
+	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
+		 gdu_name(gdu));
+    }
     int len;
-    return send_GDU(gdu, &len);
+    int r = send_GDU(gdu, &len);
+    logtime();
+    return r;
 }
 
 int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
@@ -677,8 +700,15 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     int ret = z_soap_codec_enc(o, &soap_package,
 			       &hres->content_buf, &hres->content_len,
 			       soap_handlers, 0);
+    if (m_log_mask & PROXY_LOG_REQ_CLIENT)
+    {
+	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
+		 gdu_name(gdu));
+    }
     int len;
-    return send_GDU(gdu, &len);
+    int r = send_GDU(gdu, &len);
+    logtime();
+    return r;
 }
 
 int Yaz_Proxy::send_to_srw_client_error(int srw_error)
@@ -774,31 +804,20 @@ int Yaz_Proxy::send_srw_explain()
     Z_SRW_PDU *res = yaz_srw_get(odr_encode(), Z_SRW_explain_response);
     Z_SRW_explainResponse *er = res->u.explain_response;
     
-    if (m_zeerex_fname)
+    Yaz_ProxyConfig *cfg = check_reconfigure();
+    if (cfg)
     {
-	FILE *inf = fopen(m_zeerex_fname, "rb");
-	if (inf)
+	int len;
+	assert (m_proxyTarget);
+	char *b = cfg->get_explain(odr_encode(), 0 /* target */,
+				   0 /* db */, &len);
+	if (b)
 	{
-	    fseek(inf, 0L, SEEK_END);
-	    long sz = ftell(inf);
-	    fseek(inf, 0L, SEEK_SET);
-	    if (sz > 0)
-	    {
-		er->record.recordData_buf = 
-		    (char*) odr_malloc(odr_encode(), sz);
-		size_t s = fread(er->record.recordData_buf, 1,sz, inf);
-		if (s > 0)
-		    er->record.recordData_len = s;
-	    }
-	    else
-		yaz_log(LOG_WARN|LOG_ERRNO, "zeerex file: ftell");
-	    fclose(inf);
+	    er->record.recordData_buf = b;
+	    er->record.recordData_len = len;
+	    er->record.recordPacking = m_s2z_packing;
 	}
-	else
-	    yaz_log(LOG_WARN|LOG_ERRNO, "zeerex file: fopen");
     }
-    else
-	yaz_log(LOG_LOG, "zeerex file: not defined");
     return send_srw_response(res);
 }
 
@@ -851,7 +870,14 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 	}
     }
     else
-	return send_Z_PDU(apdu, len);
+    {
+	if (m_log_mask & PROXY_LOG_REQ_CLIENT)
+	    yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
+		     apdu_name(apdu));
+	int r = send_Z_PDU(apdu, len);
+	logtime();
+	return r;
+    }
     return 0;
 }
 
@@ -912,9 +938,6 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
     int r = send_PDU_convert(apdu, &len);
     if (r)
 	return r;
-    if (m_log_mask & PROXY_LOG_APDU_CLIENT)
-	yaz_log (LOG_DEBUG, "%sSending %s to client %d bytes", m_session_str,
-		 apdu_name(apdu), len);
     m_bytes_sent += len;
     m_bw_stat.add_bytes(len);
     if (kill_session)
@@ -1178,12 +1201,17 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 }
 
 
-void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
+void Yaz_Proxy::inc_request_no()
 {
     char *cp = strchr(m_session_str, ' ');
     m_request_no++;
     if (cp)
 	sprintf(cp+1, "%d ", m_request_no);
+}
+
+void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
+{
+    inc_request_no();
 
     m_bytes_recv += len;
     
@@ -1196,6 +1224,8 @@ void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
 
     m_bw_stat.add_bytes(len);
     m_pdu_stat.add_bytes(1);
+
+    gettimeofday(&m_time_tv, 0);
 
     int bw_total = m_bw_stat.get_total();
     int pdu_total = m_pdu_stat.get_total();
@@ -1568,6 +1598,14 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	}
 	else if (srw_pdu->which == Z_SRW_explain_request)
 	{
+	    Z_SRW_explainRequest *srw_req = srw_pdu->u.explain_request;
+	    
+	    if (srw_req->recordPacking &&
+		!strcmp(srw_req->recordPacking, "xml"))
+		m_s2z_packing = Z_SRW_recordPacking_XML;
+	    else
+		m_s2z_packing = Z_SRW_recordPacking_string;
+
 	    if (!m_client)
 	    {
 		yaz_log(LOG_LOG, "handle_incoming: initRequest");
@@ -1754,6 +1792,7 @@ void Yaz_ProxyClient::shutdown()
 
 void Yaz_Proxy::failNotify()
 {
+    inc_request_no();
     yaz_log (LOG_LOG, "%sConnection closed by client",
 	     get_session_str());
     shutdown();
@@ -1761,6 +1800,8 @@ void Yaz_Proxy::failNotify()
 
 void Yaz_ProxyClient::failNotify()
 {
+    if (m_server)
+	m_server->inc_request_no();
     yaz_log (LOG_LOG, "%sConnection closed by target %s", 
 	     get_session_str(), get_hostname());
     shutdown();
@@ -1854,8 +1895,7 @@ void Yaz_Proxy::pre_init()
 					  &keepalive_limit_bw,
 					  &keepalive_limit_pdu,
 					  &pre_init,
-					  &cql2rpn,
-					  &zeerex) ; i++)
+					  &cql2rpn) ; i++)
     {
 	if (pre_init)
 	{
@@ -1931,6 +1971,8 @@ void Yaz_Proxy::timeoutNotify()
 	}
 	else
 	{
+	    inc_request_no();
+
 	    yaz_log (LOG_LOG, "%sTimeout (client to proxy)", m_session_str);
 	    shutdown();
 	}
@@ -1944,6 +1986,9 @@ void Yaz_Proxy::timeoutNotify()
 
 void Yaz_ProxyClient::timeoutNotify()
 {
+    if (m_server)
+	m_server->inc_request_no();
+
     yaz_log (LOG_LOG, "%sTimeout (proxy to target) %s", get_session_str(),
 	     get_hostname());
     m_waiting = 1;
