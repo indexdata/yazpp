@@ -1,10 +1,11 @@
-// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.3 2002-10-08 23:55:52 mike Exp $
 
-// Trivial sample client
+// Simple sample client
 
 #include <stdlib.h>		// for atoi()
 #include <iostream.h>
 #include "zoom++.h"
+
 
 int main(int argc, char **argv)
 {
@@ -22,11 +23,11 @@ int main(int argc, char **argv)
     ZOOM::connection *conn;
     try {
 	conn = new ZOOM::connection(hostname, port);
-    } catch(ZOOM::bib1Exception err) {
+    } catch(ZOOM::bib1Exception& err) {
 	cerr << argv[0] << ": connect: bib1Exception " <<
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 2;
-    } catch(ZOOM::exception err) {
+    } catch(ZOOM::exception& err) {
 	cerr << argv[0] << ": connect: exception " <<
 	    err.errmsg() << "\n";
 	return 2;
@@ -38,7 +39,8 @@ int main(int argc, char **argv)
     try {
 	rs = new ZOOM::resultSet(*conn, pq);
     } catch(ZOOM::bib1Exception err) {
-	cerr << argv[0] << ": searchSpec: " <<
+	//fprintf(stderr, "caught exception 0x%lx\n", (long) &err);
+	cerr << argv[0] << ": search: " <<
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 3;
     }
