@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.20 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.21 2004-03-30 18:14:13 adam Exp $
  */
 
 #include <assert.h>
@@ -153,7 +153,7 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
 void Yaz_IR_Assoc::recv_GDU(Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
-	return recv_Z_PDU(apdu->u.z3950, len);
+	    recv_Z_PDU(apdu->u.z3950, len);
 }
 
 void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)

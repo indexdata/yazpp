@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.17 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.18 2004-03-30 18:14:13 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -51,7 +51,7 @@ void Yaz_Z_Server::facility_add(IYaz_Server_Facility *facility,
 void Yaz_Z_Server::recv_GDU (Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
-	return recv_Z_PDU(apdu->u.z3950, len);
+	recv_Z_PDU(apdu->u.z3950, len);
     else
 	delete this;
 }

@@ -1,4 +1,4 @@
-/* $Id: yaz-proxy.cpp,v 1.3 2004-03-30 14:25:41 adam Exp $
+/* $Id: yaz-proxy.cpp,v 1.4 2004-03-30 18:14:13 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -19,7 +19,11 @@ Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
  */
 
+#ifdef WIN32
+#else
 #include <unistd.h>
+#endif
+
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
@@ -143,8 +147,10 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_http_version = 0;
     m_soap_ns = 0;
     m_s2z_packing = Z_SRW_recordPacking_string;
+#if HAVE_GETTIMEOFDAY
     m_time_tv.tv_sec = 0;
     m_time_tv.tv_usec = 0;
+#endif
     if (!m_parent)
 	low_socket_open();
 }
@@ -737,6 +743,7 @@ void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
 
 void Yaz_Proxy::logtime()
 {
+#if HAVE_GETTIMEOFDAY
     if (m_time_tv.tv_sec)
     {
 	struct timeval tv;
@@ -749,6 +756,7 @@ void Yaz_Proxy::logtime()
     }
     m_time_tv.tv_sec = 0;
     m_time_tv.tv_usec = 0;
+#endif
 }
 
 int Yaz_Proxy::send_http_response(int code)
@@ -1399,7 +1407,9 @@ void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
     m_bw_stat.add_bytes(len);
     m_pdu_stat.add_bytes(1);
 
+#if HAVE_GETTIMEOFDAY
     gettimeofday(&m_time_tv, 0);
+#endif
 
     int bw_total = m_bw_stat.get_total();
     int pdu_total = m_pdu_stat.get_total();
@@ -2571,17 +2581,23 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 
 void Yaz_Proxy::low_socket_close()
 {
+#if WIN32
+#else
     int i;
     for (i = 0; i<NO_SPARE_SOLARIS_FD; i++)
 	if  (m_lo_fd[i] >= 0)
 	    ::close(m_lo_fd[i]);
+#endif
 }
 
 void Yaz_Proxy::low_socket_open()
 {
+#if WIN32
+#else
     int i;
     for (i = 0; i<NO_SPARE_SOLARIS_FD; i++)
 	m_lo_fd[i] = open("/dev/null", O_RDONLY);
+#endif
 }
 
 int Yaz_Proxy::server(const char *addr)
@@ -2589,7 +2605,11 @@ int Yaz_Proxy::server(const char *addr)
     int r = Yaz_Z_Assoc::server(addr);
     if (!r)
     {
-	yaz_log(LOG_LOG, "%sStarted proxy " VERSION " on %s", m_session_str, addr);
+	yaz_log(LOG_LOG, "%sStarted proxy " 
+#ifdef VERSION
+	    VERSION 
+#endif
+	    " on %s", m_session_str, addr);
 	timeout(1);
     }
     return r;

@@ -1,4 +1,4 @@
-/* $Id: yaz-proxy-main.cpp,v 1.1 2004-03-29 22:48:31 adam Exp $
+/* $Id: yaz-proxy-main.cpp,v 1.2 2004-03-30 18:14:13 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -19,10 +19,14 @@ Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
  */
 
+#ifdef WIN32
+#else
 #include <signal.h>
 #include <unistd.h>
 #include <pwd.h>
+#endif
 #include <sys/types.h>
+
 #include <stdarg.h>
 
 #if HAVE_GETRLIMIT
@@ -150,7 +154,10 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 static Yaz_Proxy *static_yaz_proxy = 0;
 static void sighup_handler(int num)
 {
+#if WIN32
+#else
     signal(SIGHUP, sighup_handler);
+#endif
     if (static_yaz_proxy)
 	static_yaz_proxy->reconfig();
 }
@@ -163,8 +170,11 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
 
+#ifdef WIN32
+    vsprintf(buf, fmt, ap);
+#else
     vsnprintf(buf, sizeof(buf), fmt, ap);
-
+#endif
     yaz_log(LOG_WARN, "%s: %s", (char*) ctx, buf);
 
     va_end (ap);
@@ -173,14 +183,19 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
 
 static void child_run(Yaz_SocketManager *m, int run)
 {
+#ifdef WIN32
+#else
     signal(SIGHUP, sighup_handler);
+#endif
 
 #if HAVE_XSLT
     xmlSetGenericErrorFunc((void *) "XML", proxy_xml_error_handler);
     xsltSetGenericErrorFunc((void *) "XSLT", proxy_xml_error_handler);
 #endif
+#ifdef WIN32
+#else
     yaz_log(LOG_LOG, "0 proxy run=%d pid=%ld", run, (long) getpid());
-
+#endif
     if (no_limit_files)
     {
 #if HAVE_SETRLIMIT
@@ -196,6 +211,8 @@ static void child_run(Yaz_SocketManager *m, int run)
 	yaz_log(LOG_WARN, "setrlimit unavablable. Option -n ignored");
 #endif
     }
+#ifdef WIN32
+#else
     if (pid_fname)
     {
 	FILE *f = fopen(pid_fname, "w");
@@ -229,6 +246,7 @@ static void child_run(Yaz_SocketManager *m, int run)
 	}
 	xfree(uid);
     }
+#endif
 #if HAVE_GETRLIMIT
     struct rlimit limit_data;
     getrlimit(RLIMIT_NOFILE, &limit_data);
@@ -258,6 +276,9 @@ int main(int argc, char **argv)
 
     args(&proxy, argc, argv);
 
+#ifdef WIN32
+    child_run(&mySocketManager, run);
+#else
     if (debug)
     {
 	child_run(&mySocketManager, run);
@@ -327,6 +348,7 @@ int main(int argc, char **argv)
 	    sleep(1 + run/5);
 	run++;
     }
+#endif
     exit (0);
     return 0;
 }

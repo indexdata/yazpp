@@ -1,6 +1,6 @@
 # Copyright (C) 1993-2004, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.1 2004-03-30 17:42:25 adam Exp $
+# $Id: makefile,v 1.2 2004-03-30 18:14:14 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -31,7 +31,7 @@ ZLIB_DIR = c:\zlib-1.1.4.win32
 
 default: all
 
-all: dirs dll proxy iconv libxml2 libxslt
+all: dirs dll proxy iconv libxml2 libxslt yaz
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -81,6 +81,10 @@ proxy: $(YAZPROXY)
 
 YAZ_LIB="$(YAZ_DIR)\lib\yaz.lib"
 YAZ_DEF=/I"$(YAZ_DIR)\include"
+yaz: $(BINDIR)\yaz.dll $(BINDIR)\yaz.dll
+
+$(BINDIR)\yaz.dll: $(YAZ_DIR)\bin\yaz.dll
+  copy "$(YAZ_DIR)\bin\yaz.dll" $(BINDIR)
 
 !if $(HAVE_ICONV)
 ICONV_DEF= \
@@ -240,7 +244,7 @@ YAZPP_DLL_OBJS = \
 YAZPROXY_DLL_OBJS = \
    "$(OBJDIR)\yaz-proxy.obj" \
    "$(OBJDIR)\yaz-proxy-config.obj" \
-   "$(OBJDIR)\yaz-bw.obj
+   "$(OBJDIR)\yaz-bw.obj"
 
 ###########################################################
 ############### Compiling 
@@ -294,16 +298,17 @@ $(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
 		$(DLL_LINK_OPTIONS)
 		$(YAZPP_DLL_OBJS)
 		/out:"$(YAZPP_DLL)"
-		/implib:$(YAZPP_IMPLIB)
+		/implib:"$(YAZPP_IMPLIB)"
 		/map:"$(LIBDIR)\yazpp.map"  
 <<
 
-$(YAZPROXY_DLL) $(YAZPROXY_IMPLIB): "$(BINDIR)" $(YAZPROXY_DLL_OBJS)
+$(YAZPROXY_DLL) $(YAZPROXY_IMPLIB): "$(BINDIR)" $(YAZPROXY_DLL_OBJS) $(YAZPP_IMPLIB)
 	@echo Linking $(YAZPROXY_DLL)
 	$(LINK) @<<
 		$(LNKOPT) 
 		$(LINK_LIBS) 
 		$(DLL_LINK_OPTIONS)
+		$(YAZPP_IMPLIB)
 		$(YAZPROXY_DLL_OBJS)
 		/out:$(YAZPROXY_DLL) 
 		/implib:"$(YAZPROXY_IMPLIB)"

@@ -1,4 +1,4 @@
-/* $Id: proxy.h,v 1.2 2004-03-30 09:05:53 adam Exp $
+/* $Id: proxy.h,v 1.3 2004-03-30 18:14:13 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -19,7 +19,9 @@ Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
  */
 
+#if HAVE_GETTIMEOFDAY
 #include <sys/time.h>
+#endif
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
@@ -277,7 +279,9 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_http_keepalive;
     const char *m_http_version;
     Yaz_cql2rpn m_cql2rpn;
+#if HAVE_GETTIMEOFDAY
     struct timeval m_time_tv;
+#endif
     void logtime();
     Z_ElementSetNames *mk_esn_from_schema(ODR o, const char *schema);
     Z_ReferenceId *m_referenceId;
