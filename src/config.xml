@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<!-- $Id: config.xml,v 1.12 2003-10-16 16:10:43 adam Exp $ -->
+<!-- $Id: config.xml,v 1.13 2003-10-20 18:31:43 adam Exp $ -->
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
-    <url>z3950.loc.gov:7090/voyager</url>
-    <url>z3950.loc.gov:7094/voyager</url>
+    <url>z3950.loc.gov:7090</url>
+    <url>z3950.loc.gov:7094</url>
     <keepalive>
       <bandwidth>500000</bandwidth>
       <pdu>500</pdu>
@@ -16,12 +16,12 @@
     </limit>
     <attribute type="1" value="1-11,13-1010"/>
     <attribute type="1" value="*" error="114"/>
-    <target-timeout>300</target-timeout>
+    <target-timeout>240</target-timeout>
     <client-timeout>180</client-timeout>
     <syntax type="usmarc"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
-    <preinit>0</preinit>
+    <preinit>2</preinit>
   </target>
   <target name="localhost">
     <url>localhost:9999</url>
@@ -38,7 +38,7 @@
     <syntax type="grs1"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
-    <preinit>2</preinit>
+    <preinit>0</preinit>
   </target>
   <target name="*">
     <!-- everything else -->

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.19 2003-10-16 16:10:43 adam Exp $
+ * $Id: proxy.h,v 1.20 2003-10-20 18:31:43 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -59,7 +59,7 @@ public:
 private:
     void operator=(const Yaz_ProxyConfig &conf);
 #if HAVE_XML2
-    int mycmp(const char *hay, const char *item, int len);
+    int mycmp(const char *hay, const char *item, size_t len);
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,

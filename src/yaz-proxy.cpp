@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.62 2003-10-16 16:10:43 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.63 2003-10-20 18:31:44 adam Exp $
  */
 
 #include <assert.h>
@@ -258,6 +258,11 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	Yaz_ProxyConfig *cfg = check_reconfigure();
 	if (proxy_host)
 	{
+#if 0
+/* only to be enabled for debugging... */
+	    if (!strcmp(proxy_host, "stop"))
+		exit(0);
+#endif
 	    xfree(m_default_target);
 	    m_default_target = xstrdup(proxy_host);
 	    proxy_host = m_default_target;
@@ -1321,15 +1326,26 @@ void Yaz_Proxy::pre_init()
 	    {
 		Yaz_ProxyClient *c;
 		int spare = 0;
+		int in_use = 0;
+		int other = 0;
 		for (c = m_clientPool; c; c = c->m_next)
 		{
-		    if (!strcmp(zurl_in_use[j], c->get_hostname())
-			&& c->m_server == 0 && c->m_cookie == 0)
-			spare++;
+		    if (!strcmp(zurl_in_use[j], c->get_hostname()))
+		    {
+			if (c->m_cookie == 0)
+			{
+			    if (c->m_server == 0)
+				spare++;
+			    else
+				in_use++;
+			}
+			else
+			    other++;
+		    }
 		}
-		yaz_log(LOG_LOG, "%s pre-init %s %s spare=%d pre_init=%d",
+		yaz_log(LOG_LOG, "%s pre-init %s %s use=%d other=%d spare=%d preinit=%d",
 			m_session_str,
-			name, zurl_in_use[j], spare, pre_init);
+			name, zurl_in_use[j], in_use, other, spare, pre_init);
 		if (spare < pre_init)
 		{
 		    c = new Yaz_ProxyClient(m_PDU_Observable->clone(), this);

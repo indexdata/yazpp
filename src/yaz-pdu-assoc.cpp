@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.34 2003-10-16 16:10:43 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.35 2003-10-20 18:31:44 adam Exp $
  */
 
 #include <assert.h>
@@ -210,9 +210,9 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		    return;
 
 		m_PDU_Observer->recv_PDU(m_input_buf, res);
-                m_destroyed = 0;
 		if (destroyed)   // it really was destroyed, return now.
 		    return;
+                m_destroyed = 0;
 	    } while (m_cs && cs_more (m_cs));
 	    if (m_cs && m_state == Ready)
             {

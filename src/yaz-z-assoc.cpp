@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.28 2003-10-16 16:10:43 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.29 2003-10-20 18:31:44 adam Exp $
  */
 
 #include <assert.h>
@@ -63,6 +63,7 @@ int Yaz_Z_Assoc::set_APDU_yazlog(int v)
 {
     int old = m_APDU_yazlog;
     m_APDU_yazlog = v;
+    return old;
 }
 
 const char *Yaz_Z_Assoc::get_APDU_log()
@@ -92,6 +93,7 @@ void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
     else
     {
 	close();
+	failNotify();
     }
 }
 

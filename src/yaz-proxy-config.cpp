@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.11 2003-10-16 16:10:43 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.12 2003-10-20 18:31:44 adam Exp $
  */
 
 #include <ctype.h>
@@ -283,7 +283,6 @@ int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
 					    Z_RPNStructure *q,
 					    char **addinfo)
 {
-    int c;
     if (q->which == Z_RPNStructure_complex)
     {
 	int e = check_type_1_structure(odr, ptr, q->u.complex->s1, addinfo);
@@ -497,7 +496,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
     return 0;
 }
 
-int Yaz_ProxyConfig::mycmp(const char *hay, const char *item, int len)
+int Yaz_ProxyConfig::mycmp(const char *hay, const char *item, size_t len)
 {
     if (len == strlen(item) && memcmp(hay, item, len) == 0)
 	return 1;
