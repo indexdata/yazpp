@@ -1,20 +1,20 @@
 YAZ++ - A C++ library for YAZ and a ZOOM C++ API.
 
-$Id: README,v 1.3 2004-03-30 11:46:11 adam Exp $
+$Id: README,v 1.4 2004-03-31 21:04:47 adam Exp $
 
 Introduction
 ------------
 
-YAZ++ is a C++ layer for YAZ and implements the ANSI Z39.50
-protocol for information retrieval (client and server side).
-The YAZ++ homepage is: http://www.indexdata.dk/yaz++/
-Later versions of YAZ++ also supports SRW/SRU.
+YAZ++ is a set of libraries and header files that make it easier to
+use the the YAZ toolkit from C++, together with some utilities written
+using these libraries. It includes an implementation of the C++ binding
+for ZOOM and a powerful general-purposse Z39.50/SRW/SRU proxy.
 
 YAZ++ and ZOOM C++ uses the same license as YAZ - see LICENSE file
 for details.
 
-This package also contains a proxy as well as a proxy library. This
-component is covered by the GPL. See LICENSE.proxy for details.
+The proxy application and development library is covered by the
+GPL - see LICENSE.proxy for details.
 
 Documentation
 -------------
@@ -42,6 +42,7 @@ Directory structure of the YAZ++ package:
   -- lib (compiled libraries)
   -- win (Windows build files)
   -- doc (DocBook-format documentation)
+  -- etc (Proxy config + XSLT files)
 
 Installation, Unix
 ------------------
