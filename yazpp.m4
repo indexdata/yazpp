@@ -1,4 +1,3 @@
-## $Id: yazpp.m4,v 1.4 2004-12-03 14:26:39 adam Exp $
 AC_DEFUN([YAZPP_INIT],
 [
         AC_SUBST(YAZPPLIB)
