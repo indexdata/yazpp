@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.17 2003-12-22 15:16:23 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.18 2004-01-05 09:31:09 adam Exp $
  */
 
 #include <ctype.h>
@@ -12,7 +12,7 @@
 Yaz_ProxyConfig::Yaz_ProxyConfig()
 {
     m_copy = 0;
-#if HAVE_XML2
+#if HAVE_XSLT
     m_docPtr = 0;
     m_proxyPtr = 0;
 #endif
@@ -20,7 +20,7 @@ Yaz_ProxyConfig::Yaz_ProxyConfig()
 
 Yaz_ProxyConfig::~Yaz_ProxyConfig()
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     if (!m_copy && m_docPtr)
 	xmlFreeDoc(m_docPtr);
 #endif
@@ -28,7 +28,7 @@ Yaz_ProxyConfig::~Yaz_ProxyConfig()
 
 int Yaz_ProxyConfig::read_xml(const char *fname)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlDocPtr ndoc = xmlParseFile(fname);
 
     if (!ndoc)
@@ -56,7 +56,7 @@ int Yaz_ProxyConfig::read_xml(const char *fname)
 #endif
 }
 
-#if HAVE_XML2
+#if HAVE_XSLT
 const char *Yaz_ProxyConfig::get_text(xmlNodePtr ptr)
 {
     for(ptr = ptr->children; ptr; ptr = ptr->next)
@@ -74,7 +74,7 @@ const char *Yaz_ProxyConfig::get_text(xmlNodePtr ptr)
 }
 #endif
 
-#if HAVE_XML2
+#if HAVE_XSLT
 void Yaz_ProxyConfig::return_limit(xmlNodePtr ptr,
 				   int *limit_bw,
 				   int *limit_pdu,
@@ -107,7 +107,7 @@ void Yaz_ProxyConfig::return_limit(xmlNodePtr ptr,
 }
 #endif
 
-#if HAVE_XML2
+#if HAVE_XSLT
 void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 const char **url,
 					 int *limit_bw,
@@ -220,7 +220,7 @@ int Yaz_ProxyConfig::match_list(int v, const char *m)
   return 0;
 }
 
-#if HAVE_XML2
+#if HAVE_XSLT
 int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptrl,
 					     Z_AttributeList *attrs,
 					     char **addinfo)
@@ -293,7 +293,7 @@ int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptrl,
 }
 #endif
 
-#if HAVE_XML2
+#if HAVE_XSLT
 int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
 					    Z_RPNStructure *q,
 					    char **addinfo)
@@ -319,7 +319,7 @@ int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
 }
 #endif
 
-#if HAVE_XML2
+#if HAVE_XSLT
 int Yaz_ProxyConfig::check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
 				  char **addinfo)
 {
@@ -331,7 +331,7 @@ int Yaz_ProxyConfig::check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
 int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 				 char **addinfo)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlNodePtr ptr;
     
     ptr = find_target_node(name, 0);
@@ -344,10 +344,58 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
     return 0;
 }
 
-int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
-				  Odr_oid *syntax, char **addinfo)
+#if HAVE_XSLT
+int Yaz_ProxyConfig::check_esn(xmlNodePtr ptr, Z_RecordComposition *comp)
 {
-#if HAVE_XML2
+    char *esn = 0;
+    int default_match = 1;
+    if (comp && comp->which == Z_RecordComp_simple &&
+	comp->u.simple && comp->u.simple->which == Z_ElementSetNames_generic)
+    {
+	esn = comp->u.simple->u.generic;
+    }
+    if (!esn)
+	return 1;
+    for (; ptr; ptr = ptr->next)
+    {
+	if (ptr->type == XML_TEXT_NODE)
+	{
+	    default_match = 0;
+	    xmlChar *t = ptr->content;
+	    while (*t)
+	    {
+		while (*t && isspace(*t))
+		    t++;
+		xmlChar *s = t;
+		int i = 0;
+		while (esn[i] && esn[i] == *s)
+		{
+		    i++;
+		    s++;
+		}
+		if (!esn[i] &&  (!*s || isspace(*s)))
+		    return 1;
+		while (*s && !isspace(*s))
+		    s++;
+		t = s;
+	    }
+	}
+    }
+    return default_match;
+}
+#endif
+
+int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
+				  Odr_oid *syntax, Z_RecordComposition *comp,
+				  char **addinfo,
+				  char **stylesheet)
+{
+    if (stylesheet)
+    {
+	xfree (*stylesheet);
+	*stylesheet = 0;
+    }
+#if HAVE_XSLT
     xmlNodePtr ptr;
     
     ptr = find_target_node(name, 0);
@@ -362,6 +410,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	    const char *match_type = 0;
 	    const char *match_error = 0;
 	    const char *match_marcxml = 0;
+	    const char *match_stylesheet = 0;
 	    struct _xmlAttr *attr;
 	    for (attr = ptr->properties; attr; attr = attr->next)
 	    {
@@ -374,6 +423,9 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		if (!strcmp((const char *) attr->name, "marcxml") &&
 		    attr->children && attr->children->type == XML_TEXT_NODE)
 		    match_marcxml = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "stylesheet") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_stylesheet = (const char *) attr->children->content;
 	    }
 	    if (match_type)
 	    {
@@ -393,7 +445,15 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		}
 	    }
 	    if (match)
+		match = check_esn(ptr->children, comp);
+
+	    if (match)
 	    {
+		if (stylesheet && match_stylesheet)
+		{
+		    xfree(*stylesheet);
+		    *stylesheet = xstrdup(match_stylesheet);
+		}
 		if (match_marcxml)
 		{
 		    return -1;
@@ -416,7 +476,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
     return 0;
 }
 
-#if HAVE_XML2
+#if HAVE_XSLT
 xmlNodePtr Yaz_ProxyConfig::find_target_db(xmlNodePtr ptr, const char *db)
 {
     xmlNodePtr dptr;
@@ -509,7 +569,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *pre_init,
 				   const char **cql2rpn)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlNodePtr ptr;
     if (!m_proxyPtr)
 	return 0;
@@ -551,7 +611,7 @@ int Yaz_ProxyConfig::mycmp(const char *hay, const char *item, size_t len)
 void Yaz_ProxyConfig::get_generic_info(int *log_mask,
 				       int *max_clients)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlNodePtr ptr;
     if (!m_proxyPtr)
 	return;
@@ -603,7 +663,7 @@ void Yaz_ProxyConfig::get_generic_info(int *log_mask,
 char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 				   int *len)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlNodePtr ptr = find_target_node(name, db);
     if (ptr)
     {
@@ -650,7 +710,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *pre_init,
 				      const char **cql2rpn)
 {
-#if HAVE_XML2
+#if HAVE_XSLT
     xmlNodePtr ptr;
     if (!m_proxyPtr)
     {

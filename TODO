@@ -1,11 +1,17 @@
 
 Control the various optimizations with config..
 
-Handle invalidate sessions (-1 hit, control-number search).
-
 Live status (via search, present).
 
-SRW/SRU.
-
 Possible threading.
+
+Throw proper diagnostic for bad schema (Z39.50/SRW).
+
+Deal with Z39.50 options properly.
+
+Deal with Z39.50 messages sizes properly.
+
+For SRW/SRU, set schema for each returned record.
+
+Fork to ensure that crashes are catched.
 

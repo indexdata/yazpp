@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.24 2003-12-22 15:16:23 adam Exp $
+ * $Id: proxy.h,v 1.25 2004-01-05 09:31:09 adam Exp $
  */
 
 #include <sys/time.h>
@@ -10,7 +10,7 @@
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
 #include <yaz/cql.h>
-#if HAVE_XML2
+#if HAVE_XSLT
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #endif
@@ -58,13 +58,15 @@ public:
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
-		     Odr_oid *syntax, char **addinfo);
+		     Odr_oid *syntax, Z_RecordComposition *comp,
+		     char **addinfo, char **stylesheet);
     char *get_explain(ODR odr, const char *name, const char *db,
 		      int *len);
 private:
     void operator=(const Yaz_ProxyConfig &conf);
     int mycmp(const char *hay, const char *item, size_t len);
-#if HAVE_XML2
+#if HAVE_XSLT
+    int check_esn(xmlNodePtr ptr, Z_RecordComposition *comp);
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,
@@ -234,7 +236,9 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_request_no;
     int m_invalid_session;
     int m_marcxml_flag;
+    char *m_stylesheet;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
+    void convert_xsl(Z_NamePlusRecordList *p);
     Z_APDU *m_initRequest_apdu;
     NMEM m_initRequest_mem;
     Z_APDU *m_apdu_invalid_session;
@@ -261,6 +265,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_cql2rpn m_cql2rpn;
     struct timeval m_time_tv;
     void logtime();
+    Z_ElementSetNames *mk_esn_from_schema(ODR o, const char *schema);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);

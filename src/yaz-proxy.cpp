@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.74 2003-12-22 19:01:34 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.75 2004-01-05 09:31:09 adam Exp $
  */
 
 #include <assert.h>
@@ -15,6 +15,11 @@
 #include <yaz/diagbib1.h>
 #include <yaz++/proxy.h>
 #include <yaz/pquery.h>
+
+#if HAVE_XSLT
+#include <libxslt/xsltutils.h>
+#include <libxslt/transform.h>
+#endif
 
 static const char *apdu_name(Z_APDU *apdu)
 {
@@ -101,6 +106,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_invalid_session = 0;
     m_config = 0;
     m_marcxml_flag = 0;
+    m_stylesheet = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
     m_apdu_invalid_session = 0;
@@ -128,6 +134,7 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
+    xfree (m_stylesheet);
     if (m_s2z_odr_init)
 	odr_destroy(m_s2z_odr_init);
     if (m_s2z_odr_search)
@@ -572,6 +579,44 @@ void Yaz_Proxy::display_diagrecs(Z_DiagRec **pp, int num)
     }
 }
 
+void Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p)
+{
+    if (!m_stylesheet)
+	return;
+    xmlDocPtr xslt_doc = xmlParseFile(m_stylesheet);
+    xsltStylesheetPtr xsp;
+
+    xsp = xsltParseStylesheetDoc(xslt_doc);
+
+    int i;
+    for (i = 0; i < p->num_records; i++)
+    {
+	Z_NamePlusRecord *npr = p->records[i];
+	if (npr->which == Z_NamePlusRecord_databaseRecord)
+	{
+	    Z_External *r = npr->u.databaseRecord;
+	    if (r->which == Z_External_octet)
+	    {
+		xmlDocPtr res, doc = xmlParseMemory(
+		    (char*) r->u.octet_aligned->buf,
+		    r->u.octet_aligned->len);
+		
+		res = xsltApplyStylesheet(xsp, doc, 0);
+		
+		xmlChar *out_buf;
+		int out_len;
+		xmlDocDumpMemory (res, &out_buf, &out_len);
+		p->records[i]->u.databaseRecord = 
+		    z_ext_record(odr_encode(), VAL_TEXT_XML,
+				 (char*) out_buf, out_len);
+		xmlFreeDoc(doc);
+		xmlFreeDoc(res);
+	    }
+	}
+    }
+    xsltFreeStylesheet(xsp);
+}
+
 void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
 {
     int i;
@@ -682,7 +727,7 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
         z_HTTP_header_add(o, &hres->headers, "Connection", "Keep-Alive");
 
     static Z_SOAP_Handler soap_handlers[2] = {
-#if HAVE_XML2
+#if HAVE_XSLT
 	{"http://www.loc.gov/zing/srw/", 0,
 	 (Z_SOAP_fun) yaz_srw_codec},
 #endif
@@ -900,8 +945,12 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	}
 	else
 	{
-	    if (m_marcxml_flag && p && p->which == Z_Records_DBOSD)
-		convert_to_marcxml(p->u.databaseOrSurDiagnostics);
+	    if (p && p->which == Z_Records_DBOSD)
+	    {
+		if (m_marcxml_flag)
+		    convert_to_marcxml(p->u.databaseOrSurDiagnostics);
+		convert_xsl(p->u.databaseOrSurDiagnostics);
+	    }
 	    if (sr->resultCount)
 	    {
 		yaz_log(LOG_LOG, "%s%d hits", m_session_str,
@@ -932,8 +981,12 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 		*sr->presentStatus = Z_PresentStatus_failure;
 	    display_diagrecs(&dr_p, 1);
 	}
-	if (m_marcxml_flag && p && p->which == Z_Records_DBOSD)
-	    convert_to_marcxml(p->u.databaseOrSurDiagnostics);
+	if (p && p->which == Z_Records_DBOSD)
+	{
+	    if (m_marcxml_flag)
+		convert_to_marcxml(p->u.databaseOrSurDiagnostics);
+	    convert_xsl(p->u.databaseOrSurDiagnostics);
+	}
     }
     int r = send_PDU_convert(apdu, &len);
     if (r)
@@ -1365,17 +1418,24 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	int err = 0;
 	char *addinfo = 0;
 	Yaz_ProxyConfig *cfg = check_reconfigure();
-	
+
+	Z_RecordComposition rc_temp, *rc = 0;
+	if (sr->smallSetElementSetNames)
+	{
+	    rc_temp.which = Z_RecordComp_simple;
+	    rc_temp.u.simple = sr->smallSetElementSetNames;
+	    rc = &rc_temp;
+	}
+	    
 	if (cfg)
 	    err = cfg->check_syntax(odr_encode(),
 				    m_default_target,
-				    sr->preferredRecordSyntax,
-				    &addinfo);
+				    sr->preferredRecordSyntax, rc,
+				    &addinfo, &m_stylesheet);
 	if (err == -1)
 	{
 	    sr->preferredRecordSyntax =
-		yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
-				       VAL_USMARC);
+		yaz_oidval_to_z3950oid(odr_encode(), CLASS_RECSYN, VAL_USMARC);
 	    m_marcxml_flag = 1;
 	}
 	else if (err)
@@ -1402,12 +1462,12 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	if (cfg)
 	    err = cfg->check_syntax(odr_encode(), m_default_target,
 				    pr->preferredRecordSyntax,
-				    &addinfo);
+				    pr->recordComposition,
+				    &addinfo, &m_stylesheet);
 	if (err == -1)
 	{
 	    pr->preferredRecordSyntax =
-		yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
-				       VAL_USMARC);
+		yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN, VAL_USMARC);
 	    m_marcxml_flag = 1;
 	}
 	else if (err)
@@ -1428,10 +1488,20 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     return apdu;
 }
 
+Z_ElementSetNames *Yaz_Proxy::mk_esn_from_schema(ODR o, const char *schema)
+{
+    if (!schema)
+	return 0;
+    Z_ElementSetNames *esn = (Z_ElementSetNames *)
+	odr_malloc(o, sizeof(Z_ElementSetNames));
+    esn->which = Z_ElementSetNames_generic;
+    esn->u.generic = odr_strdup(o, schema);
+    return esn;
+}
+
 void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 {
-    Z_SRW_PDU *srw_pdu = 0;
-    char *soap_ns = 0;
+
     if (m_s2z_odr_init)
     {
 	odr_destroy(m_s2z_odr_init);
@@ -1464,12 +1534,17 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
         m_http_version = "1.1";
     }
 
-    if (yaz_check_for_srw(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0
-	|| yaz_check_for_sru(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0)
+    Z_SRW_PDU *srw_pdu = 0;
+    Z_SOAP *soap_package = 0;
+    char *charset = 0;
+    if (yaz_srw_decode(hreq, &srw_pdu, &soap_package, odr_decode(),
+		       &charset) == 0
+	|| yaz_sru_decode(hreq, &srw_pdu, &soap_package, odr_decode(),
+			  &charset) == 0)
     {
 	m_s2z_odr_init = odr_createmem(ODR_ENCODE);
 	m_s2z_odr_search = odr_createmem(ODR_ENCODE);
-	m_soap_ns = odr_strdup(m_s2z_odr_search, soap_ns);
+	m_soap_ns = odr_strdup(m_s2z_odr_search, soap_package->ns);
 	m_s2z_init_apdu = 0;
 	m_s2z_search_apdu = 0;
 	m_s2z_present_apdu = 0;
@@ -1561,9 +1636,17 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		    *z_searchRequest->smallSetUpperBound = max;
 		    *z_searchRequest->mediumSetPresentNumber = max;
 		    *z_searchRequest->largeSetLowerBound = 2000000000; // 2e9
+
 		    z_searchRequest->preferredRecordSyntax =
 			yaz_oidval_to_z3950oid(m_s2z_odr_search, CLASS_RECSYN,
 					       VAL_TEXT_XML);
+		    if (srw_req->recordSchema)
+		    {
+			z_searchRequest->smallSetElementSetNames =
+			    z_searchRequest->mediumSetElementSetNames =
+			    mk_esn_from_schema(m_s2z_odr_search,
+					       srw_req->recordSchema);
+		    }
 		}
 		else   // Z39.50 present
 		{
@@ -1576,6 +1659,18 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		    z_presentRequest->preferredRecordSyntax =
 			yaz_oidval_to_z3950oid(m_s2z_odr_search, CLASS_RECSYN,
 					       VAL_TEXT_XML);
+		    z_presentRequest->recordComposition =
+			(Z_RecordComposition *)
+			odr_malloc(m_s2z_odr_search,
+				   sizeof(Z_RecordComposition));
+		    if (srw_req->recordSchema)
+		    {
+			z_presentRequest->recordComposition->which = 
+			    Z_RecordComp_simple;		    
+			z_presentRequest->recordComposition->u.simple =
+			    mk_esn_from_schema(m_s2z_odr_search,
+					       srw_req->recordSchema);
+		    }
 		}
 	    }
 	    if (!m_client)

@@ -11,27 +11,27 @@ AM_PROG_LIBTOOL
 YAZ_INIT(threads)
 
 dnl
-dnl ----- libXML2
-AC_SUBST(XML2_LIBS)
-AC_SUBST(XML2_CFLAGS)
-xml2dir=yes
-AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]    use libxml2 in PREFIX],[xml2dir=$withval])
-if test "$xml2dir" = "yes"; then
+dnl ----- libXSLT
+AC_SUBST(XSLT_LIBS)
+AC_SUBST(XSLT_CFLAGS)
+xsltdir=yes
+AC_ARG_WITH(xslt, [  --with-xslt[=PREFIX]    use libxslt in PREFIX],[xsltdir=$withval])
+if test "$xsltdir" = "yes"; then
 	for d in /usr /usr/local; do
-		if test -x $d/bin/xml2-config; then
-			xml2dir=$d
+		if test -x $d/bin/xslt-config; then
+			xsltdir=$d
 		fi
 	done
 fi
-if test "$xml2dir" != "no"; then
-	AC_MSG_CHECKING(for libXML2)
-	if test -x $xml2dir/bin/xml2-config; then
-		XML2_LIBS=`$xml2dir/bin/xml2-config --libs`
-		LIBS="$XML2_LIBS $LIBS"
-		XML2_CFLAGS=`$xml2dir/bin/xml2-config --cflags`
-		XML2_VER=`$xml2dir/bin/xml2-config --version`
-		AC_MSG_RESULT($XML2_VER)
-		AC_DEFINE(HAVE_XML2)
+if test "$xsltdir" != "no"; then
+	AC_MSG_CHECKING(for libXSLT)
+	if test -x $xsltdir/bin/xslt-config; then
+		XSLT_LIBS=`$xsltdir/bin/xslt-config --libs`
+		LIBS="$XSLT_LIBS $LIBS"
+		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
+		XSLT_VER=`$xsltdir/bin/xslt-config --version`
+		AC_MSG_RESULT($XSLT_VER)
+		AC_DEFINE(HAVE_XSLT)
 	else
 		AC_MSG_RESULT(Not found)
 	fi

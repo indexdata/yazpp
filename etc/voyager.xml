@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.1 2003-10-24 10:21:23 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.2 2004-01-05 09:31:09 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
     <!-- all backend addresses as seen from this proxy .. -->
     <url>z3950.loc.gov:7090</url>
-    <url>z3950.loc.gov:7094</url>
 
     <!-- set session timeout between proxy and backend target -->
     <target-timeout>300</target-timeout>
@@ -25,7 +24,7 @@
     <limit>
       <bandwidth>200000</bandwidth>
       <pdu>31</pdu>
-      <retrieve>20</retrieve>
+      <retrieve>50</retrieve>
     </limit>
 
     <!-- use attributes -->
@@ -55,15 +54,36 @@
     <!-- other types -->
     <attribute type="*" value="*" error="113"/>
 
-    <!-- list allowed record syntaxes; reject all others at the end -->
+    <!-- list allowed record syntaxes and possible schemas (if any);
+    reject all others at the end -->
     <syntax type="opac"/>
     <syntax type="usmarc"/>
     <syntax type="none"/>
-    <syntax type="xml" marcxml="1"/>
+
+    <syntax type="xml" marcxml="1" stylesheet="MARC21slim2DC.xsl">
+      dc
+      http://www.loc.gov/zing/srw/dcschema/v1.0/
+    </syntax>
+    <syntax type="xml" marcxml="1">
+      marcxml
+      http://www.loc.gov/marcxml/
+    </syntax>
+    <syntax type="xml" marcxml="1" stylesheet="MARC21slim2MODS.xsl">
+      mods
+      http://www.loc.gov/mods/v3
+    </syntax>
+
     <syntax type="*" error="238"/>
 
     <!-- keep this number of spare sessions for future sessions -->
     <preinit>2</preinit>
+
+    <explain>
+      <serverInfo>
+	<host>indexdata.dk</host>
+	<port>9000</port>
+      </serverInfo>
+    </explain>
   </target>
 
   <!-- maximum number of client sessions. Remember to allow for

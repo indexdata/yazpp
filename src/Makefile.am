@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.20 2003-12-16 14:17:01 adam Exp $
+## $Id: Makefile.am,v 1.21 2004-01-05 09:31:09 adam Exp $
 
-AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include $(XML2_CFLAGS)
+AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include $(XSLT_CFLAGS)
 
 noinst_LTLIBRARIES = libyazcpp.la
 
@@ -20,4 +20,4 @@ yaz_my_server_SOURCES=yaz-my-server.cpp yaz-marc-sample.cpp
 
 yaz_proxy_SOURCES=yaz-proxy-main.cpp
 
-LDADD=libyazcpp.la $(YAZLALIB)
+LDADD=libyazcpp.la $(YAZLALIB) $(XSLT_LIBS)
