@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.2 2003-06-10 07:16:38 adam Exp $
+## $Id: Makefile.am,v 1.3 2004-01-29 20:28:41 adam Exp $
 
-LDFLAGS=-version-info 1:0:0
+AM_LDFLAGS=-version-info 1:0:0
 
 lib_LTLIBRARIES = libyaz++.la
 
