@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.25 2004-01-24 21:31:59 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.26 2004-01-29 21:33:39 adam Exp $
  */
 
 #include <ctype.h>
@@ -703,7 +703,7 @@ char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 			    break;
 		    if (!ptr1)
 			continue;
-		    for (ptr1 = ptr1->children; ptr; ptr1 = ptr1->next)
+		    for (ptr1 = ptr1->children; ptr1; ptr1 = ptr1->next)
 			if (ptr1->type == XML_ELEMENT_NODE &&
 			    !strcmp((const char *) ptr1->name, "database"))
 			    break;
