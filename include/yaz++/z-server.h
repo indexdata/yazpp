@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.11 2002-04-24 12:21:03 adam Exp $
+ * $Id: z-server.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
-#include <yaz++/yaz-z-assoc.h>
+#include <yaz++/z-assoc.h>
 #if HAVE_YAZ_URSULA_H
 #include <yaz/zes-ursula.h>
 #endif

@@ -2,16 +2,16 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.10 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.11 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/log.h>
 #include <yaz/options.h>
 #include <yaz/diagbib1.h>
 #include <yaz/marcdisp.h>
-#include <yaz++/yaz-ir-assoc.h>
-#include <yaz++/yaz-pdu-assoc.h>
-#include <yaz++/yaz-socket-manager.h>
+#include <yaz++/ir-assoc.h>
+#include <yaz++/pdu-assoc.h>
+#include <yaz++/socket-manager.h>
 
 #if HAVE_YAZ_URSULA_H
 #include <yaz/zes-ursula.h>

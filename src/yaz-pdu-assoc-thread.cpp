@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.5 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.6 2002-10-09 12:50:26 adam Exp $
  */
 
 #ifdef WIN32
@@ -26,8 +26,8 @@
 #include <yaz/log.h>
 #include <yaz/tcpip.h>
 
-#include <yaz++/yaz-pdu-assoc.h>
-#include <yaz++/yaz-socket-manager.h>
+#include <yaz++/pdu-assoc.h>
+#include <yaz++/socket-manager.h>
 
 Yaz_PDU_AssocThread::Yaz_PDU_AssocThread(
     IYazSocketObservable *socketObservable)

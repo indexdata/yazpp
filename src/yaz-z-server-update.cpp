@@ -2,11 +2,11 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-update.cpp,v 1.3 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-z-server-update.cpp,v 1.4 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/log.h>
-#include <yaz++/yaz-z-server.h>
+#include <yaz++/z-server.h>
 
 int Yaz_Facility_Update::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
 			   Z_InitResponse *initResponse)

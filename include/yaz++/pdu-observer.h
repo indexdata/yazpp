@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-observer.h,v 1.3 2001-03-26 14:43:49 adam Exp $
+ * $Id: pdu-observer.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H

@@ -2,15 +2,15 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.16 2002-01-14 12:01:28 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.17 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/log.h>
 #include <yaz/options.h>
 
-#include <yaz++/yaz-socket-manager.h>
-#include <yaz++/yaz-pdu-assoc.h>
-#include <yaz++/yaz-proxy.h>
+#include <yaz++/socket-manager.h>
+#include <yaz++/pdu-assoc.h>
+#include <yaz++/proxy.h>
 
 void usage(char *prog)
 {

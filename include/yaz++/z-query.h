@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: z-query.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/proto.h>
-#include <yaz++/yaz-query.h>
+#include <yaz++/query.h>
 
 /** Z39.50 Query
     RPN, etc.

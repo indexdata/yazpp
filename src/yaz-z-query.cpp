@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.10 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.11 2002-10-09 12:50:26 adam Exp $
  */
 
-#include <yaz++/yaz-z-query.h>
+#include <yaz++/z-query.h>
 #include <yaz/pquery.h>
 
 Yaz_Z_Query::Yaz_Z_Query()

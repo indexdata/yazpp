@@ -2,11 +2,11 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.14 2002-04-24 12:21:03 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.15 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/log.h>
-#include <yaz++/yaz-z-server.h>
+#include <yaz++/z-server.h>
 
 Yaz_Z_Server::Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable)
     : Yaz_Z_Assoc(the_PDU_Observable)

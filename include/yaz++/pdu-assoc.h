@@ -2,15 +2,15 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.h,v 1.2 2001-03-26 14:43:49 adam Exp $
+ * $Id: pdu-assoc.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
 #define YAZ_PDU_ASSOC_INCLUDED
 
 #include <yaz/comstack.h>
-#include <yaz++/yaz-socket-observer.h>
-#include <yaz++/yaz-pdu-observer.h>
+#include <yaz++/socket-observer.h>
+#include <yaz++/pdu-observer.h>
 
 /** Simple Protocol Data Unit Assocation.
     This object sends - and receives PDU's using the COMSTACK

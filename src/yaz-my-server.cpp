@@ -2,14 +2,14 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.9 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.10 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <yaz/log.h>
 #include <yaz/options.h>
-#include <yaz++/yaz-z-server.h>
-#include <yaz++/yaz-pdu-assoc.h>
-#include <yaz++/yaz-socket-manager.h>
+#include <yaz++/z-server.h>
+#include <yaz++/pdu-assoc.h>
+#include <yaz++/socket-manager.h>
 
 class MyILL : public Yaz_Facility_ILL {
 public:

@@ -2,12 +2,12 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.h,v 1.7 2002-09-10 13:01:14 adam Exp $
+ * $Id: proxy.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
-#include <yaz++/yaz-z-assoc.h>
-#include <yaz++/yaz-z-query.h>
-#include <yaz++/yaz-z-databases.h>
+#include <yaz++/z-assoc.h>
+#include <yaz++/z-query.h>
+#include <yaz++/z-databases.h>
 
 class Yaz_Proxy;
 

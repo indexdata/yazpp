@@ -2,14 +2,14 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.35 2002-09-10 13:00:58 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.36 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <assert.h>
 #include <time.h>
 
 #include <yaz/log.h>
-#include <yaz++/yaz-proxy.h>
+#include <yaz++/proxy.h>
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Assoc(the_PDU_Observable)

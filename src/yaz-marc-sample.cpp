@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.2 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.3 2002-10-09 12:50:26 adam Exp $
  */
 
-#include <yaz++/yaz-z-server.h>
+#include <yaz++/z-server.h>
 
 static char *marc_records[] = {
 {

@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.17 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.18 2002-10-09 12:50:26 adam Exp $
  */
 
 #include <assert.h>
 
 #include <yaz/log.h>
-#include <yaz++/yaz-ir-assoc.h>
+#include <yaz++/ir-assoc.h>
 
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     : Yaz_Z_Assoc(the_PDU_Observable)

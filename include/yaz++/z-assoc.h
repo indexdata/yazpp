@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.h,v 1.2 2001-04-25 18:59:30 adam Exp $
+ * $Id: z-assoc.h,v 1.1 2002-10-09 12:50:26 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -10,7 +10,7 @@
 
 #include <yaz/proto.h>
 #include <yaz/odr.h>
-#include <yaz++/yaz-pdu-observer.h>
+#include <yaz++/pdu-observer.h>
 
 /** Z39.50 Assocation.
     This object implements the client - and server role of a generic
