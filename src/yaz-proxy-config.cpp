@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.24 2004-01-15 23:44:58 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.25 2004-01-24 21:31:59 adam Exp $
  */
 
 #include <ctype.h>
@@ -458,7 +458,8 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	    }
 	    if (match)
 	    {
-		syntax_has_matched = 1;
+		if (!match_error)
+		    syntax_has_matched = 1;
 		match = check_schema(ptr->children, comp, match_identifier);
 	    }
 	    if (match)
@@ -479,7 +480,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		}
 		if (match_error)
 		{
-		    if (syntax_has_matched)  // if syntax did match, schema/ESN was bad
+		    if (syntax_has_matched)  // if syntax OK, bad schema/ESN
 			return 25;
 		    if (syntax)
 		    {
