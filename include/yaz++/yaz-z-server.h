@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.8 2001-04-11 12:33:42 heikki Exp $
+ * $Id: yaz-z-server.h,v 1.9 2001-05-03 12:39:39 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -54,9 +54,6 @@ class YAZ_EXPORT Yaz_Facility_Ursula : public IYaz_Server_Facility {
 
 class YAZ_EXPORT Yaz_Facility_ILL : public IYaz_Server_Facility {
  public:
-    virtual int ill_init (Z_InitRequest *initRequest,
-			  Z_InitResponse *initResponse) = 0;
-
     virtual void ill_service (Z_ExtendedServicesRequest *req,
 			      Z_ItemOrder *io,
 			      Z_ExtendedServicesResponse *res) = 0;
@@ -66,6 +63,19 @@ class YAZ_EXPORT Yaz_Facility_ILL : public IYaz_Server_Facility {
 	     Z_InitResponse *initResponse);
     int recv(Yaz_Z_Server *server, Z_APDU *apdu);
 };
+
+class YAZ_EXPORT Yaz_Facility_Update : public IYaz_Server_Facility {
+ public:
+    virtual void update_service (Z_ExtendedServicesRequest *req,
+				 Z_IUUpdate *io,
+				 Z_ExtendedServicesResponse *res) = 0;
+
+    int init(Yaz_Z_Server *server,
+	     Z_InitRequest *initRequest,
+	     Z_InitResponse *initResponse);
+    int recv(Yaz_Z_Server *server, Z_APDU *apdu);
+};
+
 
 class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility,
     public Yaz_Z_ServerUtility {

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-server.cpp,v $
- * Revision 1.4  2001-04-05 13:09:44  adam
+ * Revision 1.5  2001-05-03 12:39:39  adam
+ * Added Update server service.
+ *
+ * Revision 1.4  2001/04/05 13:09:44  adam
  * Removed ursula dependancy.
  *
  * Revision 1.3  2001/04/04 14:02:49  adam
@@ -74,12 +77,18 @@
 
 class MyILL : public Yaz_Facility_ILL {
 public:
-    int ill_init (Z_InitRequest *initRequest,
-		  Z_InitResponse *initResponse);
     void ill_service (Z_ExtendedServicesRequest *req,
 		      Z_ItemOrder *io,
 		      Z_ExtendedServicesResponse *res);
 };
+
+class MyUpdate : public Yaz_Facility_Update {
+public:
+    void update_service (Z_ExtendedServicesRequest *req,
+			 Z_IUUpdate *io,
+			 Z_ExtendedServicesResponse *res);
+};
+
 
 class MyRetrieval : public Yaz_Facility_Retrieval, Yaz_USMARC {
 public:
@@ -119,24 +128,25 @@ public:
 private:
     MyRetrieval m_retrieval;
     MyILL       m_ill;
+    MyUpdate    m_update;
 #if HAVE_YAZ_URSULA_H
     MyUrsula    m_ursula;
 #endif
     int m_no;
 };
 
-int MyILL::ill_init (Z_InitRequest *initRequest,
-		     Z_InitResponse *initResponse)
-{
-    yaz_log (LOG_LOG, "MyILL::ill_init");
-    return 1;
-}
-
 void MyILL::ill_service (Z_ExtendedServicesRequest *req,
 			 Z_ItemOrder *io,
 			 Z_ExtendedServicesResponse *res)
 {
     yaz_log (LOG_LOG, "MyServer::ill_service");
+}
+
+void MyUpdate::update_service (Z_ExtendedServicesRequest *req,
+			   Z_IUUpdate *io,
+			   Z_ExtendedServicesResponse *res)
+{
+    yaz_log (LOG_LOG, "MyServer::update_service");
 }
 
 
@@ -229,8 +239,9 @@ IYaz_PDU_Observer *MyServer::sessionNotify(
     new_server->timeout(900);
     new_server->facility_add(&new_server->m_retrieval, "my sr");
     new_server->facility_add(&new_server->m_ill, "my ill");
+    new_server->facility_add(&new_server->m_update, "my update");
 #if HAVE_YAZ_URSULA_H
-    new_server->facility_add(&new_server->m_ursula, "my ill");
+    new_server->facility_add(&new_server->m_ursula, "my ursula");
 #endif
 
     new_server->set_APDU_log(get_APDU_log());

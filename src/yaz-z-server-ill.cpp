@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ill.cpp,v $
- * Revision 1.5  2001-04-25 19:40:18  adam
+ * Revision 1.6  2001-05-03 12:39:39  adam
+ * Added Update server service.
+ *
+ * Revision 1.5  2001/04/25 19:40:18  adam
  * Added refernceId handling for other services.
  *
  * Revision 1.4  2001/04/04 14:02:49  adam
@@ -31,7 +34,7 @@ int Yaz_Facility_ILL::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
     
     if (ODR_MASK_GET(req, Z_Options_extendedServices))
 	ODR_MASK_SET(res, Z_Options_extendedServices);
-    return ill_init (initRequest, initResponse);
+    return 1;
 }
 
 int Yaz_Facility_ILL::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
