@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.46 2003-09-03 11:25:08 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.47 2003-09-03 11:30:26 adam Exp $
  */
 
 #include <assert.h>
@@ -22,7 +22,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_keepalive = 1;
     m_proxyTarget = 0;
     m_proxy_authentication = 0;
-    m_max_clients = 100;
+    m_max_clients = 150;
     m_seed = time(0);
     m_idletime = 600;
     m_optimize = xstrdup ("1");
