@@ -47,13 +47,13 @@ set -e
 
 case "$1" in
   start)
-	echo -n "Starting $DESC: "
+	printf "%s" "Starting $DESC: "
 	cd $DIR
 	$DAEMON -l $LOGFILE -p $PIDFILE $ARGS @:$PORT &
 	echo "$NAME."
 	;;
   stop)
-	echo -n "Stopping $DESC: "
+	printf "%s" "Stopping $DESC: "
 
 	if test -f $PIDFILE; then
 		kill `cat $PIDFILE`
@@ -69,7 +69,7 @@ case "$1" in
 	fi
   ;;
   restart|force-reload)
-	echo -n "Restarting $DESC: "
+	printf "%s" "Restarting $DESC: "
 	if test -f $PIDFILE; then
 		kill `cat $PIDFILE`
 		rm -f $PIDFILE
