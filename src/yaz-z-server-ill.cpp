@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ill.cpp,v $
- * Revision 1.2  2001-03-29 15:14:26  adam
+ * Revision 1.3  2001-04-03 14:37:19  adam
+ * More work ILL-service.
+ *
+ * Revision 1.2  2001/03/29 15:14:26  adam
  * Minor updates.
  *
  * Revision 1.1  2001/03/27 14:47:45  adam
@@ -81,9 +84,14 @@ int Yaz_Facility_ILL::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     m_odr = s->odr_encode();
     if (apdu_request->which != Z_APDU_extendedServicesRequest)
 	return 0;
-    
-    yaz_log (LOG_LOG, "got extendedSericesRequest p=%p", this);
+    Z_ExtendedServicesRequest *req = apdu_request->u.extendedServicesRequest;
+    if (!req->taskSpecificParameters || req->taskSpecificParameters->which !=
+        Z_External_itemOrder)
+        return 0;
+    yaz_log (LOG_LOG, "got ill p=%p", this);
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
+    ill_service(req, req->taskSpecificParameters->u.itemOrder,
+        apdu_response->u.extendedServicesResponse);
     s->send_Z_PDU(apdu_response);
     return 1;
 }

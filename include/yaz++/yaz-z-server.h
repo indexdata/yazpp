@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.4 2001-04-02 13:39:34 adam Exp $
+ * $Id: yaz-z-server.h,v 1.5 2001-04-03 14:37:19 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -20,13 +20,17 @@ class YAZ_EXPORT IYaz_Server_Facility {
 
 class YAZ_EXPORT Yaz_Facility_ILL : public IYaz_Server_Facility {
  public:
+    virtual int ill_init (Z_InitRequest *initRequest,
+			  Z_InitResponse *initResponse) = 0;
+
+    virtual void ill_service (Z_ExtendedServicesRequest *req,
+        Z_ItemOrder *io, Z_ExtendedServicesResponse *res) = 0;
+
     int init(Yaz_Z_Server *server,
 	     Z_InitRequest *initRequest,
 	     Z_InitResponse *initResponse);
     int recv(Yaz_Z_Server *server, Z_APDU *apdu);
 
-    virtual int ill_init (Z_InitRequest *initRequest,
-			  Z_InitResponse *initResponse) = 0;
 
     void create_databaseRecord (Z_NamePlusRecord *rec,
 				const char *dbname, int format,
@@ -41,10 +45,6 @@ class YAZ_EXPORT Yaz_Facility_ILL : public IYaz_Server_Facility {
 
 class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility {
  public:
-    int init(Yaz_Z_Server *server,
-	     Z_InitRequest *initRequest,
-	     Z_InitResponse *initResponse);
-    int recv(Yaz_Z_Server *server, Z_APDU *apdu);
 
     virtual int sr_init (Z_InitRequest *initRequest,
 			 Z_InitResponse *initResponse) = 0;
@@ -58,6 +58,11 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility {
 				Z_RecordComposition *comp,
 				Z_NamePlusRecord *namePlusRecord,
 				Z_Records *diagnostics) = 0;
+    int init(Yaz_Z_Server *server,
+	     Z_InitRequest *initRequest,
+	     Z_InitResponse *initResponse);
+    int recv(Yaz_Z_Server *server, Z_APDU *apdu);
+
     void create_databaseRecord (Z_NamePlusRecord *rec,
 				const char *dbname, int format,
 				const void *buf, int len);
@@ -67,10 +72,7 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility {
     
     Z_Records *create_nonSurrogateDiagnostics (int error,
     					       const char *addinfo);
-    
-
     virtual ODR odr_encode();
-
  private:
     Z_Records *pack_records (const char *resultSetName,
 			     int start, int num,
