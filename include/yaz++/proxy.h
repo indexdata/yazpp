@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.29 2004-01-07 13:24:12 adam Exp $
+ * $Id: proxy.h,v 1.30 2004-01-07 20:56:02 adam Exp $
  */
 
 #include <sys/time.h>
@@ -238,7 +238,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_request_no;
     int m_invalid_session;
     int m_marcxml_flag;
-    char *m_stylesheet;
+    char *m_stylesheet_schema;
     char *m_schema;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
     void convert_xsl(Z_NamePlusRecordList *p);

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.79 2004-01-07 11:37:45 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.80 2004-01-07 20:56:03 adam Exp $
  */
 
 #include <assert.h>
@@ -106,7 +106,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_invalid_session = 0;
     m_config = 0;
     m_marcxml_flag = 0;
-    m_stylesheet = 0;
+    m_stylesheet_schema = 0;
     m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
@@ -135,7 +135,7 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
-    xfree (m_stylesheet);
+    xfree (m_stylesheet_schema);
     xfree (m_schema);
     if (m_s2z_odr_init)
 	odr_destroy(m_s2z_odr_init);
@@ -292,7 +292,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 {
     assert (m_parent);
     Yaz_Proxy *parent = m_parent;
-    Z_OtherInformation **oi;
     Yaz_ProxyClient *c = m_client;
     
     if (!m_proxyTarget)
@@ -583,9 +582,9 @@ void Yaz_Proxy::display_diagrecs(Z_DiagRec **pp, int num)
 
 void Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p)
 {
-    if (!m_stylesheet)
+    if (!m_stylesheet_schema)
 	return;
-    xmlDocPtr xslt_doc = xmlParseFile(m_stylesheet);
+    xmlDocPtr xslt_doc = xmlParseFile(m_stylesheet_schema);
     xsltStylesheetPtr xsp;
 
     xsp = xsltParseStylesheetDoc(xslt_doc);
@@ -699,7 +698,6 @@ void Yaz_Proxy::logtime()
 int Yaz_Proxy::send_http_response(int code)
 {
     ODR o = odr_encode();
-    const char *ctype = "text/xml";
     Z_GDU *gdu = z_get_HTTP_Response(o, code);
     Z_HTTP_Response *hres = gdu->u.HTTP_Response;
     if (m_http_version)
@@ -744,9 +742,9 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     soap_package->u.generic->ns = soap_handlers[0].ns;
     soap_package->u.generic->p = (void *) srw_pdu;
     soap_package->ns = m_soap_ns;
-    int ret = z_soap_codec_enc(o, &soap_package,
-			       &hres->content_buf, &hres->content_len,
-			       soap_handlers, 0);
+    z_soap_codec_enc(o, &soap_package,
+		     &hres->content_buf, &hres->content_len,
+		     soap_handlers, 0, 0);
     if (m_log_mask & PROXY_LOG_REQ_CLIENT)
     {
 	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
@@ -1450,7 +1448,7 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	    err = cfg->check_syntax(odr_encode(),
 				    m_default_target,
 				    sr->preferredRecordSyntax, rc,
-				    &addinfo, &m_stylesheet, &m_schema);
+				    &addinfo, &m_stylesheet_schema, &m_schema);
 	if (err == -1)
 	{
 	    sr->preferredRecordSyntax =
@@ -1482,7 +1480,7 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	    err = cfg->check_syntax(odr_encode(), m_default_target,
 				    pr->preferredRecordSyntax,
 				    pr->recordComposition,
-				    &addinfo, &m_stylesheet, &m_schema);
+				    &addinfo, &m_stylesheet_schema, &m_schema);
 	if (err == -1)
 	{
 	    pr->preferredRecordSyntax =
@@ -1992,7 +1990,6 @@ void Yaz_Proxy::pre_init()
     int keepalive_limit_bw, keepalive_limit_pdu;
     int pre_init;
     const char *cql2rpn = 0;
-    const char *zeerex = 0;
 
     Yaz_ProxyConfig *cfg = check_reconfigure();
 
