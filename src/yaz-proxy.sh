@@ -18,7 +18,7 @@ DIR=/var/yaz-proxy
 DAEMON="/usr/local/bin/yaz-proxy"
 
 # Proxy PIDFILE. Must be writable by it.
-PIDFILE="$DIR/yaz-proxy.pid"
+PIDFILE="/var/run/yaz-proxy.pid"
 
 # Log file
 LOGFILE=/var/log/yaz-proxy.log
@@ -65,7 +65,7 @@ case "$1" in
 	;;
   reload)
 	if test -f $PIDFILE; then
-		kill -INT `cat $PIDFILE`
+		kill -HUP `cat $PIDFILE`
 	fi
   ;;
   restart|force-reload)
