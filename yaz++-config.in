@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz++-config.in,v 1.4 2002-11-14 14:41:07 adam Exp $
+# $Id: yaz++-config.in,v 1.5 2004-02-11 10:01:54 adam Exp $
 yazppprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -69,16 +69,18 @@ while test $# -gt 0; do
   shift
 done
 
+libs_short="-lyazcpp -lzoomcpp"
+
 if test "$yaz_echo_source" = "yes"; then
-    YAZPPLIB="-L${yazpp_build_root}/lib/.libs -lyaz++ $yazlibs"
-    YAZPPLALIB="${yazpp_build_root}/lib/libyaz++.la $yazlalibs"
+    YAZPPLIB="-L${yazpp_build_root}/src/.libs ${libs_short} $yazlibs"
+    YAZPPLALIB="${yazpp_build_root}/src/libyazcpp.la $yazlalibs"
     YAZPPINC="@YAZINC@ -I${yazpp_src_root}/include"
 else
 
     if test "$yazppprefix" = "/usr"; then
-	YAZPPLIB="-lyaz++ $yazlibs"
+	YAZPPLIB="${libs_short} $yazlibs"
     else
-	YAZPPLIB="-L${yazppprefix}/lib -lyaz++ $yazlibs"
+	YAZPPLIB="-L${yazppprefix}/lib ${libs_short} $yazlibs"
     fi
     YAZPPLALIB=$YAZPPLIB
     if test "$yazppprefix" = "/usr"; then
