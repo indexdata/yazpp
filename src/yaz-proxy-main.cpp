@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.32 2004-02-10 15:02:19 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.33 2004-02-12 17:17:31 adam Exp $
  */
 
 #include <signal.h>
@@ -10,6 +10,11 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <stdarg.h>
+
+#if HAVE_GETRLIMIT
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
 
 #include <yaz/log.h>
 #include <yaz/options.h>
@@ -182,7 +187,6 @@ static void child_run(Yaz_SocketManager *m, int run)
 	    chown(log_file, pw->pw_uid,  pw->pw_gid);
 	    xfree(log_file);
 	}
-
 	if (setuid(pw->pw_uid) < 0)
 	{
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "setuid");
@@ -190,6 +194,12 @@ static void child_run(Yaz_SocketManager *m, int run)
 	}
 	xfree(uid);
     }
+#if HAVE_GETRLIMIT
+	struct rlimit limit_data;
+	getrlimit(RLIMIT_NOFILE, &limit_data);
+	yaz_log(LOG_LOG, "0 get limit NOFILE cur=%d max=%d",
+		limit_data.rlim_cur, limit_data.rlim_max);
+#endif
 
     while (m->processEvent() > 0)
 	;
