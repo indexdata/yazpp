@@ -75,7 +75,7 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).dll $(ProjDir)\..\..\..\bin
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../../yaz/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../../yaz/include" /I "../../yaz++/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
@@ -106,7 +106,7 @@ SOURCE="..\..\src\yaz-ir-assoc.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-ir-assoc.h"
+SOURCE="..\..\include\yaz++\yaz-ir-assoc.h"
 # End Source File
 # Begin Source File
 
@@ -114,11 +114,11 @@ SOURCE="..\..\src\yaz-pdu-assoc.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-pdu-assoc.h"
+SOURCE="..\..\include\yaz++\yaz-pdu-assoc.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-pdu-observer.h"
+SOURCE="..\..\include\yaz++\yaz-pdu-observer.h"
 # End Source File
 # Begin Source File
 
@@ -126,7 +126,7 @@ SOURCE="..\..\src\yaz-proxy.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-proxy.h"
+SOURCE="..\..\include\yaz++\yaz-proxy.h"
 # End Source File
 # Begin Source File
 
@@ -134,11 +134,11 @@ SOURCE="..\..\src\yaz-socket-manager.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-socket-manager.h"
+SOURCE="..\..\include\yaz++\yaz-socket-manager.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-socket-observer.h"
+SOURCE="..\..\include\yaz++\yaz-socket-observer.h"
 # End Source File
 # Begin Source File
 
@@ -146,7 +146,7 @@ SOURCE="..\..\src\yaz-z-assoc.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-z-assoc.h"
+SOURCE="..\..\include\yaz++\yaz-z-assoc.h"
 # End Source File
 # Begin Source File
 
@@ -154,7 +154,7 @@ SOURCE="..\..\src\yaz-z-query.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-z-query.h"
+SOURCE="..\..\include\yaz++\yaz-z-query.h"
 # End Source File
 # Begin Source File
 
@@ -162,7 +162,7 @@ SOURCE="..\..\src\yaz-z-server.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\yaz-z-server.h"
+SOURCE="..\..\include\yaz++\yaz-z-server.h"
 # End Source File
 # End Target
 # End Project
