@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.8  2000-08-07 14:19:59  adam
+ * Revision 1.9  2000-08-10 08:42:42  adam
+ * Fixes for {set,get}_APDU_log.
+ *
+ * Revision 1.8  2000/08/07 14:19:59  adam
  * Fixed serious bug regarding timeouts. Improved logging for proxy.
  *
  * Revision 1.7  2000/05/10 11:36:58  ian
@@ -66,8 +69,10 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
 void Yaz_Z_Assoc::set_APDU_log(const char *fname)
 {
     if (m_APDU_file && m_APDU_file != stderr)
+    {
 	fclose (m_APDU_file);
-    m_APDU_file = 0;
+	m_APDU_file = 0;
+    }
     delete [] m_APDU_fname;
     m_APDU_fname = 0;
 
@@ -75,9 +80,6 @@ void Yaz_Z_Assoc::set_APDU_log(const char *fname)
     {
 	m_APDU_fname = new char[strlen(fname)+1];
 	strcpy (m_APDU_fname, fname);
-    }
-    if (fname)
-    {
 	if (*fname)
 	    m_APDU_file = fopen (fname, "a");
 	else
@@ -95,12 +97,10 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
 {
     m_PDU_Observable->destroy();
     delete m_PDU_Observable;
-    odr_destroy (m_odr_print);
+    odr_destroy (m_odr_print);     // note: also runs fclose on m_APDU_file ..
     odr_destroy (m_odr_out);
     odr_destroy (m_odr_in);
     delete [] m_APDU_fname;
-    if (m_APDU_file && m_APDU_file != stderr)
-	fclose (m_APDU_file);
     delete [] m_hostname;
 }
 

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.13  2000-08-07 14:19:59  adam
+ * Revision 1.14  2000-08-10 08:42:42  adam
+ * Fixes for {set,get}_APDU_log.
+ *
+ * Revision 1.13  2000/08/07 14:19:59  adam
  * Fixed serious bug regarding timeouts. Improved logging for proxy.
  *
  * Revision 1.12  2000/07/04 13:48:49  adam
@@ -67,7 +70,6 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_keepalive = 1;
     m_proxyTarget = 0;
     m_max_clients = 50;
-    m_APDU_fname = 0;
     m_seed = time(0);
 }
 
@@ -259,7 +261,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    m_client->m_sr_transform = 1;
 	    return new_apdu;
 	}
-	else if (m_client->m_last_resultCount >= *sr->largeSetLowerBound ||
+	else if (m_client->m_last_resultCount > *sr->largeSetLowerBound ||
 	    m_client->m_last_resultCount == 0)
 	{
 	    // large set

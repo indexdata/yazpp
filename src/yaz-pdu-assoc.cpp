@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.9  1999-12-06 13:52:45  adam
+ * Revision 1.10  2000-08-10 08:42:42  adam
+ * Fixes for {set,get}_APDU_log.
+ *
+ * Revision 1.9  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -127,8 +130,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
                4. start thread
 	    */
 	    int fd = cs_fileno(new_line);
-	    cs_fileno(new_line) = -1;
-	    cs_close (new_line);
+	    cs_fileno(new_line) = -1;  
+	    cs_close (new_line);        /* potential problem ... */
 #if 1
 	    childNotify(fd);
 #else
