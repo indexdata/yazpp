@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.5 2003-07-02 10:25:13 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.6 2003-09-22 12:25:20 mike Exp $
 
 // Z39.50 Connection class
 
@@ -17,6 +17,7 @@ namespace ZOOM {
 	const char *addinfo;
 	if ((errcode = ZOOM_connection_error(c, &errmsg, &addinfo)) != 0) {
 	    //###cerr << "oops: no connect, errcode=" << errcode << "\n";
+	    ZOOM_connection_destroy(c);
 	    throw bib1Exception(errcode, addinfo);
 	}
     }
