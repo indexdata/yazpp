@@ -1,10 +1,11 @@
-## $Id: Makefile.am,v 1.6 2002-10-24 07:20:24 adam Exp $
+## $Id: Makefile.am,v 1.7 2002-11-08 13:38:45 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
  yazhtml.dsl.in \
  yazphp.dsl.in \
  yazprint.dsl.in \
+ tkl.xsl.in \
  xml.dcl
 XMLFILES = \
  installation.xml \
@@ -44,6 +45,9 @@ yaz++.pdf: $(XMLFILES)
 	pdfjadetex yaz++.tex
 	pdfjadetex yaz++.tex
 	pdfjadetex yaz++.tex
+
+index.tkl: $(XMLFILES) tkl.xsl
+	xsltproc tkl.xsl $(TOP)
 
 dist-hook: zoom.html
 	cp *.html $(distdir)

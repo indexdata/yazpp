@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.10 2002-10-23 12:22:19 mike Exp $ -->
+ <!-- $Id: zoom.xml,v 1.11 2002-11-08 13:38:45 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -24,7 +24,7 @@
   </para>
   <para>
    For example, here is a tiny Z39.50 client that fetches and displays
-   the MARC record for Farlow & Brett Surman's
+   the MARC record for Farlow &amp; Brett Surman's
    <citetitle>The Complete Dinosaur</citetitle>
    from the Library of Congress's Z39.50 server:
   </para>
