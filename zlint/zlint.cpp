@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.6 2004-09-06 07:50:51 adam Exp $
+ * $Id: zlint.cpp,v 1.7 2004-11-30 21:10:31 adam Exp $
  */
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include <yaz/options.h>
 #include <yaz/otherinfo.h>
 #include <yaz/charneg.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 
 #include <zlint.h>
 
@@ -161,7 +161,7 @@ int Zlint::initResponseGetVersion(Z_InitResponse *init)
 	{
 	    no = i+1;
 	    if (off)
-		yaz_log(LOG_WARN, "%sbad formatted version");
+		yaz_log(YLOG_WARN, "%sbad formatted version");
 	}
 	else
 	    off = 1;

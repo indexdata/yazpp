@@ -2,12 +2,12 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.21 2004-03-30 18:14:13 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.22 2004-11-30 21:10:30 adam Exp $
  */
 
 #include <assert.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/ir-assoc.h>
 
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
@@ -21,7 +21,7 @@ Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_host = 0;
     m_proxy = 0;
     m_cookie = 0;
-    m_log = LOG_DEBUG;
+    m_log = YLOG_DEBUG;
     const char *db = "Default";
     set_databaseNames(1, &db);
 }

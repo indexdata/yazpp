@@ -2,11 +2,11 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.6 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.7 2004-11-30 21:10:31 adam Exp $
  *
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/z-server.h>
 
 Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
@@ -31,9 +31,6 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
     *pres = Z_PRES_SUCCESS;
     *next = 0;
 
-    yaz_log(LOG_LOG, "Request to pack %d+%d", start, toget);
-    yaz_log(LOG_LOG, "pms=%d, mrs=%d", m_preferredMessageSize,
-	    m_maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
 	Z_NamePlusRecord *this_rec =
@@ -64,20 +61,16 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
 	 */
 	total_length = odr_total(odr_encode()) - dumped_records;
 	this_length = odr_total(odr_encode()) - total_length;
-	yaz_log(LOG_LOG, "  fetched record, len=%d, total=%d",
-		this_length, total_length);
 	if (this_length + total_length > m_preferredMessageSize)
 	{
 	    /* record is small enough, really */
 	    if (this_length <= m_preferredMessageSize)
 	    {
-	    	yaz_log(LOG_LOG, "  Dropped last normal-sized record");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
 	    if (this_length >= m_maximumRecordSize)
 	    {   /* too big entirely */
-	    	yaz_log(LOG_LOG, "Record > maxrcdsz");
 		reclist->records[reclist->num_records] = this_rec;
 		create_surrogateDiagnostics(odr_encode(), this_rec,
 					    this_rec->databaseName, 17, 0);
@@ -88,10 +81,9 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
 	    }
 	    else /* record can only be fetched by itself */
 	    {
-	    	yaz_log(LOG_LOG, "  Record > prefmsgsz");
 	    	if (toget > 1)
 		{
-		    yaz_log(LOG_DEBUG, "  Dropped it");
+		    yaz_log(YLOG_DEBUG, "  Dropped it");
 		    reclist->records[reclist->num_records] = this_rec;
 		    create_surrogateDiagnostics(odr_encode(), this_rec,
 						this_rec->databaseName,
@@ -220,7 +212,6 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     switch (apdu_request->which)
     {
     case Z_APDU_searchRequest:
-        yaz_log (LOG_LOG, "got SearchRequest p=%p", this);
 	apdu_response = s->create_Z_PDU(Z_APDU_searchResponse);
 	s->transfer_referenceId(apdu_request, apdu_response);
 	sr_search (apdu_request->u.searchRequest,
@@ -233,7 +224,6 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 	s->send_Z_PDU(apdu_response, 0);
 	return 1;
     case Z_APDU_presentRequest:
-        yaz_log (LOG_LOG, "got PresentRequest p=%p", this);
 	apdu_response = s->create_Z_PDU(Z_APDU_presentResponse);
 	s->transfer_referenceId(apdu_request, apdu_response);
 	sr_present (apdu_request->u.presentRequest,

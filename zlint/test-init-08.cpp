@@ -2,10 +2,10 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-init-08.cpp,v 1.1 2004-03-25 23:14:07 adam Exp $
+ * $Id: test-init-08.cpp,v 1.2 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/charneg.h>
 #include <yaz/otherinfo.h>
 

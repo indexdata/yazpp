@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.28 2004-10-23 12:44:10 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.29 2004-11-30 21:10:31 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/socket-manager.h>
 
 Yaz_SocketManager::YazSocketEntry **Yaz_SocketManager::lookupObserver(
@@ -178,8 +178,8 @@ int Yaz_SocketManager::processEvent()
 			 timeout== -1 ? 0 : &to)) < 0)
 	if (errno != EINTR)
 	{
-	    yaz_log(LOG_ERRNO|LOG_WARN, "select");
-	    yaz_log(LOG_WARN, "errno=%d max=%d timeout=%d",
+	    yaz_log(YLOG_ERRNO|YLOG_WARN, "select");
+	    yaz_log(YLOG_WARN, "errno=%d max=%d timeout=%d",
 			     errno, max, timeout);
 	    if (++pass > 10)
 	        return -1;
@@ -227,7 +227,7 @@ int Yaz_SocketManager::processEvent()
 	delete event;
 	return 1;
     }
-    yaz_log(LOG_WARN, "unhandled event in processEvent res=%d", res);
+    yaz_log(YLOG_WARN, "unhandled event in processEvent res=%d", res);
     return 1;
 }
 
@@ -298,7 +298,7 @@ Yaz_SocketManager::Yaz_SocketManager()
     m_observers = 0;
     m_queue_front = 0;
     m_queue_back = 0;
-    m_log = LOG_DEBUG;
+    m_log = YLOG_DEBUG;
 }
 
 Yaz_SocketManager::~Yaz_SocketManager()

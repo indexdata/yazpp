@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.18 2004-03-30 18:14:13 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.19 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/z-server.h>
 
 Yaz_Z_Server::Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable)
@@ -100,7 +100,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
 	}
 	if (!taken)
 	{
-	    yaz_log (LOG_WARN, "unhandled request = %d", apdu_request->which);
+	    yaz_log (YLOG_WARN, "unhandled request = %d", apdu_request->which);
 	    delete this;
 	}
     }
@@ -131,7 +131,7 @@ void Yaz_Z_ServerUtility::create_surrogateDiagnostics(
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
     	odr_malloc (odr, sizeof(*dr));
     
-    yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
+    yaz_log(YLOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     *err = error;
     rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;

@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-ill.cpp,v 1.9 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-z-server-ill.cpp,v 1.10 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/z-server.h>
 
 int Yaz_Facility_ILL::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
@@ -29,7 +29,7 @@ int Yaz_Facility_ILL::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     if (!req->taskSpecificParameters || req->taskSpecificParameters->which !=
         Z_External_itemOrder)
         return 0;
-    yaz_log (LOG_LOG, "got ill p=%p", this);
+    yaz_log (YLOG_LOG, "got ill p=%p", this);
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
     ill_service(req, req->taskSpecificParameters->u.itemOrder,
         apdu_response->u.extendedServicesResponse);

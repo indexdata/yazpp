@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.6 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.7 2004-11-30 21:10:31 adam Exp $
  */
 
 #ifdef WIN32
@@ -23,7 +23,7 @@
 #endif
 
 #include <errno.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/tcpip.h>
 
 #include <yaz++/pdu-assoc.h>
@@ -45,10 +45,10 @@ events(void *p)
 {
     Yaz_SocketManager *s = (Yaz_SocketManager *) p;
     
-    yaz_log (LOG_LOG, "thread started");
+    yaz_log (YLOG_LOG, "thread started");
     while (s->processEvent() > 0)
 	;
-    yaz_log (LOG_LOG, "thread finished");
+    yaz_log (YLOG_LOG, "thread finished");
 #ifdef WIN32
 #else
     return 0;
@@ -72,7 +72,7 @@ void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
     t_id = _beginthread (events, 0, socket_observable);
     if (t_id == -1)
     {
-        yaz_log (LOG_FATAL|LOG_ERRNO, "_beginthread failed");
+        yaz_log (YLOG_FATAL|YLOG_ERRNO, "_beginthread failed");
         exit (1);
     }
 #else
@@ -80,7 +80,7 @@ void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
 
     int id = pthread_create (&tid, 0, events, socket_observable);
     if (id)
-	yaz_log (LOG_ERRNO|LOG_FATAL, "pthread_create returned id=%d", id);
+	yaz_log (YLOG_ERRNO|YLOG_FATAL, "pthread_create returned id=%d", id);
     else
 	pthread_detach (tid);
 #endif

@@ -2,12 +2,12 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.37 2003-10-23 11:45:08 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.38 2004-11-30 21:10:31 adam Exp $
  */
 
 #include <assert.h>
 #include <string.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/tcpip.h>
 
 #include <yaz++/pdu-assoc.h>
@@ -28,7 +28,7 @@ void Yaz_PDU_Assoc::init(IYazSocketObservable *socketObservable)
     m_next = 0;
     m_destroyed = 0;
     m_idleTime = 0;
-    m_log = LOG_DEBUG;
+    m_log = YLOG_DEBUG;
 }
 
 Yaz_PDU_Assoc::Yaz_PDU_Assoc(IYazSocketObservable *socketObservable)
@@ -158,7 +158,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		return;
 	    if (res < 0)
 	    {
-		yaz_log(LOG_FATAL|LOG_ERRNO, "cs_listen failed");
+		yaz_log(YLOG_FATAL|YLOG_ERRNO, "cs_listen failed");
 		return;
 	    }
 	    if (!(new_line = cs_accept(m_cs)))

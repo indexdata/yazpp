@@ -2,10 +2,10 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.9 2004-03-29 22:46:51 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.10 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/proto.h>
 #include <yaz++/record-cache.h>
 
@@ -168,7 +168,7 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
     oid_to_dotstring(entry->m_record->u.databaseRecord->direct_reference, mstr1);
     char mstr2[100];
     oid_to_dotstring(syntax, mstr2);
-    yaz_log(LOG_LOG, "match fail 3 d=%s s=%s", mstr1, mstr2);
+    yaz_log(YLOG_LOG, "match fail 3 d=%s s=%s", mstr1, mstr2);
 #endif
 
     return 0;
@@ -180,7 +180,7 @@ int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 			     Z_RecordComposition *comp)
 {
     int i;
-    yaz_log(LOG_DEBUG, "cache lookup start=%d num=%d", start, num);
+    yaz_log(YLOG_DEBUG, "cache lookup start=%d num=%d", start, num);
 
     for (i = 0; i<num; i++)
     {

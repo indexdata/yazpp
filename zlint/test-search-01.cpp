@@ -2,10 +2,10 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-search-01.cpp,v 1.2 2004-09-06 07:50:51 adam Exp $
+ * $Id: test-search-01.cpp,v 1.3 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/pquery.h>
 #include <yaz/sortspec.h>
 

@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.33 2004-01-24 21:33:27 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.34 2004-11-30 21:10:31 adam Exp $
  */
 
 #include <assert.h>
 #include <signal.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz++/z-assoc.h>
 #include <yaz/otherinfo.h>
 
@@ -28,7 +28,7 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_odr_in = odr_createmem (ODR_DECODE);
     m_odr_out = odr_createmem (ODR_ENCODE);
     m_odr_print = odr_createmem (ODR_PRINT);
-    m_log = LOG_DEBUG;
+    m_log = YLOG_DEBUG;
     m_APDU_file = 0;
     m_APDU_fname = 0;
     m_hostname = 0;
@@ -211,11 +211,11 @@ Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
     if (!z_GDU(m_odr_in, &apdu, 0, 0))
     {
 	const char *element = odr_getelement(m_odr_in);
-        yaz_log(LOG_LOG, "PDU decode failed '%s' near byte %d. Element %s",
+        yaz_log(YLOG_LOG, "PDU decode failed '%s' near byte %d. Element %s",
 		odr_errmsg(odr_geterror(m_odr_in)),
 		odr_offset(m_odr_in),
 		element ? element : "unknown");
-        yaz_log(LOG_LOG, "PDU dump:");
+        yaz_log(YLOG_LOG, "PDU dump:");
         odr_dumpBER(yaz_log_file(), buf, len);
         return 0;
     }
@@ -250,7 +250,7 @@ int Yaz_Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
     if (m_APDU_yazlog || !r)
     {
 	if (!r)
-	    yaz_log (LOG_LOG, "PDU encode failed. Element %s",
+	    yaz_log (YLOG_LOG, "PDU encode failed. Element %s",
 		     element ? element : "unknown");
 	FILE *save = m_APDU_file;
 	FILE *yazf = yaz_log_file();

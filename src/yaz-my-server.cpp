@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.12 2003-10-16 11:43:37 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.13 2004-11-30 21:10:31 adam Exp $
  */
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/options.h>
 #include <yaz++/z-server.h>
 #include <yaz++/pdu-assoc.h>
@@ -66,34 +66,34 @@ void MyILL::ill_service (Z_ExtendedServicesRequest *req,
 			 Z_ItemOrder *io,
 			 Z_ExtendedServicesResponse *res)
 {
-    yaz_log (LOG_LOG, "MyServer::ill_service");
+    yaz_log (YLOG_LOG, "MyServer::ill_service");
 }
 
 void MyUpdate::update_service (Z_ExtendedServicesRequest *req,
 			   Z_IUUpdate *io,
 			   Z_ExtendedServicesResponse *res)
 {
-    yaz_log (LOG_LOG, "MyServer::update_service (v1.1)");
+    yaz_log (YLOG_LOG, "MyServer::update_service (v1.1)");
 }
 
 void MyUpdate::update_service0 (Z_ExtendedServicesRequest *req,
 			   Z_IU0Update *io,
 				Z_ExtendedServicesResponse *res)
 {
-    yaz_log (LOG_LOG, "MyServer::update_service (v1.0)");
+    yaz_log (YLOG_LOG, "MyServer::update_service (v1.0)");
 }
 
 int MyRetrieval::sr_init (Z_InitRequest *initRequest,
 		       Z_InitResponse *initResponse)
 {
-    yaz_log (LOG_LOG, "MyServer::sr_init");
+    yaz_log (YLOG_LOG, "MyServer::sr_init");
     return 1;
 }
 
 void MyRetrieval::sr_search (Z_SearchRequest *searchRequest,
 			     Z_SearchResponse *searchResponse)
 {
-    yaz_log (LOG_LOG, "MyServer::recv_Z_search");
+    yaz_log (YLOG_LOG, "MyServer::recv_Z_search");
     if (searchRequest->query->which == Z_Query_type_1)
     {
 	Z_RPNStructure *s = searchRequest->query->u.type_1->RPNStructure;
@@ -114,7 +114,7 @@ void MyRetrieval::sr_search (Z_SearchRequest *searchRequest,
 void MyRetrieval::sr_present (Z_PresentRequest *presentRequest,
 			       Z_PresentResponse *presentResponse)
 {
-    yaz_log (LOG_LOG, "MyServer::recv_Z_present");
+    yaz_log (YLOG_LOG, "MyServer::recv_Z_present");
 }
 
 void MyRetrieval::sr_record (const char *resultSetName,
@@ -124,7 +124,7 @@ void MyRetrieval::sr_record (const char *resultSetName,
 			     Z_NamePlusRecord *namePlusRecord,
 			     Z_Records *records)
 {
-    yaz_log (LOG_LOG, "MyServer::recv_Z_record");
+    yaz_log (YLOG_LOG, "MyServer::recv_Z_record");
     const char *rec = get_record(position);
     create_databaseRecord (odr_encode(), namePlusRecord, 0, VAL_USMARC, rec,
 			   strlen(rec));
@@ -157,13 +157,13 @@ MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
 
 void MyServer::timeoutNotify()
 {
-    yaz_log (LOG_LOG, "connection timed out");
+    yaz_log (YLOG_LOG, "connection timed out");
     delete this;
 }
 
 void MyServer::failNotify()
 {
-    yaz_log (LOG_LOG, "connection closed by client");
+    yaz_log (YLOG_LOG, "connection closed by client");
     delete this;
 }
 
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
     z->server(addr);
     if (apdu_log)
     {
-	yaz_log (LOG_LOG, "set_APDU_log %s", apdu_log);
+	yaz_log (YLOG_LOG, "set_APDU_log %s", apdu_log);
 	z->set_APDU_log(apdu_log);
     }
 
