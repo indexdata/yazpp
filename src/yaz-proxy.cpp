@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.86 2004-01-09 18:11:15 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.87 2004-01-12 21:02:42 adam Exp $
  */
 
 #include <assert.h>
@@ -585,10 +585,9 @@ void Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p)
 {
     if (!m_stylesheet_schema)
 	return;
-    xmlDocPtr xslt_doc = xmlParseFile(m_stylesheet_schema);
     xsltStylesheetPtr xsp;
 
-    xsp = xsltParseStylesheetDoc(xslt_doc);
+    xsp = xsltParseStylesheetFile((const xmlChar *) m_stylesheet_schema);
 
     int i;
     for (i = 0; i < p->num_records; i++)
