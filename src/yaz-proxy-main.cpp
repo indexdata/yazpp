@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.34 2004-02-16 10:47:37 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.35 2004-03-17 10:49:58 adam Exp $
  */
 
 #include <signal.h>
@@ -151,7 +151,7 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
 
-    yaz_log(LOG_WARN, "%s", buf);
+    yaz_log(LOG_WARN, "%s: %s", (char*) ctx, buf);
 
     va_end (ap);
 }
@@ -162,7 +162,8 @@ static void child_run(Yaz_SocketManager *m, int run)
     signal(SIGHUP, sighup_handler);
 
 #if HAVE_XSLT
-    xmlSetGenericErrorFunc(0, proxy_xml_error_handler);
+    xmlSetGenericErrorFunc((void *) "XML", proxy_xml_error_handler);
+    xsltSetGenericErrorFunc((void *) "XSLT", proxy_xml_error_handler);
 #endif
     yaz_log(LOG_LOG, "0 proxy run=%d pid=%ld", run, (long) getpid());
 
