@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.26 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.27 2002-01-21 21:51:06 adam Exp $
  */
 
 #include <assert.h>
@@ -124,8 +124,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	}
 	else
 	{
-	    yaz_log (m_log, "cs_connect again");
-	    int res = cs_connect (m_cs, 0);
+	    yaz_log (m_log, "cs_rcvconnect");
+	    int res = cs_rcvconnect (m_cs);
 	    if (res == 1)
 	    {
 		unsigned mask = YAZ_SOCKET_OBSERVE_EXCEPT;
