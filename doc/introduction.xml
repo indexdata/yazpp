@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.3 2004-04-11 12:13:32 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.4 2004-05-04 04:09:30 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
    <ulink url="http://www.indexdata.dk/yazplusplus/">YAZ++</ulink> 
@@ -9,7 +9,7 @@
   </para>
   <para>
    The YAZ++ packages also features a ZOOM interface for C++ (
-   <ulink url="(http://zoom.z3950.org/bind/cplusplus/">ZOOM C++</ulink>).
+   <ulink url="http://zoom.z3950.org/bind/cplusplus/">ZOOM C++</ulink>).
   </para>
   <para>
    Later versions (0.7+) of YAZ++ also supports SRW/SRU.
