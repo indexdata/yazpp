@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.3 2002-10-22 08:23:57 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.4 2002-10-22 13:07:06 mike Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -7,7 +7,7 @@
    well with YAZ++. From time to time the software has been
    compiled on Windows using Visual C++. Other compilers should
    work too. Let us know of portability problems, etc. with
-   your system!
+   your system.
   </para>
   <para>
    YAZ++ is built on top of the 
@@ -17,17 +17,17 @@
    For some platforms there are binary packages for YAZ.
   </para>
   <section id="unix">
-   <title>UNIX</title>
+   <title>Building on Unix</title>
    <para>On UNIX, the software is compiled as follows:
     <screen>
-     ./configure
-     make
-     su
-     make install
+     $ ./configure
+     $ make
+     $ su
+     # make install
     </screen>
    </para>
    <para>
-    You can supply options for the configure script.
+    You can supply options for the <literal>configure</literal> script.
     The most useful ones are:
     <variablelist>
      <varlistentry>
@@ -40,59 +40,68 @@
      <varlistentry>
       <term><literal>--with-yazconfig </literal>directory</term>
       <listitem><para>
-        Specifies location of <filename>yaz-config</filename>.
-        The <filename>yaz-config</filename> is generated in
+        Specifies the location of <filename>yaz-config</filename>.
+        The <filename>yaz-config</filename> program is generated in
         the source directory of YAZ as well as the binaries
         directory when YAZ is installed (via make install).
         </para>
        <para>
-        If you don't supply this option, configure, will
+        If you don't supply this option, <literal>configure</literal> will
         look for <filename>yaz-config</filename> in directories of the
-        <literal>PATH</literal> environment.
+        <envar>PATH</envar> environment - which is nearly always
+        what you want.
        </para></listitem>
      </varlistentry>
     </variablelist>
-    For the whole list of configure options, refer to the help:
+    For the whole list of <literal>configure</literal> options, refer
+    to the help:
     <literal>./configure --help</literal>.
    </para>
    <para>
-    This is a list of what you have after successful compilation:
+    This is what you have after successful compilation:
     <variablelist>
      <varlistentry>
-      <term>src/yaz-proxy</term> 
+      <term><literal>src/yaz-proxy</literal></term> 
       <listitem><para>
-        Z39.50 Proxy. This program gets installed in
-        your binaries directory (prefix<literal>/bin</literal>).
-       </para></listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>lib/libyaz++.la</term> 
-      <listitem><para>
-        YAZ++ library. This library gets installed in your
-        libraries directory (prefix<literal>/lib</literal>).
+        The Yaz <link linkend="proxy">Z39.50 Proxy</link> utility.
+	This program gets installed in your binaries directory
+	(<parameter>prefix</parameter><literal>/bin</literal>).
        </para></listitem>
      </varlistentry>
 
      <varlistentry>
-      <term>include/yaz++/*.h</term> 
+      <term><literal>lib/libyaz++.la</literal></term> 
       <listitem><para>
-        Various header files. All these are installed in
-        your header files area (prefix<literal>/include/yaz++</literal>).
+        The YAZ++ library, including the
+	<link linkend="zoom">ZOOM-C++</link> classes.
+	This library gets installed in your libraries directory
+	(<parameter>prefix</parameter><literal>/lib</literal>).
+       </para></listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term><literal>include/yaz++/*.h</literal></term> 
+      <listitem><para>
+        Various C++ header files, which you'll need for YAZ
+	development. All these are installed in your header files area
+	(<parameter>prefix</parameter><literal>/include/yaz++</literal>).
        </para></listitem>
      </varlistentry>
      
      <varlistentry>
-      <term>yaz++-config</term> 
+      <term><literal>yaz++-config</literal></term> 
       <listitem><para>
-        Bourne shell script utility that returns CFLAGS/LIBS
-        needed in order to compile with the YAZ++ library.
-        This script gets installed in your binaries directory
-        (prefix<literal>/bin</literal>).
+        A Bourne shell-script utility that returns the values of the
+	<envar>CFLAGS</envar> and <envar>LIBS</envar>
+	environment variables
+        needed in order to compile your applications with the YAZ++
+	library.  This script gets installed in your binaries directory
+        (<parameter>prefix</parameter><literal>/bin</literal>).
        </para></listitem>
      </varlistentry>
 
      <varlistentry>
-      <term>zoom/zclient</term> 
+      <term><literal>zoom/zclient</literal></term> 
       <listitem><para>
         ZOOM C++ demonstration client. This client does not
         get installed in the system directories.
@@ -100,7 +109,7 @@
      </varlistentry>
 
      <varlistentry>
-      <term>src/yaz-my-client</term> 
+      <term><literal>src/yaz-my-client</literal></term> 
       <listitem><para>
         YAZ C++ demonstration client. This client does not
         get installed in the system directories.
@@ -108,7 +117,7 @@
      </varlistentry>
 
      <varlistentry>
-      <term>src/yaz-my-server</term> 
+      <term><literal>src/yaz-my-server</literal></term> 
       <listitem><para>
         YAZ C++ demonstration server. This server does not
         get installed in the system directories.
