@@ -1,11 +1,11 @@
 
+Per database config.
+
 Control the various optimizations with config..
 
 Live status (via search, present).
 
 Possible threading.
-
-Throw proper diagnostic for bad schema (Z39.50/SRW).
 
 Deal with Z39.50 options properly.
 
@@ -13,5 +13,7 @@ Deal with Z39.50 messages sizes properly.
 
 For SRW/SRU, set schema for each returned record.
 
-Fork to ensure that crashes are catched.
+Character set conversion for SRW queries.
+
+Throw proper CQL conversion error.
 

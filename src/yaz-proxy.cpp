@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.76 2004-01-05 11:31:04 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.77 2004-01-06 21:17:42 adam Exp $
  */
 
 #include <assert.h>
@@ -1360,16 +1360,32 @@ Z_APDU *Yaz_Proxy::handle_query_transformation(Z_APDU *apdu)
     {
 	Z_RPNQuery *rpnquery = 0;
 	Z_SearchRequest *sr = apdu->u.searchRequest;
+	char *addinfo = 0;
 	
 	yaz_log(LOG_LOG, "%sCQL: %s", m_session_str,
 		sr->query->u.type_104->u.cql);
 
 	int r = m_cql2rpn.query_transform(sr->query->u.type_104->u.cql,
-					  &rpnquery, odr_encode());
+					  &rpnquery, odr_encode(),
+					  &addinfo);
 	if (r == -3)
 	    yaz_log(LOG_LOG, "%sNo CQL to RPN table", m_session_str);
 	else if (r)
+	{
 	    yaz_log(LOG_LOG, "%sCQL Conversion error %d", m_session_str, r);
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+
+	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
+	    new_apdu->u.searchResponse->records =
+		create_nonSurrogateDiagnostics(odr_encode(),
+					       yaz_diag_srw_to_bib1(r),
+					       addinfo);
+	    *new_apdu->u.searchResponse->searchStatus = 0;
+
+	    send_to_client(new_apdu);
+
+	    return 0;
+	}
 	else
 	{
 	    sr->query->which = Z_Query_type_1;
@@ -1631,7 +1647,9 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		start = *srw_req->startRecord;
 	    if (max > 0)
 	    {
-		if (start <= 1)  // Z39.50 piggyback
+                // Some backend, such as Voyager doesn't honor piggyback
+		// So we use present always (0 &&).
+		if (0 && start <= 1)  // Z39.50 piggyback
 		{
 		    *z_searchRequest->smallSetUpperBound = max;
 		    *z_searchRequest->mediumSetPresentNumber = max;
@@ -2248,7 +2266,7 @@ int Yaz_Proxy::server(const char *addr)
     int r = Yaz_Z_Assoc::server(addr);
     if (!r)
     {
-	yaz_log(LOG_LOG, "%sStarted listener on %s", m_session_str, addr);
+	yaz_log(LOG_LOG, "%sStarted proxy " VERSION " on %s", m_session_str, addr);
 	timeout(1);
     }
     return r;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.27 2004-01-05 11:31:04 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.28 2004-01-06 21:17:42 adam Exp $
  */
 
 #include <signal.h>
@@ -109,7 +109,6 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     }
     if (addr)
     {
-	yaz_log(LOG_LOG, "0 Starting proxy " VERSION );
 	if (proxy->server(addr))
 	{
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "listen %s", addr);
@@ -133,9 +132,11 @@ static void sighup_handler(int num)
 }
 
 
-static void child_run(Yaz_SocketManager *m)
+static void child_run(Yaz_SocketManager *m, int run)
 {
-    yaz_log(LOG_LOG, "0 proxy pid=%ld", (long) getpid());
+    signal(SIGHUP, sighup_handler);
+
+    yaz_log(LOG_LOG, "0 proxy run=%d pid=%ld", run, (long) getpid());
     if (pid_fname)
     {
 	FILE *f = fopen(pid_fname, "w");
@@ -180,19 +181,19 @@ static void child_run(Yaz_SocketManager *m)
 int main(int argc, char **argv)
 {
     int cont = 1;
+    int run = 1;
     static int mk_pid = 0;
     Yaz_SocketManager mySocketManager;
     Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
 
     static_yaz_proxy = &proxy;
 
-    signal(SIGHUP, sighup_handler);
 
     args(&proxy, argc, argv);
 
     if (debug)
     {
-	child_run(&mySocketManager);
+	child_run(&mySocketManager, run);
 	exit(0);
     }
     while (cont)
@@ -205,11 +206,14 @@ int main(int argc, char **argv)
 	}
 	else if (p == 0)
 	{
-	    child_run(&mySocketManager);
+	    child_run(&mySocketManager, run);
 	}
 	pid_t p1;
 	int status;
 	p1 = wait(&status);
+
+	yaz_log_reopen();
+
 	if (p1 != p)
 	{
 	    yaz_log(LOG_FATAL, "p1=%d != p=%d", p1, p);
@@ -250,6 +254,7 @@ int main(int argc, char **argv)
 	}
 	if (cont)
 	    sleep(1);
+	run++;
     }
     exit (0);
     return 0;

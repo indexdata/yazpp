@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.18 2004-01-05 09:31:09 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.19 2004-01-06 21:17:42 adam Exp $
  */
 
 #include <ctype.h>
@@ -396,6 +396,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	*stylesheet = 0;
     }
 #if HAVE_XSLT
+    int syntax_has_matched = 0;
     xmlNodePtr ptr;
     
     ptr = find_target_node(name, 0);
@@ -445,8 +446,10 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		}
 	    }
 	    if (match)
+	    {
+		syntax_has_matched = 1;
 		match = check_esn(ptr->children, comp);
-
+	    }
 	    if (match)
 	    {
 		if (stylesheet && match_stylesheet)
@@ -460,6 +463,8 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		}
 		if (match_error)
 		{
+		    if (syntax_has_matched)  // if syntax did match, schema/ESN was bad
+			return 25;
 		    if (syntax)
 		    {
 			char dotoid_str[100];

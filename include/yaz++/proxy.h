@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.26 2004-01-05 11:31:04 adam Exp $
+ * $Id: proxy.h,v 1.27 2004-01-06 21:17:42 adam Exp $
  */
 
 #include <sys/time.h>
@@ -177,7 +177,8 @@ class YAZ_EXPORT Yaz_cql2rpn {
     Yaz_cql2rpn();
     ~Yaz_cql2rpn();
     void set_pqf_file(const char *fname);
-    int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o);
+    int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o,
+			char **addinfop);
  private:
     cql_transform_t m_transform;
 };
