@@ -581,7 +581,11 @@
 	 <entry><literal>client-apdu</literal></entry>
 	 <entry>
 	  Log APDUs as reported by YAZ for the
-	  communication between the client and the proxy
+	  communication between the client and the proxy.
+	  This facility is equivalent to the APDU logging that
+	  happens when using option <literal>-a</literal>, however
+	  this tells the proxy to log in the same file as given
+	  by <literal>-l</literal>.
 	 </entry>
 	</row>
 	<row>

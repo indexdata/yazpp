@@ -10,6 +10,7 @@
  <cmdsynopsis>
   <command>yaz-proxy</command>
   <arg choice="opt">-a <replaceable>filename</replaceable></arg>
+  <arg choice="opt">-l <replaceable>filename</replaceable></arg>
   <arg choice="opt">-m <replaceable>num</replaceable></arg>
   <arg choice="opt">-v <replaceable>level</replaceable></arg>
   <arg choice="opt">-t <replaceable>target</replaceable></arg>
@@ -55,6 +56,14 @@
      standard output.
     </para></listitem>
   </varlistentry>
+  <varlistentry><term>-l <replaceable>filename</replaceable></term>
+   <listitem><para>
+     Specifies the name of a file to which to write a log of the
+     YAZ proxy activity. This uses the logging facility as provided
+     by the YAZ toolkit. If this options is omitted, the output
+     directed to stderr.
+    </para></listitem>
+  </varlistentry>
   <varlistentry><term>-m <replaceable>num</replaceable></term>
    <listitem><para>
      Specifies the maximum number of connections to be cached
@@ -63,7 +72,7 @@
   </varlistentry>
   <varlistentry><term>-v <replaceable>level</replaceable></term>
    <listitem><para>
-     Sets the logging level.  <replaceable>level</replaceable> is
+     Sets the logging level. <replaceable>level</replaceable> is
      a comma-separated list of members of the set
      {<literal>fatal</literal>,<literal>debug</literal>,<literal>warn</literal>,<literal>log</literal>,<literal>malloc</literal>,<literal>all</literal>,<literal>none</literal>}.
     </para></listitem>
