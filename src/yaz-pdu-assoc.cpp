@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.31 2003-10-09 12:11:10 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.32 2003-10-10 10:50:37 adam Exp $
  */
 
 #include <assert.h>
@@ -428,6 +428,11 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     m_PDU_Observer = observer;
     void *ap;
     m_cs = comstack(addr, &ap);
+    if (!m_cs)
+    {
+        m_PDU_Observer->failNotify();
+	return;
+    }
     int res = cs_connect (m_cs, ap);
     yaz_log (m_log, "Yaz_PDU_Assoc::connect fd=%d res=%d", cs_fileno(m_cs),
 	     res);
