@@ -22,7 +22,7 @@
       <pdu>11</pdu>
       <retrieve>10</retrieve>
     </limit>
-    <query type="1" value="10" error="114"/>
+    <query type="1" value="10,1023-9000" error="114"/>
   </target>
   <target name="*">
     <!-- everything else -->

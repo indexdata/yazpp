@@ -2,9 +2,10 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.3 2003-10-04 06:44:16 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.4 2003-10-06 08:08:49 adam Exp $
  */
 
+#include <ctype.h>
 #include <yaz/log.h>
 #include <yaz++/proxy.h>
 
@@ -173,6 +174,40 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 }
 #endif
 
+int Yaz_ProxyConfig::atoi_l(const char **cp)
+{
+    int v = 0;
+    while (**cp && isdigit(**cp))
+    {
+	v = v*10 + (**cp - '0');
+	(*cp)++;
+    }
+    return v;
+}
+
+int Yaz_ProxyConfig::match_list(int v, const char *m)
+{
+  while(m && *m)
+  {
+      while(*m && isspace(*m))
+	  m++;
+      if (*m == '*')
+	  return 1;
+      int l = atoi_l(&m);
+      int h = l;
+      if (*m == '-')
+      {
+	  ++m;
+	  h = atoi_l(&m);
+      }
+      if (v >= l && v <= h)
+	  return 1;
+      if (*m == ',')
+	  m++;
+  }
+  return 0;
+}
+
 #if HAVE_XML2
 int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
 					     Z_AttributeList *attrs,
@@ -213,19 +248,14 @@ int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
 			continue;
 		    int type = *el->attributeType;
 
-		    if (strcmp(match_type, "*")) {
-			if (type != atoi(match_type))
-			    continue;  // no match on type
-		    }
+		    if (!match_list(type, match_type))
+			continue;
 		    if (el->which == Z_AttributeValue_numeric && 
 			el->value.numeric)
 		    {
-			int value = *el->value.numeric;
-			if (strcmp(match_value, "*")) {
-			    if (value != atoi(match_value))
-				continue;  // no match on value
-			}
-			sprintf(value_str, "%d", value);
+			if (!match_list(*el->value.numeric, match_value))
+			    continue;
+			sprintf (value_str, "%d", *el->value.numeric);
 		    }
 		    else
 			continue;
