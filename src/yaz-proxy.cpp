@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.103 2004-02-24 20:55:57 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.104 2004-02-26 23:43:07 adam Exp $
  */
 
 #include <assert.h>
@@ -271,30 +271,53 @@ char *Yaz_Proxy::get_proxy(Z_OtherInformation **otherInfo)
 const char *Yaz_Proxy::load_balance(const char **url)
 {
     int zurl_in_use[MAX_ZURL_PLEX];
+    int zurl_in_spare[MAX_ZURL_PLEX];
     Yaz_ProxyClient *c;
     int i;
 
     for (i = 0; i<MAX_ZURL_PLEX; i++)
+    {
 	zurl_in_use[i] = 0;
+	zurl_in_spare[i] = 0;
+    }
     for (c = m_parent->m_clientPool; c; c = c->m_next)
     {
 	for (i = 0; url[i]; i++)
 	    if (!strcmp(url[i], c->get_hostname()))
+	    {
 		zurl_in_use[i]++;
+		if (c->m_cookie == 0 && c->m_server == 0 && c->m_waiting == 0)
+		    zurl_in_spare[i]++;
+	    }
     }
-    int min = 100000;
-    const char *ret = 0;
+    int min_use = 100000;
+    int spare_for_min = 0;
+    int max_spare = 0;
+    const char *ret_min = 0;
+    const char *ret_spare = 0;
     for (i = 0; url[i]; i++)
     {
-	yaz_log(LOG_DEBUG, "%szurl=%s use=%d",
-		m_session_str, url[i], zurl_in_use[i]);
-	if (min > zurl_in_use[i])
+	yaz_log(LOG_DEBUG, "%szurl=%s use=%d spare=%d",
+		m_session_str, url[i], zurl_in_use[i], zurl_in_spare[i]);
+	if (min_use > zurl_in_use[i])
 	{
-	    ret = url[i];
-	    min = zurl_in_use[i];
+	    ret_min = url[i];
+	    min_use = zurl_in_use[i];
+	    spare_for_min = zurl_in_spare[i];
+	}
+	if (max_spare < zurl_in_spare[i]) 
+	{
+	    ret_spare = url[i];
+	    max_spare = zurl_in_spare[i];
 	}
     }
-    return ret;
+    // use the one with minimum connections if spare is > 3
+    if (spare_for_min > 3)
+	return ret_min;
+    // use one with most spares (if any)
+    if (max_spare > 0)
+	return ret_spare;
+    return ret_min;
 }
 
 Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
@@ -411,8 +434,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 		!strcmp(m_proxyTarget, c->get_hostname()))
 	    {
 		// found it in cache
-		yaz_log (LOG_LOG, "%sREUSE %s",
-			 m_session_str, c->get_hostname());
+		yaz_log (LOG_LOG, "%sREUSE %d %s",
+			 m_session_str, parent->m_seqno, c->get_hostname());
 		
 		c->m_seqno = parent->m_seqno;
 		assert(c->m_server == 0);
@@ -477,16 +500,16 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 	    c = c_min;
 	    if (c->m_waiting || strcmp(m_proxyTarget, c->get_hostname()))
 	    {
-		yaz_log (LOG_LOG, "%sMAXCLIENTS Destroy %d",
-			 m_session_str, c->m_seqno);
+		yaz_log (LOG_LOG, "%sMAXCLIENTS %d Destroy %d",
+			 m_session_str, parent->m_max_clients, c->m_seqno);
 		if (c->m_server && c->m_server != this)
 		    delete c->m_server;
 		c->m_server = 0;
 	    }
 	    else
 	    {
-		yaz_log (LOG_LOG, "%sMAXCLIENTS Reuse %d %d %s",
-			 m_session_str,
+		yaz_log (LOG_LOG, "%sMAXCLIENTS %d Reuse %d %d %s",
+			 m_session_str, parent->m_max_clients,
 			 c->m_seqno, parent->m_seqno, c->get_hostname());
 		xfree (c->m_cookie);
 		c->m_cookie = 0;

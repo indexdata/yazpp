@@ -1,3 +1,7 @@
+--- 0.7.10 2004/02/27 Internal release.
+
+Revise proxy algorithm for backend target selection.
+
 --- 0.7.9 2004/02/25 Internal release.
 
 Deal with init message sizes for reuse sessions.
