@@ -1,6 +1,8 @@
-Fixed Windows Compile.
+--- 0.7.5 2004/01/15 Internal release.
 
 Fixes for Z39.50 options / version.
+
+Fixes for XML formatting for stylesheet conversions.
 
 --- 0.7.4 2004/01/07 Internal release.
 
