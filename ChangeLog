@@ -1,4 +1,10 @@
-Fixed fix-up for omitted referenceIds.
+--- 0.7.12 2004/03/17 Internal release.
+
+Force libXSLT to reports errors to log file (similar to libXML2).
+
+Update voyager.xml and pqf.properties to use info: URIs.
+
+Fixed handling of omitted referenceIDs.
 
 --- 0.7.11 2004/03/01 Internal release.
 

@@ -4,6 +4,12 @@ Proxy doesn't do well, if preferredRecordSyntax is not set.
 Per database config.
 
 Control the various optimizations with config..
+  query match
+  record caching
+  fix-up reference ID
+  pre-init
+  keepalive
+  -1 reinit.
 
 Live status (via search, present).
 
