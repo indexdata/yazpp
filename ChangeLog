@@ -1,5 +1,8 @@
-2001-05-03  Adam Dickmeiss
-    * Added Update service for server.
 
-2001-04-25  Adam Dickmeiss
-    * Server sets referenceId in responses..
+--- 0.4 2002/10/24 First official release
+
+Documentation!
+
+Added ZOOM C++ binding.
+
+
