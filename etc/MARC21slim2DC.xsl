@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: MARC21slim2DC.xsl,v 1.1 2004-01-05 09:31:09 adam Exp $ -->
-<xsl:stylesheet version="1.0"
-  xmlns:marc="http://www.loc.gov/MARC21/slim"
-  xmlns:dc="http://purl.org/dc/elements/1.1/"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  exclude-result-prefixes="marc">
+<xsl:stylesheet version="1.0" 
+	xmlns:marc="http://www.loc.gov/MARC21/slim" 
+	xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:dc="http://purl.org/dc/elements/1.1/" 
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+	exclude-result-prefixes="marc oai_dc">
 	<xsl:import href="MARC21slimUtils.xsl"/>
 	<xsl:output method="xml" indent="yes"/>
-	
+<!-- modification log 
+	NT 01/04:  added collection level element
+	and removed attributes
+
+-->	
 	<xsl:template match="/">
-			<xsl:apply-templates/>
+	<xsl:choose>
+			<xsl:when test="marc:collection">
+				<!-- nt fix 1/04 -->
+				<dc:dcCollection>
+					<xsl:for-each select="marc:collection">
+						<oai_dc:dc xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">				
+							<xsl:apply-templates select="marc:record"/>
+						</oai_dc:dc>
+					</xsl:for-each>								
+				</dc:dcCollection>
+			</xsl:when>
+			<xsl:otherwise>					
+				 <oai_dc:dc xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+					<xsl:apply-templates select="marc:record"/>
+				 </oai_dc:dc>					
+			</xsl:otherwise>
+		</xsl:choose>			
 	</xsl:template>
 
 	<xsl:template match="marc:record">
@@ -18,7 +39,6 @@
 		<xsl:variable name="leader7" select="substring($leader,8,1)"/>
 		<xsl:variable name="controlField008" select="marc:controlfield[@tag=008]"/>
 
-	  <dc:dc>
 			<xsl:for-each select="marc:datafield[@tag=245]">
 				<dc:title>
 					<xsl:call-template name="subfieldSelect">
@@ -26,21 +46,24 @@
 					</xsl:call-template>
 				</dc:title>
 			</xsl:for-each>
-
 	
 			<xsl:for-each select="marc:datafield[@tag=100]|marc:datafield[@tag=110]|marc:datafield[@tag=111]|marc:datafield[@tag=700]|marc:datafield[@tag=710]|marc:datafield[@tag=711]|marc:datafield[@tag=720]">
 				<dc:creator>
-					<xsl:value-of select="."/>
+					<xsl:value-of select="normalize-space(.)"/>
 				</dc:creator>
 			</xsl:for-each>
 
 			<dc:type>		
 				<xsl:if test="$leader7='c'">
-					<xsl:attribute name="collection">yes</xsl:attribute>
+					<!-- nt fix 1/04 -->
+					<!--<xsl:attribute name="collection">yes</xsl:attribute>-->
+					<xsl:text>collection</xsl:text>
 				</xsl:if>
 
 				<xsl:if test="$leader6='d' or $leader6='f' or $leader6='p' or $leader6='t'">
-					<xsl:attribute name="manuscript">yes</xsl:attribute>
+					<!-- nt fix 1/04 -->
+					<!--<xsl:attribute name="manuscript">yes</xsl:attribute> -->
+					<xsl:text>manuscript</xsl:text>
 				</xsl:if>
 
 				<xsl:choose>
@@ -58,7 +81,7 @@
 
 			<xsl:for-each select="marc:datafield[@tag=655]">
 				<dc:type>
-					<xsl:value-of select="."/>
+					<xsl:value-of select="normalize-space(.)"/>
 				</dc:type>
 			</xsl:for-each>
 
@@ -88,7 +111,8 @@
 
 			<xsl:for-each select="marc:datafield[@tag=520]">
 				<dc:description>
-					<xsl:value-of select="marc:subfield[@code='a']"/>
+					<!-- nt fix 01/04 -->
+					<xsl:value-of select="normalize-space(marc:subfield[@code='a'])"/>
 				</dc:description>
 			</xsl:for-each>
 
@@ -161,7 +185,9 @@
 			</xsl:for-each>
 
 			<xsl:for-each select="marc:datafield[@tag=530]">
-				<dc:relation type="original">
+			<!-- nt 01/04 attribute fix -->
+				<dc:relation>
+					<!--<xsl:attribute name="type">original</xsl:attribute>-->
 					<xsl:call-template name="subfieldSelect">
 						<xsl:with-param name="codes">abcdu</xsl:with-param>
 					</xsl:call-template>
@@ -192,7 +218,6 @@
 				<dc:rights>
 					<xsl:value-of select="marc:subfield[@code='a']"/>
 				</dc:rights>
-			</xsl:for-each>
-		</dc:dc>
+			</xsl:for-each>		
 	</xsl:template>
 </xsl:stylesheet>
