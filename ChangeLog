@@ -1,5 +1,7 @@
 New autoconf m4 macro in yazpp.m4.
 
+Fix creation of src/yaz++-config so that it works if srcdir != objdir.
+
 Fixes for yaz++-config for libtool archives.
 
 --- 0.5 2002/11/04 Second release

@@ -66,21 +66,16 @@ AC_SUBST(YAZPP_BUILD_ROOT)
 YAZPP_SRC_ROOT=`cd ${srcdir}; pwd`
 YAZPP_BUILD_ROOT=`pwd`
 
-if test -f ${srcdir}/src/yaz++-config.in; then
-        rm ${srcdir}/src/yaz++-config.in
-fi
-sed s%yaz_echo_source=yes%yaz_echo_source=no%g < ${srcdir}/yaz++-config.in >${srcdir}/src/yaz++-config.in
 AC_OUTPUT([
 	Makefile
 	src/Makefile
 	include/Makefile
 	include/yaz++/Makefile
 	yaz++-config
-	src/yaz++-config
 	zoom/Makefile
 	lib/Makefile
 	doc/Makefile
 	doc/yaz++.xml
 	doc/yazprint.dsl doc/yazphp.dsl doc/yazhtml.dsl
         doc/tkl.xsl
-],[chmod +x yaz++-config src/yaz++-config])
+],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz++-config >src/yaz++-config && chmod +x yaz++-config src/yaz++-config])
