@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.45 2003-07-25 08:57:01 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.46 2003-09-03 11:25:08 adam Exp $
  */
 
 #include <assert.h>
@@ -22,7 +22,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_keepalive = 1;
     m_proxyTarget = 0;
     m_proxy_authentication = 0;
-    m_max_clients = 50;
+    m_max_clients = 100;
     m_seed = time(0);
     m_idletime = 600;
     m_optimize = xstrdup ("1");
@@ -124,7 +124,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	{
 	    assert (c->m_prev);
 	    assert (*c->m_prev == c);
-	    if (!strcmp(cookie,c->m_cookie) &&
+	    if (c->m_cookie && !strcmp(cookie,c->m_cookie) &&
 		!strcmp(m_proxyTarget, c->get_hostname()))
 	    {
 		cc = c;
@@ -169,7 +169,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	{
 	    assert (c->m_prev);
 	    assert (*c->m_prev == c);
-	    if (c->m_server == 0 && c->m_cookie[0] == 0 && 
+	    if (c->m_server == 0 && c->m_cookie == 0 && 
 		!strcmp(m_proxyTarget, c->get_hostname()))
 	    {
 		cc = c;
@@ -223,8 +223,9 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    yaz_log (LOG_LOG, "Existing sessions");
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
-	    yaz_log (LOG_LOG, " Session %-3d wait=%d %s", c->m_seqno,
-			       c->m_waiting, c->get_hostname());
+	    yaz_log (LOG_LOG, " Session %-3d wait=%d %s cookie=%s", c->m_seqno,
+			       c->m_waiting, c->get_hostname(),
+			       c->m_cookie ? c->m_cookie : "");
 	    no_of_clients++;
 	    if (min_seq < 0 || c->m_seqno < min_seq)
 	    {
@@ -247,10 +248,10 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    {
 		yaz_log (LOG_LOG, "Move session %d to %d %s",
 		      c->m_seqno, parent->m_seqno, c->get_hostname());
+		xfree (c->m_cookie);
+		c->m_cookie = 0;
 		if (cookie)
-		    strcpy (c->m_cookie, cookie);
-		else
-		    c->m_cookie[0] = '\0';
+		    c->m_cookie = xstrdup(cookie);
 		c->m_seqno = parent->m_seqno;
 		if (c->m_server && c->m_server != this)
 		{
@@ -273,10 +274,12 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    parent->m_clientPool = c;
 	    c->m_prev = &parent->m_clientPool;
 	}
+
+	xfree (c->m_cookie);
+	c->m_cookie = 0;
 	if (cookie)
-	    strcpy (c->m_cookie, cookie);
-	else
-	    c->m_cookie[0] = '\0';
+	    c->m_cookie = xstrdup(cookie);
+
 	yaz_log (LOG_LOG, "Connecting to %s", m_proxyTarget);
 	c->m_seqno = parent->m_seqno;
 	c->client(m_proxyTarget);
@@ -661,6 +664,7 @@ Yaz_ProxyClient::~Yaz_ProxyClient()
     odr_destroy(m_init_odr);
     delete m_last_query;
     xfree (m_last_resultSetId);
+    xfree (m_cookie);
 }
 
 void Yaz_Proxy::timeoutNotify()
@@ -678,7 +682,7 @@ void Yaz_ProxyClient::timeoutNotify()
 Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Assoc (the_PDU_Observable)
 {
-    m_cookie[0] = 0;
+    m_cookie = 0;
     m_next = 0;
     m_prev = 0;
     m_init_flag = 0;
@@ -758,7 +762,7 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 	    m_resultSetStartPoint = 0;
 	}
     }
-    if (m_cookie && *m_cookie)
+    if (m_cookie)
 	set_otherInformationString (apdu, VAL_COOKIE, 1, m_cookie);
     if (m_server)
     {

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.5 2003-07-25 08:57:01 adam Exp $
+ * $Id: proxy.h,v 1.6 2003-09-03 11:25:08 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -48,7 +48,7 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     void failNotify();
     void timeoutNotify();
     void connectNotify();
-    char m_cookie[32];
+    char *m_cookie;
     Yaz_ProxyClient *m_next;
     Yaz_ProxyClient **m_prev;
     int m_init_flag;
