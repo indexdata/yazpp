@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.9  1999-04-28 13:29:14  adam
+ * Revision 1.10  1999-04-29 07:33:28  adam
+ * Changed setting of host in connect/proxy setting. YAZ' strtoaddr now
+ * ignores database part of host.
+ *
+ * Revision 1.9  1999/04/28 13:29:14  adam
  * Yet another fix regarding database settings.
  *
  * Revision 1.8  1999/04/28 13:04:03  adam
@@ -293,17 +297,10 @@ void Yaz_IR_Assoc::client(const char *addr)
     delete [] m_host;
     m_host = new char[strlen(addr)+1];
     strcpy(m_host, addr);
-    const char *zurl_p = (m_proxy ? m_proxy : m_host);
-    char *zurl = new char[strlen(zurl_p)+1];
-    strcpy(zurl, zurl_p);
-    char *dbpart = strchr(zurl, '/');
+    const char *dbpart = strchr(m_host, '/');
     if (dbpart)
-    {
 	set_databaseNames (dbpart+1, "+ ");
-	*dbpart = '\0';
-    }
-    Yaz_Z_Assoc::client(zurl);
-    delete [] zurl;
+    Yaz_Z_Assoc::client(m_proxy ? m_proxy : m_host);
 }
 
 const char *Yaz_IR_Assoc::get_proxy()
@@ -375,18 +372,7 @@ int Yaz_IR_Assoc::send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
     if (m_proxy && m_host)
-    {
-	char *rawhost = new char[strlen(m_host)+1];
-	strcpy(rawhost, m_host);
-	char *dbpart = strchr(rawhost, '/');
-	if (dbpart)
-	{
-	    set_databaseNames (dbpart+1, "+ ");
-	    *dbpart = '\0';
-	}
-	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, rawhost);
-	delete [] rawhost;
-    }
+	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
     if (m_cookie)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);
