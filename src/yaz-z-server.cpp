@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.8  2001-03-27 14:47:45  adam
+ * Revision 1.9  2001-03-29 15:14:26  adam
+ * Minor updates.
+ *
+ * Revision 1.8  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  * Revision 1.7  2001/03/26 14:43:49  adam
@@ -53,7 +56,6 @@ void Yaz_Z_Server::facility_reset ()
 	Yaz_Z_Server_Facility_Info *p_next = p->m_next;
 
 	delete [] p->m_name;
-	delete [] p->m_facility;
 	delete p;
 	p = p_next;
     }

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-server.cpp,v $
- * Revision 1.1  2001-03-27 14:47:45  adam
+ * Revision 1.2  2001-03-29 15:14:26  adam
+ * Minor updates.
+ *
+ * Revision 1.1  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  * Revision 1.15  2001/03/26 14:43:49  adam
@@ -87,6 +90,7 @@ public:
 
 class MyServer : public Yaz_Z_Server {
 public:
+    ~MyServer();
     MyServer(IYaz_PDU_Observable *the_PDU_Observable);
     IYaz_PDU_Observer* sessionNotify(IYaz_PDU_Observable *the_PDU_Observable,
 				     int fd);
@@ -95,6 +99,8 @@ public:
     void connectNotify();
 
 private:
+    MyRetrieval *m_retrieval;
+    MyILL       *m_ill;
     int m_no;
 };
 
@@ -152,17 +158,23 @@ void MyRetrieval::sr_record (const char *resultSetName,
 			   strlen(rec));
 }
 
+MyServer::~MyServer()
+{
+    delete m_ill;
+    delete m_retrieval;
+}
+
 IYaz_PDU_Observer *MyServer::sessionNotify(
     IYaz_PDU_Observable *the_PDU_Observable, int fd)
 {
     MyServer *new_server;
-    MyRetrieval *new_ret = new MyRetrieval;
-    MyILL *new_ill = new MyILL;
     m_no++;
     new_server = new MyServer(the_PDU_Observable);
     new_server->timeout(900);
-    new_server->facility_add(new_ret, "my sr");
-    new_server->facility_add(new_ill, "my ill");
+    new_server->m_retrieval = new MyRetrieval;
+    new_server->m_ill = new MyILL;
+    new_server->facility_add(new_server->m_retrieval, "my sr");
+    new_server->facility_add(new_server->m_ill, "my ill");
 
     new_server->set_APDU_log(get_APDU_log());
 
@@ -173,6 +185,8 @@ MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Server (the_PDU_Observable)
 {
     m_no = 0;
+    m_ill = 0;
+    m_retrieval = 0;
 }
 
 void MyServer::timeoutNotify()

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ill.cpp,v $
- * Revision 1.1  2001-03-27 14:47:45  adam
+ * Revision 1.2  2001-03-29 15:14:26  adam
+ * Minor updates.
+ *
+ * Revision 1.1  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  */
@@ -61,7 +64,7 @@ ODR Yaz_Facility_ILL::odr_encode()
 }
 
 int Yaz_Facility_ILL::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
-				 Z_InitResponse *initResponse)
+			   Z_InitResponse *initResponse)
 {
     Z_Options *req = initRequest->options;
     Z_Options *res = initResponse->options;
