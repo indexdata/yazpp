@@ -1,4 +1,7 @@
 
+Add MODS version 3 conversion, MARC21slim2MODS3.xsl. Update voyager.xml,
+config.xml to use it.
+
 --- 0.7.7 2004/02/10 Internal release.
 
 Make proxy perform keepalive when receiving SIGBUS.
