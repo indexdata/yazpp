@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-proxy.h,v 1.4 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-proxy.h,v 1.5 1999-04-21 12:09:01 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -14,12 +14,15 @@ class Yaz_Proxy;
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     friend Yaz_Proxy;
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
+    ~Yaz_ProxyClient();
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
     Yaz_Proxy *m_server;
     void failNotify();
-    char *m_cookie;
+    void timeoutNotify();
+    char m_cookie[32];
     Yaz_ProxyClient *m_next;
+    Yaz_ProxyClient **m_prev;
 };
 
 /// Information Retrieval Proxy Server.
@@ -30,10 +33,17 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
     void failNotify();
+    void timeoutNotify();
  private:
     char *get_cookie(Z_OtherInformation **otherInfo);
     char *get_proxy(Z_OtherInformation **otherInfo);
+    Yaz_ProxyClient *get_client(Z_APDU *apdu);
     
     Yaz_ProxyClient *m_client;
     IYaz_PDU_Observable *m_PDU_Observable;
+    Yaz_ProxyClient *m_clientPool;
+    Yaz_Proxy *m_parent;
+    int m_seqno;
+    int m_keepalive;
 };
+

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.5  1999-04-09 11:46:57  adam
+ * Revision 1.6  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.5  1999/04/09 11:46:57  adam
  * Added object Yaz_Z_Assoc. Much more functional client.
  *
  * Revision 1.4  1999/03/23 14:17:57  adam
@@ -167,7 +171,8 @@ int Yaz_SocketManager::processEvent()
     struct timeval to;
     to.tv_sec = timeout;
     to.tv_usec = 0;
-
+    
+    logf (LOG_LOG, "timeout=%d", timeout);
     while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;

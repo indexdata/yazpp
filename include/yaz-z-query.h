@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-query.h,v 1.3 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-z-query.h,v 1.4 1999-04-21 12:09:01 adam Exp $
  */
 
 #include <proto.h>
@@ -31,4 +31,5 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     int len;
     ODR odr_decode;
     ODR odr_encode;
+    ODR odr_print;
 };

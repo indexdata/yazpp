@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.6  1999-04-20 10:30:05  adam
+ * Revision 1.7  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.6  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
  *
@@ -116,8 +120,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    assoc->m_socketObservable->maskObserver(assoc,
 						    YAZ_SOCKET_OBSERVE_READ|
 						    YAZ_SOCKET_OBSERVE_EXCEPT);
-	    if (m_idleTime)
-		assoc->m_socketObservable->timeoutObserver(assoc, m_idleTime);
+	    assoc->m_socketObservable->timeoutObserver(assoc,
+						       assoc->m_idleTime);
 	}
     }
     else if (m_state == Ready)
@@ -271,7 +275,7 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
     if (!m_cs)
     {
 	logf (LOG_LOG, "Yaz_PDU_Assoc::send_PDU failed, m_cs == 0");
-        return 0;
+        return -1;
     }
     while (*pq)
         pq = &(*pq)->m_next;
@@ -320,6 +324,8 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
 void Yaz_PDU_Assoc::idleTime(int idleTime)
 {
     m_idleTime = idleTime;
+    logf (LOG_LOG, "Yaz_PDU_Assoc::idleTime(%d)", idleTime);
+    m_socketObservable->timeoutObserver(this, m_idleTime);
 }
 
 void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,

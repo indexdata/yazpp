@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.3  1999-04-20 10:30:05  adam
+ * Revision 1.4  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.3  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
  *
@@ -23,6 +27,7 @@ Yaz_Z_Query::Yaz_Z_Query()
 {
     odr_encode = odr_createmem (ODR_ENCODE);
     odr_decode = odr_createmem (ODR_DECODE);
+    odr_print = odr_createmem (ODR_PRINT);
 }
 
 int Yaz_Z_Query::set_rpn (const char *rpn)
@@ -36,6 +41,7 @@ int Yaz_Z_Query::set_rpn (const char *rpn)
 	return -1;
     if (!z_Query (odr_encode, &query, 0, 0))
 	return -1;
+    z_Query(odr_print, &query, 0, 0);
     buf = odr_getbuf (odr_encode, &len, 0);
     return len;
 }
@@ -53,6 +59,7 @@ Yaz_Z_Query::~Yaz_Z_Query()
 {
     odr_destroy (odr_encode);
     odr_destroy (odr_decode);
+    odr_destroy (odr_print);
 }
 
 Z_Query *Yaz_Z_Query::get_Z_Query ()

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.2  1999-04-20 10:30:05  adam
+ * Revision 1.3  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.2  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
  *
@@ -50,12 +54,23 @@ void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
     logf (LOG_LOG, "recv_PDU len=%d", len);
     Z_APDU *apdu = decode_Z_PDU (buf, len);
     if (apdu)
+    {
 	recv_Z_PDU (apdu);
+    }
 }
 
 Z_APDU *Yaz_Z_Assoc::create_Z_PDU(int type)
 {
-    return zget_APDU(m_odr_out, type);
+    Z_APDU *apdu = zget_APDU(m_odr_out, type);
+    if (apdu->which == Z_APDU_initRequest)
+    {
+	Z_InitRequest * p = apdu->u.initRequest;
+	char *newName = (char*) odr_malloc(m_odr_out, 50);
+	strcpy (newName, p->implementationName);
+	strcat (newName, " YAZ++");
+	p->implementationName = newName;
+    }
+    return apdu;
 }
 
 int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu)
@@ -86,7 +101,7 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     }
     else
     {
-        logf (LOG_LOG, "decoded ok");
+	z_APDU(m_odr_print, &apdu, 0, "decode");
         return apdu;
     }
 }
@@ -98,6 +113,7 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
+    z_APDU(m_odr_print, &apdu, 0, "encode");
     *buf = odr_getbuf (m_odr_out, len, 0);
     odr_reset (m_odr_out);
     return *len;
@@ -147,6 +163,90 @@ ODR Yaz_Z_Assoc::odr_print()
     return m_odr_print;
 }
 
+void Yaz_Z_Assoc::timeout(int timeout)
+{
+    m_PDU_Observable->idleTime(timeout);
+}
+
+void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
+{
+    switch (apdu->which)
+    {
+    case Z_APDU_initRequest:
+	*oip = &apdu->u.initRequest->otherInfo;
+	break;
+    case Z_APDU_searchRequest:
+	*oip = &apdu->u.searchRequest->otherInfo;
+	break;
+    case Z_APDU_presentRequest:
+	*oip = &apdu->u.presentRequest->otherInfo;
+	break;
+    case Z_APDU_sortRequest:
+	*oip = &apdu->u.sortRequest->otherInfo;
+	break;
+    case Z_APDU_scanRequest:
+	*oip = &apdu->u.scanRequest->otherInfo;
+	break;
+    case Z_APDU_initResponse:
+	*oip = &apdu->u.initResponse->otherInfo;
+	break;
+    case Z_APDU_searchResponse:
+	*oip = &apdu->u.searchResponse->otherInfo;
+	break;
+    case Z_APDU_presentResponse:
+	*oip = &apdu->u.presentResponse->otherInfo;
+	break;
+    case Z_APDU_sortResponse:
+	*oip = &apdu->u.sortResponse->otherInfo;
+	break;
+    case Z_APDU_scanResponse:
+	*oip = &apdu->u.scanResponse->otherInfo;
+	break;
+    default:
+	*oip = 0;
+	break;
+    }
+}
+
+void Yaz_Z_Assoc::set_otherInformationString (
+    Z_APDU *apdu,
+    int oidval, int categoryValue,
+    const char *str)
+{
+    Z_OtherInformation **otherInformation;
+    get_otherInfoAPDU(apdu, &otherInformation);
+    if (!otherInformation)
+	return;
+    set_otherInformationString(otherInformation, oidval, categoryValue, str);
+}
+
+void Yaz_Z_Assoc::set_otherInformationString (
+    Z_OtherInformation **otherInformation,
+    int oidval, int categoryValue,
+    const char *str)
+{
+    int oid[OID_SIZE];
+    struct oident ent;
+    ent.proto = PROTO_Z3950;
+    ent.oclass = CLASS_USERINFO;
+    ent.value = (oid_value) oidval;
+    if (!oid_ent_to_oid (&ent, oid))
+	return ;
+    set_otherInformationString(otherInformation, oid, categoryValue, str);
+}
+
+void Yaz_Z_Assoc::set_otherInformationString (
+    Z_OtherInformation **otherInformation,
+    int *oid, int categoryValue,
+    const char *str)
+{
+    Z_OtherInformationUnit *oi =
+	update_otherInformation(otherInformation, 1, oid, categoryValue);
+    if (!oi)
+	return;
+    oi->information.characterInfo = odr_strdup (odr_encode(), str);
+}
+
 Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
     int *oid, int categoryValue)
@@ -165,6 +265,8 @@ Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
 	for (i = 0; i<8; i++)
 	    otherInformation->list[i] = 0;
     }
+    logf (LOG_LOG, "Yaz_Z_Assoc::update_otherInformation num=%d",
+	  otherInformation->num_elements);
     for (i = 0; i<otherInformation->num_elements; i++)
     {
 	assert (otherInformation->list[i]);

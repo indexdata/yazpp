@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.6  1999-04-20 10:30:05  adam
+ * Revision 1.7  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.6  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
  *
@@ -153,33 +157,6 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
     *elementSetName = m_elementSetNames->u.generic;
 }
 
-void Yaz_IR_Assoc::set_otherInformationString (
-    Z_OtherInformation **otherInformation,
-    int oidval, int categoryValue,
-    const char *str)
-{
-    int oid[OID_SIZE];
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_USERINFO;
-    ent.value = (oid_value) oidval;
-    if (!oid_ent_to_oid (&ent, oid))
-	return ;
-    set_otherInformationString(otherInformation, oid, categoryValue, str);
-}
-
-void Yaz_IR_Assoc::set_otherInformationString (
-    Z_OtherInformation **otherInformation,
-    int *oid, int categoryValue,
-    const char *str)
-{
-    Z_OtherInformationUnit *oi =
-	update_otherInformation(otherInformation, 1, oid, categoryValue);
-    if (!oi)
-	return;
-    oi->information.characterInfo = odr_strdup (odr_encode(), str);
-}
-
 void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
 {
     logf (LOG_LOG, "recv_Z_PDU");
@@ -237,7 +214,10 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
     logf (LOG_LOG, "send_searchRequest");
     assert (req->otherInfo == 0);
     if (m_cookie)
+    {
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+	assert (req->otherInfo);
+    }
     return send_Z_PDU(apdu);
 }
 
@@ -277,16 +257,24 @@ int Yaz_IR_Assoc::send_presentRequest(int start, int number)
 
 void Yaz_IR_Assoc::set_proxy(const char *str)
 {
-    delete m_proxy;
-    m_proxy = new char[strlen(str)+1];
-    strcpy (m_proxy, str);
+    delete [] m_proxy;
+    m_proxy = 0;
+    if (str)
+    {
+	m_proxy = new char[strlen(str)+1];
+	strcpy (m_proxy, str);
+    }
 }
 
 void Yaz_IR_Assoc::set_cookie(const char *str)
 {
-    delete m_cookie;
-    m_cookie = new char[strlen(str)+1];
-    strcpy(m_cookie, str);
+    delete [] m_cookie;
+    m_cookie = 0;
+    if (str)
+    {
+	m_cookie = new char[strlen(str)+1];
+	strcpy(m_cookie, str);
+    }
 }
 
 const char *Yaz_IR_Assoc::get_cookie()

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.6  1999-04-20 10:30:05  adam
+ * Revision 1.7  1999-04-21 12:09:01  adam
+ * Many improvements. Modified to proxy server to work with "sessions"
+ * based on cookies.
+ *
+ * Revision 1.6  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
  *
@@ -76,6 +80,7 @@ public:
     int cmd_find(char *args);
     int cmd_show(char *args);
     int cmd_cookie(char *args);
+    int cmd_init(char *args);
 };
 
 IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
@@ -302,7 +307,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
     else 
     {
         printf("Unknown record representation.\n");
-        if (!z_External(odr_print(), &r, 0))
+        if (!z_External(odr_print(), &r, 0, 0))
         {
             odr_perror(odr_print(), "Printing external");
             odr_reset(odr_print());
@@ -322,7 +327,11 @@ void MyClient::recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset)
 
 void MyClient::recv_records (Z_Records *records)
 {
+#ifdef ASN_COMPILED
     Z_DiagRec dr, *dr_p = &dr;
+#endif
+    if (!records)
+	return;
     int i;
     switch (records->which)
     {
@@ -358,8 +367,7 @@ void MyClient::recv_searchResponse(Z_SearchResponse *searchResponse)
     }
     printf ("Ok\n");
     printf ("Hits: %d\n", *searchResponse->resultCount);
-    if (searchResponse->records)
-	recv_records (searchResponse->records);
+    recv_records (searchResponse->records);
 }
 
 void MyClient::recv_presentResponse(Z_PresentResponse *presentResponse)
@@ -384,6 +392,12 @@ int MyClient::wait()
 int MyClient::cmd_open(char *host)
 {
     client (host);
+    m_socketManager->processEvent();
+    return 1;
+}
+
+int MyClient::cmd_init(char *args)
+{
     if (send_initRequest() >= 0)
 	wait();
     else
@@ -421,6 +435,7 @@ int MyClient::cmd_show(char *args)
     int start = m_setOffset, number = 1;
 
     sscanf (args, "%d %d", &start, &number);
+    m_setOffset = start;
     if (send_presentRequest(start, number) >= 0)
 	wait();
     return 1;
@@ -428,7 +443,7 @@ int MyClient::cmd_show(char *args)
 
 int MyClient::cmd_cookie(char *args)
 {
-    set_cookie(args);
+    set_cookie(*args ? args : 0);
     return 1;
 }
 
@@ -448,6 +463,7 @@ int MyClient::processCommand(const char *commandLine)
 	{"find", &cmd_find, "<query>"},
 	{"show", &cmd_show, "[<start> [<number>]]"},
 	{"cookie", &cmd_cookie, "<cookie>"},
+	{"init", &cmd_init, ""},
 	{0,0,0}
     };
     

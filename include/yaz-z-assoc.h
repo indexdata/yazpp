@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-assoc.h,v 1.2 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.3 1999-04-21 12:09:01 adam Exp $
  */
 
 #include <proto.h>
@@ -28,6 +28,8 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     void failNotify();
     /// Timeout notification
     void timeoutNotify();
+    /// Timeout specify
+    void timeout(int timeout);
     /// Begin Z39.50 client role
     void client(const char *addr);
     /// Begin Z39.50 server role
@@ -48,10 +50,25 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     ODR odr_encode ();
     ODR odr_decode ();
     ODR odr_print ();
+
     /// OtherInformation
+    void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
     Z_OtherInformationUnit *update_otherInformation (
 	Z_OtherInformation **otherInformationP, int createFlag,
 	int *oid, int categoryValue);
+    void set_otherInformationString (
+	Z_OtherInformation **otherInformationP,
+	int *oid, int categoryValue,
+	const char *str);
+    void set_otherInformationString (
+	Z_OtherInformation **otherInformation,
+	int oidval, int categoryValue,
+	const char *str);
+    void set_otherInformationString (
+	Z_APDU *apdu,
+	int oidval, int categoryValue,
+	const char *str);
+    void set_apdu_log(const char *file);
  private:
     static int yaz_init_flag;
     static int yaz_init_func();
