@@ -155,6 +155,10 @@ SOURCE="..\..\include\yaz++\yaz-z-assoc.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\src\yaz-z-cache.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-databases.cpp"
 # End Source File
 # Begin Source File

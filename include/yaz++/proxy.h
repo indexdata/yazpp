@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.6 2003-09-03 11:25:08 adam Exp $
+ * $Id: proxy.h,v 1.7 2003-09-04 20:11:03 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -11,7 +11,7 @@
 
 class Yaz_Proxy;
 
-class Yaz_RecordCache_Entry;
+struct Yaz_RecordCache_Entry;
 
 class YAZ_EXPORT Yaz_RecordCache {
  public:
