@@ -1,5 +1,11 @@
 Fixed Windows Compile.
 
+--- 0.7.4 2004/01/07 Internal release.
+
+SRW/SRU gateway for yaz-proxy.
+
+Schema conversion 
+
 --- 0.6 2003/09/04 Third release
 
 Fixed handling of cookies so they can be of any length.
