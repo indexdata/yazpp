@@ -1,0 +1,11 @@
+.deps
+.libs
+Makefile
+Makefile.in
+libyaz++.la
+yaz++-config
+yaz++-config.in
+yaz-my-client
+yaz-my-server
+yaz-proxy
+*.lo
