@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.19 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.20 2003-10-09 12:11:10 adam Exp $
  */
 
+#include <signal.h>
 #include <yaz/log.h>
 #include <yaz/options.h>
 
@@ -18,7 +19,6 @@ void usage(char *prog)
              "[-u auth] [-o optlevel] @:port\n", prog);
     exit (1);
 }
-
 
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
@@ -97,10 +97,21 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     return 0;
 }
 
+static Yaz_Proxy *static_yaz_proxy = 0;
+static void sighup_handler(int num)
+{
+    if (static_yaz_proxy)
+	static_yaz_proxy->reconfig();
+}
+
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
     Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
+
+    static_yaz_proxy = &proxy;
+
+    signal(SIGHUP, sighup_handler);
 
     args(&proxy, argc, argv);
     while (mySocketManager.processEvent() > 0)

@@ -5,13 +5,16 @@
     <!-- default target -->
     <url>z3950.loc.gov:7090/voyager</url>
     <url>z3950.loc.gov:7094/voyager</url>
-    <keepalive>1</keepalive>
+    <keepalive>
+      <bandwidth>500000</bandwidth>
+      <pdu>500</pdu>
+    </keepalive>
     <limit><!-- limits .. -->
       <bandwidth>200000</bandwidth>
       <pdu>31</pdu>
       <retrieve>20</retrieve>
     </limit>
-    <query type="1" value="10" error="114"/>
+    <attribute type="1" value="10" error="114"/>
     <target-timeout>180</target-timeout>
     <client-timeout>120</client-timeout>
     <syntax type="usmarc"/>
@@ -20,13 +23,13 @@
   <target name="localhost">
     <url>localhost:9999</url>
     <url>localhost:9998</url>
-    <keepalive>0</keepalive>
+    <keepalive/> <!-- keepalive enabled -->
     <limit><!-- limits .. -->
       <bandwidth>50000</bandwidth>
       <pdu>11</pdu>
       <retrieve>10</retrieve>
     </limit>
-    <query type="1" value="10,1023-9000" error="114"/>
+    <attribute type="1" value="10,1023-9000" error="114"/>
     <syntax type="usmarc"/>
     <syntax type="grs1"/>
     <syntax type="xml"/>

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.30 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.31 2003-10-09 12:11:10 adam Exp $
  */
 
 #include <assert.h>
@@ -387,7 +387,7 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
 
 COMSTACK Yaz_PDU_Assoc::comstack(const char *type_and_host, void **vp)
 {
-    return cs_create_host(type_and_host, 0, vp);
+    return cs_create_host(type_and_host, 2, vp);
 }
 
 void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,

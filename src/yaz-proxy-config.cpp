@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.6 2003-10-08 09:32:49 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.7 2003-10-09 12:11:10 adam Exp $
  */
 
 #include <ctype.h>
@@ -119,12 +119,13 @@ void Yaz_ProxyConfig::return_limit(xmlNodePtr ptr,
 #if HAVE_XML2
 void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 const char **url,
-					 int *keepalive,
 					 int *limit_bw,
 					 int *limit_pdu,
 					 int *limit_req,
 					 int *target_idletime,
-					 int *client_idletime)
+					 int *client_idletime,
+					 int *keepalive_limit_bw,
+					 int *keepalive_limit_pdu)
 {
     int no_url = 0;
     ptr = ptr->children;
@@ -143,11 +144,11 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "keepalive"))
 	{
-	    const char *t = get_text(ptr);
-	    if (!t || *t == '1')
-		*keepalive = 1;
-	    else
-		*keepalive = 0;
+	    int dummy;
+	    *keepalive_limit_bw = 500000;
+	    *keepalive_limit_pdu = 1000;
+	    return_limit(ptr, keepalive_limit_bw, keepalive_limit_pdu,
+			 &dummy);
 	}
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "limit"))
@@ -220,7 +221,7 @@ int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
     for(ptr = ptr->children; ptr; ptr = ptr->next)
     {
 	if (ptr->type == XML_ELEMENT_NODE &&
-	    !strcmp((const char *) ptr->name, "query"))
+	    !strcmp((const char *) ptr->name, "attribute"))
 	{
 	    const char *match_type = 0;
 	    const char *match_value = 0;
@@ -398,6 +399,8 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 {
     xmlNodePtr ptr;
+    if (!m_proxyPtr)
+	return 0;
     for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
     {
 	if (ptr->type == XML_ELEMENT_NODE &&
@@ -444,13 +447,14 @@ xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 
 void Yaz_ProxyConfig::get_target_info(const char *name,
 				      const char **url,
-				      int *keepalive,
 				      int *limit_bw,
 				      int *limit_pdu,
 				      int *limit_req,
 				      int *target_idletime,
 				      int *client_idletime,
-				      int *max_clients)
+				      int *max_clients,
+				      int *keepalive_limit_bw,
+				      int *keepalive_limit_pdu)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -483,8 +487,9 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	    url[0] = name;
 	    url[1] = 0;
 	}
-	return_target_info(ptr, url, keepalive, limit_bw, limit_pdu, limit_req,
-			   target_idletime, client_idletime);
+	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
+			   target_idletime, client_idletime,
+			   keepalive_limit_bw, keepalive_limit_pdu);
     }
 #else
     *url = name;

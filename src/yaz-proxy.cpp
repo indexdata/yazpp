@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.53 2003-10-08 09:49:05 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.54 2003-10-09 12:11:10 adam Exp $
  */
 
 #include <assert.h>
@@ -58,7 +58,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_parent = 0;
     m_clientPool = 0;
     m_seqno = 1;
-    m_keepalive = 0;
+    m_keepalive_limit_bw = 500000;
+    m_keepalive_limit_pdu = 1000;
     m_proxyTarget = 0;
     m_default_target = 0;
     m_proxy_authentication = 0;
@@ -74,20 +75,28 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_bw_max = 0;
     m_pdu_max = 0;
     m_max_record_retrieve = 0;
+    m_reconfig_flag = 0;
+    m_config_fname = 0;
+    m_request_no = 0;
+    m_invalid_session = 0;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
 {
-    yaz_log(LOG_LOG, "%s Closed %d/%d sent/recv bytes total", m_session_str,
+    yaz_log(LOG_LOG, "%sClosed %d/%d sent/recv bytes total", m_session_str,
 	    m_bytes_sent, m_bytes_recv);
     xfree (m_proxyTarget);
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
+    if (m_parent)
+	m_parent->check_reconfigure();
 }
 
 int Yaz_Proxy::set_config(const char *config)
 {
+    xfree(m_config_fname);
+    m_config_fname = xstrdup(config);
     int r = m_config.read_xml(config);
     return r;
 }
@@ -108,20 +117,41 @@ void Yaz_Proxy::set_proxy_authentication (const char *auth)
 	m_proxy_authentication = (char *) xstrdup (auth);
 }
 
+void Yaz_Proxy::check_reconfigure()
+{
+    if (m_reconfig_flag)
+    {
+	yaz_log(LOG_LOG, "reconfigure");
+	yaz_log_reopen();
+	if (m_config_fname)
+	{
+	    yaz_log(LOG_LOG, "reconfigure config %s", m_config_fname);
+	    int r = m_config.read_xml(m_config_fname);
+	    if (r)
+		yaz_log(LOG_WARN, "reconfigure failed");
+	}
+	else
+	    yaz_log(LOG_LOG, "reconfigure");
+	m_reconfig_flag = 0;
+    }
+}
+
 IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
 					    *the_PDU_Observable, int fd)
 {
+    check_reconfigure();
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
     new_proxy->m_config = m_config;
+    new_proxy->m_config_fname = 0;
     new_proxy->timeout(m_client_idletime);
     new_proxy->m_target_idletime = m_target_idletime;
     new_proxy->set_default_target(m_default_target);
     new_proxy->set_APDU_log(get_APDU_log());
     new_proxy->set_proxy_authentication(m_proxy_authentication);
-    sprintf(new_proxy->m_session_str, "%ld:%d", (long) time(0), m_session_no);
+    sprintf(new_proxy->m_session_str, "%ld:%d ", (long) time(0), m_session_no);
     m_session_no++;
-    yaz_log (LOG_LOG, "%s New session %s", new_proxy->m_session_str,
+    yaz_log (LOG_LOG, "%sNew session %s", new_proxy->m_session_str,
 	     the_PDU_Observable->getpeername());
     return new_proxy;
 }
@@ -176,7 +206,7 @@ const char *Yaz_Proxy::load_balance(const char **url)
     const char *ret = 0;
     for (i = 0; url[i]; i++)
     {
-	yaz_log(LOG_DEBUG, "%s zurl=%s use=%d",
+	yaz_log(LOG_DEBUG, "%szurl=%s use=%d",
 		m_session_str, url[i], zurl_in_use[i]);
 	if (min > zurl_in_use[i])
 	{
@@ -209,10 +239,11 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	}
 	
 	int client_idletime = -1;
-	m_config.get_target_info(proxy_host, url, &m_keepalive, &m_bw_max,
+	m_config.get_target_info(proxy_host, url, &m_bw_max,
 				 &m_pdu_max, &m_max_record_retrieve,
 				 &m_target_idletime, &client_idletime,
-				 &parent->m_max_clients);
+				 &parent->m_max_clients,
+				 &m_keepalive_limit_bw, &m_keepalive_limit_pdu);
 	if (client_idletime != -1)
 	{
 	    m_client_idletime = client_idletime;
@@ -220,7 +251,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	}
 	if (!url[0])
 	{
-	    yaz_log(LOG_LOG, "%s No default target", m_session_str);
+	    yaz_log(LOG_LOG, "%sNo default target", m_session_str);
 	    return 0;
 	}
 	// we don't handle multiplexing for cookie session, so we just
@@ -296,7 +327,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    // found it in cache
 	    c = cc;
 
-	    yaz_log (LOG_LOG, "%s REUSE %d %d %s",
+	    yaz_log (LOG_LOG, "%sREUSE %d %d %s",
 		     m_session_str,
 		     c->m_seqno, parent->m_seqno, c->get_hostname());
 
@@ -355,7 +386,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    c = c_min;
 	    if (c->m_waiting || strcmp(m_proxyTarget, c->get_hostname()))
 	    {
-		yaz_log (LOG_LOG, "%s MAXCLIENTS Destroy %d",
+		yaz_log (LOG_LOG, "%sMAXCLIENTS Destroy %d",
 			 m_session_str, c->m_seqno);
 		if (c->m_server && c->m_server != this)
 		    delete c->m_server;
@@ -363,7 +394,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    }
 	    else
 	    {
-		yaz_log (LOG_LOG, "%s MAXCLIENTS Reuse %d %d %s",
+		yaz_log (LOG_LOG, "%sMAXCLIENTS Reuse %d %d %s",
 			 m_session_str,
 			 c->m_seqno, parent->m_seqno, c->get_hostname());
 		xfree (c->m_cookie);
@@ -382,7 +413,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	}
 	else
 	{
-	    yaz_log (LOG_LOG, "%s NEW %d %s",
+	    yaz_log (LOG_LOG, "%sNEW %d %s",
 		     m_session_str, parent->m_seqno, m_proxyTarget);
 	    c = new Yaz_ProxyClient(m_PDU_Observable->clone());
 	    c->m_next = parent->m_clientPool;
@@ -424,24 +455,24 @@ void Yaz_Proxy::display_diagrecs(Z_DiagRec **pp, int num)
         Z_DiagRec *p = pp[i];
         if (p->which != Z_DiagRec_defaultFormat)
         {
-	    yaz_log(LOG_LOG, "%s Error no diagnostics", m_session_str);
+	    yaz_log(LOG_LOG, "%sError no diagnostics", m_session_str);
             return;
         }
         else
             r = p->u.defaultFormat;
         if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
             ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
-	    yaz_log(LOG_LOG, "%s Error unknown diagnostic set", m_session_str);
+	    yaz_log(LOG_LOG, "%sError unknown diagnostic set", m_session_str);
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
-	    yaz_log(LOG_LOG, "%s Error %d %s:%s",
+	    yaz_log(LOG_LOG, "%sError %d %s:%s",
 		    m_session_str,
 		    *r->condition, diagbib1_str(*r->condition),
 		    r->u.v2Addinfo);
             break;
         case Z_DefaultDiagFormat_v3Addinfo:
-	    yaz_log(LOG_LOG, "%s Error %d %s:%s",
+	    yaz_log(LOG_LOG, "%sError %d %s:%s",
 		    m_session_str,
 		    *r->condition, diagbib1_str(*r->condition),
 		    r->u.v3Addinfo);
@@ -468,8 +499,12 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	else
 	{
 	    if (sr->resultCount)
-		yaz_log(LOG_LOG, "%s %d hits", m_session_str,
+	    {
+		yaz_log(LOG_LOG, "%s%d hits", m_session_str,
 			*sr->resultCount);
+		if (*sr->resultCount < 0)
+		    m_invalid_session = 1;
+	    }
 	}
     }
     else if (apdu->which == Z_APDU_presentResponse)
@@ -486,7 +521,7 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	}
     }
     int r = send_Z_PDU(apdu, &len);
-    yaz_log (LOG_LOG, "%s Sending %s to client %d bytes", m_session_str,
+    yaz_log (LOG_DEBUG, "%sSending %s to client %d bytes", m_session_str,
 	     apdu_name(apdu), len);
     m_bytes_sent += len;
     m_bw_stat.add_bytes(len);
@@ -497,7 +532,7 @@ int Yaz_ProxyClient::send_to_target(Z_APDU *apdu)
 {
     int len = 0;
     int r = send_Z_PDU(apdu, &len);
-    yaz_log (LOG_LOG, "%s Sending %s to %s %d bytes",
+    yaz_log (LOG_DEBUG, "%sSending %s to %s %d bytes",
 	     get_session_str(),
 	     apdu_name(apdu), get_hostname(), len);
     m_bytes_sent += len;
@@ -522,7 +557,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 					  pr->preferredRecordSyntax,
 					  pr->recordComposition))
 	    {
-		yaz_log (LOG_LOG, "%s Returned cache records for present request", 
+		yaz_log (LOG_LOG, "%sReturned cached records for present request", 
 			 m_session_str);
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentResponse);
 		new_apdu->u.presentResponse->referenceId = pr->referenceId;
@@ -556,7 +591,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 
     char query_str[80];
     this_query->print(query_str, sizeof(query_str)-1);
-    yaz_log(LOG_LOG, "%s Query %s", m_session_str, query_str);
+    yaz_log(LOG_LOG, "%sQuery %s", m_session_str, query_str);
 
     if (m_client->m_last_ok && m_client->m_last_query &&
 	m_client->m_last_query->match(this_query) &&
@@ -585,7 +620,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, 1, toget,
 					  sr->preferredRecordSyntax, comp))
 	    {
-		yaz_log (LOG_LOG, "%s Returned cache records for medium set",
+		yaz_log (LOG_LOG, "%sReturned cached records for medium set",
 			 m_session_str);
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 		new_apdu->u.searchResponse->referenceId = sr->referenceId;
@@ -610,7 +645,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    {
 		// medium Set
 		// send present request (medium size)
-		yaz_log (LOG_LOG, "%s Optimizing search for medium set",
+		yaz_log (LOG_LOG, "%sOptimizing search for medium set",
 			 m_session_str);
 
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
@@ -628,7 +663,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    m_client->m_last_resultCount <= 0)
 	{
             // large set. Return pseudo-search response immediately
-	    yaz_log (LOG_LOG, "%s Optimizing search for large set",
+	    yaz_log (LOG_LOG, "%sOptimizing search for large set",
 		     m_session_str);
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
@@ -656,7 +691,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, 1, toget,
 					  sr->preferredRecordSyntax, comp))
 	    {
-		yaz_log (LOG_LOG, "%s Returned cache records for small set",
+		yaz_log (LOG_LOG, "%sReturned cached records for small set",
 			 m_session_str);
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 		new_apdu->u.searchResponse->referenceId = sr->referenceId;
@@ -679,7 +714,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    }
 	    else
 	    {
-		yaz_log (LOG_LOG, "%s Optimizing search for small set",
+		yaz_log (LOG_LOG, "%sOptimizing search for small set",
 			 m_session_str);
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
 		Z_PresentRequest *pr = new_apdu->u.presentRequest;
@@ -713,10 +748,15 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 
 void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
 {
+    char *cp = strchr(m_session_str, ' ');
+    m_request_no++;
+    if (cp)
+	sprintf(cp+1, "%d ", m_request_no);
+
     int reduce = 0;
     m_bytes_recv += len;
     
-    yaz_log (LOG_LOG, "%s Receiving %s from client %d bytes", m_session_str,
+    yaz_log (LOG_DEBUG, "%sReceiving %s from client %d bytes", m_session_str,
 	     apdu_name(apdu), len);
 
     if (m_bw_hold_PDU)     // double incoming PDU. shutdown now.
@@ -728,7 +768,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
     int bw_total = m_bw_stat.get_total();
     int pdu_total = m_pdu_stat.get_total();
 
-    yaz_log(LOG_LOG, "%s stat bw=%d pdu=%d limit-bw=%d limit-pdu=%d",
+    yaz_log(LOG_LOG, "%sstat bw=%d pdu=%d limit-bw=%d limit-pdu=%d",
 	    m_session_str, bw_total, pdu_total, m_bw_max, m_pdu_max);
     if (m_bw_max)
     {
@@ -747,7 +787,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
     }
     if (reduce)  
     {
-	yaz_log(LOG_LOG, "%s Limit delay=%d", m_session_str, reduce);
+	yaz_log(LOG_LOG, "%sLimit delay=%d", m_session_str, reduce);
 	m_bw_hold_PDU = apdu;  // save PDU and signal "on hold"
 	timeout(reduce);       // call us reduce seconds later
     }
@@ -885,13 +925,13 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
     if (apdu->which == Z_APDU_initRequest)
     {
 	if (apdu->u.initRequest->implementationId)
-	    yaz_log(LOG_LOG, "%s implementationId: %s",
+	    yaz_log(LOG_LOG, "%simplementationId: %s",
 		    m_session_str, apdu->u.initRequest->implementationId);
 	if (apdu->u.initRequest->implementationName)
-	    yaz_log(LOG_LOG, "%s implementationName: %s",
+	    yaz_log(LOG_LOG, "%simplementationName: %s",
 		    m_session_str, apdu->u.initRequest->implementationName);
 	if (apdu->u.initRequest->implementationVersion)
-	    yaz_log(LOG_LOG, "%s implementationVersion: %s",
+	    yaz_log(LOG_LOG, "%simplementationVersion: %s",
 		    m_session_str, apdu->u.initRequest->implementationVersion);
 	if (m_client->m_init_flag)
 	{
@@ -954,18 +994,26 @@ void Yaz_Proxy::connectNotify()
 void Yaz_Proxy::shutdown()
 {
     // only keep if keep_alive flag is set...
-    if (m_keepalive && m_client && m_client->m_waiting == 0)
+    if (m_client && 
+	!m_invalid_session &&
+	m_client->m_pdu_recv < m_keepalive_limit_pdu &&
+	m_client->m_bytes_recv+m_client->m_bytes_sent < m_keepalive_limit_bw &&
+	m_client->m_waiting == 0)
     {
-        yaz_log (LOG_LOG, "%s Shutdown (client to proxy) keepalive %s",
+        yaz_log(LOG_LOG, "%sShutdown (client to proxy) keepalive %s",
 		 m_session_str,
                  m_client->get_hostname());
+	yaz_log(LOG_LOG, "%sbw=%d pdu=%d limit-bw=%d limit-pdu=%d",
+		m_session_str, m_client->m_pdu_recv,
+		m_client->m_bytes_sent + m_client->m_bytes_recv,
+		m_keepalive_limit_bw, m_keepalive_limit_pdu);
         assert (m_client->m_waiting != 2);
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
     }
     else if (m_client)
     {
-        yaz_log (LOG_LOG, "%s Shutdown (client to proxy) close %s",
+        yaz_log (LOG_LOG, "%sShutdown (client to proxy) close %s",
 		 m_session_str,
                  m_client->get_hostname());
         assert (m_client->m_waiting != 2);
@@ -973,13 +1021,13 @@ void Yaz_Proxy::shutdown()
     }
     else if (!m_parent)
     {
-        yaz_log (LOG_LOG, "%s shutdown (client to proxy) bad state",
+        yaz_log (LOG_LOG, "%sshutdown (client to proxy) bad state",
 		 m_session_str);
         assert (m_parent);
     }
     else 
     {
-        yaz_log (LOG_LOG, "%s Shutdown (client to proxy)",
+        yaz_log (LOG_LOG, "%sShutdown (client to proxy)",
 		 m_session_str);
     }
     delete this;
@@ -994,7 +1042,7 @@ const char *Yaz_ProxyClient::get_session_str()
 
 void Yaz_ProxyClient::shutdown()
 {
-    yaz_log (LOG_LOG, "%s Shutdown (proxy to target) %s", get_session_str(),
+    yaz_log (LOG_LOG, "%sShutdown (proxy to target) %s", get_session_str(),
 	     get_hostname());
     delete m_server;
     delete this;
@@ -1002,21 +1050,21 @@ void Yaz_ProxyClient::shutdown()
 
 void Yaz_Proxy::failNotify()
 {
-    yaz_log (LOG_LOG, "%s Connection closed by client",
+    yaz_log (LOG_LOG, "%sConnection closed by client",
 	     get_session_str());
     shutdown();
 }
 
 void Yaz_ProxyClient::failNotify()
 {
-    yaz_log (LOG_LOG, "%s Connection closed by target %s", 
+    yaz_log (LOG_LOG, "%sConnection closed by target %s", 
 	     get_session_str(), get_hostname());
     shutdown();
 }
 
 void Yaz_ProxyClient::connectNotify()
 {
-    yaz_log (LOG_LOG, "%s Connection accepted by %s", get_session_str(),
+    yaz_log (LOG_LOG, "%sConnection accepted by %s", get_session_str(),
 	     get_hostname());
     int to;
     if (m_server)
@@ -1056,14 +1104,14 @@ void Yaz_Proxy::timeoutNotify()
     }
     else
     {
-	yaz_log (LOG_LOG, "%s Timeout (client to proxy)", m_session_str);
+	yaz_log (LOG_LOG, "%sTimeout (client to proxy)", m_session_str);
 	shutdown();
     }
 }
 
 void Yaz_ProxyClient::timeoutNotify()
 {
-    yaz_log (LOG_LOG, "%s Timeout (proxy to target) %s", get_session_str(),
+    yaz_log (LOG_LOG, "%sTimeout (proxy to target) %s", get_session_str(),
 	     get_hostname());
     shutdown();
 }
@@ -1085,6 +1133,7 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_initResponse = 0;
     m_resultSetStartPoint = 0;
     m_bytes_sent = m_bytes_recv = 0;
+    m_pdu_recv = 0;
 }
 
 const char *Yaz_Proxy::option(const char *name, const char *value)
@@ -1102,8 +1151,9 @@ const char *Yaz_Proxy::option(const char *name, const char *value)
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 {
     m_bytes_recv += len;
+    m_pdu_recv++;
     m_waiting = 0;
-    yaz_log (LOG_LOG, "%s Receiving %s from %s %d bytes", get_session_str(),
+    yaz_log (LOG_DEBUG, "%sReceiving %s from %s %d bytes", get_session_str(),
 	     apdu_name(apdu), get_hostname(), len);
     if (apdu->which == Z_APDU_initResponse)
     {
