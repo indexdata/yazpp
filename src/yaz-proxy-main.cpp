@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.31 2004-01-30 01:30:30 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.32 2004-02-10 15:02:19 adam Exp $
  */
 
 #include <signal.h>
@@ -256,6 +256,10 @@ int main(int argc, char **argv)
 		yaz_log(LOG_WARN, "Received SIGSEGV from child %ld", (long) p);
 		cont = 1;
 		break;
+	    case SIGBUS:	
+		yaz_log(LOG_WARN, "Received SIGBUS from child %ld", (long) p);
+		cont = 1;
+		break;
 	    case SIGTERM:
 		yaz_log(LOG_LOG, "Received SIGTERM from child %ld",
 			(long) p);
@@ -275,7 +279,7 @@ int main(int argc, char **argv)
 	    cont = 1;
 	}
 	if (cont)
-	    sleep(1);
+	    sleep(1 + run/5);
 	run++;
     }
     exit (0);

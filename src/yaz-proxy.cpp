@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.97 2004-02-02 15:11:41 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.98 2004-02-10 15:02:19 adam Exp $
  */
 
 #include <assert.h>
@@ -101,6 +101,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_request_no = 0;
     m_invalid_session = 0;
     m_referenceId = 0;
+    m_referenceId_mem = nmem_create();
     m_config = 0;
     m_marcxml_flag = 0;
     m_stylesheet_xsp = 0;
@@ -133,6 +134,8 @@ Yaz_Proxy::~Yaz_Proxy()
 	    m_bytes_sent, m_bytes_recv);
     nmem_destroy(m_initRequest_mem);
     nmem_destroy(m_mem_invalid_session);
+    nmem_destroy(m_referenceId_mem);
+
     xfree (m_proxyTarget);
     xfree (m_default_target);
     xfree (m_proxy_authentication);
@@ -982,7 +985,7 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
     Z_ReferenceId **new_id = get_referenceIdP(apdu);
 
     if (new_id && m_referenceId)
-	*new_id = *m_referenceId;
+	*new_id = m_referenceId;
     
     if (apdu->which == Z_APDU_searchResponse)
     {
@@ -1917,6 +1920,20 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 
 void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 {
+    Z_ReferenceId **refid = get_referenceIdP(apdu);
+    nmem_reset(m_referenceId_mem);
+    if (refid && *refid)
+    {
+	m_referenceId = (Z_ReferenceId *)
+	    nmem_malloc(m_referenceId_mem, sizeof(*m_referenceId));
+	m_referenceId->len = m_referenceId->size = (*refid)->len;
+	m_referenceId->buf = (unsigned char *)
+	    nmem_malloc(m_referenceId_mem, (*refid)->len);
+	memcpy(m_referenceId->buf, (*refid)->buf, (*refid)->len);
+    }
+    else
+	m_referenceId = 0;
+
     if (!m_client && m_invalid_session)
     {
 	m_apdu_invalid_session = apdu;
@@ -1924,8 +1941,6 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 	apdu = m_initRequest_apdu;
     }
     
-    m_referenceId = get_referenceIdP(apdu);
-
     // Determine our client.
     Z_OtherInformation **oi;
     get_otherInfoAPDU(apdu, &oi);
