@@ -8,14 +8,14 @@ Package: libyaz++
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, libyaz (>= 2.0.9)
-Description: YAZ++ development library for Z39.50 applications in C++.
+Description: YAZ++ and ZOOM library.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
 Package: libyaz++-dev
 Section: devel
 Architecture: any
 Depends: libyaz++ (= ${Source-Version}), libyaz-dev
-Description: YAZ++ library for Z39.50 applications in C++.
+Description: Development libraries for YAZ++ and ZOOM.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
 Package: yaz++-doc
@@ -28,19 +28,28 @@ Package: libyazproxy
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, libyaz++ (= ${Source-Version})
-Description: YAZ Proxy.
- Libraries for YAZ proxy.
+Description: YAZ Proxy libraries.
+ YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
+ converts them to Z39.50 client requests. The proxy has several facilities
+ to optimize performance and tries to reduce the commnication with the
+ backend server.
 
 Package: libyazproxy-dev
 Section: devel
 Architecture: any
 Depends: libyazproxy (= ${Source-Version}), libyaz++-dev (= ${Source-Version}), libxml2-dev, libxslt1-dev
-Description: YAZ Proxy.
- Development libraries for YAZ proxy.
+Description: YAZ Proxy development libraries.
+ YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
+ converts them to Z39.50 client requests. The proxy has several facilities
+ to optimize performance and tries to reduce the commnication with the
+ backend server.
 
 Package: yazproxy
 Section: utils
 Architecture: any
 Depends: libyazproxy (= ${Source-Version})
 Description: YAZ Proxy.
- Powerful Proxy that converts Z39.50/SRW/SRU to Z39.50.
+ YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
+ converts them to Z39.50 client requests. The proxy has several facilities
+ to optimize performance and tries to reduce the commnication with the
+ backend server.
