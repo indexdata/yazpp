@@ -2,12 +2,12 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-databases.h,v 1.1 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-z-databases.h,v 1.2 2002-04-24 13:16:47 heikki Exp $
  */
 
 #include <yaz/proto.h>
 
-/** Z39.50 Databases list
+/** Z39.50 Databases list 
  */
 class YAZ_EXPORT Yaz_Z_Databases {
 public:

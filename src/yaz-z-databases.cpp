@@ -2,7 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-databases.cpp,v 1.2 2001-11-06 20:33:32 adam Exp $
+ * $Id: yaz-z-databases.cpp,v 1.3 2002-04-24 13:16:47 heikki Exp $
  */
 
 #include <string.h>
@@ -24,7 +24,7 @@ Yaz_Z_Databases::~Yaz_Z_Databases()
 void Yaz_Z_Databases::set (int num, const char **db)
 {
     nmem_reset (nmem);
-
+ 
     m_list = (char **) nmem_malloc (nmem, num * sizeof(char*));
     m_num = num;
     for (int i = 0; i<num; i++)

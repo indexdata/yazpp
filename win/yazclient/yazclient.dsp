@@ -115,7 +115,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib yazxx.lib yaz.lib wsock32.lib ursula.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug/yazmyclient.exe" /pdbtype:sept /libpath:"../yazxx/debug" /libpath:"../../../yaz/lib" /libpath:"../../../yaz-ursula/win/debug" /libpath:"../../../yaz-ursula/win"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib yazxx.lib yaz.lib wsock32.lib ursula.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug/yazmyclient.exe" /pdbtype:sept /libpath:"../yazxx/debug" /libpath:"../../../yaz/lib" /libpath:"../../../yaz-ursula/win/debug" /libpath:"../../../yaz-ursula/win"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib yazxx.lib yaz.lib wsock32.lib ursula.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug/yazmyclient.exe" /pdbtype:sept /libpath:"../yazxx/debug" /libpath:"../../../yaz/lib" /libpath:"../../../yaz-ursula/win/debug" /libpath:"../../../yaz-ursula/win" /libpath:"../yazxx/yazxx___win32_Debug_ursula"
 # Begin Special Build Tool
 OutDir=.\yazclient___Win32_Debug_URSULA
 ProjDir=.
