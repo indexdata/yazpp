@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.19 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.20 2003-07-25 19:27:36 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -75,6 +75,11 @@ void Yaz_SocketManager::deleteObservers()
 void Yaz_SocketManager::maskObserver(IYazSocketObserver *observer, int mask)
 {
     YazSocketEntry *se;
+
+    yaz_log(m_log, "obs=%p read=%d write=%d except=%d", observer,
+	            mask & YAZ_SOCKET_OBSERVE_READ,
+	            mask & YAZ_SOCKET_OBSERVE_WRITE,
+	            mask & YAZ_SOCKET_OBSERVE_EXCEPT);
 
     se = *lookupObserver(observer);
     if (se)

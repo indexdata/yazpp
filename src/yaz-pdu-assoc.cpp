@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.28 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.29 2003-07-25 19:27:36 adam Exp $
  */
 
 #include <assert.h>
@@ -58,6 +58,7 @@ Yaz_PDU_Assoc::Yaz_PDU_Assoc(IYazSocketObservable *socketObservable,
 	// assume comstack is accepting...
 	m_state = Accepting;
 	m_socketObservable->addObserver(cs_fileno(cs), this);
+	yaz_log(m_log, "maskObserver 1");
 	m_socketObservable->maskObserver(this,
 					 mask |YAZ_SOCKET_OBSERVE_EXCEPT);
     }
@@ -109,6 +110,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    }
 	    else  
 	    {   // accept still incomplete.
+	        yaz_log(m_log, "maskObserver 2");
 		m_socketObservable->maskObserver(this,
 					     mask|YAZ_SOCKET_OBSERVE_EXCEPT);
 	    }
@@ -133,6 +135,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		    mask |= YAZ_SOCKET_OBSERVE_WRITE;
 		if (m_cs->io_pending & CS_WANT_READ)
 		    mask |= YAZ_SOCKET_OBSERVE_READ;
+	        yaz_log(m_log, "maskObserver 3");
 		m_socketObservable->maskObserver(this, mask);
 	    }
 	    else
@@ -187,6 +190,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
                         mask |= YAZ_SOCKET_OBSERVE_WRITE;
                     if (m_cs->io_pending & CS_WANT_READ)
                         mask |= YAZ_SOCKET_OBSERVE_READ;
+	            yaz_log(m_log, "maskObserver 4");
 		    m_socketObservable->maskObserver(this, mask);
 		    return;
                 }
@@ -210,10 +214,13 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		if (destroyed)   // it really was destroyed, return now.
 		    return;
 	    } while (m_cs && cs_more (m_cs));
-	    if (m_cs)
+	    if (m_cs && m_state == Ready)
+            {
+	        yaz_log(m_log, "maskObserver 5");
 		m_socketObservable->maskObserver(this,
 						 YAZ_SOCKET_OBSERVE_EXCEPT|
 						 YAZ_SOCKET_OBSERVE_READ);
+	    }
 	}
 	break;
     case Closed:
@@ -311,6 +318,7 @@ int Yaz_PDU_Assoc::flush_PDU()
     {
 	m_state = Ready;
 	yaz_log (m_log, "YAZ_PDU_Assoc::flush_PDU queue empty");
+	yaz_log(m_log, "maskObserver 6");
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 					 YAZ_SOCKET_OBSERVE_WRITE|
 					 YAZ_SOCKET_OBSERVE_EXCEPT);
@@ -332,21 +340,26 @@ int Yaz_PDU_Assoc::flush_PDU()
             mask |= YAZ_SOCKET_OBSERVE_WRITE;
         if (m_cs->io_pending & CS_WANT_READ)
             mask |= YAZ_SOCKET_OBSERVE_READ;
- 
+
+	mask |= YAZ_SOCKET_OBSERVE_WRITE;
+	yaz_log(m_log, "maskObserver 7");
 	m_socketObservable->maskObserver(this, mask);
-        yaz_log (m_log, "Yaz_PDU_Assoc::flush_PDU cs_put %d bytes (incomp)",
-		 q->m_len);
+        yaz_log (m_log, "Yaz_PDU_Assoc::flush_PDU cs_put %d bytes fd=%d (inc)",
+		 q->m_len, cs_fileno(m_cs));
         return r;
     } 
-    m_state = Ready;
     yaz_log (m_log, "Yaz_PDU_Assoc::flush_PDU cs_put %d bytes", q->m_len);
     // whole packet sent... delete this and proceed to next ...
     m_queue_out = q->m_next;
     delete q;
     // don't select on write if queue is empty ...
     if (!m_queue_out)
+    {
+        m_state = Ready;
+	yaz_log(m_log, "maskObserver 8");
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 					 YAZ_SOCKET_OBSERVE_EXCEPT);
+    }
     return r;
 }
 
@@ -393,6 +406,7 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
     if (cs_bind(m_cs, ap, CS_SERVER) < 0)
         return;
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
+    yaz_log(m_log, "maskObserver 9");
     m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 				     YAZ_SOCKET_OBSERVE_EXCEPT);
     yaz_log (m_log, "Yaz_PDU_Assoc::listen ok fd=%d", cs_fileno(m_cs));
@@ -427,12 +441,14 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 	    mask |= YAZ_SOCKET_OBSERVE_WRITE;
 	if (m_cs->io_pending & CS_WANT_READ)
 	    mask |= YAZ_SOCKET_OBSERVE_READ;
+	yaz_log(m_log, "maskObserver 11");
 	m_socketObservable->maskObserver(this, mask);
     }
     else
     {   // Connect failed immediately
 	// Since m_state is Closed we can distinguish this case from
         // normal connect in socketNotify handler
+	yaz_log(m_log, "maskObserver 12");
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_WRITE|
 					 YAZ_SOCKET_OBSERVE_EXCEPT);
     }
