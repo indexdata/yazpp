@@ -10,7 +10,7 @@ AM_PROG_LIBTOOL
 
 YAZ_INIT(threads,2.0.12)
 
-AC_CHECK_FUNCS(setrlimit getrlimit)
+AC_CHECK_FUNCS(setrlimit getrlimit gettimeofday)
 dnl
 dnl ----- libXSLT
 AC_SUBST(XSLT_LIBS)
