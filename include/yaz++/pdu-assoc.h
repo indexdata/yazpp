@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.3 2003-10-10 12:37:26 adam Exp $
+ * $Id: pdu-assoc.h,v 1.4 2003-10-23 08:48:35 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -46,6 +46,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     char *m_input_buf;
     int m_input_len;
     PDU_Queue *m_queue_out;
+    PDU_Queue *m_queue_in;
     int Yaz_PDU_Assoc::flush_PDU();
     int *m_destroyed;
     int m_idleTime;
