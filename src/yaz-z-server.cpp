@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.5  2000-10-24 12:29:57  adam
+ * Revision 1.6  2001-01-29 11:18:24  adam
+ * Server sets OPTIONS search and present.
+ *
+ * Revision 1.5  2000/10/24 12:29:57  adam
  * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
  * two Yaz_Proxy's (fatal).
  *
@@ -279,12 +282,20 @@ void Yaz_Z_Server::fetch_via_present (Z_PresentRequest *req,
     
 void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 {   
+    Z_Options *req, *res;
     Z_APDU *apdu_response;
     switch (apdu_request->which)
     {
     case Z_APDU_initRequest:
         logf (LOG_LOG, "got InitRequest p=%p", this);
 	apdu_response = create_Z_PDU(Z_APDU_initResponse);
+        req = apdu_request->u.initRequest->options;
+        res = apdu_response->u.initResponse->options;
+
+        if (ODR_MASK_GET(req, Z_Options_search))
+    	    ODR_MASK_SET(res, Z_Options_search);
+        if (ODR_MASK_GET(req, Z_Options_present))
+            ODR_MASK_SET(res, Z_Options_present);
 	recv_Z_init (apdu_request->u.initRequest,
 		     apdu_response->u.initResponse);
 	m_preferredMessageSize =

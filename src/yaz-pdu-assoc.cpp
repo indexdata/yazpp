@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.21  2000-11-20 14:17:36  adam
+ * Revision 1.22  2001-01-29 11:18:24  adam
+ * Server sets OPTIONS search and present.
+ *
+ * Revision 1.21  2000/11/20 14:17:36  adam
  * Yet another WIN32 fix for connect notify.
  *
  * Revision 1.20  2000/11/20 11:27:33  adam
@@ -96,7 +99,7 @@ Yaz_PDU_Assoc::Yaz_PDU_Assoc(IYazSocketObservable *socketObservable)
     m_next = 0;
     m_destroyed = 0;
     m_idleTime = 0;
-    m_log = LOG_DEBUG;
+    m_log = LOG_LOG;
 }
 
 IYaz_PDU_Observable *Yaz_PDU_Assoc::clone()
