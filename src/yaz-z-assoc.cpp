@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.31 2003-10-23 13:49:58 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.32 2003-12-16 14:17:01 adam Exp $
  */
 
 #include <assert.h>
@@ -85,10 +85,10 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
 void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
 {
     yaz_log (m_log, "recv_PDU len=%d", len);
-    Z_APDU *apdu = decode_Z_PDU (buf, len);
+    Z_GDU *apdu = decode_GDU (buf, len);
     if (apdu)
     {
-	recv_Z_PDU (apdu, len);
+	recv_GDU (apdu, len);
     }
     else
     {
@@ -182,9 +182,17 @@ void Yaz_Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
 
 int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
 {
+    Z_GDU *gdu = (Z_GDU*) odr_malloc(odr_encode(), sizeof(*gdu));
+    gdu->which = Z_GDU_Z3950;
+    gdu->u.z3950 = apdu;
+    return send_GDU(gdu, plen);
+}
+
+int Yaz_Z_Assoc::send_GDU(Z_GDU *apdu, int *plen)
+{
     char *buf;
     int len;
-    if (encode_Z_PDU(apdu, &buf, &len) > 0)
+    if (encode_GDU(apdu, &buf, &len) > 0)
     {
 	if (plen)
 	    *plen = len;
@@ -193,14 +201,14 @@ int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
     return -1;
 }
 
-Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
+Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
 {
-    Z_APDU *apdu;
+    Z_GDU *apdu;
 
     odr_reset (m_odr_in);
     odr_setbuf (m_odr_in, (char*) buf, len, 0);
 
-    if (!z_APDU(m_odr_in, &apdu, 0, 0))
+    if (!z_GDU(m_odr_in, &apdu, 0, 0))
     {
         yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
              odr_errmsg(odr_geterror(m_odr_in)),
@@ -216,39 +224,39 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 	    FILE *save = m_APDU_file;
 
 	    odr_setprint(m_odr_print, yaz_log_file());
-	    z_APDU(m_odr_print, &apdu, 0, "decode");
+	    z_GDU(m_odr_print, &apdu, 0, "decode");
 	    m_APDU_file = save;
 	    odr_setprint(m_odr_print, save);
 	}
 	if (m_APDU_file)
         {
-	    z_APDU(m_odr_print, &apdu, 0, "decode");
+	    z_GDU(m_odr_print, &apdu, 0, "decode");
 	    fflush(m_APDU_file);
 	}
         return apdu;
     }
 }
 
-int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
+int Yaz_Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
 {
     if (m_APDU_yazlog)
     {
 	FILE *save = m_APDU_file;
 	odr_setprint(m_odr_print, yaz_log_file()); // use YAZ log FILE
-	z_APDU(m_odr_print, &apdu, 0, "encode");
+	z_GDU(m_odr_print, &apdu, 0, "encode");
 	m_APDU_file = save;
 	odr_setprint(m_odr_print, save);
     }
     if (m_APDU_file)
     {
-	z_APDU(m_odr_print, &apdu, 0, "encode");
+	z_GDU(m_odr_print, &apdu, 0, "encode");
 	fflush(m_APDU_file);
     }
-    if (!z_APDU(m_odr_out, &apdu, 0, 0))
+    if (!z_GDU(m_odr_out, &apdu, 0, 0))
     {
 	if (m_APDU_file)
 	    fprintf (m_APDU_file, "PDU encode failed (above)");
-	yaz_log (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
+	yaz_log (LOG_LOG, "yaz_Z_Assoc::encode_Z_GDU failed");
         return -1;
     }
     *buf = odr_getbuf (m_odr_out, len, 0);

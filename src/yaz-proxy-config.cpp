@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.14 2003-11-25 21:54:18 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.15 2003-12-16 14:17:01 adam Exp $
  */
 
 #include <ctype.h>
@@ -117,7 +117,8 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *client_idletime,
 					 int *keepalive_limit_bw,
 					 int *keepalive_limit_pdu,
-					 int *pre_init)
+					 int *pre_init,
+					 const char **cql2rpn)
 {
     *pre_init = 0;
     int no_url = 0;
@@ -173,6 +174,13 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 		if (*client_idletime < 0)
 		    *client_idletime = 0;
 	    }
+	}
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "cql2rpn"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+		*cql2rpn = t;
 	}
     }
 }
@@ -469,7 +477,8 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *max_clients,
 				   int *keepalive_limit_bw,
 				   int *keepalive_limit_pdu,
-				   int *pre_init)
+				   int *pre_init,
+				   const char **cql2rpn)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -494,7 +503,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 				   target_idletime, client_idletime,
 				   keepalive_limit_bw, keepalive_limit_pdu,
-				   pre_init);
+				   pre_init, cql2rpn);
 		return 1;
 	    }
 	    i++;
@@ -572,7 +581,8 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *max_clients,
 				      int *keepalive_limit_bw,
 				      int *keepalive_limit_pdu,
-				      int *pre_init)
+				      int *pre_init,
+				      const char **cql2rpn)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -608,7 +618,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
 			   keepalive_limit_bw, keepalive_limit_pdu,
-			   pre_init);
+			   pre_init, cql2rpn);
     }
 #else
     *url = name;

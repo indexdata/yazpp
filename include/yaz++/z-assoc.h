@@ -2,12 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.5 2003-10-23 11:45:08 adam Exp $
+ * $Id: z-assoc.h,v 1.6 2003-12-16 14:17:01 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
 #define YAZ_Z_ASSOC_INCLUDED
 
+#include <yaz/srw.h>
 #include <yaz/proto.h>
 #include <yaz/odr.h>
 #include <yaz++/pdu-observer.h>
@@ -39,13 +40,14 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     /// Close connection
     void close();
     /// Decode Z39.50 PDU.
-    Z_APDU *decode_Z_PDU(const char *buf, int len);
+    Z_GDU *decode_GDU(const char *buf, int len);
     /// Encode Z39.50 PDU.
-    int encode_Z_PDU(Z_APDU *apdu, char **buf, int *len);
+    int encode_GDU(Z_GDU *apdu, char **buf, int *len);
     /// Send Z39.50 PDU
     int send_Z_PDU(Z_APDU *apdu, int *len);
+    int send_GDU(Z_GDU *apdu, int *len);
     /// Receive Z39.50 PDU
-    virtual void recv_Z_PDU(Z_APDU *apdu, int len) = 0;
+    virtual void recv_GDU(Z_GDU *apdu, int len) = 0;
     /// Create Z39.50 PDU with reasonable defaults
     Z_APDU *create_Z_PDU(int type);
     /// Request Alloc

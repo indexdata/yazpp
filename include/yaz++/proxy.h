@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.21 2003-10-23 11:45:08 adam Exp $
+ * $Id: proxy.h,v 1.22 2003-12-16 14:17:01 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
-
+#include <yaz/cql.h>
 #if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -42,7 +42,8 @@ public:
 		      int *max_clients,
 		      int *keepalive_limit_bw,
 		      int *keepalive_limit_pdu,
-		      int *pre_init);
+		      int *pre_init,
+		      const char **cql2rpn);
     
     void get_generic_info(int *log_mask, int *max_clients);
 
@@ -51,22 +52,23 @@ public:
 			 int *target_idletime, int *client_idletime,
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			 int *pre_init);
+			 int *pre_init,
+			 const char **cql2rpn);
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
 		     Odr_oid *syntax, char **addinfo);
 private:
     void operator=(const Yaz_ProxyConfig &conf);
-#if HAVE_XML2
     int mycmp(const char *hay, const char *item, size_t len);
+#if HAVE_XML2
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
 			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			    int *pre_init);
+			    int *pre_init, const char **cql2rpn);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
@@ -128,7 +130,9 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable,
 		    Yaz_Proxy *parent);
     ~Yaz_ProxyClient();
+    void recv_GDU(Z_GDU *apdu, int len);
     void recv_Z_PDU(Z_APDU *apdu, int len);
+    void recv_HTTP_response(Z_HTTP_Response *apdu, int len);
     IYaz_PDU_Observer* sessionNotify
 	(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void shutdown();
@@ -162,12 +166,24 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     Yaz_Proxy *m_root;
 };
 
+class YAZ_EXPORT Yaz_cql2rpn {
+ public:
+    Yaz_cql2rpn();
+    ~Yaz_cql2rpn();
+    void set_pqf_file(const char *fname);
+    int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o);
+ private:
+    cql_transform_t m_transform;
+};
+
+
 /// Information Retrieval Proxy Server.
 class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
  private:
     char *get_cookie(Z_OtherInformation **otherInfo);
     char *get_proxy(Z_OtherInformation **otherInfo);
-    Yaz_ProxyClient *get_client(Z_APDU *apdu);
+    Yaz_ProxyClient *get_client(Z_APDU *apdu, const char *cookie,
+				const char *proxy_host);
     Z_APDU *result_set_optimize(Z_APDU *apdu);
     void shutdown();
     
@@ -197,7 +213,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_bw m_bw_stat;
     int m_pdu_max;
     Yaz_bw m_pdu_stat;
-    Z_APDU *m_bw_hold_PDU;
+    Z_GDU *m_bw_hold_PDU;
     int m_max_record_retrieve;
     void handle_max_record_retrieve(Z_APDU *apdu);
     void display_diagrecs(Z_DiagRec **pp, int num);
@@ -205,6 +221,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
 					      const char *addinfo);
 
     Z_APDU *handle_query_validation(Z_APDU *apdu);
+    Z_APDU *handle_query_transformation(Z_APDU *apdu);
+
     Z_APDU *handle_syntax_validation(Z_APDU *apdu);
     const char *load_balance(const char **url);
     int m_reconfig_flag;
@@ -213,12 +231,35 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_invalid_session;
     int m_marcxml_flag;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
+    Z_APDU *m_initRequest_apdu;
+    NMEM m_initRequest_mem;
+    Z_APDU *m_apdu_invalid_session;
+    NMEM m_mem_invalid_session;
+    int send_PDU_convert(Z_APDU *apdu, int *len);
+    ODR m_s2z_odr;
+    int m_s2z_hit_count;
+    int m_s2z_packing;
+    Z_APDU *m_s2z_init_apdu;
+    Z_APDU *m_s2z_search_apdu;
+    Z_APDU *m_s2z_present_apdu;
+    char *m_soap_ns;
+    int send_to_srw_client_error(int error);
+    int send_to_srw_client_ok(int hits, Z_Records *records);
+    int send_http_response(int code);
+    int send_srw_response(Z_SRW_PDU *srw_pdu);
+
+    int z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
+		      Z_DefaultDiagFormat *ddf);
+    int m_http_keepalive;
+    const char *m_http_version;
+    Yaz_cql2rpn m_cql2rpn;
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);
     ~Yaz_Proxy();
-    void recv_Z_PDU(Z_APDU *apdu, int len);
-    void recv_Z_PDU_0(Z_APDU *apdu);
+    void recv_GDU(Z_GDU *apdu, int len);
+    void handle_incoming_HTTP(Z_HTTP_Request *req);
+    void handle_incoming_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer* sessionNotify
 	(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void failNotify();
@@ -239,5 +280,6 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int server(const char *addr);
     void pre_init();
     int get_log_mask() { return m_log_mask; };
+    int handle_init_response_for_invalid_session(Z_APDU *apdu);
 };
 

@@ -2,17 +2,19 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.70 2003-11-08 18:51:10 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.71 2003-12-16 14:17:01 adam Exp $
  */
 
 #include <assert.h>
 #include <time.h>
 
+#include <yaz/srw.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 #include <yaz++/proxy.h>
+#include <yaz/pquery.h>
 
 static const char *apdu_name(Z_APDU *apdu)
 {
@@ -52,6 +54,20 @@ static const char *apdu_name(Z_APDU *apdu)
     return "other";
 }
 
+static const char *gdu_name(Z_GDU *gdu)
+{
+    switch(gdu->which)
+    {
+    case Z_GDU_Z3950:
+	return apdu_name(gdu->u.z3950);
+    case Z_GDU_HTTP_Request:
+	return "HTTP Request";
+    case Z_GDU_HTTP_Response:
+	return "HTTP Response";
+    }
+    return "Unknown request/response";
+}
+
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 		     Yaz_Proxy *parent) :
     Yaz_Z_Assoc(the_PDU_Observable), m_bw_stat(60), m_pdu_stat(60)
@@ -85,16 +101,32 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_invalid_session = 0;
     m_config = 0;
     m_marcxml_flag = 0;
+    m_initRequest_apdu = 0;
+    m_initRequest_mem = 0;
+    m_apdu_invalid_session = 0;
+    m_mem_invalid_session = 0;
+    m_s2z_odr = 0;
+    m_s2z_init_apdu = 0;
+    m_s2z_search_apdu = 0;
+    m_s2z_present_apdu = 0;
+    m_http_keepalive = 0;
+    m_http_version = 0;
+    m_soap_ns = 0;
+    m_s2z_packing = Z_SRW_recordPacking_string;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
 {
     yaz_log(LOG_LOG, "%sClosed %d/%d sent/recv bytes total", m_session_str,
 	    m_bytes_sent, m_bytes_recv);
+    nmem_destroy(m_initRequest_mem);
+    nmem_destroy(m_mem_invalid_session);
     xfree (m_proxyTarget);
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
+    if (m_s2z_odr)
+	odr_destroy(m_s2z_odr);
     delete m_config;
 }
 
@@ -241,24 +273,21 @@ const char *Yaz_Proxy::load_balance(const char **url)
     return ret;
 }
 
-Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
+Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
+				       const char *proxy_host)
 {
     assert (m_parent);
     Yaz_Proxy *parent = m_parent;
     Z_OtherInformation **oi;
     Yaz_ProxyClient *c = m_client;
     
-    get_otherInfoAPDU(apdu, &oi);
-    char *cookie = get_cookie(oi);
-
     if (!m_proxyTarget)
     {
 	const char *url[MAX_ZURL_PLEX];
-	const char *proxy_host = get_proxy(oi);
 	Yaz_ProxyConfig *cfg = check_reconfigure();
 	if (proxy_host)
 	{
-#if 0
+#if 1
 /* only to be enabled for debugging... */
 	    if (!strcmp(proxy_host, "stop"))
 		exit(0);
@@ -268,6 +297,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    proxy_host = m_default_target;
 	}
 	int client_idletime = -1;
+	const char *cql2rpn_fname = 0;
 	url[0] = m_default_target;
 	url[1] = 0;
 	if (cfg)
@@ -279,12 +309,18 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 				 &parent->m_max_clients,
 				 &m_keepalive_limit_bw,
 				 &m_keepalive_limit_pdu,
-				 &pre_init);
+				 &pre_init,
+				 &cql2rpn_fname);
 	}
 	if (client_idletime != -1)
 	{
 	    m_client_idletime = client_idletime;
 	    timeout(m_client_idletime);
+	}
+	if (cql2rpn_fname)
+	{
+	    yaz_log(LOG_LOG, "set_pqf_file %s", cql2rpn_fname);
+	    m_cql2rpn.set_pqf_file(cql2rpn_fname);
 	}
 	if (!url[0])
 	{
@@ -595,9 +631,192 @@ void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
     yaz_marc_destroy(mt);
 }
 
+int Yaz_Proxy::send_http_response(int code)
+{
+    ODR o = odr_encode();
+    const char *ctype = "text/xml";
+    Z_GDU *gdu = z_get_HTTP_Response(o, code);
+    Z_HTTP_Response *hres = gdu->u.HTTP_Response;
+    if (m_http_version)
+	hres->version = odr_strdup(o, m_http_version);
+    int len;
+    int r = send_GDU(gdu, &len);
+    delete this;
+    return r;
+}
+
+int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
+{
+    ODR o = odr_encode();
+    const char *ctype = "text/xml";
+    Z_GDU *gdu = z_get_HTTP_Response(o, 200);
+    Z_HTTP_Response *hres = gdu->u.HTTP_Response;
+    if (m_http_version)
+	hres->version = odr_strdup(o, m_http_version);
+    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+    if (m_http_keepalive)
+        z_HTTP_header_add(o, &hres->headers, "Connection", "Keep-Alive");
+
+    static Z_SOAP_Handler soap_handlers[2] = {
+#if HAVE_XML2
+	{"http://www.loc.gov/zing/srw/v1.0/", 0,
+	 (Z_SOAP_fun) yaz_srw_codec},
+#endif
+	{0, 0, 0}
+    };
+    
+    Z_SOAP *soap_package = (Z_SOAP*) odr_malloc(o, sizeof(Z_SOAP));
+    soap_package->which = Z_SOAP_generic;
+    soap_package->u.generic = 
+	(Z_SOAP_Generic *) odr_malloc(o,  sizeof(*soap_package->u.generic));
+    soap_package->u.generic->no = 0;
+    soap_package->u.generic->ns = soap_handlers[0].ns;
+    soap_package->u.generic->p = (void *) srw_pdu;
+    soap_package->ns = m_soap_ns;
+    int ret = z_soap_codec_enc(o, &soap_package,
+			       &hres->content_buf, &hres->content_len,
+			       soap_handlers, 0);
+    int len;
+    int r = send_GDU(gdu, &len);
+    if (!m_http_keepalive)
+	delete this;
+}
+
+int Yaz_Proxy::send_to_srw_client_error(int srw_error)
+{
+    ODR o = odr_encode();
+    Z_SRW_PDU *srw_pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+    Z_SRW_searchRetrieveResponse *srw_res = srw_pdu->u.response;
+
+    srw_res->num_diagnostics = 1;
+    srw_res->diagnostics = (Z_SRW_diagnostic *)
+	odr_malloc(o, sizeof(*srw_res->diagnostics));
+    srw_res->diagnostics[0].code =  odr_intdup(o, srw_error);
+    srw_res->diagnostics[0].details = 0;
+    return send_srw_response(srw_pdu);
+}
+
+int Yaz_Proxy::z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
+			     Z_DefaultDiagFormat *ddf)
+{
+    int bib1_code = *ddf->condition;
+    if (bib1_code == 109)
+	return 404;
+    srw_res->num_diagnostics = 1;
+    srw_res->diagnostics = (Z_SRW_diagnostic *)
+	odr_malloc(o, sizeof(*srw_res->diagnostics));
+    srw_res->diagnostics[0].code = 
+	odr_intdup(o, yaz_diag_bib1_to_srw(*ddf->condition));
+    srw_res->diagnostics[0].details = ddf->u.v2Addinfo;
+    return 0;
+}
+
+int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
+{
+    ODR o = odr_encode();
+    Z_SRW_PDU *srw_pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+    Z_SRW_searchRetrieveResponse *srw_res = srw_pdu->u.response;
+
+    srw_res->numberOfRecords = odr_intdup (o, hits);
+    if (records && records->which == Z_Records_DBOSD)
+    {
+	srw_res->num_records =
+	    records->u.databaseOrSurDiagnostics->num_records;
+	int i;
+	srw_res->records = (Z_SRW_record *)
+	    odr_malloc(o, srw_res->num_records * sizeof(Z_SRW_record));
+	for (i = 0; i < srw_res->num_records; i++)
+	{
+	    Z_NamePlusRecord *npr = records->u.databaseOrSurDiagnostics->records[i];
+	    if (npr->which != Z_NamePlusRecord_databaseRecord)
+	    {
+		srw_res->records[i].recordSchema = "diagnostic";
+		srw_res->records[i].recordPacking = m_s2z_packing;
+		srw_res->records[i].recordData_buf = "67";
+		srw_res->records[i].recordData_len = 2;
+		srw_res->records[i].recordPosition = 0;
+		continue;
+	    }
+	    Z_External *r = npr->u.databaseRecord;
+	    oident *ent = oid_getentbyoid(r->direct_reference);
+	    if (r->which == Z_External_octet && ent->value == VAL_TEXT_XML)
+	    {
+		srw_res->records[i].recordSchema = "http://www.loc.gov/marcxml/";
+		srw_res->records[i].recordPacking = m_s2z_packing;
+		srw_res->records[i].recordData_buf = (char*) 
+		    r->u.octet_aligned->buf;
+		srw_res->records[i].recordData_len = r->u.octet_aligned->len;
+		srw_res->records[i].recordPosition = 0;
+	    }
+	    else
+	    {
+		srw_res->records[i].recordSchema = "diagnostic";
+		srw_res->records[i].recordPacking = m_s2z_packing;
+		srw_res->records[i].recordData_buf = "67";
+		srw_res->records[i].recordData_len = 2;
+		srw_res->records[i].recordPosition = 0;
+	    }
+	}
+    }
+    if (records && records->which == Z_Records_NSD)
+    {
+	int http_code;
+	http_code = z_to_srw_diag(odr_encode(), srw_res,
+				   records->u.nonSurrogateDiagnostic);
+	if (http_code)
+	    return send_http_response(http_code);
+    }
+    return send_srw_response(srw_pdu);
+    
+}
+int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
+{
+    if (m_s2z_init_apdu && apdu->which == Z_APDU_initResponse)
+    {
+	m_s2z_init_apdu = 0;
+	Z_InitResponse *res = apdu->u.initResponse;
+	if (*res->result == 0)
+	{
+	    send_to_srw_client_error(3);
+	}
+	else
+	{
+	    handle_incoming_Z_PDU(m_s2z_search_apdu);
+	}
+    }
+    else if (m_s2z_search_apdu && apdu->which == Z_APDU_searchResponse)
+    {
+	m_s2z_search_apdu = 0;
+	Z_SearchResponse *res = apdu->u.searchResponse;
+	m_s2z_hit_count = *res->resultCount;
+	if (res->records && res->records->which == Z_Records_NSD)
+	{
+	    send_to_srw_client_ok(0, res->records);
+	}
+	else if (m_s2z_present_apdu)
+	{
+	    handle_incoming_Z_PDU(m_s2z_present_apdu);
+	}
+	else
+	{
+	    send_to_srw_client_ok(m_s2z_hit_count, res->records);
+	}
+    }
+    else if (m_s2z_present_apdu && apdu->which == Z_APDU_presentResponse)
+    {
+	m_s2z_present_apdu = 0;
+	Z_PresentResponse *res = apdu->u.presentResponse;
+	send_to_srw_client_ok(m_s2z_hit_count, res->records);
+    }
+    else
+	return send_Z_PDU(apdu, len);
+    return 0;
+}
+
 int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 {
     int len = 0;
+    int kill_session = 0;
     if (apdu->which == Z_APDU_searchResponse)
     {
 	Z_SearchResponse *sr = apdu->u.searchResponse;
@@ -608,6 +827,7 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	    dr.which = Z_DiagRec_defaultFormat;
 	    dr.u.defaultFormat = p->u.nonSurrogateDiagnostic;
 
+	    *sr->searchStatus = 0;
 	    display_diagrecs(&dr_p, 1);
 	}
 	else
@@ -619,7 +839,15 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 		yaz_log(LOG_LOG, "%s%d hits", m_session_str,
 			*sr->resultCount);
 		if (*sr->resultCount < 0)
+		{
 		    m_invalid_session = 1;
+		    kill_session = 1;
+
+		    *sr->searchStatus = 0;
+		    sr->records =
+			create_nonSurrogateDiagnostics(odr_encode(), 2, 0);
+		    *sr->resultCount = 0;
+		}
 	    }
 	}
     }
@@ -632,18 +860,27 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	    Z_DiagRec dr, *dr_p = &dr;
 	    dr.which = Z_DiagRec_defaultFormat;
 	    dr.u.defaultFormat = p->u.nonSurrogateDiagnostic;
-
+	    if (*sr->presentStatus == Z_PresentStatus_success)
+		*sr->presentStatus = Z_PresentStatus_failure;
 	    display_diagrecs(&dr_p, 1);
 	}
 	if (m_marcxml_flag && p && p->which == Z_Records_DBOSD)
 	    convert_to_marcxml(p->u.databaseOrSurDiagnostics);
     }
-    int r = send_Z_PDU(apdu, &len);
+    int r = send_PDU_convert(apdu, &len);
+    if (r)
+	return r;
     if (m_log_mask & PROXY_LOG_APDU_CLIENT)
 	yaz_log (LOG_DEBUG, "%sSending %s to client %d bytes", m_session_str,
 		 apdu_name(apdu), len);
     m_bytes_sent += len;
     m_bw_stat.add_bytes(len);
+    if (kill_session)
+    {
+	delete m_client;
+	m_client = 0;
+	m_parent->pre_init();
+    }
     return r;
 }
 
@@ -682,7 +919,6 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    send_to_client(new_apdu);
 	    return 0;
 	}
-#if 0
 	if (!strcmp(m_client->m_last_resultSetId, pr->resultSetId))
 	{
 	    if (start+toget-1 > m_client->m_last_resultCount)
@@ -693,6 +929,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		send_to_client(new_apdu);
 		return 0;
 	    }
+	    Z_NamePlusRecordList *npr;
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, start, toget,
 					  pr->preferredRecordSyntax,
 					  pr->recordComposition))
@@ -716,7 +953,6 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		return 0;
 	    }
 	}
-#endif
     }
 
     if (apdu->which != Z_APDU_searchRequest)
@@ -888,7 +1124,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 }
 
 
-void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
+void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
 {
     char *cp = strchr(m_session_str, ' ');
     m_request_no++;
@@ -899,7 +1135,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
     
     if (m_log_mask & PROXY_LOG_APDU_CLIENT)
 	yaz_log (LOG_DEBUG, "%sReceiving %s from client %d bytes",
-		 m_session_str, apdu_name(apdu), len);
+		 m_session_str, gdu_name(apdu), len);
 
     if (m_bw_hold_PDU)     // double incoming PDU. shutdown now.
 	shutdown();
@@ -934,8 +1170,10 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
 	m_bw_hold_PDU = apdu;  // save PDU and signal "on hold"
 	timeout(reduce);       // call us reduce seconds later
     }
-    else
-	recv_Z_PDU_0(apdu);    // all fine. Proceed receive PDU as usual
+    else if (apdu->which == Z_GDU_Z3950)
+	handle_incoming_Z_PDU(apdu->u.z3950);
+    else if (apdu->which == Z_GDU_HTTP_Request)
+	handle_incoming_HTTP(apdu->u.HTTP_Request);
 }
 
 void Yaz_Proxy::handle_max_record_retrieve(Z_APDU *apdu)
@@ -973,6 +1211,35 @@ Z_Records *Yaz_Proxy::create_nonSurrogateDiagnostics(ODR odr,
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
     return rec;
+}
+
+Z_APDU *Yaz_Proxy::handle_query_transformation(Z_APDU *apdu)
+{
+    if (apdu->which == Z_APDU_searchRequest &&
+	apdu->u.searchRequest->query &&
+	apdu->u.searchRequest->query->which == Z_Query_type_104 &&
+	apdu->u.searchRequest->query->u.type_104->which == Z_External_CQL)
+    {
+	Z_RPNQuery *rpnquery = 0;
+	Z_SearchRequest *sr = apdu->u.searchRequest;
+	
+	yaz_log(LOG_LOG, "%sCQL: %s", m_session_str,
+		sr->query->u.type_104->u.cql);
+
+	int r = m_cql2rpn.query_transform(sr->query->u.type_104->u.cql,
+					  &rpnquery, odr_encode());
+	if (r == -3)
+	    yaz_log(LOG_LOG, "%sNo CQL to RPN table", m_session_str);
+	else if (r)
+	    yaz_log(LOG_LOG, "%sCQL Conversion error %d", m_session_str, r);
+	else
+	{
+	    sr->query->which = Z_Query_type_1;
+	    sr->query->u.type_1 = rpnquery;
+	}
+	return apdu;
+    }
+    return apdu;
 }
 
 Z_APDU *Yaz_Proxy::handle_query_validation(Z_APDU *apdu)
@@ -1076,10 +1343,388 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     return apdu;
 }
 
-void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
+static int hex_digit (int ch)
 {
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    else if (ch >= 'a' && ch <= 'f')
+        return ch - 'a'+10;
+    else if (ch >= 'A' && ch <= 'F')
+        return ch - 'A'+10;
+    return 0;
+}
+
+static char *uri_val(const char *path, const char *name, ODR o)
+{
+    size_t nlen = strlen(name);
+    if (*path != '?')
+        return 0;
+    path++;
+    while (path && *path)
+    {
+        const char *p1 = strchr(path, '=');
+        if (!p1)
+            break;
+        if ((size_t)(p1 - path) == nlen && !memcmp(path, name, nlen))
+        {
+            size_t i = 0;
+            char *ret;
+            
+            path = p1 + 1;
+            p1 = strchr(path, '&');
+            if (!p1)
+                p1 = strlen(path) + path;
+            ret = (char*) odr_malloc(o, p1 - path + 1);
+            while (*path && *path != '&')
+            {
+                if (*path == '+')
+                {
+                    ret[i++] = ' ';
+                    path++;
+                }
+                else if (*path == '%' && path[1] && path[2])
+                {
+                    ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
+                    path = path + 3;
+                }
+                else
+                    ret[i++] = *path++;
+            }
+            ret[i] = '\0';
+            return ret;
+        }
+        path = strchr(p1, '&');
+        if (path)
+            path++;
+    }
+    return 0;
+}
+
+void uri_val_int(const char *path, const char *name, ODR o, int **intp)
+{
+    const char *v = uri_val(path, name, o);
+    if (v)
+        *intp = odr_intdup(o, atoi(v));
+}
+
+int yaz_check_for_sru(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+		      char **soap_ns, ODR decode)
+{
+    if (!strcmp(hreq->method, "GET"))
+    {
+        char *db = "Default";
+        const char *p0 = hreq->path, *p1;
+#if HAVE_XML2
+        int ret = -1;
+        char *charset = 0;
+        Z_SOAP *soap_package = 0;
+        static Z_SOAP_Handler soap_handlers[2] = {
+            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+             (Z_SOAP_fun) yaz_srw_codec},
+            {0, 0, 0}
+        };
+#endif
+        
+        if (*p0 == '/')
+            p0++;
+        p1 = strchr(p0, '?');
+        if (!p1)
+            p1 = p0 + strlen(p0);
+        if (p1 != p0)
+        {
+            db = (char*) odr_malloc(decode, p1 - p0 + 1);
+            memcpy (db, p0, p1 - p0);
+            db[p1 - p0] = '\0';
+        }
+#if HAVE_XML2
+        if (p1 && *p1 == '?' && p1[1])
+        {
+            Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_searchRetrieve_request);
+            char *query = uri_val(p1, "query", decode);
+            char *pQuery = uri_val(p1, "pQuery", decode);
+            char *sortKeys = uri_val(p1, "sortKeys", decode);
+            
+	    *srw_pdu = sr;
+            if (query)
+            {
+                sr->u.request->query_type = Z_SRW_query_type_cql;
+                sr->u.request->query.cql = query;
+            }
+            if (pQuery)
+            {
+                sr->u.request->query_type = Z_SRW_query_type_pqf;
+                sr->u.request->query.pqf = pQuery;
+            }
+            if (sortKeys)
+            {
+                sr->u.request->sort_type = Z_SRW_sort_type_sort;
+                sr->u.request->sort.sortKeys = sortKeys;
+            }
+            sr->u.request->recordSchema = uri_val(p1, "recordSchema", decode);
+            sr->u.request->recordPacking = uri_val(p1, "recordPacking", decode);
+            if (!sr->u.request->recordPacking)
+                sr->u.request->recordPacking = "xml";
+            uri_val_int(p1, "maximumRecords", decode, 
+                        &sr->u.request->maximumRecords);
+            uri_val_int(p1, "startRecord", decode,
+                        &sr->u.request->startRecord);
+            if (sr->u.request->startRecord)
+                yaz_log(LOG_LOG, "startRecord=%d", *sr->u.request->startRecord);
+            sr->u.request->database = db;
+	    *soap_ns = "SRU";
+	    return 0;
+        }
+#endif
+	return 1;
+    }
+    return 2;
+}
+
+int yaz_check_for_srw(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+		      char **soap_ns, ODR decode)
+{
+    if (!strcmp(hreq->method, "POST"))
+    {
+	const char *content_type = z_HTTP_header_lookup(hreq->headers,
+							"Content-Type");
+	if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+	{
+	    char *db = "Default";
+	    const char *p0 = hreq->path, *p1;
+	    Z_SOAP *soap_package = 0;
+            int ret = -1;
+            int http_code = 500;
+            const char *charset_p = 0;
+            char *charset = 0;
+	    
+            static Z_SOAP_Handler soap_handlers[2] = {
+#if HAVE_XML2
+                {"http://www.loc.gov/zing/srw/v1.0/", 0,
+                 (Z_SOAP_fun) yaz_srw_codec},
+#endif
+                {0, 0, 0}
+            };
+	    
+	    if (*p0 == '/')
+		p0++;
+	    p1 = strchr(p0, '?');
+	    if (!p1)
+		p1 = p0 + strlen(p0);
+	    if (p1 != p0)
+	    {
+		db = (char*) odr_malloc(decode, p1 - p0 + 1);
+		memcpy (db, p0, p1 - p0);
+		db[p1 - p0] = '\0';
+	    }
+
+            if ((charset_p = strstr(content_type, "; charset=")))
+            {
+                int i = 0;
+                charset_p += 10;
+                while (i < 20 && charset_p[i] &&
+                       !strchr("; \n\r", charset_p[i]))
+                    i++;
+                charset = (char*) odr_malloc(decode, i+1);
+                memcpy(charset, charset_p, i);
+                charset[i] = '\0';
+                yaz_log(LOG_LOG, "SOAP encoding %s", charset);
+            }
+            ret = z_soap_codec(decode, &soap_package, 
+                               &hreq->content_buf, &hreq->content_len,
+                               soap_handlers);
+	    if (!ret && soap_package->which == Z_SOAP_generic &&
+		soap_package->u.generic->no == 0)
+	    {
+		*srw_pdu = (Z_SRW_PDU*) soap_package->u.generic->p;
+		
+		if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
+		    (*srw_pdu)->u.request->database == 0)
+		    (*srw_pdu)->u.request->database = db;
+
+		*soap_ns = odr_strdup(decode, soap_package->ns);
+		return 0;
+	    }
+	    return 1;
+	}
+    }
+    return 2;
+}
+
+void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
+{
+    Z_SRW_PDU *srw_pdu = 0;
+    char *soap_ns = 0;
+    if (m_s2z_odr)
+    {
+	odr_destroy(m_s2z_odr);
+	m_s2z_odr = 0;
+    }
+
+    m_http_keepalive = 0;
+    m_http_version = 0;
+    if (!strcmp(hreq->version, "1.0")) 
+    {
+        const char *v = z_HTTP_header_lookup(hreq->headers, "Connection");
+        if (v && !strcmp(v, "Keep-Alive"))
+            m_http_keepalive = 1;
+        else
+            m_http_keepalive = 0;
+        m_http_version = "1.0";
+    }
+    else
+    {
+        const char *v = z_HTTP_header_lookup(hreq->headers, "Connection");
+        if (v && !strcmp(v, "close"))
+            m_http_keepalive = 0;
+        else
+            m_http_keepalive = 1;
+        m_http_version = "1.1";
+    }
+
+    if (yaz_check_for_srw(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0
+	|| yaz_check_for_sru(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0)
+    {
+	m_s2z_odr = odr_createmem(ODR_ENCODE);
+	m_soap_ns = odr_strdup(m_s2z_odr, soap_ns);
+	m_s2z_init_apdu = 0;
+	m_s2z_search_apdu = 0;
+	m_s2z_present_apdu = 0;
+	if (srw_pdu->which == Z_SRW_searchRetrieve_request)
+	{
+	    Z_SRW_searchRetrieveRequest *srw_req = srw_pdu->u.request;
+
+	    // set packing for response records ..
+	    if (srw_req->recordPacking &&
+		!strcmp(srw_req->recordPacking, "xml"))
+		m_s2z_packing = Z_SRW_recordPacking_XML;
+	    else
+		m_s2z_packing = Z_SRW_recordPacking_string;
+
+	    // prepare search PDU
+	    m_s2z_search_apdu = zget_APDU(m_s2z_odr, Z_APDU_searchRequest);
+	    Z_SearchRequest *z_searchRequest =
+		m_s2z_search_apdu->u.searchRequest;
+
+	    z_searchRequest->num_databaseNames = 1;
+	    z_searchRequest->databaseNames = (char**)
+		odr_malloc(m_s2z_odr, sizeof(char *));
+	    z_searchRequest->databaseNames[0] = odr_strdup(m_s2z_odr,
+							   srw_req->database);
+	    
+	    // query transformation
+	    Z_Query *query = (Z_Query *)
+		odr_malloc(odr_encode(), sizeof(Z_Query));
+	    z_searchRequest->query = query;
+	    
+	    if (srw_req->query_type == Z_SRW_query_type_cql)
+	    {
+		Z_External *ext = (Z_External *) 
+		    odr_malloc(m_s2z_odr, sizeof(*ext));
+		ext->direct_reference = 
+		    odr_getoidbystr(m_s2z_odr, "1.2.840.10003.16.2");
+		ext->indirect_reference = 0;
+		ext->descriptor = 0;
+		ext->which = Z_External_CQL;
+		ext->u.cql = srw_req->query.cql;
+		
+		query->which = Z_Query_type_104;
+		query->u.type_104 =  ext;
+	    }
+	    else if (srw_req->query_type == Z_SRW_query_type_pqf)
+	    {
+		Z_RPNQuery *RPNquery;
+		YAZ_PQF_Parser pqf_parser;
+		
+		pqf_parser = yaz_pqf_create ();
+		
+		RPNquery = yaz_pqf_parse (pqf_parser, m_s2z_odr,
+					  srw_req->query.pqf);
+		if (!RPNquery)
+		{
+		    const char *pqf_msg;
+		    size_t off;
+		    int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+		    yaz_log(LOG_LOG, "%*s^\n", off+4, "");
+		    yaz_log(LOG_LOG, "Bad PQF: %s (code %d)\n", pqf_msg, code);
+		    
+		    send_to_srw_client_error(10);
+		    return;
+		}
+		query->which = Z_Query_type_1;
+		query->u.type_1 =  RPNquery;
+		
+		yaz_pqf_destroy (pqf_parser);
+	    }
+	    else
+	    {
+		send_to_srw_client_error(11);
+		return;
+	    }
+
+	    // present
+	    m_s2z_present_apdu = 0;
+	    int max = 0;
+	    if (srw_req->maximumRecords)
+		max = *srw_req->maximumRecords;
+	    int start = 1;
+	    if (srw_req->startRecord)
+		start = *srw_req->startRecord;
+	    if (max > 0)
+	    {
+		if (start <= 1)  // Z39.50 piggyback
+		{
+		    *z_searchRequest->smallSetUpperBound = max;
+		    *z_searchRequest->mediumSetPresentNumber = max;
+		    *z_searchRequest->largeSetLowerBound = 2000000000; // 2e9
+		    z_searchRequest->preferredRecordSyntax =
+			yaz_oidval_to_z3950oid(m_s2z_odr, CLASS_RECSYN,
+					       VAL_TEXT_XML);
+		}
+		else   // Z39.50 present
+		{
+		    m_s2z_present_apdu = zget_APDU(m_s2z_odr, 
+						   Z_APDU_presentRequest);
+		    Z_PresentRequest *z_presentRequest = 
+			m_s2z_present_apdu->u.presentRequest;
+		    *z_presentRequest->resultSetStartPoint = start;
+		    *z_presentRequest->numberOfRecordsRequested = max;
+		    z_presentRequest->preferredRecordSyntax =
+			yaz_oidval_to_z3950oid(m_s2z_odr, CLASS_RECSYN,
+					       VAL_TEXT_XML);
+		}
+	    }
+	    if (!m_client)
+	    {
+		m_s2z_init_apdu = zget_APDU(m_s2z_odr, Z_APDU_initRequest);
+		handle_incoming_Z_PDU(m_s2z_init_apdu);
+		return;
+	    }
+	    else
+	    {
+		handle_incoming_Z_PDU(m_s2z_search_apdu);
+		return;
+	    }
+	}
+    }
+    int len = 0;
+    Z_GDU *p = z_get_HTTP_Response(odr_encode(), 400);
+    send_GDU(p, &len);
+    timeout(1);
+}
+
+void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
+{
+    if (!m_client && m_invalid_session)
+    {
+	m_apdu_invalid_session = apdu;
+	m_mem_invalid_session = odr_extract_mem(odr_decode());
+	apdu = m_initRequest_apdu;
+    }
+
     // Determine our client.
-    m_client = get_client(apdu);
+    Z_OtherInformation **oi;
+    get_otherInfoAPDU(apdu, &oi);
+    m_client = get_client(apdu, get_cookie(oi), get_proxy(oi));
     if (!m_client)
     {
 	delete this;
@@ -1098,8 +1743,17 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
 	if (apdu->u.initRequest->implementationVersion)
 	    yaz_log(LOG_LOG, "%simplementationVersion: %s",
 		    m_session_str, apdu->u.initRequest->implementationVersion);
+	if (m_initRequest_apdu == 0)
+	{
+	    if (m_initRequest_mem)
+		nmem_destroy(m_initRequest_mem);
+	    m_initRequest_apdu = apdu;
+	    m_initRequest_mem = odr_extract_mem(odr_decode());
+	}
 	if (m_client->m_init_flag)
 	{
+	    if (handle_init_response_for_invalid_session(apdu))
+		return;
 	    Z_APDU *apdu = m_client->m_initResponse;
 	    apdu->u.initResponse->otherInfo = 0;
 	    if (m_client->m_cookie && *m_client->m_cookie)
@@ -1116,6 +1770,9 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
 	apdu = handle_syntax_validation(apdu);
 
     if (apdu)
+	apdu = handle_query_transformation(apdu);
+
+    if (apdu)
 	apdu = handle_query_validation(apdu);
 
     if (apdu)
@@ -1128,7 +1785,6 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
     }
 
     // delete other info part from PDU before sending to target
-    Z_OtherInformation **oi;
     get_otherInfoAPDU(apdu, &oi);
     if (oi)
         *oi = 0;
@@ -1158,9 +1814,9 @@ void Yaz_Proxy::connectNotify()
 
 void Yaz_Proxy::shutdown()
 {
+    m_invalid_session = 0;
     // only keep if keep_alive flag is set...
     if (m_client && 
-	!m_invalid_session &&
 	m_client->m_pdu_recv < m_keepalive_limit_pdu &&
 	m_client->m_bytes_recv+m_client->m_bytes_sent < m_keepalive_limit_bw &&
 	m_client->m_waiting == 0)
@@ -1175,6 +1831,7 @@ void Yaz_Proxy::shutdown()
         assert (m_client->m_waiting != 2);
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
+	m_invalid_session = 0;
     }
     else if (m_client)
     {
@@ -1298,6 +1955,7 @@ void Yaz_Proxy::pre_init()
     int max_clients;
     int keepalive_limit_bw, keepalive_limit_pdu;
     int pre_init;
+    const char *cql2rpn = 0;
 
     Yaz_ProxyConfig *cfg = check_reconfigure();
 
@@ -1314,7 +1972,8 @@ void Yaz_Proxy::pre_init()
 					  &max_clients, 
 					  &keepalive_limit_bw,
 					  &keepalive_limit_pdu,
-					  &pre_init) ; i++)
+					  &pre_init,
+					  &cql2rpn) ; i++)
     {
 	if (pre_init)
 	{
@@ -1380,9 +2039,13 @@ void Yaz_Proxy::timeoutNotify()
 	if (m_bw_hold_PDU)
 	{
 	    timeout(m_client_idletime);
-	    Z_APDU *apdu = m_bw_hold_PDU;
+	    Z_GDU *apdu = m_bw_hold_PDU;
 	    m_bw_hold_PDU = 0;
-	    recv_Z_PDU_0(apdu);
+	    
+	    if (apdu->which == Z_GDU_Z3950)
+		handle_incoming_Z_PDU(apdu->u.z3950);
+	    else if (apdu->which == Z_GDU_HTTP_Request)
+		handle_incoming_HTTP(apdu->u.HTTP_Request);
 	}
 	else
 	{
@@ -1443,6 +2106,33 @@ const char *Yaz_Proxy::option(const char *name, const char *value)
     return 0;
 }
 
+void Yaz_ProxyClient::recv_HTTP_response(Z_HTTP_Response *apdu, int len)
+{
+
+}
+
+void Yaz_ProxyClient::recv_GDU(Z_GDU *apdu, int len)
+{
+    if (apdu->which == Z_GDU_Z3950)
+	recv_Z_PDU(apdu->u.z3950, len);
+    else if (apdu->which == Z_GDU_HTTP_Response)
+	recv_HTTP_response(apdu->u.HTTP_Response, len);
+    else
+	shutdown();
+}
+
+int Yaz_Proxy::handle_init_response_for_invalid_session(Z_APDU *apdu)
+{
+    if (!m_invalid_session)
+	return 0;
+    m_invalid_session = 0;
+    handle_incoming_Z_PDU(m_apdu_invalid_session);
+    assert (m_mem_invalid_session);
+    nmem_destroy(m_mem_invalid_session);
+    m_mem_invalid_session = 0;
+    return 1;
+}
+
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 {
     m_bytes_recv += len;
@@ -1475,6 +2165,9 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 	ir->implementationName = im1;
 
         nmem_destroy (nmem);
+
+	if (m_server && m_server->handle_init_response_for_invalid_session(apdu))
+	    return;
     }
     if (apdu->which == Z_APDU_searchResponse)
     {

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.13 2003-10-03 13:01:42 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.14 2003-12-16 14:17:01 adam Exp $
  */
 
 #include <yaz++/z-query.h>
@@ -78,9 +78,9 @@ void Yaz_Z_Query::print(char *str, int len)
 	}
 	else
 	    strcpy(str, wrbuf_buf(wbuf));
+	wrbuf_free(wbuf,1);
     }
     odr_reset(odr_decode);
-    wrbuf_free(wbuf,1);
 }
 
 int Yaz_Z_Query::match(Yaz_Z_Query *other)
