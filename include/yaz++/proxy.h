@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.32 2004-01-08 22:54:52 adam Exp $
+ * $Id: proxy.h,v 1.33 2004-01-09 18:11:15 adam Exp $
  */
 
 #include <sys/time.h>
@@ -260,8 +260,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int send_to_srw_client_ok(int hits, Z_Records *records, int start);
     int send_http_response(int code);
     int send_srw_response(Z_SRW_PDU *srw_pdu);
-    int send_srw_explain();
-
+    int send_srw_explain_response(Z_SRW_diagnostic *diagnostics,
+				  int num_diagnostics);
     int z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
 		      Z_DefaultDiagFormat *ddf);
     int m_http_keepalive;

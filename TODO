@@ -19,5 +19,3 @@ Throw proper CQL conversion error.
 
 Honor XPath.
 
-Deal with scan, sort (throw diagnostic).
-
