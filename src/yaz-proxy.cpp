@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.84 2004-01-07 22:28:08 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.85 2004-01-08 22:54:53 adam Exp $
  */
 
 #include <assert.h>
@@ -757,7 +757,7 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     return r;
 }
 
-int Yaz_Proxy::send_to_srw_client_error(int srw_error)
+int Yaz_Proxy::send_to_srw_client_error(int srw_error, const char *add)
 {
     ODR o = odr_encode();
     Z_SRW_PDU *srw_pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
@@ -767,7 +767,7 @@ int Yaz_Proxy::send_to_srw_client_error(int srw_error)
     srw_res->diagnostics = (Z_SRW_diagnostic *)
 	odr_malloc(o, sizeof(*srw_res->diagnostics));
     srw_res->diagnostics[0].code =  odr_intdup(o, srw_error);
-    srw_res->diagnostics[0].details = 0;
+    srw_res->diagnostics[0].details = add ? odr_strdup(o, add) : 0;
     return send_srw_response(srw_pdu);
 }
 
@@ -876,7 +876,7 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 	    Z_InitResponse *res = apdu->u.initResponse;
 	    if (*res->result == 0)
 	    {
-		send_to_srw_client_error(3);
+		send_to_srw_client_error(3, 0);
 	    }
 	    else if (!m_s2z_search_apdu)
 	    {
@@ -1576,7 +1576,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    // recordXPath unsupported.
 	    if (srw_req->recordXPath)
             {
-	        send_to_srw_client_error(72);
+	        send_to_srw_client_error(72, 0);
 	        return;
             }
 
@@ -1613,7 +1613,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    {
                 if (!srw_req->query.cql)
                 {
-		    send_to_srw_client_error(7);
+		    send_to_srw_client_error(7, "query");
 		    return;
                 }
 		Z_External *ext = (Z_External *) 
@@ -1645,7 +1645,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		    yaz_log(LOG_LOG, "%*s^\n", off+4, "");
 		    yaz_log(LOG_LOG, "Bad PQF: %s (code %d)\n", pqf_msg, code);
 		    
-		    send_to_srw_client_error(10);
+		    send_to_srw_client_error(10, 0);
 		    return;
 		}
 		query->which = Z_Query_type_1;
@@ -1655,7 +1655,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    }
 	    else
 	    {
-		send_to_srw_client_error(7);
+		send_to_srw_client_error(7, "query");
 		return;
 	    }
 
@@ -1761,7 +1761,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	}
 	else
         {
-	    send_to_srw_client_error(4);
+	    send_to_srw_client_error(4, 0);
         }
     }
     int len = 0;
