@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.22 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.23 2002-04-22 12:08:07 adam Exp $
  */
 
 #include <assert.h>
@@ -208,6 +208,8 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 	z_APDU(m_odr_print, &apdu, 0, "encode");
     if (!z_APDU(m_odr_out, &apdu, 0, 0))
     {
+	if (m_APDU_file)
+	    fprintf (m_APDU_file, "PDU encode failed (above)");
 	yaz_log (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
