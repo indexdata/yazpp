@@ -1,0 +1,67 @@
+# Copyright (C) 1999, Index Data 
+# All rights reserved.
+# Sebastian Hammer, Adam Dickmeiss
+# $Id: Makefile.in,v 1.1 1999-01-28 09:41:07 adam Exp $
+
+SHELL=/bin/sh
+
+CC=@CC@
+CXX=@CXX@
+CPP=@CPP@
+CXXCPP=@CXXCPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@
+LIBS=@LIBS@
+
+LIBDIR=../../yaz/lib
+
+INCLUDE=-I../../yaz/z39.50 -I../../yaz/include -I../include
+DEFS=$(INCLUDE) $(CDEFS)
+YAZLIBS=$(LIBDIR)/libasn.a \
+  $(LIBDIR)/libcomstack.a $(LIBDIR)/ccl.a \
+  $(LIBDIR)/libodr.a $(LIBDIR)/libutil.a 
+PROG1=yaz-client
+PROGO1=yaz-client.o
+PROG2=yaz-server
+PROGO2=yaz-server.o
+PROG3=yaz-proxy
+PROGO3=yaz-proxy-main.o
+LIB=$(LIBDIR)/yazchan.lib
+PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-ir-assoc.o yaz-proxy.o
+
+.SUFFIXES: .cc
+
+all: $(PROG1) $(PROG2) $(PROG3)
+
+$(LIB): $(PO)
+	rm -f $(LIB)
+	ar qc $(LIB) $(PO)
+	$(RANLIB) $(LIB)
+
+$(PROG1): $(PROGO1) $(YAZLIBS) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG1) $(PROGO1) $(LIB) $(YAZLIBS) $(LIBS) 
+
+$(PROG2): $(PROGO2) $(YAZLIBS) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG2) $(PROGO2) $(LIB) $(YAZLIBS) $(LIBS) 
+
+$(PROG3): $(PROGO3) $(YAZLIBS) $(LIB)
+	$(CXX) $(CXXFLAGS) -o $(PROG3) $(PROGO3) $(LIB) $(YAZLIBS) $(LIBS) 
+
+alll:
+
+.cc.o:
+	$(CXX) -c $(DEFS) $(CXXFLAGS) $<
+
+.c.o:
+	$(CC) -c $(DEFS) $(FLAGS) $<
+
+clean:
+	rm -f *.[oa] test core mon.out gmon.out errlist
+	rm -f $(PROG1) $(PROG2) $(PROG3)
+
+depend:
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CXXCPP) $(DEFS) -M *.cc >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
+
+#Depend --- DOT NOT DELETE THIS LINE
