@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.18  2000-10-24 12:29:57  adam
+ * Revision 1.19  2000-11-01 14:22:59  adam
+ * Added fd parameter for method IYaz_PDU_Observer::clone.
+ *
+ * Revision 1.18  2000/10/24 12:29:57  adam
  * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
  * two Yaz_Proxy's (fatal).
  *
@@ -412,7 +415,7 @@ void Yaz_PDU_Assoc::childNotify(int fd)
     IYaz_PDU_Observable *new_observable = clone();
 
     // Clone PDU Observer
-    IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable);
+    IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable, fd);
 
     // Attach new socket to it
     new_observable->socket(observer, fd);
@@ -452,7 +455,7 @@ void Yaz_PDU_Assoc::childNotify(int fd)
     Yaz_PDU_Assoc *new_observable = new Yaz_PDU_Assoc (socket_observable);
     
     /// Clone PDU Observer
-    IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable);
+    IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable, fd);
     
     /// Attach new socket to it
     new_observable->socket(observer, fd);

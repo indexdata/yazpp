@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.15  2000-10-11 11:58:16  adam
+ * Revision 1.16  2000-11-01 14:22:59  adam
+ * Added fd parameter for method IYaz_PDU_Observer::clone.
+ *
+ * Revision 1.15  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -82,7 +85,7 @@ private:
 public:
     MyClient(IYaz_PDU_Observable *the_PDU_Observable,
 	     Yaz_SocketManager *the_SocketManager);
-    IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable);
+    IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     int args(Yaz_SocketManager *socketManager, int argc, char **argv);
     int interactive(Yaz_SocketManager *socketManager);
     int wait();
@@ -135,7 +138,8 @@ void MyClient::failNotify()
     set_lastReceived(-1);
 }
 
-IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
+IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable,
+				   int fd)
 { 
     return new MyClient(the_PDU_Observable, m_socketManager);
 }

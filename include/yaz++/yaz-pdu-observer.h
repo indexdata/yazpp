@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-observer.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-pdu-observer.h,v 1.2 2000-11-01 14:22:59 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -51,7 +51,8 @@ class YAZ_EXPORT IYaz_PDU_Observer {
     /// Called whenever there is a timeout
     virtual void timeoutNotify() = 0;
     /// Make clone of observer using IYaz_PDU_Observable interface
-    virtual IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable) = 0;
+    virtual IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable,
+				     int fd) = 0;
 };
 
 #endif

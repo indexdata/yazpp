@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.13  2000-10-11 11:58:16  adam
+ * Revision 1.14  2000-11-01 14:22:59  adam
+ * Added fd parameter for method IYaz_PDU_Observer::clone.
+ *
+ * Revision 1.13  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -69,7 +72,8 @@ public:
 			Z_RecordComposition *comp,
 			Z_NamePlusRecord *namePlusRecord,
 			Z_Records *records);
-    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
+    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable,
+			     int fd);
     void failNotify();
     void timeoutNotify();
     void connectNotify();
@@ -1600,7 +1604,8 @@ void MyServer::recv_Z_record (const char *resultSetName,
 			   strlen(marc_records[eff_pos]));
 }
 
-IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable)
+IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable,
+				   int fd)
 {
     MyServer *new_server;
     logf (LOG_LOG, "child no %d", m_no);

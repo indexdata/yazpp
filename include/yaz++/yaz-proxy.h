@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-proxy.h,v 1.2 2000-11-01 14:22:59 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -16,7 +16,7 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_ProxyClient();
     void recv_Z_PDU(Z_APDU *apdu);
-    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
+    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void shutdown();
     Yaz_Proxy *m_server;
     void failNotify();
@@ -55,7 +55,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();
     void recv_Z_PDU(Z_APDU *apdu);
-    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
+    IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void failNotify();
     void timeoutNotify();
     void connectNotify();

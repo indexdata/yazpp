@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.20  2000-10-24 12:29:57  adam
+ * Revision 1.21  2000-11-01 14:22:59  adam
+ * Added fd parameter for method IYaz_PDU_Observer::clone.
+ *
+ * Revision 1.20  2000/10/24 12:29:57  adam
  * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
  * two Yaz_Proxy's (fatal).
  *
@@ -108,7 +111,7 @@ void Yaz_Proxy::set_proxyTarget(const char *target)
 }
 
 IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
-				    *the_PDU_Observable)
+				    *the_PDU_Observable, int fd)
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
@@ -479,7 +482,7 @@ void Yaz_ProxyClient::connectNotify()
 }
 
 IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
-					  *the_PDU_Observable)
+					  *the_PDU_Observable, int fd)
 {
     return new Yaz_ProxyClient(the_PDU_Observable);
 }
