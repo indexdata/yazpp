@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.10 2003-10-06 08:08:49 adam Exp $
+ * $Id: proxy.h,v 1.11 2003-10-08 08:15:01 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -29,6 +29,8 @@ public:
 			 int *max_clients);
     void operator=(const Yaz_ProxyConfig &conf);
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
+    int check_syntax(ODR odr, const char *name,
+		     Odr_oid *syntax, char **addinfo);
 private:
 #if HAVE_XML2
     xmlDocPtr m_docPtr;
@@ -164,6 +166,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
 					      const char *addinfo);
 
     Z_APDU *handle_query_validation(Z_APDU *apdu);
+    Z_APDU *handle_syntax_validation(Z_APDU *apdu);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

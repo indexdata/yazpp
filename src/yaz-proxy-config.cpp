@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.4 2003-10-06 08:08:49 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.5 2003-10-08 08:15:01 adam Exp $
  */
 
 #include <ctype.h>
@@ -321,6 +321,70 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
     {
 	if (query->which == Z_Query_type_1 || query->which == Z_Query_type_101)
 	    return check_type_1(odr, ptr, query->u.type_1, addinfo);
+    }
+#endif
+    return 0;
+}
+
+int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
+				  Odr_oid *syntax, char **addinfo)
+{
+#if HAVE_XML2
+    xmlNodePtr ptr;
+    
+    ptr = find_target_node(name);
+    if (!ptr)
+	return 0;
+    for(ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "syntax"))
+	{
+	    int match = 0;  // if we match record syntax
+	    const char *match_type = 0;
+	    const char *match_error = 0;
+	    struct _xmlAttr *attr;
+	    for (attr = ptr->properties; attr; attr = attr->next)
+	    {
+		if (!strcmp((const char *) attr->name, "type") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_type = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "error") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_error = (const char *) attr->children->content;
+	    }
+	    if (match_type)
+	    {
+		if (!strcmp(match_type, "*"))
+		    match = 1;
+		else if (!strcmp(match_type, "none"))
+		{
+		    if (syntax == 0)
+			match = 1;
+		}
+		else if (syntax)
+		{
+		    int match_oid[OID_SIZE];
+		    oid_name_to_oid(CLASS_RECSYN, match_type, match_oid);
+		    if (oid_oidcmp(match_oid, syntax) == 0)
+			match = 1;
+		}
+	    }
+	    if (match)
+	    {
+		if (match_error)
+		{
+		    if (syntax)
+		    {
+			char dotoid_str[100];
+			oid_to_dotstring(syntax, dotoid_str);
+			*addinfo = odr_strdup(odr, dotoid_str);
+		    }
+		    return atoi(match_error);
+		}
+		return 0;
+	    }
+	}
     }
 #endif
     return 0;

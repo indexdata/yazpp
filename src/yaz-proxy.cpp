@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.50 2003-10-04 06:44:16 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.51 2003-10-08 08:15:01 adam Exp $
  */
 
 #include <assert.h>
@@ -658,7 +658,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    }
 	}
     }
-    else
+    else  // query doesn't match
     {
 	delete m_client->m_last_query;
 	m_client->m_last_query = this_query;
@@ -769,16 +769,67 @@ Z_APDU *Yaz_Proxy::handle_query_validation(Z_APDU *apdu)
 	if (err)
 	{
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
-	    int *nulint = odr_intdup (odr_encode(), 0);
 
 	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
 	    new_apdu->u.searchResponse->records =
 		create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
-	    new_apdu->u.searchResponse->searchStatus = nulint;
-	    new_apdu->u.searchResponse->resultCount = nulint;
+	    *new_apdu->u.searchResponse->searchStatus = 0;
 
 	    send_to_client(new_apdu);
 
+	    return 0;
+	}
+    }
+    return apdu;
+}
+
+Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
+{
+    if (apdu->which == Z_APDU_searchRequest)
+    {
+	Z_SearchRequest *sr = apdu->u.searchRequest;
+	if (*sr->smallSetUpperBound > 0 || *sr->largeSetLowerBound > 1)
+	{
+	    int err;
+	    char *addinfo = 0;
+	    err = m_config.check_syntax(odr_encode(), m_default_target,
+					sr->preferredRecordSyntax,
+					&addinfo);
+	    if (err)
+	    {
+		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+		
+		new_apdu->u.searchResponse->referenceId = sr->referenceId;
+		new_apdu->u.searchResponse->records =
+		    create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
+		*new_apdu->u.searchResponse->searchStatus = 0;
+		
+		send_to_client(new_apdu);
+		
+		return 0;
+	    }
+	}
+    }
+    else if (apdu->which == Z_APDU_presentRequest)
+    {
+	Z_PresentRequest *pr = apdu->u.presentRequest;
+	int err;
+	char *addinfo = 0;
+	err = m_config.check_syntax(odr_encode(), m_default_target,
+				    pr->preferredRecordSyntax,
+				    &addinfo);
+	if (err)
+	{
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentResponse);
+	    
+	    new_apdu->u.presentResponse->referenceId = pr->referenceId;
+	    new_apdu->u.presentResponse->records =
+		create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
+	    *new_apdu->u.presentResponse->presentStatus =
+		Z_PresentStatus_failure;
+	    
+	    send_to_client(new_apdu);
+	    
 	    return 0;
 	}
     }
@@ -798,6 +849,15 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
 
     if (apdu->which == Z_APDU_initRequest)
     {
+	if (apdu->u.initRequest->implementationId)
+	    yaz_log(LOG_LOG, "%s implementationId: %s",
+		    m_session_str, apdu->u.initRequest->implementationId);
+	if (apdu->u.initRequest->implementationName)
+	    yaz_log(LOG_LOG, "%s implementationName: %s",
+		    m_session_str, apdu->u.initRequest->implementationName);
+	if (apdu->u.initRequest->implementationVersion)
+	    yaz_log(LOG_LOG, "%s implementationVersion: %s",
+		    m_session_str, apdu->u.initRequest->implementationVersion);
 	if (m_client->m_init_flag)
 	{
 	    Z_APDU *apdu = m_client->m_initResponse;
@@ -811,6 +871,9 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
 	m_client->m_init_flag = 1;
     }
     handle_max_record_retrieve(apdu);
+
+    if (apdu)
+	apdu = handle_syntax_validation(apdu);
 
     if (apdu)
 	apdu = handle_query_validation(apdu);
