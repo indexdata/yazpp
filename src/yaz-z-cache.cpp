@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.7 2003-10-10 17:58:30 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.8 2004-01-24 21:32:31 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -87,10 +87,7 @@ void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
 			   int hits)
 {
     if (nmem_total(m_mem) > m_max_size)
-    {
-	yaz_log(LOG_LOG, "cache size");
 	return;
-    }
     // Build appropriate compspec for this response
     Z_RecordComposition *comp = 0;
     if (hits == -1 && m_presentRequest)
