@@ -2,10 +2,11 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.20 2003-10-09 12:11:10 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.21 2003-10-23 09:08:52 adam Exp $
  */
 
 #include <signal.h>
+#include <unistd.h>
 #include <yaz/log.h>
 #include <yaz/options.h>
 
@@ -20,6 +21,8 @@ void usage(char *prog)
     exit (1);
 }
 
+static char *pid_fname = 0;
+
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
     char *addr = 0;
@@ -27,7 +30,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("o:a:t:v:c:u:i:m:l:T:", argv, argc, &arg)) != -2)
+    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:", argv, argc, &arg)) != -2)
     {
 	int err;
         switch (ret)
@@ -80,6 +83,10 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
         case 'T':
 	    proxy->set_target_idletime(atoi(arg));
 	    break;
+	case 'p':
+	    if (!pid_fname)
+		pid_fname = xstrdup(arg);
+	    break;
         default:
 	    usage(prog);
 	    return 1;
@@ -106,6 +113,7 @@ static void sighup_handler(int num)
 
 int main(int argc, char **argv)
 {
+    static int mk_pid = 0;
     Yaz_SocketManager mySocketManager;
     Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
 
@@ -115,7 +123,24 @@ int main(int argc, char **argv)
 
     args(&proxy, argc, argv);
     while (mySocketManager.processEvent() > 0)
-	;
+	if (!mk_pid && pid_fname)
+	{
+	    FILE *f = fopen(pid_fname, "w");
+	    if (!f)
+	    {
+		yaz_log(LOG_ERRNO|LOG_FATAL, "Couldn't create %s", pid_fname);
+		exit(0);
+	    }
+	    fprintf(f, "%ld", (long) getpid());
+	    fclose(f);
+	    mk_pid = 1;
+	}
+    if (pid_fname)
+    {
+	if (mk_pid)
+	    unlink(pid_fname);
+	xfree(pid_fname);
+    }
     exit (0);
     return 0;
 }
