@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.69 2003-10-23 13:59:37 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.70 2003-11-08 18:51:10 adam Exp $
  */
 
 #include <assert.h>
@@ -895,7 +895,6 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
     if (cp)
 	sprintf(cp+1, "%d ", m_request_no);
 
-    int reduce = 0;
     m_bytes_recv += len;
     
     if (m_log_mask & PROXY_LOG_APDU_CLIENT)
@@ -913,6 +912,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
 
     yaz_log(LOG_LOG, "%sstat bw=%d pdu=%d limit-bw=%d limit-pdu=%d",
 	    m_session_str, bw_total, pdu_total, m_bw_max, m_pdu_max);
+    int reduce = 0;
     if (m_bw_max)
     {
 	if (bw_total > m_bw_max)
@@ -924,7 +924,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu, int len)
     {
 	if (pdu_total > m_pdu_max)
 	{
-	    int nreduce = (60/m_pdu_max);
+	    int nreduce = (m_pdu_max >= 60) ? 1 : 60/m_pdu_max;
 	    reduce = (reduce > nreduce) ? reduce : nreduce;
 	}
     }
