@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.6  1999-04-27 07:52:13  adam
+ * Revision 1.7  1999-04-28 13:31:17  adam
+ * Better result set optimisation for proxy.
+ *
+ * Revision 1.6  1999/04/27 07:52:13  adam
  * Improved proxy; added query match for result set re-use.
  *
  * Revision 1.5  1999/04/21 12:09:01  adam
@@ -154,11 +157,31 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	m_client->m_last_query->match(this_query))
     {
 	delete this_query;
-	if (*sr->smallSetUpperBound == 0)
+	if (m_client->m_last_resultCount > *sr->smallSetUpperBound &&
+	    m_client->m_last_resultCount < *sr->largeSetLowerBound)
 	{
-	    Z_APDU *new_apdu;
-	    logf (LOG_LOG, "query match");
-	    new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+	    // medium Set
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
+	    Z_PresentRequest *pr = new_apdu->u.presentRequest;
+	    pr->referenceId = sr->referenceId;
+	    pr->resultSetId = sr->resultSetName;
+	    pr->preferredRecordSyntax = sr->preferredRecordSyntax;
+	    *pr->numberOfRecordsRequested = *sr->mediumSetPresentNumber;
+	    if (sr->mediumSetElementSetNames)
+	    {
+		pr->recordComposition = (Z_RecordComposition *)
+		    odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
+		pr->recordComposition->which = Z_RecordComp_simple;
+		pr->recordComposition->u.simple = sr->mediumSetElementSetNames;
+	    }
+	    m_client->m_sr_transform = 1;
+	    return new_apdu;
+	}
+	else if (m_client->m_last_resultCount >= *sr->largeSetLowerBound ||
+	    m_client->m_last_resultCount == 0)
+	{
+	    // large set
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
 	    new_apdu->u.searchResponse->resultCount =
 		&m_client->m_last_resultCount;
@@ -167,7 +190,22 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	}
 	else
 	{
-	    logf (LOG_LOG, "query match (piggy back)");
+	    // small set
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
+	    Z_PresentRequest *pr = new_apdu->u.presentRequest;
+	    pr->referenceId = sr->referenceId;
+	    pr->resultSetId = sr->resultSetName;
+	    pr->preferredRecordSyntax = sr->preferredRecordSyntax;
+	    *pr->numberOfRecordsRequested = m_client->m_last_resultCount;
+	    if (sr->smallSetElementSetNames)
+	    {
+		pr->recordComposition = (Z_RecordComposition *)
+		    odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
+		pr->recordComposition->which = Z_RecordComp_simple;
+		pr->recordComposition->u.simple = sr->smallSetElementSetNames;
+	    }
+	    m_client->m_sr_transform = 1;
+	    return new_apdu;
 	}
     }
     else
@@ -278,15 +316,29 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_init_flag = 0;
     m_last_query = 0;
     m_last_resultCount = 0;
+    m_sr_transform = 0;
 }
 
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 {
     logf (LOG_LOG, "Yaz_ProxyClient::recv_Z_PDU");
-    if (m_cookie)
-	set_otherInformationString (apdu, VAL_COOKIE, 1, m_cookie);
     if (apdu->which == Z_APDU_searchResponse)
 	m_last_resultCount = *apdu->u.searchResponse->resultCount;
+    if (apdu->which == Z_APDU_presentResponse && m_sr_transform)
+    {
+	m_sr_transform = 0;
+	Z_PresentResponse *pr = apdu->u.presentResponse;
+	Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+	Z_SearchResponse *sr = new_apdu->u.searchResponse;
+	sr->referenceId = pr->referenceId;
+	*sr->resultCount = m_last_resultCount;
+	sr->records = pr->records;
+	sr->nextResultSetPosition = pr->nextResultSetPosition;
+	sr->numberOfRecordsReturned = pr->numberOfRecordsReturned;
+	apdu = new_apdu;
+    }
+    if (m_cookie)
+	set_otherInformationString (apdu, VAL_COOKIE, 1, m_cookie);
     if (m_server)
     {
 	logf (LOG_LOG, "Yaz_Proxy::send_Z_PDU");
