@@ -173,7 +173,7 @@
    <para>
     When a client reconnects, query and record caching works better, if the
     proxy assigns it to the same backend as before. And the result set
-    (if any) is re-used. To achive this, Index Data defined a session
+    (if any) is re-used. To achieve this, Index Data defined a session
     cookie which identifies the backend session.
    </para>
    <para>
@@ -299,7 +299,7 @@
     <title>Configuration: target</title>
     <para>
      The element <literal>target</literal> which may be repeated zero
-     or more times with parent elemtn <literal>proxy</literal> contains
+     or more times with parent element <literal>proxy</literal> contains
      information about each backend target.
      The <literal>target</literal> element have two attributes:
      <literal>name</literal> which holds the logical name of the backend
@@ -375,7 +375,7 @@
      measures the number of bytes transferred within the last minute.
      The <literal>pdu</literal> is the number of requests in the last
      minute. The <literal>retrieve</literal> holds the maximum records to
-     be retrived in one Present Request.
+     be retrieved in one Present Request.
     </para>
     <para>
      If a bandwidth/pdu limit is reached the proxy will postpone the
@@ -455,7 +455,7 @@
      or a particular record syntax request from the client.
     </para>
     <para>
-     The <literal>syntax</literal> has one equired attribute:
+     The <literal>syntax</literal> has one required attribute:
      <literal>type</literal> which is the Preferred Record Syntax.
     </para>
     <para>
@@ -473,8 +473,8 @@
      <literal>type</literal> should be XML. The proxy will use
      preferred record syntax USMARC/MARC21 against the backend target.
     </para>
-    <para>To accept USMARC and offer MARCXML XML recors but reject
-     all other requests the following configuaration could be used:
+    <para>To accept USMARC and offer MARCXML XML records but reject
+     all other requests the following configuration could be used:
      <screen>
       &lt;proxy>
        &lt;target name="mytarget">
@@ -495,7 +495,7 @@
      a target session is shut down.
     </para>
     <para>
-     This can also be specified on the command line bt using option
+     This can also be specified on the command line by using option
      <literal>-T</literal>. Refer to <xref linkend="proxy-usage"/>.
     </para>
    </section>
