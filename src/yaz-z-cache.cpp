@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.3 2003-07-25 19:28:07 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.4 2003-08-28 18:46:54 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -143,6 +143,8 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
     if (!match)
 	return 0;
 
+    if (!syntax)
+	return 0;
     // See if offset, OID match..
     if (entry->m_offset == offset &&
 	entry->m_record->which == Z_NamePlusRecord_databaseRecord &&
