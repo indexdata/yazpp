@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.15  2000-10-11 11:58:17  adam
+ * Revision 1.16  2000-12-14 16:00:39  adam
+ * Ignoring signal SIGPIPE.
+ *
+ * Revision 1.15  2000/10/11 11:58:17  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -60,6 +63,7 @@
  */
 
 #include <assert.h>
+#include <signal.h>
 
 #include <yaz/log.h>
 #include <yaz++/yaz-z-assoc.h>
@@ -67,6 +71,7 @@
 
 int Yaz_Z_Assoc::yaz_init_func()
 {
+    signal (SIGPIPE, SIG_IGN);
     nmem_init();
     return 1;
 }
