@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.8 2003-10-01 13:13:51 adam Exp $
+ * $Id: proxy.h,v 1.9 2003-10-03 13:01:42 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -24,17 +24,29 @@ public:
     ~Yaz_ProxyConfig();
     int read_xml(const char *fname);
     void get_target_info(const char *name, const char **url, int *keepalive,
-			 int *limit_bw, int *limit_pdu, int *limit_req);
+			 int *limit_bw, int *limit_pdu, int *limit_req,
+			 int *target_idletime, int *client_idletime,
+			 int *max_clients);
     void operator=(const Yaz_ProxyConfig &conf);
+    int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
 private:
 #if HAVE_XML2
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url, int *keepalive,
-			    int *limit_bw, int *limit_pdu, int *limit_req);
+			    int *limit_bw, int *limit_pdu, int *limit_req,
+			    int *target_idletime, int *client_idletime);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
+    int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
+		     char **addinfo);
+    xmlNodePtr find_target_node(const char *name);
     const char *get_text(xmlNodePtr ptr);
+    int check_type_1_attributes(ODR odr, xmlNodePtr ptr,
+				Z_AttributeList *attrs,
+				char **addinfo);
+    int check_type_1_structure(ODR odr, xmlNodePtr ptr, Z_RPNStructure *q,
+			       char **addinfo);
 #endif
     int m_copy;
 };
@@ -145,6 +157,10 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_max_record_retrieve;
     void handle_max_record_retrieve(Z_APDU *apdu);
     void display_diagrecs(Z_DiagRec **pp, int num);
+    Z_Records *create_nonSurrogateDiagnostics(ODR o, int error,
+					      const char *addinfo);
+
+    Z_APDU *handle_query_validation(Z_APDU *apdu);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

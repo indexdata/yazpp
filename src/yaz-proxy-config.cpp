@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.1 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.2 2003-10-03 13:01:42 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -121,7 +121,9 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *keepalive,
 					 int *limit_bw,
 					 int *limit_pdu,
-					 int *limit_req)
+					 int *limit_req,
+					 int *target_idletime,
+					 int *client_idletime)
 {
     ptr = ptr->children;
     for (; ptr; ptr = ptr->next)
@@ -145,24 +147,150 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "limit"))
 	    return_limit(ptr, limit_bw, limit_pdu, limit_req);
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "target-timeout"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+	    {
+		*target_idletime = atoi(t);
+		if (*target_idletime < 0)
+		    *target_idletime = 0;
+	    }
+	}
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "client-timeout"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+	    {
+		*client_idletime = atoi(t);
+		if (*client_idletime < 0)
+		    *client_idletime = 0;
+	    }
+	}
     }
 }
 #endif
 
-void Yaz_ProxyConfig::get_target_info(const char *name,
-				      const char **url,
-				      int *keepalive,
-				      int *limit_bw,
-				      int *limit_pdu,
-				      int *limit_req)
+int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
+					     Z_AttributeList *attrs,
+					     char **addinfo)
 {
-#if HAVE_XML2
-    xmlNodePtr ptr;
-    if (!m_proxyPtr)
+    for(ptr = ptr->children; ptr; ptr = ptr->next)
     {
-	*url = name;
-	return;
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "query"))
+	{
+	    const char *match_type = 0;
+	    const char *match_value = 0;
+	    const char *match_error = 0;
+	    struct _xmlAttr *attr;
+	    for (attr = ptr->properties; attr; attr = attr->next)
+	    {
+		if (!strcmp((const char *) attr->name, "type") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_type = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "value") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_value = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "error") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_error = (const char *) attr->children->content;
+	    }
+	    int i;
+
+	    if (match_type && match_value)
+	    {
+		for (i = 0; i<attrs->num_attributes; i++)
+		{
+		    Z_AttributeElement *el = attrs->attributes[i];
+		    char value_str[20];
+		    
+		    value_str[0] = '\0';
+		    if (!el->attributeType)
+			continue;
+		    int type = *el->attributeType;
+
+		    if (strcmp(match_type, "*")) {
+			if (type != atoi(match_type))
+			    continue;  // no match on type
+		    }
+		    if (el->which == Z_AttributeValue_numeric && 
+			el->value.numeric)
+		    {
+			int value = *el->value.numeric;
+			if (strcmp(match_value, "*")) {
+			    if (value != atoi(match_value))
+				continue;  // no match on value
+			}
+			sprintf(value_str, "%d", value);
+		    }
+		    else
+			continue;
+		    if (match_error)
+		    {
+			if (*value_str)
+			    *addinfo = odr_strdup(odr, value_str);
+			return atoi(match_error);
+		    }
+		    return 0;
+		}
+	    }
+	}
     }
+    return 0;
+}
+
+int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
+					    Z_RPNStructure *q,
+					    char **addinfo)
+{
+    int c;
+    if (q->which == Z_RPNStructure_complex)
+    {
+	int e = check_type_1_structure(odr, ptr, q->u.complex->s1, addinfo);
+	if (e)
+	    return e;
+	e = check_type_1_structure(odr, ptr, q->u.complex->s2, addinfo);
+	return e;
+    }
+    else if (q->which == Z_RPNStructure_simple)
+    {
+	if (q->u.simple->which == Z_Operand_APT)
+	{
+	    return check_type_1_attributes(
+		odr, ptr, q->u.simple->u.attributesPlusTerm->attributes,
+		addinfo);
+	}
+    }
+    return 0;
+}
+
+int Yaz_ProxyConfig::check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
+				  char **addinfo)
+{
+    // possibly check for Bib-1
+    return check_type_1_structure(odr, ptr, query->RPNStructure, addinfo);
+}
+
+int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
+				 char **addinfo)
+{
+    xmlNodePtr ptr;
+    
+    ptr = find_target_node(name);
+    if (ptr)
+    {
+	if (query->which == Z_Query_type_1 || query->which == Z_Query_type_101)
+	    return check_type_1(odr, ptr, query->u.type_1, addinfo);
+    }
+    return 0;
+}
+
+xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
+{
+    xmlNodePtr ptr;
     for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
     {
 	if (ptr->type == XML_ELEMENT_NODE &&
@@ -179,11 +307,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 		    {
 			xmlChar *t = attr->children->content;
 			if (!t || *t == '1')
-			{
-			    return_target_info(ptr, url, keepalive,
-					       limit_bw, limit_pdu, limit_req);
-			    return;
-			}
+			    return ptr;
 		    }
 	    }
 	    else
@@ -201,14 +325,54 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				|| !strcmp((const char *) attr->children->content,
 					   "*")))
 			{
-			    *url = name;
-			    return_target_info(ptr, url, keepalive,
-					       limit_bw, limit_pdu, limit_req);
-			    return;
+			    return ptr;
 			}
 		    }
 	    }
 	}
+    }
+    return 0;
+}
+
+
+void Yaz_ProxyConfig::get_target_info(const char *name,
+				      const char **url,
+				      int *keepalive,
+				      int *limit_bw,
+				      int *limit_pdu,
+				      int *limit_req,
+				      int *target_idletime,
+				      int *client_idletime,
+				      int *max_clients)
+{
+#if HAVE_XML2
+    xmlNodePtr ptr;
+    if (!m_proxyPtr)
+    {
+	*url = name;
+	return;
+    }
+    for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
+    {
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "max-clients"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+	    {
+		*max_clients = atoi(t);
+		if (*max_clients  < 1)
+		    *max_clients = 1;
+	    }
+	}
+    }
+    ptr = find_target_node(name);
+    if (ptr)
+    {
+	if (name)
+	    *url = name;
+	return_target_info(ptr, url, keepalive, limit_bw, limit_pdu, limit_req,
+			   target_idletime, client_idletime);
     }
 #else
     *url = name;

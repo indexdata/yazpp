@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.2 2003-10-01 13:13:51 adam Exp $
+ * $Id: z-query.h,v 1.3 2003-10-03 13:01:42 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -28,8 +28,8 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     /// match query
     int match(Yaz_Z_Query *other);
  private:
-    char *buf;
-    int len;
+    char *m_buf;
+    int m_len;
     ODR odr_decode;
     ODR odr_encode;
     ODR odr_print;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.48 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.49 2003-10-03 13:01:42 adam Exp $
  */
 
 #include <assert.h>
@@ -49,7 +49,6 @@ static const char *apdu_name(Z_APDU *apdu)
     }
     return "other";
 }
-
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Assoc(the_PDU_Observable), m_bw_stat(60), m_pdu_stat(60)
@@ -173,12 +172,23 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     {
 	const char *proxy_host = get_proxy(oi);
 	if (!proxy_host)
+	{
+	    xfree(m_default_target);
+	    m_default_target = xstrdup(proxy_host);
 	    proxy_host = m_default_target;
+	}
 	
 	const char *url = 0;
+	int client_idletime = -1;
 	m_config.get_target_info(proxy_host, &url, &m_keepalive, &m_bw_max,
-				 &m_pdu_max, &m_max_record_retrieve);
-	
+				 &m_pdu_max, &m_max_record_retrieve,
+				 &m_target_idletime, &client_idletime,
+				 &parent->m_max_clients);
+	if (client_idletime != -1)
+	{
+	    m_client_idletime = client_idletime;
+	    timeout(m_client_idletime);
+	}
 	if (!url)
 	{
 	    yaz_log(LOG_LOG, "%s No default target", m_session_str);
@@ -724,6 +734,57 @@ void Yaz_Proxy::handle_max_record_retrieve(Z_APDU *apdu)
     }
 }
 
+Z_Records *Yaz_Proxy::create_nonSurrogateDiagnostics(ODR odr,
+						     int error,
+						     const char *addinfo)
+{
+    Z_Records *rec = (Z_Records *)
+        odr_malloc (odr, sizeof(*rec));
+    int *err = (int *)
+        odr_malloc (odr, sizeof(*err));
+    Z_DiagRec *drec = (Z_DiagRec *)
+        odr_malloc (odr, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+        odr_malloc (odr, sizeof(*dr));
+    *err = error;
+    rec->which = Z_Records_NSD;
+    rec->u.nonSurrogateDiagnostic = dr;
+    dr->diagnosticSetId =
+        yaz_oidval_to_z3950oid (odr, CLASS_DIAGSET, VAL_BIB1);
+    dr->condition = err;
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
+    return rec;
+}
+
+Z_APDU *Yaz_Proxy::handle_query_validation(Z_APDU *apdu)
+{
+    if (apdu->which == Z_APDU_searchRequest)
+    {
+	Z_SearchRequest *sr = apdu->u.searchRequest;
+	int err;
+	char *addinfo = 0;
+	err = m_config.check_query(odr_encode(), m_default_target, sr->query,
+				   &addinfo);
+	if (err)
+	{
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+	    int *nulint = odr_intdup (odr_encode(), 0);
+
+	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
+	    new_apdu->u.searchResponse->records =
+		create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
+	    new_apdu->u.searchResponse->searchStatus = nulint;
+	    new_apdu->u.searchResponse->resultCount = nulint;
+
+	    send_to_client(new_apdu);
+
+	    return 0;
+	}
+    }
+    return apdu;
+}
+
 void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
 {
     // Determine our client.
@@ -751,9 +812,17 @@ void Yaz_Proxy::recv_Z_PDU_0(Z_APDU *apdu)
     }
     handle_max_record_retrieve(apdu);
 
-    apdu = result_set_optimize(apdu);
+    if (apdu)
+	apdu = handle_query_validation(apdu);
+
+    if (apdu)
+	apdu = result_set_optimize(apdu);
     if (!apdu)
+    {
+	m_client->timeout(m_target_idletime);  // mark it active even 
+	// though we didn't use it
 	return;
+    }
 
     // delete other info part from PDU before sending to target
     Z_OtherInformation **oi;
@@ -944,6 +1013,21 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 	odr_reset (m_init_odr);
         nmem_transfer (m_init_odr->mem, nmem);
         m_initResponse = apdu;
+
+	Z_InitResponse *ir = apdu->u.initResponse;
+	char *im0 = ir->implementationName;
+	
+	char *im1 = (char*) 
+	    odr_malloc(m_init_odr, 20 + (im0 ? strlen(im0) : 0));
+	*im1 = '\0';
+	if (im0)
+	{
+	    strcat(im1, im0);
+	    strcat(im1, " ");
+	}
+	strcat(im1, "(YAZ Proxy)");
+	ir->implementationName = im1;
+
         nmem_destroy (nmem);
     }
     if (apdu->which == Z_APDU_searchResponse)
@@ -978,7 +1062,8 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 	    sr->numberOfRecordsReturned = pr->numberOfRecordsReturned;
 	    apdu = new_apdu;
 	}
-	if (pr->records->which == Z_Records_DBOSD && m_resultSetStartPoint)
+	if (pr->records && 
+	    pr->records->which == Z_Records_DBOSD && m_resultSetStartPoint)
 	{
 	    m_cache.add(odr_decode(),
 			pr->records->u.databaseOrSurDiagnostics,

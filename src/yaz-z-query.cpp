@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.12 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.13 2003-10-03 13:01:42 adam Exp $
  */
 
 #include <yaz++/z-query.h>
@@ -17,7 +17,7 @@ Yaz_Z_Query::Yaz_Z_Query()
 
 int Yaz_Z_Query::set_rpn (const char *rpn)
 {
-    buf = 0;
+    m_buf = 0;
     odr_reset (odr_encode);
     Z_Query *query = (Z_Query*) odr_malloc (odr_encode, sizeof(*query));
     query->which = Z_Query_type_1;
@@ -27,17 +27,17 @@ int Yaz_Z_Query::set_rpn (const char *rpn)
     if (!z_Query (odr_encode, &query, 0, 0))
 	return -1;
     // z_Query(odr_print, &query, 0, 0);
-    buf = odr_getbuf (odr_encode, &len, 0);
-    return len;
+    m_buf = odr_getbuf (odr_encode, &m_len, 0);
+    return m_len;
 }
 
 void Yaz_Z_Query::set_Z_Query(Z_Query *z_query)
 {
-    buf = 0;
+    m_buf = 0;
     odr_reset (odr_encode);
     if (!z_Query (odr_encode, &z_query, 0, 0))
 	return;
-    buf = odr_getbuf (odr_encode, &len, 0);
+    m_buf = odr_getbuf (odr_encode, &m_len, 0);
 }
 
 Yaz_Z_Query::~Yaz_Z_Query()
@@ -50,10 +50,10 @@ Yaz_Z_Query::~Yaz_Z_Query()
 Z_Query *Yaz_Z_Query::get_Z_Query ()
 {
     Z_Query *query;
-    if (!buf)
+    if (!m_buf)
 	return 0;
     odr_reset(odr_decode);
-    odr_setbuf(odr_decode, buf, len, 0);
+    odr_setbuf(odr_decode, m_buf, m_len, 0);
     if (!z_Query(odr_decode, &query, 0, 0))
 	return 0;
     return query;
@@ -63,9 +63,9 @@ void Yaz_Z_Query::print(char *str, int len)
 {
     Z_Query *query;
     *str = 0;
-    if (!buf)
+    if (!m_buf)
 	return;
-    odr_setbuf (odr_decode, buf, len, 0);
+    odr_setbuf (odr_decode, m_buf, m_len, 0);
     if (!z_Query(odr_decode, &query, 0, 0))
 	return;
     WRBUF wbuf = zquery2pquery(query);
@@ -85,11 +85,11 @@ void Yaz_Z_Query::print(char *str, int len)
 
 int Yaz_Z_Query::match(Yaz_Z_Query *other)
 {
-    if (len != other->len)
+    if (m_len != other->m_len)
 	return 0;
-    if (!buf || !other->buf)
+    if (!m_buf || !other->m_buf)
 	return 0;
-    if (memcmp(buf, other->buf, len))
+    if (memcmp(m_buf, other->m_buf, m_len))
 	return 0;
     return 1;
 }
