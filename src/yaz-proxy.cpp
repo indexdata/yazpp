@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.108 2004-03-01 19:12:14 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.109 2004-03-15 22:49:13 adam Exp $
  */
 
 #include <unistd.h>
@@ -639,9 +639,11 @@ void Yaz_Proxy::convert_xsl_delay()
 	Z_External *r = npr->u.databaseRecord;
 	if (r->which == Z_External_octet)
 	{
+	    fwrite((char*) r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, stdout);
 	    xmlDocPtr res, doc = xmlParseMemory(
 		(char*) r->u.octet_aligned->buf,
 		r->u.octet_aligned->len);
+
 	    
 	    yaz_log(LOG_LOG, "%sXSLT convert %d",
 		    m_session_str, m_stylesheet_offset);
@@ -682,8 +684,10 @@ void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
 {
     int i;
 
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC-8");
     yaz_marc_t mt = yaz_marc_create();
     yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+    yaz_marc_iconv(mt, cd);
     for (i = 0; i < p->num_records; i++)
     {
 	Z_NamePlusRecord *npr = p->records[i];
@@ -698,44 +702,15 @@ void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
 					r->u.octet_aligned->len,
 					&result, &rlen))
 		{
-		    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC-8");
-		    WRBUF wrbuf = wrbuf_alloc();
-		    
-		    char outbuf[120];
-		    size_t inbytesleft = rlen;
-		    const char *inp = result;
-		    while (cd && inbytesleft)
-		    {
-			size_t outbytesleft = sizeof(outbuf);
-			char *outp = outbuf;
-			size_t r;
-			
-			r = yaz_iconv (cd, (char**) &inp,
-				       &inbytesleft,
-				       &outp, &outbytesleft);
-			if (r == (size_t) (-1))
-			{
-			    int e = yaz_iconv_error(cd);
-			    if (e != YAZ_ICONV_E2BIG)
-			    {
-				yaz_log(LOG_WARN, "conversion failure");
-				break;
-			    }
-			}
-			wrbuf_write(wrbuf, outbuf, outp - outbuf);
-		    }
-		    if (cd)
-			yaz_iconv_close(cd);
-
 		    npr->u.databaseRecord = z_ext_record(odr_encode(),
 							 VAL_TEXT_XML,
-							 wrbuf_buf(wrbuf),
-							 wrbuf_len(wrbuf));
-		    wrbuf_free(wrbuf, 1);
+							 result, rlen);
 		}
 	    }
 	}
     }
+    if (cd)
+	yaz_iconv_close(cd);
     yaz_marc_destroy(mt);
 }
 
