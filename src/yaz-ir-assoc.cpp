@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.8  1999-04-28 13:04:03  adam
+ * Revision 1.9  1999-04-28 13:29:14  adam
+ * Yet another fix regarding database settings.
+ *
+ * Revision 1.8  1999/04/28 13:04:03  adam
  * Fixed setting of proxy otherInfo so that database(s) are removed.
  *
  * Revision 1.7  1999/04/21 12:09:01  adam
@@ -377,7 +380,10 @@ int Yaz_IR_Assoc::send_initRequest()
 	strcpy(rawhost, m_host);
 	char *dbpart = strchr(rawhost, '/');
 	if (dbpart)
+	{
+	    set_databaseNames (dbpart+1, "+ ");
 	    *dbpart = '\0';
+	}
 	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, rawhost);
 	delete [] rawhost;
     }
