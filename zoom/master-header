@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.16 2003-09-22 12:56:09 mike Exp $
+// $Id: master-header,v 1.17 2003-09-24 18:07:31 adam Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -87,7 +87,7 @@ namespace ZOOM {
 *   const resultSet &owner;
 *   ZOOM_record r;
   public:
-    class syntax {
+    class YAZ_EXPORT syntax {
     public:
       enum value {
 	UNKNOWN, GRS1, SUTRS, USMARC, UKMARC, XML
