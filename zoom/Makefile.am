@@ -1,12 +1,13 @@
-# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.1 2002-10-08 12:18:47 adam Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.2 2002-10-08 23:53:55 mike Exp $
 
 AM_CXXFLAGS= $(YAZINC) 
 
 lib_LTLIBRARIES = libzoomcpp.la
 LDADD=libzoomcpp.la $(YAZLALIB)
 
-libzoomcpp_la_SOURCES = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp \
- zoom++.h interface.h
+mirk_XXX_SOURCES = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
+libzoomcpp_la_SOURCES = $(mirk_XXX_SOURCES) zoom++.h interface.h
+
 noinst_PROGRAMS = zclient
 
 zclient_SOURCES=zclient.cpp
@@ -17,6 +18,8 @@ all: interface.h zclient
 
 test: zclient
 	./zclient bagel.indexdata.dk 210 gils '@and mineral epicenter'
+
+$(mirk_XXX_SOURCES): zoom++.h
 
 zoom++.h: master-header
 	rm -f $@
