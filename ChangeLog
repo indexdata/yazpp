@@ -1,3 +1,5 @@
+Fixed handling of cookies so they can be of any length.
+
 Proxy caches records.
 
 Various C++ fixes for GCC 3.2.
