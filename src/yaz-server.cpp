@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.10  2000-09-12 16:04:17  adam
+ * Revision 1.11  2000-09-12 16:23:49  adam
+ * Updated server example.
+ *
+ * Revision 1.10  2000/09/12 16:04:17  adam
  * Added comstack method for Yaz_PDU_Assoc..
  *
  * Revision 1.9  2000/09/12 12:09:53  adam
@@ -67,20 +70,19 @@ private:
     int m_no;
 };
 
-static int stop = 0;
-
 void MyServer::recv_Z_init (Z_InitRequest *initRequest,
 			    Z_InitResponse *initResponse)
 {
     logf (LOG_LOG, "MyServer::recv_Z_init");
 }
 
+static MyServer *myServer = 0;
+
 void MyServer::recv_Z_search (Z_SearchRequest *searchRequest,
 			      Z_SearchResponse *searchResponse)
 {
     logf (LOG_LOG, "MyServer::recv_Z_search");
-    delete this;
-    stop = 1;
+    myServer->close();
 }
 
 void MyServer::recv_Z_present (Z_PresentRequest *presentRequest,
@@ -135,12 +137,13 @@ int main(int argc, char **argv)
 {
     while (1)
     {
-	stop = 0;
 	Yaz_SocketManager mySocketManager;
 	Yaz_PDU_Assoc *my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
 	
-	MyServer *z = new MyServer(my_PDU_Assoc);
-	
+	myServer = new MyServer(my_PDU_Assoc);
+
+        MyServer *z = myServer;
+
 	if (argc <= 1)
 	    z->server("@:9999");
 	else
@@ -151,10 +154,11 @@ int main(int argc, char **argv)
 	COMSTACK cs = my_PDU_Assoc->comstack();
 	if (cs)
 	    printf ("fd=%d\n", cs_fileno(cs));
-	while (!stop && mySocketManager.processEvent() > 0)
-	    ;
+	while (mySocketManager.processEvent() > 0)
+            ;
 	logf (LOG_LOG, "bailing out");
 	delete z;
+        break;
     }
     return 0;
 }
