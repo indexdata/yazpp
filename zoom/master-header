@@ -1,0 +1,131 @@
+// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.1 2002-08-08 13:31:54 mike Exp $
+//
+// ZOOM C++ Binding.
+// The ZOOM homepage is at http://zoom.z3950.org/
+//
+// Derived from version 1.0g at
+//	http://zoom.z3950.org/bind/cplusplus/zoom-1.0g.hh
+
+#include <stddef.h>		// for size_t
+
+*/*
+* * This is a bit stupid.  The fact that our ZOOM-C++ implementation is
+* * based on the ZOOM-C implementation is our Dirty Little Secret, and
+* * there is in principle no reason why client code need be bothered
+* * with it.  Except of course that the public class declarations in
+* * C++ have to lay their private parts out for the world to see
+* * (oo-er).  Hence the inclusion of <yaz/zoom.h>
+* */
+*#include <yaz/zoom.h>
+*
+namespace ZOOM {
+  // Forward declarations for type names.
+  class query;
+  class resultSet;
+  class record;
+
+  const char *option (const char *key);
+  const char *option (const char *key, const char *val);
+  int errcode ();
+  char *errmsg ();
+  char *addinfo ();
+
+  class connection {
+*   ZOOM_connection c;
+  public:
+    connection (const char *hostname, int portnum);
+    // ### I would like to add a ``throw (ZOOM::error)'' clause
+    // here, but it looks like G++ 2.95.2 doesn't recognise it.
+    ~connection ();
+    const char *option (const char *key) const;
+    const char *option (const char *key, const char *val);
+*   ZOOM_connection _getYazConnection() const { return c; } // package-private
+  };
+
+  class query {
+      // pure virtual class: derive concrete subclasses from it.
+* protected:
+*   ZOOM_query q;
+  public:
+    virtual ~query ();
+*   ZOOM_query _getYazQuery() const { return q; } // package-private
+  };
+
+  class prefixQuery : public query {
+  public:
+    prefixQuery (const char *pqn);
+    ~prefixQuery();
+  };
+
+  class CCLQuery : public query {
+  public:
+    CCLQuery (const char *ccl, void *qualset);
+    ~CCLQuery();
+  };
+
+  class resultSet {
+*   connection &owner;
+*   ZOOM_resultset rs;
+  public:
+    resultSet (connection &c, const query &q);
+    ~resultSet ();
+    const char *option (const char *key) const;
+    const char *option (const char *key, const char *val);
+    size_t size () const;
+    const record *getRecord (size_t i) const;
+  };
+
+  class record {
+*   const resultSet *owner;
+*   ZOOM_record r;
+  public:
+*   record::record(const resultSet *rs, ZOOM_record rec):
+*	owner(rs), r(rec) {}
+    ~record ();
+    enum syntax {
+      UNKNOWN, GRS1, SUTRS, USMARC, UKMARC, XML
+    };
+    record *clone () const;
+    syntax recsyn () const;
+    const char *render () const;
+    const char *rawdata () const;
+  };
+
+  class error {
+* protected:
+*   int code;
+  public:
+    error (int code);
+    int errcode () const;
+    const char *errmsg () const;
+  };
+
+  class systemError: public error {
+  public:
+    systemError ();
+    int errcode () const;
+    const char *errmsg () const;
+  };
+
+  class bib1Error: public error {
+*   const char *info;
+  public:
+*   ~bib1Error();
+    bib1Error (int errcode, const char *addinfo);
+    int errcode () const;
+    const char *errmsg () const;
+    const char *addinfo () const;
+  };
+
+  class queryError: public error {
+*   const char *q;
+  public:
+*   ~queryError();
+    static const int PREFIX = 1;
+    static const int CCL = 2;
+    queryError (int qtype, const char *source);
+    int errcode () const;
+    const char *errmsg () const;
+    const char *addinfo () const;
+  };
+}
