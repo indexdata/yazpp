@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.11  2000-09-04 08:59:16  adam
+ * Revision 1.12  2000-09-05 13:57:28  adam
+ * Fixed get_otherInfoAPDU to return otherInfo for extended services.
+ *
+ * Revision 1.11  2000/09/04 08:59:16  adam
  * Changed call to logging functions (yaz_ added).
  *
  * Revision 1.10  2000/09/04 08:29:22  adam
@@ -246,6 +249,12 @@ void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     case Z_APDU_scanRequest:
 	*oip = &apdu->u.scanRequest->otherInfo;
 	break;
+    case Z_APDU_extendedServicesRequest:
+        *oip = &apdu->u.extendedServicesRequest->otherInfo;
+        break;
+    case Z_APDU_deleteResultSetRequest:
+        *oip = &apdu->u.deleteResultSetRequest->otherInfo;
+        break;
     case Z_APDU_initResponse:
 	*oip = &apdu->u.initResponse->otherInfo;
 	break;
@@ -261,6 +270,12 @@ void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     case Z_APDU_scanResponse:
 	*oip = &apdu->u.scanResponse->otherInfo;
 	break;
+    case Z_APDU_extendedServicesResponse:
+        *oip = &apdu->u.extendedServicesResponse->otherInfo;
+        break;
+    case Z_APDU_deleteResultSetResponse:
+        *oip = &apdu->u.deleteResultSetResponse->otherInfo;
+        break;
     default:
 	*oip = 0;
 	break;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.16  2000-09-04 08:29:22  adam
+ * Revision 1.17  2000-09-05 13:57:28  adam
+ * Fixed get_otherInfoAPDU to return otherInfo for extended services.
+ *
+ * Revision 1.16  2000/09/04 08:29:22  adam
  * Fixed memory leak(s). Added re-use of associations, rather than
  * re-init, when maximum number of targets are in use.
  *
@@ -391,7 +394,8 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     // delete other info part from PDU before sending to target
     Z_OtherInformation **oi;
     get_otherInfoAPDU(apdu, &oi);
-    *oi = 0;
+    if (oi)
+        *oi = 0;
 
     if (m_client->send_Z_PDU(apdu) < 0)
     {
