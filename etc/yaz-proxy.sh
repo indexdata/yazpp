@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-proxy.sh,v 1.4 2003-11-25 21:54:02 adam Exp $
+# $Id: yaz-proxy.sh,v 1.5 2004-01-07 13:26:16 adam Exp $
 # YAZ proxy start/stop init.d script.
 #
 PATH=/usr/local/bin:/bin:/usr/bin
@@ -7,9 +7,8 @@ export PATH
 
 # Proxy CWD is here. Should be writable by it.
 DIR=/var/yaz-proxy
-# Proxy Path (either the actual one, or the keepalive one (for testing)
+# Proxy Path 
 DAEMON=/usr/local/bin/yaz-proxy
-#DAEMON=/var/yaz-proxy/yaz-proxy-ka.sh
 
 # Proxy PIDFILE. Must be writable by it.
 PIDFILE="/var/run/yaz-proxy.pid"
