@@ -9,10 +9,10 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.7 2002-10-24 07:43:12 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.8 2002-10-24 09:13:17 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
-  <title>YAZ++</title>
+  <title>YAZ++ User's Guide and Reference</title>
   <authorgroup>
    <author><firstname>Mike</firstname><surname>Taylor</surname></author>
    <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
