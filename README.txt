@@ -1,14 +1,16 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.4 1999-04-27 07:52:13 adam Exp $
+$Id: README.txt,v 1.5 2000-09-13 12:22:32 adam Exp $
  
 o Introduction
 
 YAZ is a development toolkit that implements the ANSI Z39.50 protocol.
-YAZ homepage is: http://www.indexdata.dk/yaz
+YAZ homepage is: http://www.indexdata.dk/yaz/
+YAZ++ uses the same license as YAZ - see LICENSE file for
+details.
 
-YAZ++ is a C++ wrapper on top of that YAZ. It provides a relatively
-simple, high level, interface to YAZ.
+YAZ++ is a C++ wrapper on top of that YAZ and provides a relatively
+simple interface to YAZ.
 
 o Overview
 
@@ -53,11 +55,11 @@ Then, build YAZ++:
 o Installation, Windows
 
 Software is WIN32 and should run on Windows 95/98 and Windows NT 4.0.
-Yaz++ was build using Microsoft Visual C++ 5.0 and 6.0. Other compilers
-should work but makefile/project files will have created for those
+Yaz++ was build using Microsoft Visual C++ 6.0. Other compilers should
+work but makefile/project files will have to be created for those
 compiler environments.
 
-  Open workspace yazxx.dsw that includes four projects
+  Workspace yazxx.dsw includes the projects
     yazxx.dsp       -   builds yazxx.dll
     yazclient.dsp   -   builds yazclient.exe
     yazserver.dsp   -   builds yazserver.exe
