@@ -9,19 +9,25 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.5 2002-10-23 21:23:29 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.6 2002-10-23 22:12:07 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++</title>
-  <author><firstname>Mike</firstname><surname>Taylor</surname></author>
-  <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
+  <authorgroup>
+   <author><firstname>Mike</firstname><surname>Taylor</surname></author>
+   <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
+   </authorgroup>
   <copyright>
-   <year>1999-2002</year>
-   <holder>Index Data, Mike Taylor</holder>
+   <year>1999</year>
+   <year>2000</year>
+   <year>2001</year>
+   <year>2002</year>
+   <holder>Index Data Aps and Mike Taylor</holder>
   </copyright>
   <abstract>
    <simpara>
-    YAZ++ is a set of libraries and header files that make it easier
+    <ulink url="http://www.indexdata.dk/yaz++/">YAZ++</ulink>
+    is a set of libraries and header files that make it easier
     to use the popular C-language
     <ulink url="http://www.indexdata.dk/yaz/">YAZ toolkit</ulink>
     from C++, together with some utilities written using these
@@ -29,6 +35,9 @@
     ZOOM (<link linkend="zoom">ZOOM-C++</link>) and a powerful,
     general-purpose Z39.50 <link linkend="proxy">proxy</link>.
    </simpara>
+   <simpara>
+    This manual convers version @VERSION@.
+    </simpara>
   </abstract>
  </bookinfo>
  
