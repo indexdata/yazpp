@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src include zoom
+SUBDIRS = src include zoom lib doc
 
 EXTRA_DIST= LICENSE README.txt ChangeLog yaz++-config.in
 

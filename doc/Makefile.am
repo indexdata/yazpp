@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.1 2002-10-08 11:55:57 adam Exp $
+## $Id: Makefile.am,v 1.2 2002-10-09 16:17:26 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -32,7 +32,7 @@ yaz++.pdf: $(XMLFILES)
 	pdfjadetex yaz++.tex
 	pdfjadetex yaz++.tex
 
-dist-hook: yaz++.html
+dist-hook: zoom.html
 	cp *.html $(distdir)
 
 clean-data-hook:
