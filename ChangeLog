@@ -1,3 +1,5 @@
+Fixed fix-up for omitted referenceIds.
+
 --- 0.7.11 2004/03/01 Internal release.
 
 Fix pre_init to prevent spawn if it is already queued.

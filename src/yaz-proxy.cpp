@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.107 2004-03-01 17:18:39 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.108 2004-03-01 19:12:14 adam Exp $
  */
 
 #include <unistd.h>
@@ -1019,7 +1019,7 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
     int kill_session = 0;
     Z_ReferenceId **new_id = get_referenceIdP(apdu);
 
-    if (new_id && m_referenceId)
+    if (new_id)
 	*new_id = m_referenceId;
     
     if (apdu->which == Z_APDU_searchResponse)
