@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.h,v 1.9 2000-09-12 12:09:53 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.10 2000-09-12 16:04:17 adam Exp $
  */
 
 #include <yaz/comstack.h>
@@ -29,7 +29,6 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     Yaz_PDU_Assoc *m_parent;
     Yaz_PDU_Assoc *m_children;
     Yaz_PDU_Assoc *m_next;
-    COMSTACK Yaz_PDU_Assoc::comstack();
     COMSTACK m_cs;
     IYazSocketObservable *m_socketObservable;
     IYaz_PDU_Observer *m_PDU_Observer;
@@ -41,6 +40,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     int m_idleTime;
     int m_log;
  public:
+    COMSTACK comstack();
     /// Create object using specified socketObservable
     Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
     /// Close socket and destroy object.

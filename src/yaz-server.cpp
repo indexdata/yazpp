@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.9  2000-09-12 12:09:53  adam
+ * Revision 1.10  2000-09-12 16:04:17  adam
+ * Added comstack method for Yaz_PDU_Assoc..
+ *
+ * Revision 1.9  2000/09/12 12:09:53  adam
  * More work on high-level server.
  *
  * Revision 1.8  2000/09/08 10:23:42  adam
@@ -145,6 +148,9 @@ int main(int argc, char **argv)
 	    for (int i = 1; i < argc; i++)
 		z->server(argv[i]);
 	}
+	COMSTACK cs = my_PDU_Assoc->comstack();
+	if (cs)
+	    printf ("fd=%d\n", cs_fileno(cs));
 	while (!stop && mySocketManager.processEvent() > 0)
 	    ;
 	logf (LOG_LOG, "bailing out");
