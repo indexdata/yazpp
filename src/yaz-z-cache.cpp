@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.5 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.6 2003-10-08 08:52:59 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -21,11 +21,17 @@ Yaz_RecordCache::Yaz_RecordCache ()
     m_entries = 0;
     m_presentRequest = 0;
     m_searchRequest = 0;
+    m_max_size = 200000;
 }
 
 Yaz_RecordCache::~Yaz_RecordCache ()
 {
     nmem_destroy(m_mem);
+}
+
+void Yaz_RecordCache::set_max_size(int sz)
+{
+    m_max_size = sz;
 }
 
 void Yaz_RecordCache::clear ()
@@ -80,6 +86,8 @@ void Yaz_RecordCache::copy_presentRequest(Z_PresentRequest *pr)
 void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
 			   int hits)
 {
+    if (nmem_total(m_mem) > m_max_size)
+	return;
     // Build appropriate compspec for this response
     Z_RecordComposition *comp = 0;
     if (hits == -1 && m_presentRequest)

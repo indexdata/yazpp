@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.11 2003-10-08 08:15:01 adam Exp $
+ * $Id: proxy.h,v 1.12 2003-10-08 08:53:08 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -68,6 +68,7 @@ class YAZ_EXPORT Yaz_RecordCache {
 
     void copy_searchRequest(Z_SearchRequest *sr);
     void copy_presentRequest(Z_PresentRequest *pr);
+    void set_max_size(int sz);
  private:
     NMEM m_mem;
     Yaz_RecordCache_Entry *m_entries;
@@ -76,6 +77,7 @@ class YAZ_EXPORT Yaz_RecordCache {
     int match (Yaz_RecordCache_Entry *entry,
 	       Odr_oid *syntax, int offset,
 	       Z_RecordComposition *comp);
+    int m_max_size;
 };
 
 class YAZ_EXPORT Yaz_bw {
