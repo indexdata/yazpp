@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.37 2002-10-23 10:15:18 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.38 2003-01-24 20:10:57 adam Exp $
  */
 
 #include <assert.h>
@@ -265,8 +265,8 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 {
     if (apdu->which != Z_APDU_searchRequest)
 	return apdu;
-    if (*m_parent->m_optimize != '1')
-        return apdu;
+    if (*m_parent->m_optimize == '0')
+        return apdu;      // don't optimize result sets..
     Z_SearchRequest *sr = apdu->u.searchRequest;
     Yaz_Z_Query *this_query = new Yaz_Z_Query;
     Yaz_Z_Databases this_databases;
@@ -293,7 +293,10 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    pr->referenceId = sr->referenceId;
 	    pr->resultSetId = sr->resultSetName;
 	    pr->preferredRecordSyntax = sr->preferredRecordSyntax;
-	    *pr->numberOfRecordsRequested = *sr->mediumSetPresentNumber;
+            if (*sr->mediumSetPresentNumber < m_client->m_last_resultCount)
+                *pr->numberOfRecordsRequested = *sr->mediumSetPresentNumber;
+            else
+                *pr->numberOfRecordsRequested = m_client->m_last_resultCount;
 	    if (sr->mediumSetElementSetNames)
 	    {
 		pr->recordComposition = (Z_RecordComposition *)

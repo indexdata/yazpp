@@ -1,3 +1,6 @@
+Bug fix: in some cases the Proxy could issue a Present Request
+which was out of range (code 13).
+
 New autoconf m4 macro in yazpp.m4.
 
 Fix creation of src/yaz++-config so that it works if srcdir != objdir.
