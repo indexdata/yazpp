@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.6  1999-04-21 12:09:01  adam
+ * Revision 1.7  1999-04-28 13:02:08  adam
+ * Added include of string.h.
+ *
+ * Revision 1.6  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -34,6 +37,7 @@
 #include <unistd.h>
 #endif
 #include <errno.h>
+#include <string.h>
 
 #include <log.h>
 #include <yaz-socket-manager.h>
