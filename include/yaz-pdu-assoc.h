@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.h,v 1.8 2000-09-08 10:23:42 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.9 2000-09-12 12:09:53 adam Exp $
  */
 
 #include <yaz/comstack.h>
@@ -44,7 +44,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     /// Create object using specified socketObservable
     Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
     /// Close socket and destroy object.
-    virtual ~Yaz_PDU_Assoc();
+    /// virtual ~Yaz_PDU_Assoc();
     /// Clone the object
     IYaz_PDU_Observable *clone();
     /// Send PDU

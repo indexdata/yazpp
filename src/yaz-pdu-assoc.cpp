@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.13  2000-09-08 10:23:42  adam
+ * Revision 1.14  2000-09-12 12:09:53  adam
+ * More work on high-level server.
+ *
+ * Revision 1.13  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.12  2000/09/06 14:23:45  adam
@@ -30,7 +33,7 @@
  * Revision 1.6  1999/04/20 10:30:05  adam
  * Implemented various stuff for client and proxy. Updated calls
  * to ODR to reflect new name parameter.
- *
+ *g
  * Revision 1.5  1999/04/09 11:46:57  adam
  * Added object Yaz_Z_Assoc. Much more functional client.
  *
@@ -77,11 +80,6 @@ IYaz_PDU_Observable *Yaz_PDU_Assoc::clone()
 {
     Yaz_PDU_Assoc *copy = new Yaz_PDU_Assoc(m_socketObservable);
     return copy;
-}
-
-Yaz_PDU_Assoc::~Yaz_PDU_Assoc()
-{
-    destroy();
 }
 
 void Yaz_PDU_Assoc::socketNotify(int event)
@@ -131,7 +129,6 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    }
 	    if (!(new_line = cs_accept(m_cs)))
 		return;
-	    
 	    /* 1. create socket-manager 
                2. create pdu-assoc
                3. create top-level object
@@ -139,6 +136,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
                4. start thread
 	    */
 	    int fd = cs_fileno(new_line);
+	    logf (m_log, "accept ok fd = %d", fd);
 	    cs_fileno(new_line) = -1;  
 	    cs_close (new_line);        /* potential problem ... */
 #if 1
@@ -349,6 +347,7 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
     m_socketObservable->addObserver(cs_fileno(cs), this);
     m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 				     YAZ_SOCKET_OBSERVE_EXCEPT);
+    logf (m_log, "Yaz_PDU_Assoc::listen ok fd=%d", cs_fileno(cs));
     m_state = Listen;
 }
 
@@ -398,7 +397,7 @@ void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)
     }
 }
 
-#if 0
+#if 1
 
 // Single-threaded... Only useful for non-blocking handlers
 void Yaz_PDU_Assoc::childNotify(int fd)
