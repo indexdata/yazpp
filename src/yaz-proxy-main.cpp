@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.24 2003-10-23 13:00:35 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.25 2003-10-23 13:49:58 adam Exp $
  */
 
 #include <signal.h>
@@ -104,6 +104,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     }
     if (addr)
     {
+	yaz_log(LOG_LOG, "Starting proxy pid=%ld", (long) getpid());
 	if (proxy->server(addr))
 	{
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "listen %s", addr);
