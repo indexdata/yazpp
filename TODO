@@ -1,4 +1,6 @@
 
+Try to catch libxml2/libxslt errors and log..
+
 Proxy doesn't do well, if preferredRecordSyntax is not set.
 
 Per database config.
