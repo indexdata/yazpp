@@ -1,4 +1,4 @@
-/* $Id: yaz-proxy.cpp,v 1.2 2004-03-30 09:05:54 adam Exp $
+/* $Id: yaz-proxy.cpp,v 1.3 2004-03-30 14:25:41 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -1734,13 +1734,6 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 				       &diagnostic, &num_diagnostic,
 				       72, 0);
             }
-	    // must have a query
-	    if (!srw_req->query.cql)
-	    {
-		yaz_add_srw_diagnostic(odr_decode(),
-				       &diagnostic, &num_diagnostic,
-				       7, "query");
-	    }
 	    // sort unsupported
 	    if (srw_req->sort_type != Z_SRW_sort_type_none)
 	    {
