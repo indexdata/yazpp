@@ -4,14 +4,7 @@ yaz++.xml
 yazhtml.dsl
 yazphp.dsl
 yazprint.dsl
-yazpp.html
-installation.html
-zoom.html
-zoom-*.html
-proxy.html
-proxy-*.html
-yaz-proxy.html
-otherinfo-encoding.html
+*.html
 yaz-proxy.8
 yaz++.tex
 yaz++.log
