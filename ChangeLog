@@ -1,3 +1,7 @@
+
+Multiple explain records may exist for one target. Proxy checks contents of
+database element in explain record to validate database.
+
 --- 0.7.5 2004/01/15 Internal release.
 
 Fixes for Z39.50 options / version.

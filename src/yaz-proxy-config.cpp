@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.23 2004-01-07 13:40:06 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.24 2004-01-15 23:44:58 adam Exp $
  */
 
 #include <ctype.h>
@@ -693,6 +693,30 @@ char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 	    if (ptr->type == XML_ELEMENT_NODE &&
 		!strcmp((const char *) ptr->name, "explain"))
 	    {
+		xmlNodePtr ptr1 = ptr->children;
+		if (db)
+		{
+		    for (; ptr1; ptr1 = ptr1->next)
+			if (ptr1->type == XML_ELEMENT_NODE &&
+			    !strcmp((const char *) ptr1->name, "serverInfo"))
+			    break;
+		    if (!ptr1)
+			continue;
+		    for (ptr1 = ptr1->children; ptr; ptr1 = ptr1->next)
+			if (ptr1->type == XML_ELEMENT_NODE &&
+			    !strcmp((const char *) ptr1->name, "database"))
+			    break;
+		    
+		    if (!ptr1)
+			continue;
+		    for (ptr1 = ptr1->children; ptr1; ptr1 = ptr1->next)
+			if (ptr1->type == XML_TEXT_NODE &&
+			    ptr1->content &&
+			    !strcmp((const char *) ptr1->content, db))
+			    break;
+		    if (!ptr1)
+			continue;
+		}
 		xmlNodePtr ptr2 = xmlCopyNode(ptr, 1);
 
 		xmlDocPtr doc = xmlNewDoc((const xmlChar *) "1.0");
@@ -709,9 +733,6 @@ char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 		return content;
 	    }
     }
-    else
-	yaz_log(LOG_WARN, "No explain node 1");
-
 #endif
     yaz_log(LOG_WARN, "No explain node");
     return 0;

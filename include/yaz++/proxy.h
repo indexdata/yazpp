@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.35 2004-01-15 15:47:52 adam Exp $
+ * $Id: proxy.h,v 1.36 2004-01-15 23:44:58 adam Exp $
  */
 
 #include <sys/time.h>
@@ -255,6 +255,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     ODR m_s2z_odr_search;
     int m_s2z_hit_count;
     int m_s2z_packing;
+    char *m_s2z_database;
     Z_APDU *m_s2z_init_apdu;
     Z_APDU *m_s2z_search_apdu;
     Z_APDU *m_s2z_present_apdu;

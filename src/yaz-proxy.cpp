@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.90 2004-01-15 15:47:52 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.91 2004-01-15 23:44:58 adam Exp $
  */
 
 #include <assert.h>
@@ -108,6 +108,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_marcxml_flag = 0;
     m_stylesheet_schema = 0;
     m_s2z_stylesheet = 0;
+    m_s2z_database = 0;
     m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
@@ -850,25 +851,27 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records, int start)
 int Yaz_Proxy::send_srw_explain_response(Z_SRW_diagnostic *diagnostics,
 					int num_diagnostics)
 {
-    Z_SRW_PDU *res = yaz_srw_get(odr_encode(), Z_SRW_explain_response);
-    Z_SRW_explainResponse *er = res->u.explain_response;
-    
     Yaz_ProxyConfig *cfg = check_reconfigure();
     if (cfg)
     {
 	int len;
 	char *b = cfg->get_explain(odr_encode(), 0 /* target */,
-				   0 /* db */, &len);
+				   m_s2z_database, &len);
 	if (b)
 	{
+	    Z_SRW_PDU *res = yaz_srw_get(odr_encode(), Z_SRW_explain_response);
+	    Z_SRW_explainResponse *er = res->u.explain_response;
+
 	    er->record.recordData_buf = b;
 	    er->record.recordData_len = len;
 	    er->record.recordPacking = m_s2z_packing;
+
+	    er->diagnostics = diagnostics;
+	    er->num_diagnostics = num_diagnostics;
+	    return send_srw_response(res);
 	}
     }
-    er->diagnostics = diagnostics;
-    er->num_diagnostics = num_diagnostics;
-    return send_srw_response(res);
+    return send_http_response(404);
 }
 
 int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
@@ -1565,7 +1568,6 @@ Z_ElementSetNames *Yaz_Proxy::mk_esn_from_schema(ODR o, const char *schema)
 
 void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 {
-
     if (m_s2z_odr_init)
     {
 	odr_destroy(m_s2z_odr_init);
@@ -1621,6 +1623,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	{
 	    Z_SRW_searchRetrieveRequest *srw_req = srw_pdu->u.request;
 
+	    m_s2z_database = odr_strdup(m_s2z_odr_init, srw_req->database);
 	    // recordXPath unsupported.
 	    if (srw_req->recordXPath)
             {
@@ -1804,6 +1807,8 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	{
 	    Z_SRW_explainRequest *srw_req = srw_pdu->u.explain_request;
 
+	    m_s2z_database = odr_strdup(m_s2z_odr_init, srw_req->database);
+
 	    // save stylesheet
 	    if (srw_req->stylesheet)
 		m_s2z_stylesheet =
@@ -1837,6 +1842,9 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	}
 	else if (srw_pdu->which == Z_SRW_scan_request)
         {
+	    m_s2z_database = odr_strdup(m_s2z_odr_init,
+					srw_pdu->u.scan_request->database);
+
 	    yaz_add_srw_diagnostic(odr_decode(),
 				   &diagnostic, &num_diagnostic,
 				   4, "scan");
@@ -1852,6 +1860,8 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
         }
 	else
         {
+	    m_s2z_database = 0;
+
 	    send_to_srw_client_error(4, 0);
         }
     }
