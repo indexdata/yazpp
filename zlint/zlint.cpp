@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.1 2004-02-18 22:11:41 adam Exp $
+ * $Id: zlint.cpp,v 1.2 2004-02-19 15:25:46 adam Exp $
  */
 
 #include <yaz/pquery.h>
@@ -79,11 +79,17 @@ const char *try_scan [] = {
     0
 };
 
+#define TEST_STATE_FAIL 0
+#define TEST_STATE_UNKNOWN 1
+#define TEST_STATE_OK   2
+#define TEST_STATE_NOT_APPLIC 3
+
 class Zlint : public Yaz_Z_Assoc {
     int m_tst_no;
 
     int m_subtst_no;
 
+    int m_test_state;
     int m_query_no;
     int m_scan_no;
     int m_sort_no;
@@ -144,7 +150,6 @@ Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 
 void Zlint::recv_GDU(Z_GDU *gdu, int len)
 {
-    yaz_log(LOG_LOG, "%sgot PDU", m_session_str);
     if (gdu->which != Z_GDU_Z3950)
     {
 	yaz_log(LOG_LOG, "%sreceived non-Z39.50 response", m_session_str);
@@ -164,6 +169,8 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    if (ver > 3 || ver < 2)
 		yaz_log(LOG_WARN, "%sgot version %d, expected 2 or 3",
 			m_session_str, ver);
+	    else
+		m_test_state = TEST_STATE_OK;
 	    m_protocol_version = ver;
 	    if (!result)
 		closeNextTest();
@@ -171,19 +178,22 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    {
 		close();
 		nextTest();
-		connect();
 	    }
 	    break;
 	case 1:
 	    if (ver != 2)
 		yaz_log(LOG_WARN, "%sgot version %d, expected 2",
 			m_session_str, ver);
+	    else
+		m_test_state = TEST_STATE_OK;
 	    closeNextTest();
 	    break;
 	case 2:
 	    if (ver < 2 || ver > 5)
 		yaz_log(LOG_WARN, "%sgot version %d, expected 2-5",
 			m_session_str,ver);
+	    else
+		m_test_state = TEST_STATE_OK;
 	    closeNextTest();
 	    break;
 	case 3:
@@ -193,6 +203,8 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    else if (init->referenceId->len != REFID_LEN1
 		     || memcmp(init->referenceId->buf, REFID_BUF1, REFID_LEN1))
 		yaz_log(LOG_WARN, "%sreference ID does not match");
+	    else
+		m_test_state = TEST_STATE_OK;
 	    closeNextTest();
 	    break;
 	case 4:
@@ -214,6 +226,8 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 		else if (init->referenceId->len != REFID_LEN2
 			 || memcmp(init->referenceId->buf, REFID_BUF2, REFID_LEN2))
 		    yaz_log(LOG_WARN, "%sreference ID does not match");
+		else
+		    m_test_state = TEST_STATE_OK;
 		closeNextTest();
 	    }	    
 	    break;
@@ -234,6 +248,8 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 		if (no_reset == 0)
 		    yaz_log(LOG_WARN, "%ssuspicuously many option bits set",
 			    m_session_str);
+		if (no_set >= 2 && no_reset)
+		    m_test_state = TEST_STATE_OK;
 	    }
 	    closeNextTest();
 	    break;
@@ -251,49 +267,69 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 		    
 		    yaz_get_response_charneg(m, p, &charset, &lang,
 					     &selected);
-		    yaz_log(LOG_LOG, "%sAccepted character set : %s",
+		    yaz_log(LOG_DEBUG, "%sAccepted character set : %s",
 			    m_session_str, charset);
-		    yaz_log(LOG_LOG, "%sAccepted code language : %s",
+		    yaz_log(LOG_DEBUG, "%sAccepted code language : %s",
 			    m_session_str, lang ? lang : "none");
-		    yaz_log(LOG_LOG, "%sAccepted records in ...: %d",
+		    yaz_log(LOG_DEBUG, "%sAccepted records in ...: %d",
 			    m_session_str, selected );
 		    nmem_destroy(m);
+		    m_test_state = TEST_STATE_OK;
 		}
 	    }
+	    else
+		m_test_state = TEST_STATE_NOT_APPLIC;
 	    closeNextTest();
 	    break;
 	case 7:
 	    if (m_subtst_no * m_subtst_no * 100000 + 2000 < *init->maximumRecordSize)
+	    {
 		yaz_log(LOG_WARN, "%smaximumRecordSize bigger than proposed size");
-
-	    if (m_subtst_no * m_subtst_no * 100000 + 2000 < *init->preferredMessageSize)
+		closeNextTest();
+	    }
+	    else if (m_subtst_no * m_subtst_no * 100000 + 2000 < *init->preferredMessageSize)
+	    {
 		yaz_log(LOG_WARN, "%smaximumRecordSize bigger than proposed size");
-	    if (m_subtst_no < 3)
+		closeNextTest();
+	    }
+	    else if (m_subtst_no < 3)
 	    {
 		close();
 		m_subtst_no++;
 		connect();
 	    }
 	    else
+	    {
+		m_test_state = TEST_STATE_OK;
 		closeNextTest();
+	    }
 	    break;
 	case 9:
 	    if (result && ODR_MASK_GET(init->options, Z_Options_scan))
 		sendTest();
 	    else
+	    {
+		m_test_state = TEST_STATE_NOT_APPLIC;
 		closeNextTest();
+	    }
 	    break;
 	case 10:
 	    if (result && ODR_MASK_GET(init->options, Z_Options_sort))
 		sendTest();
 	    else
+	    {
+		m_test_state = TEST_STATE_NOT_APPLIC;
 		closeNextTest();
+	    }
 	    break;
 	default:
 	    if (result)
 		sendTest();
 	    else
+	    {
+		m_test_state = TEST_STATE_NOT_APPLIC;
 		closeNextTest();
+	    }
 	}
     }
     else if (gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_searchResponse)
@@ -317,11 +353,22 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    }
 	    else
 	    {
-		yaz_log(LOG_LOG, "%sgot %d result count with %s",
+		yaz_log(LOG_DEBUG, "%sgot %d result count with %s",
 			m_session_str, *sr->resultCount,
 			try_query[m_query_no]);
 		m_got_result_set = 1;
 		sendTest();
+	    }
+	    break;
+	case 10:
+	    if (sr->resultCount && *sr->resultCount > 0)
+	    {
+		m_got_result_set = 1;
+		sendTest();
+	    }
+	    else
+	    {
+		closeNextTest();
 	    }
 	    break;
 	default:
@@ -353,15 +400,18 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 					    try_syntax[m_record_syntax_no]);
 		    if (oid_oidcmp(expectRecordSyntax,
 			       ext->direct_reference))
-			yaz_log(LOG_WARN, "%spresent bad record type for %s",
+			yaz_log(LOG_WARN, "%sGot Record in different syntax from that required %s",
 				m_session_str,
 				try_syntax[m_record_syntax_no]);
 		    else
-			yaz_log(LOG_LOG, "%spresent OK for %s", m_session_str,
+		    {
+			yaz_log(LOG_DEBUG, "%spresent OK for %s", m_session_str,
 				try_syntax[m_record_syntax_no]);
+			m_test_state = TEST_STATE_OK;
+		    }
 		}
 		else if (sr->records->u.databaseOrSurDiagnostics->records[0]->which == Z_NamePlusRecord_surrogateDiagnostic)
-		    yaz_log(LOG_LOG, "%spresent returned SD %s", m_session_str,
+		    yaz_log(LOG_DEBUG, "%spresent returned SD %s", m_session_str,
 			    try_syntax[m_record_syntax_no]);
 		else
 		    yaz_log(LOG_WARN, "%spresent returned fragment %s",
@@ -392,8 +442,9 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    }
 	    else if (sr->entries->entries && sr->entries->num_entries > 0)
 	    {
-		yaz_log(LOG_LOG, "%sscan OK for %s", m_session_str,
+		yaz_log(LOG_DEBUG, "%sscan OK for %s", m_session_str,
 			try_scan[m_scan_no]);
+		m_test_state = TEST_STATE_OK;
 		closeNextTest();
 	    }
 	    else
@@ -424,8 +475,9 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 	    }
 	    else
 	    {
-		yaz_log(LOG_LOG, "%ssort OK for %s", m_session_str,
+		yaz_log(LOG_DEBUG, "%ssort OK for %s", m_session_str,
 			try_sort[m_sort_no]);
+		m_test_state = TEST_STATE_OK;
 		closeNextTest();
 	    }
 	    break;
@@ -445,7 +497,7 @@ Zlint::Zlint(IYaz_PDU_Observable *the_PDU_Observable) :
     m_database = 0;
     m_timeout_connect = 30;
     m_timeout_init = 30;
-    m_tst_no = 0;
+    m_tst_no = -1;
     m_subtst_no = 0;
     m_protocol_version = 0;
     sprintf(m_session_str, "%d ", m_tst_no);
@@ -564,42 +616,83 @@ void Zlint::connectNotify()
 
 int Zlint::nextTest()
 {
+    if (m_tst_no >= 0)
+    {
+	switch(m_test_state)
+	{
+	case TEST_STATE_FAIL:
+	    yaz_log(LOG_LOG, "%sTest Failed", m_session_str);
+	    break;
+	case TEST_STATE_OK:
+	    yaz_log(LOG_LOG, "%sTest Passed", m_session_str);
+	    break;
+	case TEST_STATE_NOT_APPLIC:
+	    yaz_log(LOG_LOG, "%sTest Not Applicable", m_session_str);
+	    break;
+	case TEST_STATE_UNKNOWN:
+	    yaz_log(LOG_LOG, "%sTest Could not be performed", m_session_str);
+	}
+    }
+    m_test_state = TEST_STATE_FAIL;
     m_subtst_no = 0;
-    while(m_tst_no >= 0)
+    connect();
+    while(1)
     {
 	m_tst_no++;
 	sprintf(m_session_str, "%d ", m_tst_no);
 	switch(m_tst_no)
 	{
 	case 0:
+	    yaz_log(LOG_LOG, "%sCheck for init v3",
+		    m_session_str);
 	    return 1;
 	case 1:
+	    yaz_log(LOG_LOG, "%sCheck for init v2",
+		    m_session_str);
 	    return 1;
 	case 2:
+	    yaz_log(LOG_LOG, "%sCheck for init protocol version negotiation",
+		    m_session_str);
 	    return 1;
 	case 3:
+	    yaz_log(LOG_LOG, "%sCheck for init reference ID",
+		    m_session_str);
 	    return 1;
 	case 4:
+	    yaz_log(LOG_LOG, "%sCheck for double init request",
+		    m_session_str);
 	    return 1;
 	case 5:
+	    yaz_log(LOG_LOG, "%sCheck for init options",
+		    m_session_str);
 	    return 1;
 	case 6:
+	    yaz_log(LOG_LOG, "%sCheck for character set negotiation",
+		    m_session_str);
 	    return 1;
 	case 7:
+	    yaz_log(LOG_LOG, "%sCheck for messages size negotiation",
+		    m_session_str);
 	    return 1;
 	case 8:
+	    yaz_log(LOG_LOG, "%sCheck for basic search and retrieve",
+		    m_session_str);
 	    m_query_no = 0;
 	    m_record_syntax_no = 0;
 	    m_got_result_set = 0;
 	    return 1;
 	case 9:
+	    yaz_log(LOG_LOG, "%sCheck for scan", m_session_str);
 	    m_scan_no = 0;
 	    return 1;
 	case 10:
+	    yaz_log(LOG_LOG, "%sCheck for sort", m_session_str);
+	    m_got_result_set = 0;
 	    m_sort_no = 0;
 	    return 1;
 	default:
-	    m_tst_no = -1;
+	    close();
+	    return 0;
 	}
     }
     return 0;
@@ -612,7 +705,6 @@ void Zlint::closeNextTest()
     if (m_tst_no != 0)
     {
 	nextTest();
-	connect();
     }
 }
 
@@ -651,6 +743,15 @@ void Zlint::testContinue()
 	m_scan_no++;
 	connect();
 	return;
+    case 10:
+	if (m_got_result_set)
+	{
+	    // if sort test fails during sort, we'll continue to next
+	    m_got_result_set = 0;
+	    m_sort_no++;
+	    connect();
+	    return;
+	}
     }
     nextTest();
 }
@@ -661,7 +762,7 @@ void Zlint::sendTest()
     switch(m_tst_no)
     {
     case 8:
-	if (m_got_result_set == 0)
+	if (!m_got_result_set)
 	{
 	    apdu = zget_APDU(odr_encode(), Z_APDU_searchRequest);
 	    Z_SearchRequest *sr;
@@ -683,7 +784,7 @@ void Zlint::sendTest()
 		if (rpn)
 		{
 		    int len;
-		    yaz_log(LOG_LOG, "%spqf: %s",
+		    yaz_log(LOG_DEBUG, "%spqf: %s",
 			    m_session_str, try_query[m_query_no]);
 
 		    sr->query->u.type_1 = rpn;
@@ -737,24 +838,65 @@ void Zlint::sendTest()
 	    closeNextTest();
 	break;
     case 10:
-	apdu = zget_APDU(odr_encode(), Z_APDU_sortRequest);
-	if (apdu && try_sort[m_sort_no])
+	if (!m_got_result_set)
 	{
-	    char *setstring = "default";
-	    int len;
-	    Z_SortRequest *sr = apdu->u.sortRequest;
+	    apdu = zget_APDU(odr_encode(), Z_APDU_searchRequest);
+	    Z_SearchRequest *sr;
+	    sr = apdu->u.searchRequest;
+	    sr->query = (Z_Query *) odr_malloc(odr_encode(), sizeof(*sr->query));
+	    if (try_query[m_query_no] && sr)
+	    {
+		sr->query->which = Z_Query_type_1;
+		Z_RPNQuery *rpn;
+		YAZ_PQF_Parser pqf_parser = yaz_pqf_create ();
+		
+		sr->databaseNames = &m_database;
+		sr->num_databaseNames = 1;
+		
+		rpn = yaz_pqf_parse(pqf_parser, odr_encode(), try_query[m_query_no]);
 
-	    sr->num_inputResultSetNames = 1;
-	    sr->num_inputResultSetNames = 1;
-	    sr->inputResultSetNames = (Z_InternationalString **)
-		odr_malloc (odr_encode(), sizeof(*sr->inputResultSetNames));
-	    sr->inputResultSetNames[0] = odr_strdup (odr_encode(), setstring);
-	    sr->sortedResultSetName = odr_strdup(odr_encode(), setstring);
-	    sr->sortSequence = yaz_sort_spec(odr_encode(), try_sort[m_sort_no]);
-	    send_Z_PDU(apdu, &len);
+		yaz_pqf_destroy (pqf_parser);
+
+		if (rpn)
+		{
+		    int len;
+		    yaz_log(LOG_DEBUG, "%spqf: %s",
+			    m_session_str, try_query[m_query_no]);
+
+		    sr->query->u.type_1 = rpn;
+		    send_Z_PDU(apdu, &len);
+		}
+		else
+		    closeNextTest();
+	    }
+	    else
+	    {
+		yaz_log(LOG_WARN, "%sunable to get any hit count", 
+			m_session_str);
+		closeNextTest();
+	    }
 	}
-	else
-	    closeNextTest();
+	else 
+	{
+	    apdu = zget_APDU(odr_encode(), Z_APDU_sortRequest);
+	    if (apdu && try_sort[m_sort_no])
+	    {
+		char *setstring = "default";
+		int len;
+		Z_SortRequest *sr = apdu->u.sortRequest;
+		
+		sr->num_inputResultSetNames = 1;
+		sr->num_inputResultSetNames = 1;
+		sr->inputResultSetNames = (Z_InternationalString **)
+		    odr_malloc (odr_encode(), sizeof(*sr->inputResultSetNames));
+		sr->inputResultSetNames[0] = odr_strdup (odr_encode(), setstring);
+		sr->sortedResultSetName = odr_strdup(odr_encode(), setstring);
+		sr->sortSequence = yaz_sort_spec(odr_encode(), try_sort[m_sort_no]);
+		send_Z_PDU(apdu, &len);
+	    }
+	    else
+		closeNextTest();
+	}
 	break;
     default:
 	closeNextTest();
@@ -769,9 +911,9 @@ IYaz_PDU_Observer *Zlint::sessionNotify(
 
 void Zlint::connect()
 {
-    if (m_host && m_tst_no != -1)
+    if (m_host)
     {
-	yaz_log(LOG_LOG, "%sconnecting to %s", m_session_str, m_host);
+	yaz_log(LOG_DEBUG, "%sconnecting to %s", m_session_str, m_host);
 	timeout(m_timeout_connect);
 	client(m_host);
     }
@@ -809,7 +951,8 @@ int main(int argc, char **argv)
     
     z.args(argc, argv);
 
-    z.connect();
+    z.nextTest();
+
     while (mySocketManager.processEvent() > 0)
 	;
     exit (0);
