@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.95 2004-01-30 12:02:21 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.96 2004-02-02 11:17:45 adam Exp $
  */
 
 #include <assert.h>
@@ -103,6 +103,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_config = 0;
     m_marcxml_flag = 0;
     m_stylesheet_xsp = 0;
+    m_stylesheet_nprl = 0;
     m_s2z_stylesheet = 0;
     m_s2z_database = 0;
     m_schema = 0;

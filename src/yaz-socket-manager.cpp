@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.25 2004-01-30 00:38:28 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.26 2004-02-02 11:17:45 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -141,7 +141,8 @@ int Yaz_SocketManager::processEvent()
         }
 	if (fd > max)
 	    max = fd;
-	if (p->timeout >= 0)
+	if (p->timeout > 0 ||
+	    (p->timeout == 0 && (p->mask & YAZ_SOCKET_OBSERVE_WRITE) == 0))
 	{
 	    int timeout_this;
 	    timeout_this = p->timeout;
@@ -194,7 +195,7 @@ int Yaz_SocketManager::processEvent()
 	if (FD_ISSET(fd, &except))
 	    mask |= YAZ_SOCKET_OBSERVE_EXCEPT;
 	
-	if (res > 0 && mask)
+	if (mask)
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
 	    p->last_activity = now;
@@ -204,7 +205,11 @@ int Yaz_SocketManager::processEvent()
 
 	    yaz_log (m_log, "putEvent I/O mask=%d", mask);
 	}
-	else if ((now - p->last_activity) >= p->timeout)
+	else if (
+	    (p->timeout > 0 ||
+	     (p->timeout == 0 && (p->mask & YAZ_SOCKET_OBSERVE_WRITE) == 0))
+	    &&
+	    (now - p->last_activity) >= p->timeout)
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
             assert (p->last_activity);
