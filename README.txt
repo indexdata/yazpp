@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.12 2003-10-09 16:06:42 adam Exp $
+$Id: README.txt,v 1.13 2003-10-16 13:40:41 adam Exp $
  
 
 Introduction
@@ -8,10 +8,15 @@ Introduction
 
 YAZ++ is a C++ layer for YAZ and implements the ANSI Z39.50
 protocol for information retrieval (client and server side).
-The YAZ homepage is: http://www.indexdata.dk/yaz/
+The YAZ++ homepage is: http://www.indexdata.dk/yaz++/
 
 YAZ++ uses the same license as YAZ - see LICENSE file for details.
 
+Documentation
+-------------
+
+Directory sub contains documentation in HTML and PDF. You can
+also read it online at http://www.indexdata.dk/yaz++/
 
 Overview
 --------

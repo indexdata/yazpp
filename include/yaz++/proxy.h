@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.17 2003-10-16 08:28:10 adam Exp $
+ * $Id: proxy.h,v 1.18 2003-10-16 13:40:41 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -17,6 +17,9 @@
 class Yaz_Proxy;
 
 #define MAX_ZURL_PLEX 10
+
+#define PROXY_LOG_APDU 1
+#define PROXY_LOG_REQ 1
 
 struct Yaz_RecordCache_Entry;
 
@@ -37,14 +40,15 @@ public:
 		      int *max_clients,
 		      int *keepalive_limit_bw,
 		      int *keepalive_limit_pdu,
-		      int *pre_init);
+		      int *pre_init,
+		      int *log_mask);
 
     void get_target_info(const char *name, const char **url,
 			 int *limit_bw, int *limit_pdu, int *limit_req,
 			 int *target_idletime, int *client_idletime,
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			 int *pre_init);
+			 int *pre_init, int *log_mask);
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
@@ -58,7 +62,7 @@ private:
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
 			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			    int *pre_init);
+			    int *pre_init, int *log_mask);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,

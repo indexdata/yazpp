@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.9 2003-10-13 19:16:29 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.10 2003-10-16 13:40:41 adam Exp $
  */
 
 #include <ctype.h>
@@ -117,13 +117,38 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *client_idletime,
 					 int *keepalive_limit_bw,
 					 int *keepalive_limit_pdu,
-					 int *pre_init)
+					 int *pre_init,
+					 int *log_mask)
 {
     *pre_init = 0;
     int no_url = 0;
     ptr = ptr->children;
     for (; ptr; ptr = ptr->next)
     {
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "log"))
+	{
+	    const char *v = get_text(ptr);
+	    *log_mask = 0;
+	    while (v && *v)
+	    {
+		const char *cp = v;
+		while (*cp && *cp != ',' && !isspace(*cp))
+		    cp++;
+		size_t len = cp - v;
+		if (len == 4 && !memcmp(v, "apdu", 4))
+		    *log_mask |= PROXY_LOG_APDU;
+		if (len == 3 && !memcmp(v, "req", 3))
+		    *log_mask |= PROXY_LOG_REQ;
+		if (isdigit(*v))
+		    *log_mask |= atoi(v);
+		if (*cp == ',')
+		    cp++;
+		while (*cp && isspace(*cp))
+		    cp++;
+		v = cp;
+	    }
+	}
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "preinit"))
 	{
@@ -463,7 +488,8 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *max_clients,
 				   int *keepalive_limit_bw,
 				   int *keepalive_limit_pdu,
-				   int *pre_init)
+				   int *pre_init,
+				   int *log_mask)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -488,7 +514,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 				   target_idletime, client_idletime,
 				   keepalive_limit_bw, keepalive_limit_pdu,
-				   pre_init);
+				   pre_init, log_mask);
 		return 1;
 	    }
 	    i++;
@@ -507,7 +533,8 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *max_clients,
 				      int *keepalive_limit_bw,
 				      int *keepalive_limit_pdu,
-				      int *pre_init)
+				      int *pre_init,
+				      int *log_mask)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -543,7 +570,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
 			   keepalive_limit_bw, keepalive_limit_pdu,
-			   pre_init);
+			   pre_init, log_mask);
     }
 #else
     *url = name;

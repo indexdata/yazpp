@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.60 2003-10-16 08:28:10 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.61 2003-10-16 13:40:41 adam Exp $
  */
 
 #include <assert.h>
@@ -249,17 +249,20 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    proxy_host = m_default_target;
 	}
 	int client_idletime = -1;
-	int pre_init = 0;
 	url[0] = m_default_target;
 	url[1] = 0;
 	if (cfg)
+	{
+	    int pre_init = 0;
+	    int log_mask = 0;
 	    cfg->get_target_info(proxy_host, url, &m_bw_max,
 				 &m_pdu_max, &m_max_record_retrieve,
 				 &m_target_idletime, &client_idletime,
 				 &parent->m_max_clients,
 				 &m_keepalive_limit_bw,
 				 &m_keepalive_limit_pdu,
-				 &pre_init);
+				 &pre_init, &log_mask);
+	}
 	if (client_idletime != -1)
 	{
 	    m_client_idletime = client_idletime;
@@ -1276,6 +1279,7 @@ void Yaz_Proxy::pre_init()
     int max_clients;
     int keepalive_limit_bw, keepalive_limit_pdu;
     int pre_init;
+    int log_mask = 0;
 
     Yaz_ProxyConfig *cfg = check_reconfigure();
 
@@ -1287,7 +1291,7 @@ void Yaz_Proxy::pre_init()
 					  &max_clients, 
 					  &keepalive_limit_bw,
 					  &keepalive_limit_pdu,
-					  &pre_init) ; i++)
+					  &pre_init, &log_mask) ; i++)
     {
 	if (pre_init)
 	{

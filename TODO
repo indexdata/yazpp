@@ -1,13 +1,13 @@
 
 Control the various optimizations with config..
 
+Control the various logging facilities APDU, etc. in XML configuration.
+
 Handle invalidate sessions (-1 hit, control-number search).
 
 Live status (via search, present).
 
-Documentation update.
-
 SRW/SRU.
 
-Threading.
+Possible threading.
 
