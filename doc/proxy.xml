@@ -230,19 +230,19 @@
     The proxy uses the OtherInformation definition to carry
     information about the target address and cookie.
    </para>
-   <literallayout>
+   <screen>
   OtherInformation   ::= [201] IMPLICIT SEQUENCE OF SEQUENCE{
-    category            [1]   IMPLICIT InfoCategory OPTIONAL, 
+    category           [1]   IMPLICIT InfoCategory OPTIONAL, 
     information        CHOICE{
-      characterInfo        [2]  IMPLICIT InternationalString,
-      binaryInfo        [3]  IMPLICIT OCTET STRING,
+      characterInfo            [2]  IMPLICIT InternationalString,
+      binaryInfo               [3]  IMPLICIT OCTET STRING,
       externallyDefinedInfo    [4]  IMPLICIT EXTERNAL,
-      oid          [5]  IMPLICIT OBJECT IDENTIFIER}}
+      oid                      [5]  IMPLICIT OBJECT IDENTIFIER}}
 --
   InfoCategory ::= SEQUENCE{
-      categoryTypeId  [1]   IMPLICIT OBJECT IDENTIFIER OPTIONAL,
-      categoryValue  [2]   IMPLICIT INTEGER}
-  </literallayout>
+      categoryTypeId   [1]   IMPLICIT OBJECT IDENTIFIER OPTIONAL,
+      categoryValue    [2]   IMPLICIT INTEGER}
+  </screen>
    <para>
     The <literal>categoryTypeId</literal> is either
     OID 1.2.840.10003.10.1000.81.1, 1.2.840.10003.10.1000.81.2
