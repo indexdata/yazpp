@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.5 2002-11-30 22:33:21 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.6 2003-07-02 10:25:13 adam Exp $
 
 // Z39.50 Record class
 
@@ -9,7 +9,7 @@
 namespace ZOOM {
     record::syntax::syntax (value rs): val(rs) {}
 
-    record::syntax::operator string() const {
+    record::syntax::operator std::string() const {
 	switch (val) {
 	case GRS1:   return "grs1";
 	case SUTRS:  return "sutrs";
@@ -82,12 +82,12 @@ namespace ZOOM {
 	return syntax::UNKNOWN;
     }
 
-    string record::render() const {
+    std::string record::render() const {
 	int len;
 	return ZOOM_record_get(r, "render", &len);
     }
 
-    string record::rawdata() const {
+    std::string record::rawdata() const {
 	int len;
 	return ZOOM_record_get(r, "raw", &len);
     }

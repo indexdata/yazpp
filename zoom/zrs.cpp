@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.4 2002-11-30 22:33:21 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.5 2003-07-02 10:25:13 adam Exp $
 
 // Z39.50 Result Set class
 
@@ -22,11 +22,11 @@ namespace ZOOM {
 	ZOOM_resultset_destroy(rs);
     }
 
-    string resultSet::option(const string &key) const {
+    std::string resultSet::option(const std::string &key) const {
 	return ZOOM_resultset_option_get(rs, key.c_str());
     }
 
-    bool resultSet::option(const string &key, const string &val) {
+    bool resultSet::option(const std::string &key, const std::string &val) {
       ZOOM_resultset_option_set(rs, key.c_str(), val.c_str());
 	return true;
     }

@@ -1,10 +1,10 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.7 2002-11-30 22:33:21 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.8 2003-07-02 10:25:13 adam Exp $
 
 // Z39.50 Exception classes
 
+#include <iostream>
 #include <errno.h>
 #include <string.h>		// for strerror(), strlen(), strcpy()
-#include <stdio.h>		// for sprintf()
 #include "zoom.h"
 
 
@@ -21,7 +21,7 @@ namespace ZOOM {
 	return code;
     }
 
-    string exception::errmsg() const {
+    std::string exception::errmsg() const {
 	static char buf[40];
 	sprintf(buf, "error #%d", code);
 	return buf;
@@ -33,15 +33,15 @@ namespace ZOOM {
 	code = errno;
     }
 
-    string systemException::errmsg() const {
+    std::string systemException::errmsg() const {
 	return strerror(code);
     }
 
 
     
-    bib1Exception::bib1Exception(int errcode, const string &addinfo) :
+    bib1Exception::bib1Exception(int errcode, const std::string &addinfo) :
 	exception(errcode), info(addinfo) {
-	cerr << "WARNING: made bib1Exception(" << errcode << "=" <<
+	std::cerr << "WARNING: made bib1Exception(" << errcode << "=" <<
 	    ZOOM_diag_str(errcode) << ", '" << addinfo << "')\n";
     }
 
@@ -55,24 +55,24 @@ namespace ZOOM {
 	//  or less work -- it just leaks memory.  (Or does it?)
     }
 
-    string bib1Exception::errmsg() const {
+    std::string bib1Exception::errmsg() const {
 	return ZOOM_diag_str(code);
     }
 
-    string bib1Exception::addinfo() const {
+    std::string bib1Exception::addinfo() const {
 	return info;
     }
 
 
 
-    queryException::queryException(int qtype, const string &source) :
+    queryException::queryException(int qtype, const std::string &source) :
 	exception(qtype), q(source) {}
 
     queryException::~queryException() {
 	//delete q; // ### see comment on bib1Exception destructor
     }
 
-    string queryException::errmsg() const {
+    std::string queryException::errmsg() const {
 	switch (code) {
 	case PREFIX: return "bad prefix search";
 	case CCL: return "bad CCL search";
@@ -81,7 +81,7 @@ namespace ZOOM {
 	return "bad search (unknown type)";
     }
 
-    string queryException::addinfo() const {
+    std::string queryException::addinfo() const {
 	return q;
     }
 }

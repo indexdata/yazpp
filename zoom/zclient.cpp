@@ -1,16 +1,16 @@
-// $Id: zclient.cpp,v 1.6 2002-12-02 15:57:58 mike Exp $
+// $Id: zclient.cpp,v 1.7 2003-07-02 10:25:13 adam Exp $
 
 // Simple sample client
 
 #include <stdlib.h>		// for atoi()
-#include <iostream.h>
+#include <iostream>
 #include "zoom.h"
 
 
 int main(int argc, char **argv)
 {
     if (argc != 5) {
-	cerr << "Usage: " <<
+	std::cerr << "Usage: " <<
 	    argv[0] << " <host> <port> <dbname> <@prefix-search>\n";
 	return 1;
     }
@@ -25,21 +25,21 @@ int main(int argc, char **argv)
 	resultSet rs(conn, pq);
 
 	size_t n = rs.size();
-	cout << "found " << n << " records:\n";
+	std::cout << "found " << n << " records:\n";
 	for (size_t i = 0; i < n; i++) {
 	    const record rec(rs, i);
-	    cout << "=== record " << i+1 <<
-		" (record-syntax " << (string) rec.recsyn() << ")" <<
+	    std::cout << "=== record " << i+1 <<
+		" (record-syntax " << (std::string) rec.recsyn() << ")" <<
 		" ===\n" << rec.render();
 	}
 
     } catch(bib1Exception& err) {
-	cerr << argv[0] << ": bib1Exception " <<
+	std::cerr << argv[0] << ": bib1Exception " <<
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 2;
 
     } catch(ZOOM::exception& err) {
-	cerr << argv[0] << ": exception " <<
+	std::cerr << argv[0] << ": exception " <<
 	    err.errmsg() << "\n";
 	return 3;
     }

@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.4 2002-11-30 22:33:21 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.5 2003-07-02 10:25:13 adam Exp $
 
 // Z39.50 Connection class
 
@@ -6,7 +6,7 @@
 
 
 namespace ZOOM {
-    connection::connection(const string &hostname, int portnum) {
+    connection::connection(const std::string &hostname, int portnum) {
 	const char *line_printer_size_hostname = hostname.c_str();
 	//###cerr << "opening " << hostname << ":" << portnum << "\n";
 	c = ZOOM_connection_new(line_printer_size_hostname, portnum);
@@ -21,11 +21,11 @@ namespace ZOOM {
 	}
     }
 
-    string connection::option(const string &key) const {
+    std::string connection::option(const std::string &key) const {
 	return ZOOM_connection_option_get(c, key.c_str());
     }
 
-    bool connection::option(const string &key, const string &val) {
+    bool connection::option(const std::string &key, const std::string &val) {
 	// No way to tell whether ZOOM_connection_option_set() accepts key
 	ZOOM_connection_option_set(c, key.c_str(), val.c_str());
 	return true;
