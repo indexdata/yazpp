@@ -1,4 +1,4 @@
-/* $Id: yaz-proxy.cpp,v 1.1 2004-03-29 22:46:51 adam Exp $
+/* $Id: yaz-proxy.cpp,v 1.2 2004-03-30 09:05:54 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -162,9 +162,10 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_proxy_authentication);
     xfree (m_optimize);
 
+#if HAVE_XSLT
     if (m_stylesheet_xsp)
 	xsltFreeStylesheet(m_stylesheet_xsp);
-
+#endif
     xfree (m_schema);
     if (m_s2z_odr_init)
 	odr_destroy(m_s2z_odr_init);
@@ -354,7 +355,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 	Yaz_ProxyConfig *cfg = check_reconfigure();
 	if (proxy_host)
 	{
-#if 1
+#if 0
 /* only to be enabled for debugging... */
 	    if (!strcmp(proxy_host, "stop"))
 		exit(0);
@@ -648,6 +649,7 @@ int Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p, Z_APDU *apdu)
 void Yaz_Proxy::convert_xsl_delay()
 {
     Z_NamePlusRecord *npr = m_stylesheet_nprl->records[m_stylesheet_offset];
+#if HAVE_XSLT
     if (npr->which == Z_NamePlusRecord_databaseRecord)
     {
 	Z_External *r = npr->u.databaseRecord;
@@ -682,12 +684,15 @@ void Yaz_Proxy::convert_xsl_delay()
 	    xmlFreeDoc(doc);
 	}
     }
+#endif
     m_stylesheet_offset++;
     if (m_stylesheet_offset == m_stylesheet_nprl->num_records)
     {
 	m_stylesheet_nprl = 0;
+#if HAVE_XSLT
 	if (m_stylesheet_xsp)
 	    xsltFreeStylesheet(m_stylesheet_xsp);
+#endif
 	m_stylesheet_xsp = 0;
 	timeout(m_client_idletime);
 	send_PDU_convert(m_stylesheet_apdu);
@@ -1569,11 +1574,12 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	{
 	    m_parent->low_socket_close();
 
+#if HAVE_XSLT
 	    if (m_stylesheet_xsp)
 		xsltFreeStylesheet(m_stylesheet_xsp);
-
 	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
 						       stylesheet_name);
+#endif
 	    m_stylesheet_offset = 0;
 	    xfree(stylesheet_name);
 
@@ -1616,11 +1622,13 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	{
 	    m_parent->low_socket_close();
 
+#if HAVE_XSLT
 	    if (m_stylesheet_xsp)
 		xsltFreeStylesheet(m_stylesheet_xsp);
 
 	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
 						       stylesheet_name);
+#endif
 	    m_stylesheet_offset = 0;
 	    xfree(stylesheet_name);
 

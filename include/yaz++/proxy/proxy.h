@@ -1,4 +1,4 @@
-/* $Id: proxy.h,v 1.1 2004-03-29 22:46:50 adam Exp $
+/* $Id: proxy.h,v 1.2 2004-03-30 09:05:53 adam Exp $
    Copyright (c) 1998-2004, Index Data.
 
 This file is part of the yaz-proxy.
@@ -235,7 +235,11 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_request_no;
     int m_invalid_session;
     int m_marcxml_flag;
+#if HAVE_XSLT
     xsltStylesheetPtr m_stylesheet_xsp;
+#else
+    void *m_stylesheet_xsp;
+#endif
     int m_stylesheet_offset;
     Z_APDU *m_stylesheet_apdu;
     Z_NamePlusRecordList *m_stylesheet_nprl;
