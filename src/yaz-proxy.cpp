@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.94 2004-01-30 11:45:26 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.95 2004-01-30 12:02:21 adam Exp $
  */
 
 #include <assert.h>
@@ -628,13 +628,12 @@ void Yaz_Proxy::convert_xsl_delay()
     m_stylesheet_offset++;
     if (m_stylesheet_offset == m_stylesheet_nprl->num_records)
     {
+	m_stylesheet_nprl = 0;
 	if (m_stylesheet_xsp)
 	    xsltFreeStylesheet(m_stylesheet_xsp);
 	m_stylesheet_xsp = 0;
 	timeout(m_client_idletime);
 	int r = send_PDU_convert(m_stylesheet_apdu);
-	if (r)
-	    return;
     }
     else
 	timeout(0);
@@ -2383,7 +2382,6 @@ int Yaz_Proxy::handle_init_response_for_invalid_session(Z_APDU *apdu)
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 {
     m_bytes_recv += len;
-    yaz_log(LOG_LOG, "m_bytes_recv += %d (now %d)", len, m_bytes_recv);
 
     m_pdu_recv++;
     m_waiting = 0;
