@@ -3,7 +3,12 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-server.cpp,v $
- * Revision 1.5  2001-05-03 12:39:39  adam
+ * Revision 1.6  2001-05-17 14:18:03  adam
+ * New handler for old version item update for server:
+ *  void update_service0 (Z_ExtendedServicesRequest *req,
+ *                        Z_IU0Update *io, Z_ExtendedServicesResponse *res)
+ *
+ * Revision 1.5  2001/05/03 12:39:39  adam
  * Added Update server service.
  *
  * Revision 1.4  2001/04/05 13:09:44  adam
@@ -87,6 +92,9 @@ public:
     void update_service (Z_ExtendedServicesRequest *req,
 			 Z_IUUpdate *io,
 			 Z_ExtendedServicesResponse *res);
+    void update_service0 (Z_ExtendedServicesRequest *req,
+			 Z_IU0Update *io,
+			 Z_ExtendedServicesResponse *res);
 };
 
 
@@ -146,7 +154,14 @@ void MyUpdate::update_service (Z_ExtendedServicesRequest *req,
 			   Z_IUUpdate *io,
 			   Z_ExtendedServicesResponse *res)
 {
-    yaz_log (LOG_LOG, "MyServer::update_service");
+    yaz_log (LOG_LOG, "MyServer::update_service (v1.1)");
+}
+
+void MyUpdate::update_service0 (Z_ExtendedServicesRequest *req,
+			   Z_IU0Update *io,
+				Z_ExtendedServicesResponse *res)
+{
+    yaz_log (LOG_LOG, "MyServer::update_service (v1.0)");
 }
 
 

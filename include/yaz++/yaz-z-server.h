@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.9 2001-05-03 12:39:39 adam Exp $
+ * $Id: yaz-z-server.h,v 1.10 2001-05-17 14:18:03 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -68,6 +68,10 @@ class YAZ_EXPORT Yaz_Facility_Update : public IYaz_Server_Facility {
  public:
     virtual void update_service (Z_ExtendedServicesRequest *req,
 				 Z_IUUpdate *io,
+				 Z_ExtendedServicesResponse *res) = 0;
+
+    virtual void update_service0 (Z_ExtendedServicesRequest *req,
+				 Z_IU0Update *io,
 				 Z_ExtendedServicesResponse *res) = 0;
 
     int init(Yaz_Z_Server *server,
