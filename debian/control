@@ -20,8 +20,14 @@ Description: YAZ++ library for Z39.50 applications in C++.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
 Package: yaz++
-Section: devel
+Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: YAZ++ programs.
+ YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
+
+Package: yaz++-doc
+Section: doc
+Architecture: all
+Description: Documentation for YAZ++.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
