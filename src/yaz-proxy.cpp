@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.100 2004-02-12 20:40:22 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.101 2004-02-15 16:41:14 adam Exp $
  */
 
 #include <assert.h>
@@ -896,6 +896,7 @@ int Yaz_Proxy::send_srw_explain_response(Z_SRW_diagnostic *diagnostics,
 	    er->record.recordData_buf = b;
 	    er->record.recordData_len = len;
 	    er->record.recordPacking = m_s2z_packing;
+	    er->record.recordSchema = "http://explain.z3950.org/dtd/2.0/";
 
 	    er->diagnostics = diagnostics;
 	    er->num_diagnostics = num_diagnostics;
