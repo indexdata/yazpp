@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.26 2004-02-02 11:17:45 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.27 2004-02-26 23:42:27 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -173,12 +173,16 @@ int Yaz_SocketManager::processEvent()
     
     yaz_log (m_log, "Yaz_SocketManager::select begin no=%d timeout=%d",
              no, timeout);
+    int pass = 0;
     while ((res = select(max + 1, &in, &out, &except,
 			 timeout== -1 ? 0 : &to)) < 0)
 	if (errno != EINTR)
 	{
-	    yaz_log (LOG_LOG|LOG_WARN, "select");
-	    return -1;
+	    yaz_log(LOG_ERRNO|LOG_WARN, "select");
+	    yaz_log(LOG_WARN, "errno=%d max=%d timeout=%d",
+			     errno, max, timeout);
+	    if (++pass > 10)
+	        return -1;
 	}
     yaz_log(m_log, "select returned res=%d", res);
     now = time(0);
