@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.26  2001-08-13 16:39:12  adam
+ * Revision 1.27  2001-11-02 13:06:29  adam
+ * Fixed bug in result_set_optimize where LSLB == resultCount.
+ *
+ * Revision 1.26  2001/08/13 16:39:12  adam
  * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
  *
  * Revision 1.25  2001/04/25 18:59:30  adam
@@ -360,7 +363,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    m_client->m_sr_transform = 1;
 	    return new_apdu;
 	}
-	else if (m_client->m_last_resultCount > *sr->largeSetLowerBound ||
+	else if (m_client->m_last_resultCount >= *sr->largeSetLowerBound ||
 	    m_client->m_last_resultCount == 0)
 	{
 	    // large set
@@ -460,6 +463,8 @@ void Yaz_Proxy::shutdown()
     // only keep if keep_alive flag and cookie is set...
     if (m_keepalive && m_client && m_client->m_cookie[0])
     {
+	yaz_log (LOG_LOG, "shutdown - keepalive this=%p, m_server=%p",
+            this, m_client->m_server);
 	if (m_client->m_waiting == 2)
 	    abort();
 	// Tell client (if any) that no server connection is there..
@@ -474,7 +479,8 @@ void Yaz_Proxy::shutdown()
     }
     else if (!m_parent)
     {
-	abort();
+	yaz_log (LOG_LOG, "abort %p", this);
+        abort();
     }
     delete this;
 }
