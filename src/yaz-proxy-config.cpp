@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.22 2004-01-07 13:24:12 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.23 2004-01-07 13:40:06 adam Exp $
  */
 
 #include <ctype.h>
@@ -700,7 +700,6 @@ char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 		xmlDocSetRootElement(doc, ptr2);
 		
 		xmlChar *buf_out;
-		int len_out;
 		xmlDocDumpMemory(doc, &buf_out, len);
 		char *content = (char*) odr_malloc(odr, *len);
 		memcpy(content, buf_out, *len);

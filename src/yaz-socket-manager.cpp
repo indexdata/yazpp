@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.23 2004-01-05 11:31:04 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.24 2004-01-07 13:40:06 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -143,7 +143,7 @@ int Yaz_SocketManager::processEvent()
 	    max = fd;
 	if (p->timeout >= 0)
 	{
-	    unsigned timeout_this;
+	    int timeout_this;
 	    timeout_this = p->timeout;
 	    if (p->last_activity)
 		timeout_this -= now - p->last_activity;
