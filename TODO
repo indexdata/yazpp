@@ -1,4 +1,6 @@
 
+Proxy doesn't do well, if preferredRecordSyntax is not set.
+
 Per database config.
 
 Control the various optimizations with config..

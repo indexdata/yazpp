@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.32 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.33 2004-01-24 21:33:27 adam Exp $
  */
 
 #include <assert.h>
@@ -210,9 +210,11 @@ Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
 
     if (!z_GDU(m_odr_in, &apdu, 0, 0))
     {
-        yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
-             odr_errmsg(odr_geterror(m_odr_in)),
-             odr_offset(m_odr_in));
+	const char *element = odr_getelement(m_odr_in);
+        yaz_log(LOG_LOG, "PDU decode failed '%s' near byte %d. Element %s",
+		odr_errmsg(odr_geterror(m_odr_in)),
+		odr_offset(m_odr_in),
+		element ? element : "unknown");
         yaz_log(LOG_LOG, "PDU dump:");
         odr_dumpBER(yaz_log_file(), buf, len);
         return 0;
@@ -239,26 +241,34 @@ Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
 
 int Yaz_Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
 {
-    if (m_APDU_yazlog)
+    const char *element = 0;
+    int r = z_GDU(m_odr_out, &apdu, 0, 0);
+
+    if (!r) // decoding failed. Get the failed element
+	element = odr_getelement(m_odr_out);
+    
+    if (m_APDU_yazlog || !r)
     {
+	if (!r)
+	    yaz_log (LOG_LOG, "PDU encode failed. Element %s",
+		     element ? element : "unknown");
 	FILE *save = m_APDU_file;
-	odr_setprint(m_odr_print, yaz_log_file()); // use YAZ log FILE
+	FILE *yazf = yaz_log_file();
+	odr_setprint(m_odr_print, yazf); // use YAZ log FILE
 	z_GDU(m_odr_print, &apdu, 0, "encode");
 	m_APDU_file = save;
 	odr_setprint(m_odr_print, save);
     }
     if (m_APDU_file)
     {
+	if (!r)
+	    fprintf (m_APDU_file, "PDU encode failed. Element %s",
+		     element ? element : "unknown");
 	z_GDU(m_odr_print, &apdu, 0, "encode");
 	fflush(m_APDU_file);
     }
-    if (!z_GDU(m_odr_out, &apdu, 0, 0))
-    {
-	if (m_APDU_file)
-	    fprintf (m_APDU_file, "PDU encode failed (above)");
-	yaz_log (LOG_LOG, "yaz_Z_Assoc::encode_Z_GDU failed");
+    if (!r)  // encoding failed
         return -1;
-    }
     *buf = odr_getbuf (m_odr_out, len, 0);
     odr_reset (m_odr_out);
     return *len;

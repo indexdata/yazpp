@@ -1,4 +1,6 @@
 
+Proxy now throws 'unsupported transfer syntax' / 'unsupported ESN' properly.
+
 Multiple explain records may exist for one target. Proxy checks contents of
 database element in explain record to validate database.
 
