@@ -4,10 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.1  1999-04-09 11:46:57  adam
+ * Revision 1.2  1999-04-20 10:30:05  adam
+ * Implemented various stuff for client and proxy. Updated calls
+ * to ODR to reflect new name parameter.
+ *
+ * Revision 1.1  1999/04/09 11:46:57  adam
  * Added object Yaz_Z_Assoc. Much more functional client.
  *
  */
+
+#include <assert.h>
 
 #include <log.h>
 #include <yaz-z-assoc.h>
@@ -69,7 +75,7 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     odr_reset (m_odr_in);
     odr_setbuf (m_odr_in, (char*) buf, len, 0);
 
-    if (!z_APDU(m_odr_in, &apdu, 0))
+    if (!z_APDU(m_odr_in, &apdu, 0, 0))
     {
         logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
              odr_errmsg(odr_geterror(m_odr_in)),
@@ -87,7 +93,7 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 
 int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 {
-    if (!z_APDU(m_odr_out, &apdu, 0))
+    if (!z_APDU(m_odr_out, &apdu, 0, 0))
     {
 	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
@@ -131,3 +137,73 @@ ODR Yaz_Z_Assoc::odr_encode()
 {
     return m_odr_out;
 }
+
+ODR Yaz_Z_Assoc::odr_decode()
+{
+    return m_odr_in;
+}
+ODR Yaz_Z_Assoc::odr_print()
+{
+    return m_odr_print;
+}
+
+Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
+    Z_OtherInformation **otherInformationP, int createFlag,
+    int *oid, int categoryValue)
+{
+    int i;
+    Z_OtherInformation *otherInformation = *otherInformationP;
+    if (!otherInformation)
+    {
+	if (!createFlag)
+	    return 0;
+	otherInformation = *otherInformationP = (Z_OtherInformation *)
+	    odr_malloc (odr_encode(), sizeof(*otherInformation));
+	otherInformation->num_elements = 0;
+	otherInformation->list = (Z_OtherInformationUnit **)
+	    odr_malloc (odr_encode(), 8*sizeof(*otherInformation));
+	for (i = 0; i<8; i++)
+	    otherInformation->list[i] = 0;
+    }
+    for (i = 0; i<otherInformation->num_elements; i++)
+    {
+	assert (otherInformation->list[i]);
+	if (!oid)
+	{
+	    if (!otherInformation->list[i]->category)
+		return otherInformation->list[i];
+	}
+	else
+	{
+	    if (otherInformation->list[i]->category &&
+		categoryValue ==
+		*otherInformation->list[i]->category->categoryValue &&
+		!oid_oidcmp (oid, otherInformation->list[i]->category->
+			     categoryTypeId))
+		return otherInformation->list[i];
+	}
+    }
+    if (!createFlag)
+	return 0;
+    otherInformation->list[i] = (Z_OtherInformationUnit*)
+	odr_malloc (odr_encode(), sizeof(Z_OtherInformationUnit));
+    if (oid)
+    {
+	otherInformation->list[i]->category = (Z_InfoCategory*)
+	    odr_malloc (odr_encode(), sizeof(Z_InfoCategory));
+	otherInformation->list[i]->category->categoryTypeId = (int*)
+	    odr_oiddup (odr_encode(), oid);
+	otherInformation->list[i]->category->categoryValue = (int*)
+	    odr_malloc (odr_encode(), sizeof(int));
+	*otherInformation->list[i]->category->categoryValue =
+	    categoryValue;
+    }
+    else
+	otherInformation->list[i]->category = 0;
+    otherInformation->list[i]->which = Z_OtherInfo_characterInfo;
+    otherInformation->list[i]->information.characterInfo = 0;
+    
+    otherInformation->num_elements = i+1;
+    return otherInformation->list[i];
+}
+

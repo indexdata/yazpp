@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.5  1999-04-09 11:46:57  adam
+ * Revision 1.6  1999-04-20 10:30:05  adam
+ * Implemented various stuff for client and proxy. Updated calls
+ * to ODR to reflect new name parameter.
+ *
+ * Revision 1.5  1999/04/09 11:46:57  adam
  * Added object Yaz_Z_Assoc. Much more functional client.
  *
  * Revision 1.4  1999/03/23 14:17:57  adam
@@ -243,10 +247,11 @@ int Yaz_PDU_Assoc::flush_PDU()
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 					 YAZ_SOCKET_OBSERVE_EXCEPT|
 					 YAZ_SOCKET_OBSERVE_WRITE);
-        logf (LOG_LOG, "flush_PDU put %d bytes (incomplete write)", q->m_len);
+        logf (LOG_LOG, "Yaz_PDU_Assoc::flush_PDU put %d bytes (incomplete)",
+	      q->m_len);
         return r;
     }
-    logf (LOG_LOG, "flush_PDU put %d bytes fd=%d", q->m_len, cs_fileno(m_cs));
+    logf (LOG_LOG, "Yaz_PDU_Assoc::flush_PDU put %d bytes", q->m_len);
     // whole packet sent... delete this and proceed to next ...
     m_queue_out = q->m_next;
     delete q;
@@ -265,7 +270,7 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
     
     if (!m_cs)
     {
-	logf (LOG_LOG, "send_PDU failed, m_cs == 0");
+	logf (LOG_LOG, "Yaz_PDU_Assoc::send_PDU failed, m_cs == 0");
         return 0;
     }
     while (*pq)
@@ -274,7 +279,8 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
     if (is_idle)
         return flush_PDU ();
     else
-	logf (LOG_LOG, "cannot send_PDU fd=%d", cs_fileno(m_cs));
+	logf (LOG_LOG, "Yaz_PDU_Assoc::cannot send_PDU fd=%d",
+	      cs_fileno(m_cs));
     return 0;
 }
 
@@ -332,8 +338,17 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     int res = cs_connect (cs, ap);
     if (res < 0)
     {
-	logf (LOG_DEBUG, "Yaz_PDU_Assoc::connect failed");
+	logf (LOG_LOG, "Yaz_PDU_Assoc::connect failed");
+#if 1
+	logf (LOG_LOG, "Yaz_PDU_Assoc::connect fd=%d", cs_fileno(cs));
+	m_socketObservable->addObserver(cs_fileno(cs), this);
+	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
+					 YAZ_SOCKET_OBSERVE_EXCEPT|
+					 YAZ_SOCKET_OBSERVE_WRITE);
+	m_state = Connecting;
+#else
         close ();
+#endif
     }
     else
     {
@@ -344,12 +359,12 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 					 YAZ_SOCKET_OBSERVE_WRITE);
 	if (res == 1)
 	{
-	    logf (LOG_LOG, "Connect pending");
+	    logf (LOG_LOG, "Yaz_PDU_Assoc::connect pending");
 	    m_state = Connecting;
 	}
 	else
 	{
-	    logf (LOG_LOG, "Connect complete");
+	    logf (LOG_LOG, "Yaz_PDU_Assoc::Connect complete");
 	    m_state = Connected;
 	}
     }

@@ -4,9 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.5  1999-04-09 11:46:57  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
+ * Revision 1.6  1999-04-20 10:30:05  adam
+ * Implemented various stuff for client and proxy. Updated calls
+ * to ODR to reflect new name parameter.
  *
+ * Revision 1.5  1999/04/09 11:46:57  adam
+ * Added object Yaz_Z_Assoc. Much more functional client.
  */
 
 #include <assert.h>
@@ -24,7 +27,7 @@ Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_lastReceived = 0;
     m_host = 0;
     m_proxy = 0;
-
+    m_cookie = 0;
     const char *db = "Default";
     set_databaseNames(1, &db);
 }
@@ -33,7 +36,10 @@ Yaz_IR_Assoc::~Yaz_IR_Assoc()
 {
     if (m_elementSetNames)
 	delete [] m_elementSetNames->u.generic;
-    delete m_elementSetNames;
+    delete [] m_elementSetNames;
+    delete [] m_host;
+    delete [] m_proxy;
+    delete [] m_cookie;
 }
 
 void Yaz_IR_Assoc::get_databaseNames (int *num, char ***list)
@@ -149,70 +155,29 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
 
 void Yaz_IR_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
+    int oidval, int categoryValue,
+    const char *str)
+{
+    int oid[OID_SIZE];
+    struct oident ent;
+    ent.proto = PROTO_Z3950;
+    ent.oclass = CLASS_USERINFO;
+    ent.value = (oid_value) oidval;
+    if (!oid_ent_to_oid (&ent, oid))
+	return ;
+    set_otherInformationString(otherInformation, oid, categoryValue, str);
+}
+
+void Yaz_IR_Assoc::set_otherInformationString (
+    Z_OtherInformation **otherInformation,
     int *oid, int categoryValue,
     const char *str)
 {
     Z_OtherInformationUnit *oi =
-	set_otherInformation(otherInformation, oid, categoryValue);
+	update_otherInformation(otherInformation, 1, oid, categoryValue);
     if (!oi)
 	return;
     oi->information.characterInfo = odr_strdup (odr_encode(), str);
-}
-
-Z_OtherInformationUnit *Yaz_IR_Assoc::set_otherInformation (
-    Z_OtherInformation **otherInformationP,
-    int *oid, int categoryValue)
-{
-    int i;
-    Z_OtherInformation *otherInformation = *otherInformationP;
-    if (!otherInformation)
-    {
-	otherInformation = *otherInformationP = (Z_OtherInformation *)
-	    odr_malloc (odr_encode(), sizeof(*otherInformation));
-	otherInformation->num_elements = 0;
-	otherInformation->list = (Z_OtherInformationUnit **)
-	    odr_malloc (odr_encode(), 8*sizeof(*otherInformation));
-	for (i = 0; i<8; i++)
-	    otherInformation->list[i] = 0;
-    }
-    for (i = 0; i<otherInformation->num_elements; i++)
-    {
-	assert (otherInformation->list[i]);
-	if (!oid)
-	{
-	    if (!otherInformation->list[i]->category)
-		return otherInformation->list[i];
-	}
-	else
-	{
-	    if (otherInformation->list[i]->category &&
-		categoryValue ==
-		*otherInformation->list[i]->category->categoryValue &&
-		!oid_oidcmp (oid, otherInformation->list[i]->category->
-			     categoryTypeId))
-		return otherInformation->list[i];
-	}
-    }
-    otherInformation->list[i] = (Z_OtherInformationUnit*)
-	odr_malloc (odr_encode(), sizeof(Z_OtherInformationUnit));
-    if (oid)
-    {
-	otherInformation->list[i]->category = (Z_InfoCategory*)
-	    odr_malloc (odr_encode(), sizeof(Z_InfoCategory));
-	otherInformation->list[i]->category->categoryTypeId = (int*)
-	    odr_oiddup (odr_encode(), oid);
-	otherInformation->list[i]->category->categoryValue = (int*)
-	    odr_malloc (odr_encode(), sizeof(int));
-	*otherInformation->list[i]->category->categoryValue =
-	    categoryValue;
-    }
-    else
-	otherInformation->list[i]->category = 0;
-    otherInformation->list[i]->which = Z_OtherInfo_characterInfo;
-    otherInformation->list[i]->information.characterInfo = 0;
-    
-    otherInformation->num_elements = i+1;
-    return otherInformation->list[i];
 }
 
 void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
@@ -258,8 +223,6 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
     if (!req->query)
 	return -1;
     get_databaseNames (&req->num_databaseNames, &req->databaseNames);
-    for (int i = 0; i<req->num_databaseNames; i++)
-	logf (LOG_LOG, "Database %s", req->databaseNames[i]);
     int oid_syntax[OID_SIZE];
     oident prefsyn;
     get_preferredRecordSyntax(&recordSyntax);
@@ -272,6 +235,9 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
 	req->preferredRecordSyntax = oid_syntax;
     }
     logf (LOG_LOG, "send_searchRequest");
+    assert (req->otherInfo == 0);
+    if (m_cookie)
+	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);
 }
 
@@ -304,6 +270,8 @@ int Yaz_IR_Assoc::send_presentRequest(int start, int number)
         compo.which = Z_RecordComp_simple;
         compo.u.simple = elementSetNames;
     }
+    if (m_cookie)
+	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);
 }
 
@@ -312,6 +280,18 @@ void Yaz_IR_Assoc::set_proxy(const char *str)
     delete m_proxy;
     m_proxy = new char[strlen(str)+1];
     strcpy (m_proxy, str);
+}
+
+void Yaz_IR_Assoc::set_cookie(const char *str)
+{
+    delete m_cookie;
+    m_cookie = new char[strlen(str)+1];
+    strcpy(m_cookie, str);
+}
+
+const char *Yaz_IR_Assoc::get_cookie()
+{
+    return m_cookie;
 }
 
 void Yaz_IR_Assoc::client(const char *addr)
@@ -384,7 +364,6 @@ void Yaz_IR_Assoc::set_lastReceived(int lastReceived)
 
 int Yaz_IR_Assoc::send_initRequest()
 {
-
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
     
@@ -402,16 +381,9 @@ int Yaz_IR_Assoc::send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
     if (m_proxy && m_host)
-    {
-	int oid[OID_SIZE];
-	struct oident ent;
-	ent.proto = PROTO_Z3950;
-	ent.oclass = CLASS_USERINFO;
-	ent.value = VAL_PROXY;
-	oid_ent_to_oid (&ent, oid);
-	logf (LOG_LOG, "proxy host %s", m_host);
-	set_otherInformationString(&req->otherInfo, oid, 1, m_host);
-    }
+	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+    if (m_cookie)
+	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);
 }
 

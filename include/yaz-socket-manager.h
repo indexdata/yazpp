@@ -3,16 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Log: yaz-socket-manager.h,v $
- * Revision 1.3  1999-03-23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
- * Revision 1.2  1999/02/02 14:01:16  adam
- * First WIN32 port of YAZ++.
- *
- * Revision 1.1.1.1  1999/01/28 09:41:07  adam
- * First implementation of YAZ++.
- *
+ * $Id: yaz-socket-manager.h,v 1.4 1999-04-20 10:30:05 adam Exp $
  */
 
 #include <yaz-socket-observer.h>

@@ -3,10 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Log: yaz-ir-assoc.h,v $
- * Revision 1.5  1999-04-09 11:47:23  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
+ * $Id: yaz-ir-assoc.h,v 1.6 1999-04-20 10:30:05 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -49,17 +46,20 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
     void set_lastReceived(int lastReceived);
 
     /// OtherInformation
-    Z_OtherInformationUnit *set_otherInformation(
-	Z_OtherInformation **otherInformationP, int *oid,
-	int categoryValue);
     void set_otherInformationString (Z_OtherInformation **otherInformationP,
 				     int *oid, int categoryValue,
 				     const char *str);
-
+    void set_otherInformationString (
+	Z_OtherInformation **otherInformation,
+	int oidval, int categoryValue,
+	const char *str);
     /// Settings
     void set_proxy(const char *str);
     const char *get_proxy();
     const char *get_host();
+
+    void set_cookie(const char *str);
+    const char *get_cookie();
 
     /// Send Services
     int send_initRequest();
@@ -75,6 +75,7 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
  private:
     char *m_proxy;
     char *m_host;
+    char *m_cookie;
     int m_num_databaseNames;
     char **m_databaseNames;
     int m_preferredRecordSyntax;

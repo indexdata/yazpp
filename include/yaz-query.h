@@ -3,10 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Log: yaz-query.h,v $
- * Revision 1.1  1999-03-23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
+ * $Id: yaz-query.h,v 1.2 1999-04-20 10:30:05 adam Exp $
  */
 
 

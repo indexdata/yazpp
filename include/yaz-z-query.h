@@ -3,13 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Log: yaz-z-query.h,v $
- * Revision 1.2  1999-04-09 11:47:23  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
- * Revision 1.1  1999/03/23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
+ * $Id: yaz-z-query.h,v 1.3 1999-04-20 10:30:05 adam Exp $
  */
 
 #include <proto.h>

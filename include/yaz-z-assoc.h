@@ -3,10 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Log: yaz-z-assoc.h,v $
- * Revision 1.1  1999-04-09 11:47:23  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
+ * $Id: yaz-z-assoc.h,v 1.2 1999-04-20 10:30:05 adam Exp $
  */
 
 #include <proto.h>
@@ -49,6 +46,12 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     Z_APDU *create_Z_PDU(int type);
     /// Request Alloc
     ODR odr_encode ();
+    ODR odr_decode ();
+    ODR odr_print ();
+    /// OtherInformation
+    Z_OtherInformationUnit *update_otherInformation (
+	Z_OtherInformation **otherInformationP, int createFlag,
+	int *oid, int categoryValue);
  private:
     static int yaz_init_flag;
     static int yaz_init_func();

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.2  1999-04-09 11:46:57  adam
+ * Revision 1.3  1999-04-20 10:30:05  adam
+ * Implemented various stuff for client and proxy. Updated calls
+ * to ODR to reflect new name parameter.
+ *
+ * Revision 1.2  1999/04/09 11:46:57  adam
  * Added object Yaz_Z_Assoc. Much more functional client.
  *
  * Revision 1.1  1999/03/23 14:17:57  adam
@@ -30,7 +34,7 @@ int Yaz_Z_Query::set_rpn (const char *rpn)
     query->u.type_1 = p_query_rpn (odr_encode, PROTO_Z3950, rpn);
     if (!query->u.type_1)
 	return -1;
-    if (!z_Query (odr_encode, &query, 0))
+    if (!z_Query (odr_encode, &query, 0, 0))
 	return -1;
     buf = odr_getbuf (odr_encode, &len, 0);
     return len;
@@ -40,7 +44,7 @@ void Yaz_Z_Query::set_Z_Query(Z_Query *z_query)
 {
     buf = 0;
     odr_reset (odr_encode);
-    if (!z_Query (odr_encode, &z_query, 0))
+    if (!z_Query (odr_encode, &z_query, 0, 0))
 	return;
     buf = odr_getbuf (odr_encode, &len, 0);
 }
@@ -57,7 +61,7 @@ Z_Query *Yaz_Z_Query::get_Z_Query ()
     if (!buf)
 	return 0;
     odr_setbuf (odr_decode, buf, len, 0);
-    if (!z_Query(odr_decode, &query, 0))
+    if (!z_Query(odr_decode, &query, 0, 0))
 	return 0;
     return query;
 }
