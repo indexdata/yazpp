@@ -2,13 +2,14 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.30 2004-01-12 22:35:26 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.31 2004-01-30 01:30:30 adam Exp $
  */
 
 #include <signal.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <stdarg.h>
 
 #include <yaz/log.h>
 #include <yaz/options.h>
@@ -131,11 +132,29 @@ static void sighup_handler(int num)
 	static_yaz_proxy->reconfig();
 }
 
+#if HAVE_XSLT
+static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
+{
+    char buf[1024];
+
+    va_list ap;
+    va_start(ap, fmt);
+
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+
+    yaz_log(LOG_WARN, "%s", buf);
+
+    va_end (ap);
+}
+#endif
 
 static void child_run(Yaz_SocketManager *m, int run)
 {
     signal(SIGHUP, sighup_handler);
 
+#if HAVE_XSLT
+    xmlSetGenericErrorFunc(0, proxy_xml_error_handler);
+#endif
     yaz_log(LOG_LOG, "0 proxy run=%d pid=%ld", run, (long) getpid());
     if (pid_fname)
     {

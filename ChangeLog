@@ -1,4 +1,6 @@
 
+Log libxml2/libxslt errors in yaz log.
+
 Update proxy to work with SRW diagnostic code as a URI/string.
 
 Proxy now throws 'unsupported transfer syntax' / 'unsupported ESN' properly.
