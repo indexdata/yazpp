@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.87 2004-01-12 21:02:42 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.88 2004-01-12 22:35:59 adam Exp $
  */
 
 #include <assert.h>
@@ -606,7 +606,8 @@ void Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p)
 		
 		xmlChar *out_buf;
 		int out_len;
-		xmlDocDumpMemory (res, &out_buf, &out_len);
+		xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
+
 		p->records[i]->u.databaseRecord = 
 		    z_ext_record(odr_encode(), VAL_TEXT_XML,
 				 (char*) out_buf, out_len);
