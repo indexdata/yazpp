@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.10 2004-03-30 22:03:56 adam Exp $
+## $Id: Makefile.am,v 1.11 2004-03-30 22:11:12 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -30,7 +30,7 @@ doc_DATA = $(HTMLFILES) yaz++.pdf yaz.css
 
 man_MANS = $(MANFILES)
 
-EXTRA_DIST = $(SUPPORTFILES) $(XMLFILES) yaz++.pdf yaz-proxy.8
+EXTRA_DIST = $(SUPPORTFILES) $(XMLFILES) $(doc_DATA) $(man_MANS)
 
 $(HTMLFILES): $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
