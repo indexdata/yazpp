@@ -3,7 +3,7 @@
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
-    <url>z3950.loc.gov:7090/voyager</url>
+    <url>z3950.loc.gov:7094/voyager</url>
     <keepalive>1</keepalive>
     <limit><!-- limits .. -->
       <bandwidth>200000</bandwidth>

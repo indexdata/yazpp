@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.49 2003-10-03 13:01:42 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.50 2003-10-04 06:44:16 adam Exp $
  */
 
 #include <assert.h>
@@ -171,7 +171,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     if (!m_proxyTarget)
     {
 	const char *proxy_host = get_proxy(oi);
-	if (!proxy_host)
+	if (proxy_host)
 	{
 	    xfree(m_default_target);
 	    m_default_target = xstrdup(proxy_host);

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.2 2003-10-03 13:01:42 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.3 2003-10-04 06:44:16 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -173,6 +173,7 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 }
 #endif
 
+#if HAVE_XML2
 int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
 					     Z_AttributeList *attrs,
 					     char **addinfo)
@@ -241,7 +242,9 @@ int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
     }
     return 0;
 }
+#endif
 
+#if HAVE_XML2
 int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
 					    Z_RPNStructure *q,
 					    char **addinfo)
@@ -266,17 +269,21 @@ int Yaz_ProxyConfig::check_type_1_structure(ODR odr, xmlNodePtr ptr,
     }
     return 0;
 }
+#endif
 
+#if HAVE_XML2
 int Yaz_ProxyConfig::check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
 				  char **addinfo)
 {
     // possibly check for Bib-1
     return check_type_1_structure(odr, ptr, query->RPNStructure, addinfo);
 }
+#endif
 
 int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 				 char **addinfo)
 {
+#if HAVE_XML2
     xmlNodePtr ptr;
     
     ptr = find_target_node(name);
@@ -285,9 +292,11 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 	if (query->which == Z_Query_type_1 || query->which == Z_Query_type_101)
 	    return check_type_1(odr, ptr, query->u.type_1, addinfo);
     }
+#endif
     return 0;
 }
 
+#if HAVE_XML2
 xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 {
     xmlNodePtr ptr;
@@ -333,7 +342,7 @@ xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
     }
     return 0;
 }
-
+#endif
 
 void Yaz_ProxyConfig::get_target_info(const char *name,
 				      const char **url,
