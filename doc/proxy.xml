@@ -1,38 +1,149 @@
 <chapter id="proxy">
-  <!-- $Id: proxy.xml,v 1.5 2002-10-22 21:21:54 adam Exp $ -->
- <title>YAZ Proxy</title>
+ <title>The YAZ Proxy</title>
   <para>
-   The YAZ proxy is a transparent Z39.50 to Z39.50 gateway.
-   It is useful for debugging Z39.50 software, redirect
-   Z39.50 packages through fire walls, etc.
+   The YAZ proxy is a transparent Z39.50-to-Z39.50 gateway.  That is,
+   it is a Z39.50 server which has as its back-end a Z39.50 client
+   that forwards requests on to another server (known as the
+   <firstterm>backend target</firstterm>.)
   </para>
   <para>
-   Furthermore, the proxy offers facilities that often boost
-   performance for stateless Z39.50 clients such as web gateways.
+   The YAZ Proxy is useful for debugging Z39.50 software, logging
+   APDUs, redirecting Z39.50 packages through firewalls, etc.
+   Furthermore, it offers facilities that often
+   boost performance for connectionless Z39.50 clients such
+   as web gateways.
   </para>
   <para>
-   Unlike most other "server" software the proxy runs single-threaded,
+   Unlike most other server software, the proxy runs single-threaded,
    single-process. Every I/O operation
-   is non-blocking so it is light-weight and very fast.
-   It does not store state information on the hard drive
-   except the log files you want.
+   is non-blocking so it is very lightweight and extremely fast.
+   It does not store any state information on the hard drive,
+   except any log files you ask for.
   </para>
-  <section id="proxy-target">
-   <title>Specifying the backend target</title>
+
+  <section id="proxy-example">
+   <title>Example: Using the Proxy to Log APDUs</title>
    <para>
-    When a Z39.50 client session is accepted by the proxy, the proxy
+    Suppose you use a commercial Z39.50 client for which you do not
+    have source code, and it's not behaving how you think it should
+    when running against some specific server that you have no control
+    over.  One way to diagnose the problem is to find out what packets
+    (APDUs) are being sent and received, but not all client
+    applications have facilities to do APDU logging.
+   </para>
+   <para>
+    No problem.  Run the proxy on a friendly machine, get it to log
+    APDUs, and point the errant client at the proxy instead of
+    directly at the server that's causing it problems.
+   </para>
+   <para>
+    Suppose the server is running on <literal>foo.bar.com</literal>,
+    port 18398.  Run the proxy on the machine of your choice, say
+    <literal>your.company.com</literal> like this:
+   </para>
+   <screen>
+    yaz-proxy -a - -t tcp:foo.bar.com:18398 tcp:@:9000
+   </screen>
+   <para>
+    (The <literal>-a -</literal> option requests APDU logging on
+    standard output, <literal>-t tcp:foo.bar.com:18398</literal>
+    specifies where the backend target is, and
+    <literal>tcp:@:9000</literal> tells the proxy to listen on port
+    9000 and accept connections from any machine.)
+   </para>
+   <para>
+    Now change your client application's configuration so that instead
+    of connecting to <literal>foo.bar.com</literal> port 18398, it
+    connects to <literal>your.company.com</literal> port 9000, and
+    start it up.  It will work exactly as usual, but all the packets
+    will be sent via the proxy, which will generate a log like this:
+   </para>
+   <screen>
+    decode choice
+    initRequest {
+        referenceId OCTETSTRING(len=4) 69 6E 69 74
+        protocolVersion BITSTRING(len=1)
+        options BITSTRING(len=2)
+        preferredMessageSize 1048576
+        maximumRecordSize 1048576
+        implementationId 'Mike Taylor (id=169)'
+        implementationName 'Net::Z3950.pm (Perl)'
+        implementationVersion '0.31'
+    }
+    encode choice
+    initResponse {
+        referenceId OCTETSTRING(len=4) 69 6E 69 74
+        protocolVersion BITSTRING(len=1)
+        options BITSTRING(len=2)
+        preferredMessageSize 1048576
+        maximumRecordSize 1048576
+        result TRUE
+        implementationId '81'
+        implementationName 'GFS/YAZ / Zebra Information Server'
+        implementationVersion 'YAZ 1.9.1 / Zebra 1.3.3'
+    }
+    decode choice
+    searchRequest {
+        referenceId OCTETSTRING(len=1) 30
+        smallSetUpperBound 0
+        largeSetLowerBound 1
+        mediumSetPresentNumber 0
+        replaceIndicator TRUE
+        resultSetName 'default'
+        databaseNames {
+            'gils'
+        }
+        {
+            smallSetElementSetNames choice
+            generic 'F'
+        }
+        {
+            mediumSetElementSetNames choice
+            generic 'B'
+        }
+        preferredRecordSyntax OID: 1 2 840 10003 5 10
+        {
+            query choice
+            type_1 {
+                attributeSetId OID: 1 2 840 10003 3 1
+                RPNStructure choice
+                {
+                    simple choice
+                    attributesPlusTerm {
+                        attributes {
+                        }
+                        term choice
+                        general OCTETSTRING(len=7) 6D 69 6E 65 72 61 6C
+                    }
+                }
+            }
+        }
+    }
+   </screen>
+  </section>
+
+  <section id="proxy-target">
+   <title>Specifying the Backend Target</title>
+   <para>
+    When the proxy accepts a Z39.50 client session, it
     determines the backend target by the following rules:
     <orderedlist>
      <listitem>
-      <para> If the Initialize Request PDU from the client
-       includes Other-Information, with OID 
-       <literal>1.2.840.10003.10.1000.81.1</literal>, that
-       specifies the target.
+      <para> If the <literal>InitializeRequest</literal> PDU from the
+       client includes an <literal>otherInfo</literal> element with OID
+       <literal>1.2.840.10003.10.1000.81.1</literal>, then the
+       contents of that element specify the target to be used, in the
+       usual YAZ address format (typically
+       <literal>tcp:<parameter>hostname</parameter>:<parameter>port</parameter></literal>)
+       as described in
+       <ulink url="http://www.indexdata.dk/yaz/doc/comstack.addresses.php"
+	>the Addresses section of the YAZ manual</ulink>.
       </para>
      </listitem>
      <listitem>
-      <para> Otherwise, the Proxy uses the default target if given.
-       (option <literal>-t</literal>).
+      <para> Otherwise, the Proxy uses the default target, if one was
+       specified on the command-line with the <literal>-t</literal>
+       option.
       </para>
      </listitem>
      <listitem>
@@ -44,58 +155,68 @@
    </para>
   </section>
   <section id="proxy-keepalive">
-   <title>Keep-alive facility for Stateless clients</title>
+   <title>Keep-alive Facility for Stateless Clients</title>
    <para>
-    Stateless clients may generate a cookie for a Z39.50
+    Stateless clients such as web gateways may generate a cookie for a Z39.50
     session which is sent to the proxy as part of PDUs. 
-    In this case, the proxy will keep the Z39.50 session alive
-    to the backend target even the connection from the client
+    In this case, the proxy will keep alive its Z39.50 session
+    to the backend target even when the connection from the client
     to the proxy is closed. When the client contacts the
-    proxy again it will re-issue the cookie and reuse the
-    Z39.50 connection with the backend target. Note that there is not
-    guarantee that the Z39.50 is kept forever to the backend
-    target, since the proxy will shut it down after certain
-    idle time. So in effect, the connection from the client's
-    point of view should be considered stateless.
+    proxy again, and re-issues the same cookie, the proxy reuses the
+    Z39.50 connection with the backend target.
    </para>
    <para>
-    As for the target specification, the Other-Information
-    area is used to hold the cookie with OID 
-    <literal>1.2.840.10003.10.1000.81.2</literal>.
+    There is no
+    guarantee that the Z39.50 connection to the backend
+    target is kept forever: the proxy will shut it down after certain
+    idle time.
+    <!-- ### How long?  Wot no command-line option? -->
+    So in effect, the connection from the client's
+    point of view should be considered stateless, and the keep-alive
+    facility should be treated only as a performance booster.
+   </para>
+   <para>
+    Cookies may be passed in an <literal>otherInfo</literal> element
+    with OID <literal>1.2.840.10003.10.1000.81.2</literal>.
    </para>
   </section>
 
   <section id="proxy-cache">
    <title>Query Caching</title>
    <para>
-    Simple stateless clients often sends identical Z39.50 searches
-    in a relatively short period of time (full-list, next-page,
-    single full-record, etc). And for many targets, it's
-    much more expensive to produce a new result set than
-    reuse and existing one.
+    Simple stateless clients often send identical Z39.50 searches
+    in a relatively short period of time (e.g. in order to produce a
+    results-list page, the next page,
+    a single full-record, etc). And for many targets, it's
+    much more expensive to produce a new result set than to
+    reuse an existing one.
    </para>
    <para>
-    The proxy tries to solve that by storing the last query for each
-    backend target. So when an identical query is received that
+    The proxy tries to solve that by remembering the last query for each
+    backend target, so that if an identical query is received next, it
     is turned into Present Requests rather than new Search Requests.
    </para>
+   <!-- ### should be generalised to an arbitrary-sized cache -->
    <para>
     This optimization should work for any Z39.50 client and/or
     target. The target does not have to support named result sets.
    </para>
-
+   <!-- ### There should be an option to turn this off, as it will
+	    affect semantics for some searches on some databases:
+	    e.g. "ten most recent stories" in a newswire database.
+   -->
   </section>
 
   <section id="proxy-optimizations">
-   <title>Other optimizations</title>
+   <title>Other Optimizations</title>
    <para>
     We've had some plans to support caching of result set records,
-    but this had not yet been implemented.
+    but this has not yet been implemented.
    </para>
   </section>
 
   <section id="proxy-usage">
-   <title>Proxy usage</title>
+   <title>Proxy Usage</title>
    <para>
    </para>
    <refentry id="yaz-proxy">
@@ -105,12 +226,12 @@
     </refmeta>
     <refnamediv>
      <refname>yaz-proxy</refname>
-     <refpurpose>Z39.50 proxy</refpurpose>
+     <refpurpose>The YAZ toolkit's transparent Z39.50 proxy</refpurpose>
     </refnamediv>
     <refsynopsisdiv>
      <cmdsynopsis>
       <command>yaz-proxy</command>
-      <arg choice="opt">-a <replaceable>fname</replaceable></arg>
+      <arg choice="opt">-a <replaceable>filename</replaceable></arg>
       <arg choice="opt">-c <replaceable>num</replaceable></arg>
       <arg choice="opt">-v <replaceable>level</replaceable></arg>
       <arg choice="opt">-t <replaceable>target</replaceable></arg>
@@ -122,39 +243,49 @@
     
     <refsect1><title>DESCRIPTION</title>
      <para>
-      The proxy is a daemon on its own and runs stand-alone (no
-      inetd support). The host:port specifies host address and
-      listening port respectively. Use <literal>@</literal>
-      for ANY address.
+      The proxy runs stand-alone (not from
+      <literal>inetd</literal>). The
+      <replaceable>host</replaceable>:<replaceable>port</replaceable>
+      argument specifies host address to listen to, and the port to
+      listen on.  Use the host <literal>@</literal>
+      to listen for connections coming from any address.
      </para>
     </refsect1>
     <refsect1><title>OPTIONS</title>
      <variablelist>
-      <varlistentry><term>-a <replaceable>fname</replaceable></term>
+      <varlistentry><term>-a <replaceable>filename</replaceable></term>
        <listitem><para>
-         APDU log.
+         Specifies the name of a file to which to write a log of the
+	 APDUs (protocol packets) that pass through the proxy.  The
+	 special filename <literal>-</literal> may be used to indicate
+	 standard output.
         </para></listitem>
       </varlistentry>
       <varlistentry><term>-c <replaceable>num</replaceable></term>
        <listitem><para>
-         Specifies maximum number of connections to be cached.
+         Specifies the maximum number of connections to be cached
+	 [default 50].
         </para></listitem>
       </varlistentry>
       <varlistentry><term>-v <replaceable>level</replaceable></term>
        <listitem><para>
-         Debug level (like YAZ).
+         Sets the logging level.  <replaceable>level</replaceable> is
+	 a comma-separated list of members of the set
+	 {<literal>fatal</literal>,<literal>debug</literal>,<literal>warn</literal>,<literal>log</literal>,<literal>malloc</literal>,<literal>all</literal>,<literal>none</literal>}.
         </para></listitem>
       </varlistentry>
       <varlistentry><term>-t <replaceable>target</replaceable></term>
        <listitem><para>
-         Default target.
+         Specifies the default backend target to use when a client
+	 connects that does not explicitly specify a target in its
+	 <literal>initRequest</literal>.
         </para></listitem>
       </varlistentry>
-      <varlistentry><term>-t <replaceable>target</replaceable></term>
+      <varlistentry><term>-u <replaceable>auth</replaceable></term>
        <listitem><para>
-         Authentication info sent to the backend target.
-         Useful if you happen to have an internal target that does
-         require authentication or if the client software does not allow
+         Specifies authentication info to be sent to the backend target.
+         This is useful if you happen to have an internal target that
+         requires authentication, or if the client software does not allow
          you to set it.
         </para></listitem>
       </varlistentry>
@@ -171,50 +302,58 @@
     <refsect1>
      <title>EXAMPLES</title>
      <para>
-      The following starts the proxy so that it listens on port
-      9000. The default backend target is the LOC target.
-      <screen>
-       $ yaz-proxy -t z3950.loc.gov:7090 @:9000
-      </screen>
-      This target is sometimes very slow. You can connect to
+      The following command starts the proxy, listening on port
+      9000, with its default backend target set to the Library of
+      Congress bibliographic server:
+     </para>
+     <screen>
+      $ yaz-proxy -t z3950.loc.gov:7090 @:9000
+     </screen>
+     <para>
+      The LOC target is sometimes very slow.  You can connect to
       it using yaz-client as follows:
-      <screen>
-$ yaz-client localhost:9000/voyager
-Connecting...Ok.
-Sent initrequest.
-Connection accepted by target.
-ID     : 34
-Name   : Voyager LMS - Z39.50 Server
-Version: 1.13
-Options: search present
-Elapsed: 7.131197
-Z> f computer
-Sent searchRequest.
-Received SearchResponse.
-Search was a success.
-Number of hits: 10000
-records returned: 0
-Elapsed: 6.695174
-Z> f computer
-Sent searchRequest.
-Received SearchResponse.
-Search was a success.
-Number of hits: 10000
-records returned: 0
-Elapsed: 0.001417
-       </screen>
+     </para>
+     <screen>
+      $ yaz-client localhost:9000/voyager
+      Connecting...Ok.
+      Sent initrequest.
+      Connection accepted by target.
+      ID     : 34
+      Name   : Voyager LMS - Z39.50 Server
+      Version: 1.13
+      Options: search present
+      Elapsed: 7.131197
+      Z> f computer
+      Sent searchRequest.
+      Received SearchResponse.
+      Search was a success.
+      Number of hits: 10000
+      records returned: 0
+      Elapsed: 6.695174
+      Z> f computer
+      Sent searchRequest.
+      Received SearchResponse.
+      Search was a success.
+      Number of hits: 10000
+      records returned: 0
+      Elapsed: 0.001417
+     </screen>
+     <para>
       In this test, the second search was more than 4000 times faster
-      than the first.
+      than the first, because the proxy cached the result of the first
+      search and noticed that the second was the same.
      </para>
      <para>
-      The YAZ client allows you to set the backend target in
-      the Initialize Request using option -p. To connect to
-      Index Data's target through a proxy on localhost, port 9000,
-      you could use:
-      <screen>
-       yaz-client -p indexdata.dk localhost:9000/gils
-      </screen>
+      The YAZ command-line client,
+      <literal>yaz-client</literal>,
+      allows you to set the backend target in
+      the <literal>initRequest</literal> using the
+      <literal>-p</literal> option. For example, to connect to
+      Index Data's target you could use:
      </para>
+     <screen>
+      yaz-client -p indexdata.dk localhost:9000/gils
+     </screen>
     </refsect1>
    </refentry>
   </section>

@@ -6,7 +6,7 @@
      <!ENTITY chap-zoom SYSTEM "zoom.xml">
      <!ENTITY chap-proxy SYSTEM "proxy.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.1 2002-10-08 11:55:57 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.2 2002-10-22 23:12:49 mike Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++</title>
@@ -17,8 +17,15 @@
    <holder>Index Data</holder>
    <holder>Mike Taylor</holder>
   </copyright>
-  <abstract><simpara>
-    Short introduction.
+  <abstract>
+   <simpara>
+    YAZ++ is a set of libraries and header files that make it easier
+    to use the popular C-language
+    <ulink url="http://www.indexdata.dk/yaz/">YAZ toolkit</ulink>
+    from C++, together with some utilities written using these
+    libraries.  It includes an implementation of the C++ binding for
+    ZOOM (<link linkend="zoom">ZOOM-C++</link>) and a powerful,
+    general-purpose Z39.50 <link linkend="proxy">proxy</link>.
    </simpara>
   </abstract>
  </bookinfo>
