@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.32 2002-08-28 13:01:41 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.33 2002-09-10 11:30:54 adam Exp $
  */
 
 #include <assert.h>
@@ -303,7 +303,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    return new_apdu;
 	}
 	else if (m_client->m_last_resultCount >= *sr->largeSetLowerBound ||
-	    m_client->m_last_resultCount == 0)
+	    m_client->m_last_resultCount <= 0)
 	{
             // large set. Return pseudo-search response immediately
 	    yaz_log (LOG_LOG, "Optimizing search for large set");
