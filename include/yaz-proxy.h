@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-proxy.h,v 1.10 2000-07-04 13:48:49 adam Exp $
+ * $Id: yaz-proxy.h,v 1.11 2000-08-07 14:19:59 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -50,6 +50,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_max_clients;
     int m_keepalive;
     char *m_proxyTarget;
+    char *m_APDU_fname;
+    long m_seed;
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

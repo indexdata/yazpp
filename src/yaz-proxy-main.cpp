@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.8  2000-07-04 13:48:49  adam
+ * Revision 1.9  2000-08-07 14:19:59  adam
+ * Fixed serious bug regarding timeouts. Improved logging for proxy.
+ *
+ * Revision 1.8  2000/07/04 13:48:49  adam
  * Implemented upper-limit on proxy-to-target sessions.
  *
  * Revision 1.7  1999/12/06 13:52:45  adam
@@ -42,7 +45,7 @@
 
 void usage(char *prog)
 {
-    fprintf (stderr, "%s: [-c num] [-v log] [-t target] @:port\n", prog);
+    fprintf (stderr, "%s: [-a log] [-c num] [-v level] [-t target] @:port\n", prog);
     exit (1);
 }
 
@@ -54,7 +57,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("t:v:c:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:t:v:c:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -66,6 +69,9 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    }
 	    addr = arg;
             break;
+	case 'a':
+	    proxy->set_APDU_log(arg);
+	    break;
         case 't':
 	    proxy->set_proxyTarget(arg);
 	    break;

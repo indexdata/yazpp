@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.8  1999-12-06 13:52:45  adam
+ * Revision 1.9  2000-08-07 14:19:59  adam
+ * Fixed serious bug regarding timeouts. Improved logging for proxy.
+ *
+ * Revision 1.8  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -206,9 +209,12 @@ int Yaz_SocketManager::processEvent()
 	    event->event = mask;
 	    putEvent (event);
 	}
-	else if (p->timeout && now >= p->last_activity + (int) (p->timeout))
+	else if (p->timeout && p->last_activity && 
+		 now >= p->last_activity + (int) (p->timeout))
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
+	    logf (LOG_LOG, "timeout now = %ld last_activity=%ld timeout=%d",
+		  now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;
 	    event->event = YAZ_SOCKET_OBSERVE_TIMEOUT;

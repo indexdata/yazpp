@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.7  2000-05-10 11:36:58  ian
+ * Revision 1.8  2000-08-07 14:19:59  adam
+ * Fixed serious bug regarding timeouts. Improved logging for proxy.
+ *
+ * Revision 1.7  2000/05/10 11:36:58  ian
  * Added default parameters for refid to request functions.
  * Added default parameter for result set name to search and present request.
  * Commented out forced logging of PDU contents.
@@ -55,6 +58,37 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_odr_out = odr_createmem (ODR_ENCODE);
     m_odr_print = odr_createmem (ODR_PRINT);
     m_log = LOG_DEBUG;
+    m_APDU_file = 0;
+    m_APDU_fname = 0;
+    m_hostname = 0;
+}
+
+void Yaz_Z_Assoc::set_APDU_log(const char *fname)
+{
+    if (m_APDU_file && m_APDU_file != stderr)
+	fclose (m_APDU_file);
+    m_APDU_file = 0;
+    delete [] m_APDU_fname;
+    m_APDU_fname = 0;
+
+    if (fname)
+    {
+	m_APDU_fname = new char[strlen(fname)+1];
+	strcpy (m_APDU_fname, fname);
+    }
+    if (fname)
+    {
+	if (*fname)
+	    m_APDU_file = fopen (fname, "a");
+	else
+	    m_APDU_file = stderr;
+	odr_setprint(m_odr_print, m_APDU_file);
+    }
+}
+
+const char *Yaz_Z_Assoc::get_APDU_log()
+{
+    return m_APDU_fname;
 }
 
 Yaz_Z_Assoc::~Yaz_Z_Assoc()
@@ -64,6 +98,10 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
     odr_destroy (m_odr_print);
     odr_destroy (m_odr_out);
     odr_destroy (m_odr_in);
+    delete [] m_APDU_fname;
+    if (m_APDU_file && m_APDU_file != stderr)
+	fclose (m_APDU_file);
+    delete [] m_hostname;
 }
 
 void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
@@ -117,7 +155,8 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     }
     else
     {
-	// z_APDU(m_odr_print, &apdu, 0, "decode");
+	if (m_APDU_file)
+	    z_APDU(m_odr_print, &apdu, 0, "decode");
         return apdu;
     }
 }
@@ -129,14 +168,23 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
-    // z_APDU(m_odr_print, &apdu, 0, "encode");
+    if (m_APDU_file)
+	z_APDU(m_odr_print, &apdu, 0, "encode");
     *buf = odr_getbuf (m_odr_out, len, 0);
     odr_reset (m_odr_out);
     return *len;
 }
 
+const char *Yaz_Z_Assoc::get_hostname()
+{
+    return m_hostname;
+}
+
 void Yaz_Z_Assoc::client(const char *addr)
 {
+    delete [] m_hostname;
+    m_hostname = new char[strlen(addr)+1];
+    strcpy (m_hostname, addr);
     m_PDU_Observable->connect (this, addr);
 }
 
@@ -147,6 +195,9 @@ void Yaz_Z_Assoc::close()
 
 void Yaz_Z_Assoc::server(const char *addr)
 {
+    delete [] m_hostname;
+    m_hostname = new char[strlen(addr)+1];
+    strcpy (m_hostname, addr);
     m_PDU_Observable->listen (this, addr);
 }
 
@@ -168,7 +219,6 @@ void Yaz_Z_Assoc::timeout(int timeout)
 {
     m_PDU_Observable->idleTime(timeout);
 }
-
 
 void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 {

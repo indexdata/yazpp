@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-assoc.h,v 1.6 2000-05-10 11:36:58 ian Exp $
+ * $Id: yaz-z-assoc.h,v 1.7 2000-08-07 14:19:59 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -51,6 +51,9 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     ODR odr_decode ();
     ODR odr_print ();
 
+    void set_APDU_log(const char *fname);
+    const char *get_APDU_log();
+
     /// OtherInformation
     void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
     Z_OtherInformationUnit *update_otherInformation (
@@ -68,9 +71,10 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
 	Z_APDU *apdu,
 	int oidval, int categoryValue,
 	const char *str);
-    void set_apdu_log(const char *file);
 
     Z_ReferenceId* getRefID(char* str);
+
+    const char *get_hostname();
 
  private:
     static int yaz_init_flag;
@@ -80,4 +84,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     ODR m_odr_out;
     ODR m_odr_print;
     int m_log;
+    FILE *m_APDU_file;
+    char *m_APDU_fname;
+    char *m_hostname;
 };
