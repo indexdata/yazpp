@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.10  2000-08-10 08:42:42  adam
+ * Revision 1.11  2000-09-04 08:29:22  adam
+ * Fixed memory leak(s). Added re-use of associations, rather than
+ * re-init, when maximum number of targets are in use.
+ *
+ * Revision 1.10  2000/08/10 08:42:42  adam
  * Fixes for {set,get}_APDU_log.
  *
  * Revision 1.9  1999/12/06 13:52:45  adam
@@ -117,7 +121,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		return;
 	    if (res < 0)
 	    {
-		logf(LOG_FATAL, "cs_listen failed");
+		logf(LOG_FATAL|LOG_ERRNO, "cs_listen failed");
 		return;
 	    }
 	    if (!(new_line = cs_accept(m_cs)))
@@ -197,7 +201,7 @@ void Yaz_PDU_Assoc::close()
 	m_queue_out = m_queue_out->m_next;
 	delete q_this;
     }
-//   free (m_input_buf);
+    xfree (m_input_buf);
     m_input_buf = 0;
     m_input_len = 0;
 }

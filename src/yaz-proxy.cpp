@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.15  2000-08-31 14:41:55  adam
+ * Revision 1.16  2000-09-04 08:29:22  adam
+ * Fixed memory leak(s). Added re-use of associations, rather than
+ * re-init, when maximum number of targets are in use.
+ *
+ * Revision 1.15  2000/08/31 14:41:55  adam
  * Proxy no longer generates cookies (it's up to the client). Proxy
  * re-opens if target new op is started before previous operation finishes.
  *
@@ -162,8 +166,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
-	    logf (LOG_LOG, " found client cookie = %s target=%s",
-		  c->m_cookie, c->get_hostname());
+	    logf (LOG_LOG, " found client cookie = %s target=%s seqno=%d",
+		  c->m_cookie, c->get_hostname(), c->m_seqno);
 	    assert (c->m_prev);
 	    assert (*c->m_prev == c);
 	    if (!strcmp(cookie,c->m_cookie) &&
@@ -175,8 +179,12 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	}
 	if (cc)
 	{
+	    // found it in cache
 	    c = cc;
-	    if (c->m_waiting)
+	    // The following handles "cancel"
+	    // If connection is busy (waiting for PDU) and
+	    // we have an initRequest we can safely do re-open
+	    if (c->m_waiting && apdu->which == Z_APDU_initRequest)
 	    {
 		logf (LOG_LOG, "reopen target=%s", c->get_hostname());
 		c->close();
@@ -211,7 +219,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
 	    no_of_clients++;
-	    logf (LOG_LOG, "found seqno = %d", c->m_seqno);
 	    if (min_seq < 0 || c->m_seqno < min_seq)
 	    {
 		min_seq = c->m_seqno;
@@ -221,11 +228,26 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	if (no_of_clients >= parent->m_max_clients)
 	{
 	    c = c_min;
-	    logf (LOG_LOG, "Yaz_Proxy::get_client re-using session %d",
-		  c->m_seqno);
-	    if (c->m_server)
-		delete c->m_server;
-	    c->m_server = 0;
+	    if (c->m_waiting || strcmp(m_proxyTarget, c->get_hostname()))
+	    {
+		logf (LOG_LOG, "Yaz_Proxy::get_client re-init session %d",
+		      c->m_seqno);
+		if (c->m_server)
+		    delete c->m_server;
+		c->m_server = 0;
+	    }
+	    else
+	    {
+		logf (LOG_LOG, "Yaz_Proxy::get_client re-use session %d to %d",
+		      c->m_seqno, parent->m_seqno);
+		if (cookie)
+		    strcpy (c->m_cookie, cookie);
+		else
+		    c->m_cookie[0] = '\0';
+		c->m_seqno = parent->m_seqno;
+		(parent->m_seqno)++;
+		return c;
+	    }
 	}
 	else
 	{
@@ -346,11 +368,6 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
 	return;
     }
     m_client->m_server = this;
-#if 0
-    Z_OtherInformation **oi;
-    get_otherInfoAPDU(apdu, &oi);
-    *oi = 0;
-#endif
 
     if (apdu->which == Z_APDU_initRequest)
     {
@@ -370,6 +387,12 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
 	return;
 
     logf (LOG_LOG, "Yaz_ProxyClient::send_Z_PDU %s", m_client->get_hostname());
+
+    // delete other info part from PDU before sending to target
+    Z_OtherInformation **oi;
+    get_otherInfoAPDU(apdu, &oi);
+    *oi = 0;
+
     if (m_client->send_Z_PDU(apdu) < 0)
     {
 	delete m_client;

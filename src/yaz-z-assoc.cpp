@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.9  2000-08-10 08:42:42  adam
+ * Revision 1.10  2000-09-04 08:29:22  adam
+ * Fixed memory leak(s). Added re-use of associations, rather than
+ * re-init, when maximum number of targets are in use.
+ *
+ * Revision 1.9  2000/08/10 08:42:42  adam
  * Fixes for {set,get}_APDU_log.
  *
  * Revision 1.8  2000/08/07 14:19:59  adam
@@ -80,7 +84,7 @@ void Yaz_Z_Assoc::set_APDU_log(const char *fname)
     {
 	m_APDU_fname = new char[strlen(fname)+1];
 	strcpy (m_APDU_fname, fname);
-	if (*fname)
+	if (*fname && strcmp(fname, "-"))
 	    m_APDU_file = fopen (fname, "a");
 	else
 	    m_APDU_file = stderr;
