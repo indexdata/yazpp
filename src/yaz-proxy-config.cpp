@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.19 2004-01-06 21:17:42 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.20 2004-01-07 11:10:55 adam Exp $
  */
 
 #include <ctype.h>
@@ -345,40 +345,45 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 }
 
 #if HAVE_XSLT
-int Yaz_ProxyConfig::check_esn(xmlNodePtr ptr, Z_RecordComposition *comp)
+int Yaz_ProxyConfig::check_schema(xmlNodePtr ptr, Z_RecordComposition *comp,
+				  const char **found_schema,
+				  const char *schema_identifier)
 {
     char *esn = 0;
     int default_match = 1;
+    *found_schema = schema_identifier;  // may be NULL
     if (comp && comp->which == Z_RecordComp_simple &&
 	comp->u.simple && comp->u.simple->which == Z_ElementSetNames_generic)
     {
 	esn = comp->u.simple->u.generic;
     }
+    // if no ESN/schema was given accept..
     if (!esn)
 	return 1;
+    // check if schema identifier match
+    if (schema_identifier && !strcmp(esn, schema_identifier))
+	return 1;
+    *found_schema = esn;
+    // Check each name element
     for (; ptr; ptr = ptr->next)
     {
-	if (ptr->type == XML_TEXT_NODE)
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "name"))
 	{
+	    xmlNodePtr tptr = ptr->children;
 	    default_match = 0;
-	    xmlChar *t = ptr->content;
-	    while (*t)
-	    {
-		while (*t && isspace(*t))
-		    t++;
-		xmlChar *s = t;
-		int i = 0;
-		while (esn[i] && esn[i] == *s)
+	    for (; tptr; tptr = tptr->next)
+		if (tptr->type == XML_TEXT_NODE && tptr->content)
 		{
-		    i++;
-		    s++;
+		    xmlChar *t = tptr->content;
+		    while (*t && isspace(*t))
+			t++;
+		    int i = 0;
+		    while (esn[i] && esn[i] == t[i])
+			i++;
+		    if (!esn[i] && (!t[i] || isspace(t[i])))
+			return 1;
 		}
-		if (!esn[i] &&  (!*s || isspace(*s)))
-		    return 1;
-		while (*s && !isspace(*s))
-		    s++;
-		t = s;
-	    }
 	}
     }
     return default_match;
@@ -388,12 +393,17 @@ int Yaz_ProxyConfig::check_esn(xmlNodePtr ptr, Z_RecordComposition *comp)
 int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 				  Odr_oid *syntax, Z_RecordComposition *comp,
 				  char **addinfo,
-				  char **stylesheet)
+				  char **stylesheet, char **schema)
 {
     if (stylesheet)
     {
 	xfree (*stylesheet);
 	*stylesheet = 0;
+    }
+    if (schema)
+    {
+	xfree (*schema);
+	*schema = 0;
     }
 #if HAVE_XSLT
     int syntax_has_matched = 0;
@@ -412,6 +422,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	    const char *match_error = 0;
 	    const char *match_marcxml = 0;
 	    const char *match_stylesheet = 0;
+	    const char *match_identifier = 0;
 	    struct _xmlAttr *attr;
 	    for (attr = ptr->properties; attr; attr = attr->next)
 	    {
@@ -427,6 +438,9 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		if (!strcmp((const char *) attr->name, "stylesheet") &&
 		    attr->children && attr->children->type == XML_TEXT_NODE)
 		    match_stylesheet = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "identifier") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_identifier = (const char *) attr->children->content;
 	    }
 	    if (match_type)
 	    {
@@ -445,10 +459,12 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 			match = 1;
 		}
 	    }
+	    const char *match_schema = 0;
 	    if (match)
 	    {
 		syntax_has_matched = 1;
-		match = check_esn(ptr->children, comp);
+		match = check_schema(ptr->children, comp, &match_schema,
+				     match_identifier);
 	    }
 	    if (match)
 	    {
@@ -457,6 +473,14 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		    xfree(*stylesheet);
 		    *stylesheet = xstrdup(match_stylesheet);
 		}
+		if (schema && match_schema)
+		{
+		    yaz_log(LOG_LOG, "Match_schema=%s", match_schema);
+		    xfree(*schema);
+		    *schema = xstrdup(match_schema);
+		}
+		else
+		    yaz_log(LOG_LOG, "NO SCHEMA");
 		if (match_marcxml)
 		{
 		    return -1;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.77 2004-01-06 21:17:42 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.78 2004-01-07 11:10:55 adam Exp $
  */
 
 #include <assert.h>
@@ -107,6 +107,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_config = 0;
     m_marcxml_flag = 0;
     m_stylesheet = 0;
+    m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
     m_apdu_invalid_session = 0;
@@ -135,6 +136,7 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_proxy_authentication);
     xfree (m_optimize);
     xfree (m_stylesheet);
+    xfree (m_schema);
     if (m_s2z_odr_init)
 	odr_destroy(m_s2z_odr_init);
     if (m_s2z_odr_search)
@@ -815,7 +817,7 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records, int start)
 	    oident *ent = oid_getentbyoid(r->direct_reference);
 	    if (r->which == Z_External_octet && ent->value == VAL_TEXT_XML)
 	    {
-		srw_res->records[i].recordSchema = "http://www.loc.gov/marcxml/";
+		srw_res->records[i].recordSchema = m_schema;
 		srw_res->records[i].recordPacking = m_s2z_packing;
 		srw_res->records[i].recordData_buf = (char*) 
 		    r->u.octet_aligned->buf;
@@ -1447,7 +1449,7 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	    err = cfg->check_syntax(odr_encode(),
 				    m_default_target,
 				    sr->preferredRecordSyntax, rc,
-				    &addinfo, &m_stylesheet);
+				    &addinfo, &m_stylesheet, &m_schema);
 	if (err == -1)
 	{
 	    sr->preferredRecordSyntax =
@@ -1479,7 +1481,7 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	    err = cfg->check_syntax(odr_encode(), m_default_target,
 				    pr->preferredRecordSyntax,
 				    pr->recordComposition,
-				    &addinfo, &m_stylesheet);
+				    &addinfo, &m_stylesheet, &m_schema);
 	if (err == -1)
 	{
 	    pr->preferredRecordSyntax =

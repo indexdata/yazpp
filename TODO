@@ -11,9 +11,11 @@ Deal with Z39.50 options properly.
 
 Deal with Z39.50 messages sizes properly.
 
-For SRW/SRU, set schema for each returned record.
-
 Character set conversion for SRW queries.
 
 Throw proper CQL conversion error.
+
+Honor XPath.
+
+Deal with scan, sort (throw diagnostic).
 

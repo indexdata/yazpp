@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.27 2004-01-06 21:17:42 adam Exp $
+ * $Id: proxy.h,v 1.28 2004-01-07 11:10:55 adam Exp $
  */
 
 #include <sys/time.h>
@@ -59,14 +59,15 @@ public:
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
 		     Odr_oid *syntax, Z_RecordComposition *comp,
-		     char **addinfo, char **stylesheet);
+		     char **addinfo, char **stylesheet, char **schema);
     char *get_explain(ODR odr, const char *name, const char *db,
 		      int *len);
 private:
     void operator=(const Yaz_ProxyConfig &conf);
     int mycmp(const char *hay, const char *item, size_t len);
 #if HAVE_XSLT
-    int check_esn(xmlNodePtr ptr, Z_RecordComposition *comp);
+    int check_schema(xmlNodePtr ptr, Z_RecordComposition *comp,
+		     const char **found_schema, const char *schema_identifier);
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,
@@ -238,6 +239,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_invalid_session;
     int m_marcxml_flag;
     char *m_stylesheet;
+    char *m_schema;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
     void convert_xsl(Z_NamePlusRecordList *p);
     Z_APDU *m_initRequest_apdu;
