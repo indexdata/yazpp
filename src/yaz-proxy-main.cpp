@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.12  2000-10-11 11:58:16  adam
+ * Revision 1.13  2001-04-10 10:48:08  adam
+ * Fixed problem where proxy could cash bad result sets.
+ *
+ * Revision 1.12  2000/10/11 11:58:16  adam
  * Moved header files to include/yaz++. Switched to libtool and automake.
  * Configure script creates yaz++-config script.
  *
@@ -115,5 +118,6 @@ int main(int argc, char **argv)
     args(&proxy, argc, argv);
     while (mySocketManager.processEvent() > 0)
 	;
+    exit (0);
     return 0;
 }

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.23  2001-03-26 14:43:49  adam
+ * Revision 1.24  2001-04-10 10:48:08  adam
+ * Fixed problem where proxy could cash bad result sets.
+ *
+ * Revision 1.23  2001/03/26 14:43:49  adam
  * New threaded PDU association.
  *
  * Revision 1.22  2000/11/20 11:27:33  adam
@@ -535,7 +538,17 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
     m_waiting = 0;
     logf (LOG_LOG, "Yaz_ProxyClient::recv_Z_PDU %s", get_hostname());
     if (apdu->which == Z_APDU_searchResponse)
+    {
 	m_last_resultCount = *apdu->u.searchResponse->resultCount;
+	int status = *apdu->u.searchResponse->searchStatus;
+	if (! status || (
+		apdu->u.searchResponse->records &&
+		apdu->u.searchResponse->records->which != Z_Records_DBOSD))
+	{
+	    delete m_last_query;
+	    m_last_query = 0;
+	}
+    }
     if (apdu->which == Z_APDU_presentResponse && m_sr_transform)
     {
 	m_sr_transform = 0;

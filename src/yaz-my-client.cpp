@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.4  2001-04-05 15:12:24  adam
+ * Revision 1.5  2001-04-10 10:48:08  adam
+ * Fixed problem where proxy could cash bad result sets.
+ *
+ * Revision 1.4  2001/04/05 15:12:24  adam
  * WIN32 updates.
  *
  * Revision 1.3  2001/04/05 13:09:44  adam
@@ -496,10 +499,12 @@ void MyClient::recv_searchResponse(Z_SearchResponse *searchResponse)
     if (!*searchResponse->searchStatus)
     {
 	printf ("Fail\n");
-	return;
     }
-    printf ("Ok\n");
-    printf ("Hits: %d\n", *searchResponse->resultCount);
+    else
+    {
+	printf ("Ok\n");
+	printf ("Hits: %d\n", *searchResponse->resultCount);
+    }
     recv_records (searchResponse->records);
 }
 
