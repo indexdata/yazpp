@@ -170,6 +170,10 @@ SOURCE="..\..\src\yaz-z-server-sr.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\src\yaz-z-server-update.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-server-ursula.cpp"
 # End Source File
 # Begin Source File
