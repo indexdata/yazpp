@@ -2,8 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.h,v 1.10 2000-09-12 16:04:17 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.11 2000-09-12 16:40:33 heikki Exp $
  */
+
+#ifndef YAZ_PDU_ASSOC_INCLUDED
+#define YAZ_PDU_ASSOC_INCLUDED
 
 #include <yaz/comstack.h>
 #include <yaz-socket-observer.h>
@@ -66,3 +69,5 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     /// Child start...
     virtual void childNotify(int fd);
 };
+
+#endif

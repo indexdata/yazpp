@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.13  2000-09-08 10:23:42  adam
+ * Revision 1.14  2000-09-12 16:40:33  heikki
+ * minor
+ *
+ * Revision 1.13  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.12  2000/09/05 13:57:28  adam
@@ -64,7 +67,7 @@ int Yaz_Z_Assoc::yaz_init_func()
     return 1;
 }
 
-int Yaz_Z_Assoc::yaz_init_flag = Yaz_Z_Assoc::yaz_init_func();
+int Yaz_Z_Assoc::yaz_init_flag =  Yaz_Z_Assoc::yaz_init_func();  
 
 Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
 {
@@ -88,7 +91,7 @@ void Yaz_Z_Assoc::set_APDU_log(const char *fname)
     delete [] m_APDU_fname;
     m_APDU_fname = 0;
 
-    if (fname)
+    if (fname) 
     {
 	m_APDU_fname = new char[strlen(fname)+1];
 	strcpy (m_APDU_fname, fname);
@@ -107,7 +110,7 @@ const char *Yaz_Z_Assoc::get_APDU_log()
 
 Yaz_Z_Assoc::~Yaz_Z_Assoc()
 {
-    m_PDU_Observable->destroy();
+    m_PDU_Observable->destroy();  
     delete m_PDU_Observable;
     odr_destroy (m_odr_print);     // note: also runs fclose on m_APDU_file ..
     odr_destroy (m_odr_out);

@@ -2,8 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.h,v 1.6 2000-09-08 10:23:42 adam Exp $
+ * $Id: yaz-socket-manager.h,v 1.7 2000-09-12 16:40:33 heikki Exp $
  */
+
+#ifndef YAZ_SOCKET_MANAGER_INCLUDED
+#define YAZ_SOCKET_MANAGER_INCLUDED
 
 #include <yaz-socket-observer.h>
 #include <time.h>
@@ -56,3 +59,5 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
     virtual ~Yaz_SocketManager();
 };
 
+
+#endif
