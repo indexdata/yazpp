@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.78 2004-01-07 11:10:55 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.79 2004-01-07 11:37:45 adam Exp $
  */
 
 #include <assert.h>
@@ -1019,11 +1019,12 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 int Yaz_ProxyClient::send_to_target(Z_APDU *apdu)
 {
     int len = 0;
+    const char *apdu_name_tmp = apdu_name(apdu);
     int r = send_Z_PDU(apdu, &len);
     if (m_root->get_log_mask() & PROXY_LOG_REQ_SERVER)
 	yaz_log (LOG_LOG, "%sSending %s to %s %d bytes",
 		 get_session_str(),
-		 apdu_name(apdu), get_hostname(), len);
+		 apdu_name_tmp, get_hostname(), len);
     m_bytes_sent += len;
     return r;
 }
