@@ -1,3 +1,5 @@
+$Header: /home/cvsroot/yaz++/zoom/Attic/Changes,v 1.3 2002-08-08 16:21:06 mike Exp $
+
 Changes between the current version of the C++ binding specification
 (http://zoom.z3950.org/bind/cplusplus/zoom-1.0g.hh) and the
 specification generated in "interface.h" in this directory (which I
@@ -5,9 +7,9 @@ expect to become version 1.3a of the official specification.)
 
 --
 
-Add #include <stddef.h> for size_t
+Add #include <stddef.h> for size_t.
 
-Add comment about G++'s rejection of throw(ZOOM:exception) clause
+Add comment about G++'s rejection of throw(ZOOM:exception) clause.
 
 Add destructor declaration to connection class.
 
