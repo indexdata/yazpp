@@ -1,6 +1,8 @@
 
 Per database config.
 
+Explain always returned even though database/path is wrong.
+
 Control the various optimizations with config..
 
 Live status (via search, present).
