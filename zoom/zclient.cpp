@@ -1,4 +1,4 @@
-// $Id: zclient.cpp,v 1.5 2002-11-30 22:33:21 mike Exp $
+// $Id: zclient.cpp,v 1.6 2002-12-02 15:57:58 mike Exp $
 
 // Simple sample client
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 2;
 
-    } catch(exception& err) {
+    } catch(ZOOM::exception& err) {
 	cerr << argv[0] << ": exception " <<
 	    err.errmsg() << "\n";
 	return 3;
