@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.7  2001-04-26 12:17:49  heikki
+ * Revision 1.8  2001-04-26 17:30:07  heikki
+ * Ursularequest got more default data
+ *
+ * Revision 1.7  2001/04/26 12:17:49  heikki
  * Ursula stuff, mostly in the test client
  *
  * Revision 1.6  2001/04/17 16:21:21  heikki
@@ -655,31 +658,42 @@ int MyClient::cmd_ursula(char *args)
     
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type = (Odr_oct *)
-	odr_malloc (odr_encode(), sizeof(Odr_oct));
+    	odr_malloc (odr_encode(), sizeof(Odr_oct));
 
     Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
     pdu->which = Z_UrsPDU_request;
     pdu->u.request = (Z_UrsRequest *)
-	odr_malloc (odr_encode(), sizeof(*pdu->u.request));
+    	odr_malloc (odr_encode(), sizeof(*pdu->u.request));
     pdu->u.request->libraryNo = odr_strdup(odr_encode(), "000200");
-    pdu->u.request->borrowerTickerNo = 0;
+    pdu->u.request->borrowerTickerNo = odr_strdup(odr_encode(),"1234567973");
     pdu->u.request->disposalType = 0;
-    pdu->u.request->lastUseDate = 0;
+    pdu->u.request->lastUseDate = odr_strdup(odr_encode(),"20011224");
+#ifdef SKIPTHIS
     pdu->u.request->num_items = 0;
     pdu->u.request->items = (Z_UrsRequestItem **) odr_nullval();
+#else
+    pdu->u.request->num_items = 1;
+    pdu->u.request->items = (Z_UrsRequestItem **) 
+                odr_malloc(odr_encode(), 1 * sizeof(Z_UrsRequestItem*) );
+    pdu->u.request->items[0] = (Z_UrsRequestItem*)
+                odr_malloc(odr_encode(), sizeof(Z_UrsRequestItem) );
+    pdu->u.request->items[0]->id = odr_strdup(odr_encode(),"002231336x");
+    pdu->u.request->items[0]->titlePartNo=odr_strdup(odr_encode(),"31");
+#endif
+    
     pdu->u.request->counter = 0;
     pdu->u.request->priority = 0;
     pdu->u.request->disposalNote = 0;
-    pdu->u.renewal->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
-    pdu->u.request->overrule = 0;
+    pdu->u.request->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
+    *pdu->u.request->overrule = false;
 
     if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
     {
-	yaz_log (LOG_LOG, "ursula encoding failed");
-	return 1;
+        yaz_log (LOG_LOG, "ursula encoding failed");
+        return 1;
     }
     char *buf = 
-	odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
+	    odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
     
     ext->u.single_ASN1_type->buf = (unsigned char*)
 	odr_malloc (odr_encode(), ext->u.single_ASN1_type->len);
@@ -706,18 +720,18 @@ int MyClient::cmd_ursula_renew(char *args)
     
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type = (Odr_oct *)
-	odr_malloc (odr_encode(), sizeof(Odr_oct));
+    	odr_malloc (odr_encode(), sizeof(Odr_oct));
 
     Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
     pdu->which = Z_UrsPDU_renewal;
     pdu->u.renewal = (Z_UrsRenewal *)
 	   odr_malloc (odr_encode(), sizeof(*pdu->u.renewal));
     pdu->u.renewal->libraryNo = odr_strdup(odr_encode(), "000200");
-    pdu->u.renewal->borrowerTicketNo = odr_strdup(odr_encode(),"123456");
+    pdu->u.renewal->borrowerTicketNo = odr_strdup(odr_encode(),"1234567973");
     pdu->u.renewal->num_copies=1;
     pdu->u.renewal->copies = (Z_InternationalString **)
             odr_malloc(odr_encode(),1* sizeof(Z_InternationalString *) );
-    pdu->u.renewal->copies[0]= odr_strdup(odr_encode(), "firstcopy");
+    pdu->u.renewal->copies[0]= odr_strdup(odr_encode(), "000035238");
     pdu->u.renewal->newReturnDate=odr_strdup(odr_encode(), "20011224");
     pdu->u.renewal->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
     *pdu->u.renewal->overrule=false;
