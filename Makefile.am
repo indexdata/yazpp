@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src include zoom etc doc 
+SUBDIRS = src include zlint zoom etc doc 
 
 aclocaldir=$(datadir)/aclocal
 aclocal_DATA = yazpp.m4

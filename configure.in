@@ -101,6 +101,7 @@ AC_OUTPUT([
 	src/Makefile
 	include/Makefile
 	include/yaz++/Makefile
+	zlint/Makefile
 	yaz++-config
 	zoom/Makefile
 	doc/Makefile
