@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-sr.cpp,v $
- * Revision 1.2  2001-04-04 14:02:49  adam
+ * Revision 1.3  2001-04-25 18:59:30  adam
+ * Added referenceId handling for server.
+ *
+ * Revision 1.2  2001/04/04 14:02:49  adam
  * URSULA / Z-ruth service.
  *
  * Revision 1.1  2001/03/27 15:02:14  adam
@@ -227,6 +230,7 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     case Z_APDU_searchRequest:
         yaz_log (LOG_LOG, "got SearchRequest p=%p", this);
 	apdu_response = s->create_Z_PDU(Z_APDU_searchResponse);
+	s->transfer_referenceId(apdu_request, apdu_response);
 	sr_search (apdu_request->u.searchRequest,
 		       apdu_response->u.searchResponse);
 	if (!apdu_response->u.searchResponse->records)
@@ -239,6 +243,7 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     case Z_APDU_presentRequest:
         yaz_log (LOG_LOG, "got PresentRequest p=%p", this);
 	apdu_response = s->create_Z_PDU(Z_APDU_presentResponse);
+	s->transfer_referenceId(apdu_request, apdu_response);
 	sr_present (apdu_request->u.presentRequest,
 		    apdu_response->u.presentResponse);
 	if (!apdu_response->u.presentResponse->records)

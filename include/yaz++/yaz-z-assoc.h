@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.2 2001-04-25 18:59:30 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -74,7 +74,9 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
 	int oidval, int categoryValue,
 	const char *str);
 
-    Z_ReferenceId* getRefID(char* str);
+    Z_ReferenceId *getRefID(char* str);
+    Z_ReferenceId **get_referenceIdP(Z_APDU *apdu);
+    void transfer_referenceId(Z_APDU *from, Z_APDU *to);
 
     const char *get_hostname();
 

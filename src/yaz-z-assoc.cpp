@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.19  2001-03-27 14:47:45  adam
+ * Revision 1.20  2001-04-25 18:59:30  adam
+ * Added referenceId handling for server.
+ *
+ * Revision 1.19  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  * Revision 1.18  2001/03/26 14:43:49  adam
@@ -165,6 +168,75 @@ Z_APDU *Yaz_Z_Assoc::create_Z_PDU(int type)
 	p->implementationName = newName;
     }
     return apdu;
+}
+
+Z_ReferenceId **Yaz_Z_Assoc::get_referenceIdP(Z_APDU *apdu)
+{
+    switch (apdu->which)
+    {
+    case  Z_APDU_initRequest:
+	return &apdu->u.initRequest->referenceId; 
+    case  Z_APDU_initResponse:
+	return &apdu->u.initResponse->referenceId;
+    case  Z_APDU_searchRequest:
+	return &apdu->u.searchRequest->referenceId;
+    case  Z_APDU_searchResponse:
+	return &apdu->u.searchResponse->referenceId;
+    case  Z_APDU_presentRequest:
+	return &apdu->u.presentRequest->referenceId;
+    case  Z_APDU_presentResponse:
+	return &apdu->u.presentResponse->referenceId;
+    case  Z_APDU_deleteResultSetRequest:
+	return &apdu->u.deleteResultSetRequest->referenceId;
+    case  Z_APDU_deleteResultSetResponse:
+	return &apdu->u.deleteResultSetResponse->referenceId;
+    case  Z_APDU_accessControlRequest:
+	return &apdu->u.accessControlRequest->referenceId;
+    case  Z_APDU_accessControlResponse:
+	return &apdu->u.accessControlResponse->referenceId;
+    case  Z_APDU_resourceControlRequest:
+	return &apdu->u.resourceControlRequest->referenceId;
+    case  Z_APDU_resourceControlResponse:
+	return &apdu->u.resourceControlResponse->referenceId;
+    case  Z_APDU_triggerResourceControlRequest:
+	return &apdu->u.triggerResourceControlRequest->referenceId;
+    case  Z_APDU_resourceReportRequest:
+	return &apdu->u.resourceReportRequest->referenceId;
+    case  Z_APDU_resourceReportResponse:
+	return &apdu->u.resourceReportResponse->referenceId;
+    case  Z_APDU_scanRequest:
+	return &apdu->u.scanRequest->referenceId;
+    case  Z_APDU_scanResponse:
+	return &apdu->u.scanResponse->referenceId;
+    case  Z_APDU_sortRequest:
+	return &apdu->u.sortRequest->referenceId;
+    case  Z_APDU_sortResponse:
+	return &apdu->u.sortResponse->referenceId;
+    case  Z_APDU_segmentRequest:
+	return &apdu->u.segmentRequest->referenceId;
+    case  Z_APDU_extendedServicesRequest:
+	return &apdu->u.extendedServicesRequest->referenceId;
+    case  Z_APDU_extendedServicesResponse:
+	return &apdu->u.extendedServicesResponse->referenceId;
+    case  Z_APDU_close:
+	return &apdu->u.close->referenceId;
+    }
+    return 0;
+}
+
+void Yaz_Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
+{
+    Z_ReferenceId **id_from = get_referenceIdP(from);
+    Z_ReferenceId **id_to = get_referenceIdP(to);
+    if (id_from && *id_from && id_to)
+    {
+	*id_to = (Z_ReferenceId*) odr_malloc (m_odr_out, sizeof(**id_to));
+	(*id_to)->size = (*id_to)->len = (*id_from)->len;
+	(*id_to)->buf = (unsigned char*) odr_malloc (m_odr_out, (*id_to)->len);
+	memcpy ((*id_to)->buf, (*id_from)->buf, (*id_to)->len);
+    }
+    else if (id_to)
+	*id_to = 0;
 }
 
 int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu)

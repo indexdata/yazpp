@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.24  2001-04-10 10:48:08  adam
+ * Revision 1.25  2001-04-25 18:59:30  adam
+ * Added referenceId handling for server.
+ *
+ * Revision 1.24  2001/04/10 10:48:08  adam
  * Fixed problem where proxy could cash bad result sets.
  *
  * Revision 1.23  2001/03/26 14:43:49  adam
@@ -462,6 +465,10 @@ void Yaz_Proxy::shutdown()
 	if (m_client->m_waiting == 2)
 	    abort();
 	delete m_client;
+    }
+    else if (!m_parent)
+    {
+	abort();
     }
     delete this;
 }
