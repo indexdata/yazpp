@@ -1,10 +1,11 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.8 2003-07-02 10:25:13 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.9 2003-07-07 09:23:16 adam Exp $
 
 // Z39.50 Exception classes
 
 #include <iostream>
 #include <errno.h>
 #include <string.h>		// for strerror(), strlen(), strcpy()
+#include <stdio.h>
 #include "zoom.h"
 
 
