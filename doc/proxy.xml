@@ -225,7 +225,7 @@
     &yaz-proxy-ref;
    </refentry>
   </section>
-  <section id="otherinfo-encoding"><title>Otherinformation Encoding</title>
+  <section id="otherinfo-encoding"><title>OtherInformation Encoding</title>
    <para>
     The proxy uses the OtherInformation definition to carry
     information about the target address and cookie.
