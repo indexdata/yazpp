@@ -1,5 +1,5 @@
-<chapter id="proxy">
- <title>The YAZ Proxy</title>
+ <chapter id="proxy">
+  <title>The YAZ Proxy</title>
   <para>
    The YAZ proxy is a transparent Z39.50-to-Z39.50 gateway.  That is,
    it is a Z39.50 server which has as its back-end a Z39.50 client
@@ -213,31 +213,31 @@
   </section>
   
   <section id="record-cache">
-  <title>Record Caching</title>
-  <para>
-  As an	option, the proxy may also cache result set records for the
-  last search.
-  The proxy takes into account the Record Syntax and CompSpec.
-  The CompSpec includes simple element set names as well.
-  </para>
+   <title>Record Caching</title>
+   <para>
+    As an option, the proxy may also cache result set records for the
+    last search.
+    The proxy takes into account the Record Syntax and CompSpec.
+    The CompSpec includes simple element set names as well.
+   </para>
   </section>
 
   <section id="query-validation">
-  <title>Query Validation</title>
-  <para>
-  </para>
+   <title>Query Validation</title>
+   <para>
+   </para>
   </section>
-
+  
   <section id="record-validation">
-  <title>Record Syntax Validation</title>
-  <para>
-  </para>
+   <title>Record Syntax Validation</title>
+   <para>
+   </para>
   </section>
-
+  
   <section id="other-optimizations">
    <title>Other Optimizations</title>
-     <para>
-     We've had some plans to support global caching of result set records,
+   <para>
+    We've had some plans to support global caching of result set records,
     but this has not yet been implemented.
    </para>
   </section>
@@ -293,3 +293,4 @@
  sgml-namecase-general:t
  End:
  -->
+ 
