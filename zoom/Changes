@@ -1,4 +1,4 @@
-$Header: /home/cvsroot/yaz++/zoom/Attic/Changes,v 1.3 2002-08-08 16:21:06 mike Exp $
+$Header: /home/cvsroot/yaz++/zoom/Attic/Changes,v 1.4 2002-10-08 23:54:55 mike Exp $
 
 Changes between the current version of the C++ binding specification
 (http://zoom.z3950.org/bind/cplusplus/zoom-1.0g.hh) and the
@@ -35,7 +35,7 @@ with the was v1.3 of the AAPI is going.
 Add some substance to the exception base class: it can now be created
 (with an error-code specified), and the error-code may be both fetched
 and rendered as a human-readable string.  This is necessary so that
-it's possible to meaningfully catch(exception e).
+it's possible to meaningfully catch(exception& e).
 
 Add the missing char *errmsg() method to the systemException and
 bib1Exception classes.

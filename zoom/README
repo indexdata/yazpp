@@ -3,9 +3,6 @@ This is an initial implementation of the ZOOM C++ binding
 It's a rather obvious thin layer on top of Yaz's ZOOM-C
 implementation.
 
-The build environment will no doubt need to be tweaked to fit
-in with the way that the rest of Yaz++ is built.
-
 Only one wrinkle, really: we want the ZOOM C++ header file for two
 different purposes: one is to function as an interface specification
 that can go on the ZOOM web-site, and one is to actually build
@@ -14,7 +11,7 @@ file are rather different in that the latter needs to include
 implementation details that the former very explicitly does _not_
 want.  Accordingly, we automatically generate both versions from a
 master copy in which the implementation-dependent lines are preceded
-by asterisks(*).  So we have:
+by asterisks ("*").  So we have:
 
 	master-header	The master copy, which may be edited.
 	interface.h	The read-only, automatically-generated file
@@ -25,4 +22,4 @@ by asterisks(*).  So we have:
 			and ought quite possibly to be moved into
 			../include/yaz++/zoom.h
 
-Good luck!
+Documentation (in DocBook format) is in "../doc/zoom.xml"

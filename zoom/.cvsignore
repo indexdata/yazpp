@@ -1,2 +1,4 @@
 Makefile
 Makefile.in
+interface.h
+zoom++.h
