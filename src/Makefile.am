@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.9 2001-11-06 17:08:05 adam Exp $
+## $Id: Makefile.am,v 1.10 2002-04-15 09:43:30 adam Exp $
 
-CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
+AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
 
 lib_LTLIBRARIES = libyaz++.la
 

@@ -1,13 +1,13 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.6 2001-03-26 14:43:49 adam Exp $
+# $Id: buildconf.sh,v 1.7 2002-04-15 09:43:30 adam Exp $
 dir=`aclocal --print-ac-dir`
 if [ -f $dir/yaz.m4 ]; then
-	aclocal || exit 1
+	aclocal
 else
-	aclocal -I . || exit 1
+	aclocal -I . 
 fi
-libtoolize --force >/dev/null 2>&1 || exit 2
-automake -a >/dev/null 2>&1 || exit 3
+libtoolize --force 
+automake -a 
 autoconf || exit 4
 if [ -f config.cache ]; then
 	rm config.cache
