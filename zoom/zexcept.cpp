@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.5 2002-10-30 09:13:12 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.6 2002-11-12 22:43:56 mike Exp $
 
 // Z39.50 Exception classes
 
@@ -28,10 +28,6 @@ namespace ZOOM {
 
     systemException::systemException() : exception(errno){
 	code = errno;
-    }
-
-    int systemException::errcode() const {
-	return code;
     }
 
     const char *systemException::errmsg() const {
@@ -69,10 +65,6 @@ namespace ZOOM {
 	//  or less work -- it just leaks memory.
     }
 
-    int bib1Exception::errcode() const {
-	return code;
-    }
-
     const char *bib1Exception::errmsg() const {
 	return diagbib1_str(code);
     }
@@ -91,10 +83,6 @@ namespace ZOOM {
 
     queryException::~queryException() {
 	//delete q; // ### see comment on bib1Exception destructor
-    }
-
-    int queryException::errcode() const {
-	return code;
     }
 
     const char *queryException::errmsg() const {

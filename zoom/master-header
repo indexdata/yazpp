@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.8 2002-11-04 23:12:18 mike Exp $
+// $Id: master-header,v 1.9 2002-11-12 22:43:56 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -104,7 +104,6 @@ namespace ZOOM {
   class YAZ_EXPORT systemException: public exception {
   public:
     systemException ();
-    int errcode () const;
     const char *errmsg () const;
   };
 
@@ -113,7 +112,6 @@ namespace ZOOM {
   public:
 *   ~bib1Exception ();
     bib1Exception (int errcode, const char *addinfo);
-    int errcode () const;
     const char *errmsg () const;
     const char *addinfo () const;
   };
@@ -127,7 +125,6 @@ namespace ZOOM {
      CCL = 2
     };
     queryException (int qtype, const char *source);
-    int errcode () const;
     const char *errmsg () const;
     const char *addinfo () const;
   };
