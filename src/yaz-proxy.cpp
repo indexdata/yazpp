@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.38 2003-01-24 20:10:57 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.39 2003-06-09 22:20:39 adam Exp $
  */
 
 #include <assert.h>
@@ -157,6 +157,34 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    c->m_seqno = parent->m_seqno;
 	    (parent->m_seqno)++;
 	    yaz_log (LOG_DEBUG, "get_client 1 %p %p", this, c);
+	    return c;
+	}
+    }
+    else if (!c)
+    {
+	Yaz_ProxyClient *cc = 0;
+	
+	for (c = parent->m_clientPool; c; c = c->m_next)
+	{
+	    assert (c->m_prev);
+	    assert (*c->m_prev == c);
+	    if (c->m_server == 0 && c->m_cookie[0] == 0 && 
+		!strcmp(m_proxyTarget, c->get_hostname()))
+	    {
+		cc = c;
+	    }
+	}
+	if (cc)
+	{
+	    // found it in cache
+	    c = cc;
+
+	    c->m_seqno = parent->m_seqno;
+	    assert(c->m_server == 0);
+	    c->m_server = this;
+	    c->m_seqno = parent->m_seqno;
+	    (parent->m_seqno)++;
+	    yaz_log (LOG_LOG, "get_client 10 %p %p", this, c);
 	    return c;
 	}
     }
@@ -431,15 +459,14 @@ void Yaz_Proxy::connectNotify()
 
 void Yaz_Proxy::shutdown()
 {
-    // only keep if keep_alive flag and cookie is set...
-    if (m_keepalive && m_client && m_client->m_cookie[0])
+    // only keep if keep_alive flag is set...
+    if (m_keepalive && m_client)
     {
         yaz_log (LOG_LOG, "shutdown (client to proxy) keepalive %s",
                  m_client->get_hostname());
         assert (m_client->m_waiting != 2);
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
-
     }
     else if (m_client)
     {
