@@ -1,23 +1,27 @@
 
-Proxy doesn't do well, if preferredRecordSyntax is not set.
+- Proxy doesn't do well, if preferredRecordSyntax is not set.
 
-Per database config.
+- Per database config.
 
-Control the various optimizations with config..
+- More control the various optimizations with config..
   query match
   record caching
   fix-up reference ID
   pre-init
   keepalive
-  -1 reinit.
 
-Live status (via search, present).
+- Live status (via search, present).
 
-Possible threading.
+- Possible threading.
 
-Character set conversion for SRW queries.
+- Honor record XPath.
 
-Throw proper CQL conversion error.
+- Character set negotiation.
 
-Honor XPath.
+- Character set conversion for SRW queries.
+
+- MARC in UTF-8.
+
+- Auto generate Explain indexInfo from cql.properties .. Or generate
+  cql.properties from Explain (to reduce duplicate info).
 

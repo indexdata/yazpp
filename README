@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.14 2004-01-07 11:49:03 adam Exp $
+$Id: README,v 1.1 2004-03-29 20:00:07 adam Exp $
  
 
 Introduction
@@ -26,7 +26,7 @@ example applications:
 
   yaz-my-client      basic client
   yaz-my-server      basic server
-  yaz-proxy          not-so-basic proxy server
+  yaz-proxy          Z39.50/SRW/SRU proxy.
 
 Directory structure of the YAZ++ package:
 
@@ -36,7 +36,6 @@ Directory structure of the YAZ++ package:
   -- lib (compiled libraries)
   -- win (Windows build files)
   -- doc (DocBook-format documentation)
-
 
 Installation, Unix
 ------------------

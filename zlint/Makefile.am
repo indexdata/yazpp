@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.4 2004-03-25 23:14:07 adam Exp $
+## $Id: Makefile.am,v 1.5 2004-03-29 20:00:07 adam Exp $
 
 AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include $(XSLT_CFLAGS)
 
@@ -15,6 +15,6 @@ zlint_SOURCES=zlint.cpp zlint.h \
  test-scan-01.cpp \
  main.cpp 
 
-bin_PROGRAMS = zlint
+noinst_PROGRAMS = zlint
 
 LDADD=../src/libyazcpp.la $(YAZLALIB) $(XSLT_LIBS)
