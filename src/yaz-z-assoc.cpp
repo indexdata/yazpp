@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.23 2002-04-22 12:08:07 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.24 2002-09-10 11:30:37 adam Exp $
  */
 
 #include <assert.h>
@@ -197,7 +197,10 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     else
     {
 	if (m_APDU_file)
+        {
 	    z_APDU(m_odr_print, &apdu, 0, "decode");
+	    fflush(m_APDU_file);
+	}
         return apdu;
     }
 }
@@ -205,7 +208,10 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 {
     if (m_APDU_file)
+    {
 	z_APDU(m_odr_print, &apdu, 0, "encode");
+	fflush(m_APDU_file);
+    }
     if (!z_APDU(m_odr_out, &apdu, 0, 0))
     {
 	if (m_APDU_file)
