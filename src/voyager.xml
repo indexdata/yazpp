@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- $Id: voyager.xml,v 1.1 2003-10-23 08:46:17 adam Exp $ -->
+<proxy>
+  <!-- define default target and name it voyager -->
+  <target default="1" name="voyager">
+    <!-- all backend addresses as seen from this proxy .. -->
+    <url>z3950.loc.gov:7090</url>
+    <url>z3950.loc.gov:7094</url>
+
+    <!-- set session timeout between proxy and backend target -->
+    <target-timeout>300</target-timeout>
+
+    <!-- set session timeout between client and proxy.
+    Should be lower than target-timeout -->
+    <client-timeout>180</client-timeout>
+
+    <!-- if either bandwidth or pdu limit is reached the session is no
+    longer kept alive -->
+    <keepalive>
+      <bandwidth>500000</bandwidth>
+      <pdu>500</pdu>
+    </keepalive>
+
+    <!-- client limits .. -->
+    <limit>
+      <bandwidth>200000</bandwidth>
+      <pdu>31</pdu>
+      <retrieve>20</retrieve>
+    </limit>
+
+    <!-- list allowed attributes; reject all others at the end -->
+    <attribute type="1" value="1-11,13-1010"/>
+    <attribute type="1" value="*" error="114"/>
+
+    <!-- list allowed record syntaxes; reject all others at the end -->
+    <syntax type="opac"/>
+    <syntax type="usmarc"/>
+    <syntax type="none"/>
+    <syntax type="xml" marcxml="1"/>
+    <syntax type="*" error="238"/>
+
+    <!-- keep this number of spare sessions for future sessions -->
+    <preinit>2</preinit>
+  </target>
+
+  <!-- maximum number of client sessions. Remember to allow for
+     at least max-clients*2+5 sockets. Use 'ulimit -n 1040' on bash -->
+  <max-clients>500</max-clients>
+  
+  <!-- what we log. Allowed tokens: client-apdu, server-apdu,
+  client-requests, server-requests -->
+  <log>client-requests server-requests</log>
+</proxy>
