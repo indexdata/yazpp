@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.7  1999-04-21 12:09:01  adam
+ * Revision 1.8  1999-11-10 10:02:34  adam
+ * Work on proxy.
+ *
+ * Revision 1.7  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -588,7 +591,7 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
-    Yaz_PDU_Assoc *some = new Yaz_PDU_Assoc(&mySocketManager, 0);
+    Yaz_PDU_Assoc *some = new Yaz_PDU_Assoc(&mySocketManager);
 
     MyClient z(some, &mySocketManager);
 

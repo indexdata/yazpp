@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-pdu-assoc.h,v 1.5 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-pdu-assoc.h,v 1.6 1999-11-10 10:02:34 adam Exp $
  */
 
 #include <comstack.h>
@@ -42,7 +42,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     int m_idleTime;
  public:
     /// Create object using specified socketObservable
-    Yaz_PDU_Assoc(IYazSocketObservable *socketObservable, COMSTACK cs);
+    Yaz_PDU_Assoc(IYazSocketObservable *socketObservable, COMSTACK cs = 0);
     /// Close socket and destroy object.
     virtual ~Yaz_PDU_Assoc();
     /// Clone the object

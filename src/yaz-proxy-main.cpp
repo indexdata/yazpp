@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.5  1999-04-21 12:09:01  adam
+ * Revision 1.6  1999-11-10 10:02:34  adam
+ * Work on proxy.
+ *
+ * Revision 1.5  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -24,17 +27,63 @@
  */
 
 #include <log.h>
+#include <options.h>
 
 #include <yaz-socket-manager.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-proxy.h>
 
+void usage(char *prog)
+{
+    fprintf (stderr, "%s: [-v log] [-t target] @:port\n", prog);
+    exit (1);
+}
+
+
+int args(Yaz_Proxy *proxy, int argc, char **argv)
+{
+    char *addr = 0;
+    char *arg;
+    char *prog = argv[0];
+    int ret;
+
+    while ((ret = options("p:v:q", argv, argc, &arg)) != -2)
+    {
+        switch (ret)
+        {
+        case 0:
+            if (addr)
+	    {
+		usage(prog);
+		return 1;
+	    }
+	    addr = arg;
+            break;
+        case 't':
+	    proxy->proxyTarget(arg);
+	    break;
+	case 'v':
+	    log_init_level (log_mask_str(arg));
+	    break;
+        default:
+	    usage(prog);
+	    return 1;
+        }
+    }
+    if (addr)
+    {
+	proxy->server(addr);
+    }
+    return 0;
+}
+
+
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
-    Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager, 0));
+    Yaz_Proxy proxy(new Yaz_PDU_Assoc(&mySocketManager));
 
-    proxy.server(argc < 2 ? "@:9000" : argv[1]);
+    args(&proxy, argc, argv);
     while (mySocketManager.processEvent() > 0)
 	;
     return 0;

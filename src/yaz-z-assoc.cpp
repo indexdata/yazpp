@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.4  1999-09-13 12:53:44  adam
+ * Revision 1.5  1999-11-10 10:02:34  adam
+ * Work on proxy.
+ *
+ * Revision 1.4  1999/09/13 12:53:44  adam
  * Proxy removes OtherInfo Proxy Address and Session ID. Other
  * Otherinfo remains untouched.
  *
@@ -25,6 +28,7 @@
 
 #include <log.h>
 #include <yaz-z-assoc.h>
+#include <otherinfo.h>
 
 int Yaz_Z_Assoc::yaz_init_func()
 {

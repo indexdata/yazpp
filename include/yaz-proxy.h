@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-proxy.h,v 1.7 1999-04-28 13:31:17 adam Exp $
+ * $Id: yaz-proxy.h,v 1.8 1999-11-10 10:02:34 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -39,6 +39,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
     void failNotify();
     void timeoutNotify();
+    void proxyTarget(const char *target);
  private:
     char *get_cookie(Z_OtherInformation **otherInfo);
     char *get_proxy(Z_OtherInformation **otherInfo);
@@ -51,5 +52,6 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_Proxy *m_parent;
     int m_seqno;
     int m_keepalive;
+    char *m_proxyTarget;
 };
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.9  1999-09-13 12:53:44  adam
+ * Revision 1.10  1999-11-10 10:02:34  adam
+ * Work on proxy.
+ *
+ * Revision 1.9  1999/09/13 12:53:44  adam
  * Proxy removes OtherInfo Proxy Address and Session ID. Other
  * Otherinfo remains untouched.
  *
@@ -52,10 +55,21 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_clientPool = 0;
     m_seqno = 1;
     m_keepalive = 1;
+    m_proxyTarget = 0;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
 {
+    xfree (m_proxyTarget);
+}
+
+
+void Yaz_Proxy::proxyTarget(const char *target)
+{
+    xfree (m_proxyTarget);
+    m_proxyTarget = 0;
+    if (target)
+	m_proxyTarget = (char *) xstrdup (target);
 }
 
 IYaz_PDU_Observer *Yaz_Proxy::clone(IYaz_PDU_Observable
@@ -126,6 +140,17 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     }
     if (!m_client)
     {
+	const char *proxy_host = 0;
+	if (apdu->which == Z_APDU_initRequest)
+	{
+	    logf (LOG_LOG, "got InitRequest");
+	    
+	    char *proxy_host = get_proxy(&apdu->u.initRequest->otherInfo);
+	    if (!proxy_host)
+		proxy_host = m_proxyTarget;
+	    if (!proxy_host)
+		return 0;
+	}
 	logf (LOG_LOG, "Yaz_Proxy::get_client creating new");
 	c = new Yaz_ProxyClient(m_PDU_Observable->clone());
 	c->m_next = parent->m_clientPool;
@@ -141,11 +166,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	{
 	    logf (LOG_LOG, "got InitRequest");
 	    
-	    char *proxy_host = get_proxy(&apdu->u.initRequest->otherInfo);
-	    if (proxy_host)
-		c->client(proxy_host);
-	    else
-		c->client("localhost:9999");
+	    c->client(proxy_host);
 	}
 	c->timeout(600);
     }
