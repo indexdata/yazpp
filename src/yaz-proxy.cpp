@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.40 2003-06-11 08:22:18 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.41 2003-06-11 21:59:07 adam Exp $
  */
 
 #include <assert.h>
@@ -402,6 +402,24 @@ static const char *apdu_name(Z_APDU *apdu)
 	return "presentRequest";
     case Z_APDU_presentResponse:
 	return "presentResponse";
+    case Z_APDU_deleteResultSetRequest:
+	return "deleteResultSetRequest";
+    case Z_APDU_deleteResultSetResponse:
+	return "deleteResultSetResponse";
+    case Z_APDU_scanRequest:
+	return "scanRequest";
+    case Z_APDU_scanResponse:
+	return "scanResponse";
+    case Z_APDU_sortRequest:
+	return "sortRequest";
+    case Z_APDU_sortResponse:
+	return "sortResponse";
+    case Z_APDU_extendedServicesRequest:
+	return "extendedServicesRequest";
+    case Z_APDU_extendedServicesResponse:
+	return "extendedServicesResponse";
+    case Z_APDU_close:
+	return "close";
     }
     return "other";
 }
