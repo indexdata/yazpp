@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.8 2003-10-10 22:22:51 adam Exp $
+## $Id: Makefile.am,v 1.9 2004-03-30 08:46:36 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -51,7 +51,7 @@ index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl $(TOP)
 
 dist-hook: zoom.html
-	cp *.html $(distdir)
+	cp $(srcdir)/*.html $(distdir)
 
 clean-data-hook:
 	rm -f [0-9]* *.bak
