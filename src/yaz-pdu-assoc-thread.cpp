@@ -3,22 +3,29 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc-thread.cpp,v $
- * Revision 1.1  2001-03-26 14:43:49  adam
+ * Revision 1.2  2001-03-27 14:47:45  adam
+ * New server facility scheme.
+ *
+ * Revision 1.1  2001/03/26 14:43:49  adam
  * New threaded PDU association.
  *
  */
 
+#ifdef WIN32
+#include <process.h>
+#else
+#include <pthread.h>
+#include <unistd.h>
+#endif
+
+
+#include <errno.h>
 #include <yaz/log.h>
 #include <yaz/tcpip.h>
 
 #include <yaz++/yaz-pdu-assoc.h>
 #include <yaz++/yaz-socket-manager.h>
 
-#ifdef WIN32
-#include <process.h>
-#else
-#include <pthread.h>
-#endif
 
 
 Yaz_PDU_AssocThread::Yaz_PDU_AssocThread(
@@ -64,9 +71,12 @@ void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
         exit (1);
     }
 #else
-    pthread_t type;
+    pthread_t tid;
 
-    int id = pthread_create (&type, 0, events, socket_observable);
-    yaz_log (LOG_LOG, "pthread_create returned id=%d", id);
+    int id = pthread_create (&tid, 0, events, socket_observable);
+    if (id)
+	yaz_log (LOG_ERRNO|LOG_FATAL, "pthread_create returned id=%d", id);
+    else
+	pthread_detach (tid);
 #endif
 }

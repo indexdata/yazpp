@@ -2,8 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-client.cpp,v $
- * Revision 1.17  2001-03-26 14:43:49  adam
+ * $Log: yaz-my-client.cpp,v $
+ * Revision 1.1  2001-03-27 14:47:45  adam
+ * New server facility scheme.
+ *
+ * Revision 1.17  2001/03/26 14:43:49  adam
  * New threaded PDU association.
  *
  * Revision 1.16  2000/11/01 14:22:59  adam

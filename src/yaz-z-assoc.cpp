@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.18  2001-03-26 14:43:49  adam
+ * Revision 1.19  2001-03-27 14:47:45  adam
+ * New server facility scheme.
+ *
+ * Revision 1.18  2001/03/26 14:43:49  adam
  * New threaded PDU association.
  *
  * Revision 1.17  2001/01/04 14:25:25  heikki
@@ -199,13 +202,13 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 
 int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 {
+    if (m_APDU_file)
+	z_APDU(m_odr_print, &apdu, 0, "encode");
     if (!z_APDU(m_odr_out, &apdu, 0, 0))
     {
 	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
-    if (m_APDU_file)
-	z_APDU(m_odr_print, &apdu, 0, "encode");
     *buf = odr_getbuf (m_odr_out, len, 0);
     odr_reset (m_odr_out);
     return *len;
@@ -359,13 +362,12 @@ Z_ReferenceId* Yaz_Z_Assoc::getRefID(char* str)
 {
     Z_ReferenceId* id = NULL;
 
-    if ( str )
+    if (str)
     {
         id = (Z_ReferenceId*) odr_malloc (m_odr_out, sizeof(*id));
         id->size = id->len = strlen(str);
         id->buf = (unsigned char *) str;
     }
-
     return id;
 }
 
