@@ -15,11 +15,12 @@
       <retrieve>20</retrieve>
     </limit>
     <attribute type="1" value="10" error="114"/>
-    <target-timeout>180</target-timeout>
-    <client-timeout>120</client-timeout>
+    <target-timeout>300</target-timeout>
+    <client-timeout>180</client-timeout>
     <syntax type="usmarc"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
+    <preinit>1</preinit>
   </target>
   <target name="localhost">
     <url>localhost:9999</url>
@@ -29,11 +30,14 @@
       <pdu>60</pdu>
       <retrieve>10</retrieve>
     </limit>
+    <target-timeout>300</target-timeout>
+    <client-timeout>180</client-timeout>
     <attribute type="1" value="10,1023-9000" error="114"/>
     <syntax type="usmarc"/>
     <syntax type="grs1"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
+    <preinit>2</preinit>
   </target>
   <target name="*">
     <!-- everything else -->

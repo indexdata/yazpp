@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.15 2003-10-10 17:58:29 adam Exp $
+ * $Id: proxy.h,v 1.16 2003-10-13 19:16:28 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -25,11 +25,27 @@ public:
     Yaz_ProxyConfig();
     ~Yaz_ProxyConfig();
     int read_xml(const char *fname);
+
+    int get_target_no(int no,
+		      const char **name,
+		      const char **url,
+		      int *limit_bw,
+		      int *limit_pdu,
+		      int *limit_req,
+		      int *target_idletime,
+		      int *client_idletime,
+		      int *max_clients,
+		      int *keepalive_limit_bw,
+		      int *keepalive_limit_pdu,
+		      int *pre_init);
+
     void get_target_info(const char *name, const char **url,
 			 int *limit_bw, int *limit_pdu, int *limit_req,
 			 int *target_idletime, int *client_idletime,
 			 int *max_clients,
-			 int *keepalive_limit_bw, int *keepalive_limit_pdu);
+			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
+			 int *pre_init);
+
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
 		     Odr_oid *syntax, char **addinfo);
@@ -41,7 +57,8 @@ private:
     void return_target_info(xmlNodePtr ptr, const char **url,
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
-			    int *keepalive_limit_bw, int *keepalive_limit_pdu);
+			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
+			    int *pre_init);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
@@ -100,7 +117,8 @@ class YAZ_EXPORT Yaz_bw {
 /// Private class
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     friend class Yaz_Proxy;
-    Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
+    Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable,
+		    Yaz_Proxy *parent);
     ~Yaz_ProxyClient();
     void recv_Z_PDU(Z_APDU *apdu, int len);
     IYaz_PDU_Observer* sessionNotify
@@ -131,6 +149,9 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     ODR m_init_odr;
     Z_APDU *m_initResponse;
     Yaz_RecordCache m_cache;
+    void pre_init_client();
+    int m_target_idletime;
+    Yaz_Proxy *m_root;
 };
 
 /// Information Retrieval Proxy Server.
@@ -184,7 +205,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_marcxml_flag;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
  public:
-    Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
+    Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
+	      Yaz_Proxy *parent = 0);
     ~Yaz_Proxy();
     void recv_Z_PDU(Z_APDU *apdu, int len);
     void recv_Z_PDU_0(Z_APDU *apdu);
@@ -205,5 +227,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int set_config(const char *name);
     int reconfig() { m_reconfig_flag = 1; }
     int send_to_client(Z_APDU *apdu);
+    void server(const char *addr);
+    void pre_init();
 };
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.8 2003-10-10 17:58:29 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.9 2003-10-13 19:16:29 adam Exp $
  */
 
 #include <ctype.h>
@@ -116,12 +116,20 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *target_idletime,
 					 int *client_idletime,
 					 int *keepalive_limit_bw,
-					 int *keepalive_limit_pdu)
+					 int *keepalive_limit_pdu,
+					 int *pre_init)
 {
+    *pre_init = 0;
     int no_url = 0;
     ptr = ptr->children;
     for (; ptr; ptr = ptr->next)
     {
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "preinit"))
+	{
+	    const char *v = get_text(ptr);
+	    *pre_init = v ? atoi(v) : 1;
+	}
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "url"))
 	{
@@ -444,6 +452,51 @@ xmlNodePtr Yaz_ProxyConfig::find_target_node(const char *name)
 }
 #endif
 
+int Yaz_ProxyConfig::get_target_no(int no,
+				   const char **name,
+				   const char **url,
+				   int *limit_bw,
+				   int *limit_pdu,
+				   int *limit_req,
+				   int *target_idletime,
+				   int *client_idletime,
+				   int *max_clients,
+				   int *keepalive_limit_bw,
+				   int *keepalive_limit_pdu,
+				   int *pre_init)
+{
+#if HAVE_XML2
+    xmlNodePtr ptr;
+    if (!m_proxyPtr)
+	return 0;
+    int i = 0;
+    for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "target"))
+	{
+	    if (i == no)
+	    {
+		struct _xmlAttr *attr;
+		for (attr = ptr->properties; attr; attr = attr->next)
+		    if (!strcmp((const char *) attr->name, "name"))
+		    {
+			if (attr->children
+			    && attr->children->type==XML_TEXT_NODE
+			    && attr->children->content)
+			    *name = (const char *) attr->children->content;
+		    }
+		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
+				   target_idletime, client_idletime,
+				   keepalive_limit_bw, keepalive_limit_pdu,
+				   pre_init);
+		return 1;
+	    }
+	    i++;
+	}
+#endif
+    return 0;
+}
+
 void Yaz_ProxyConfig::get_target_info(const char *name,
 				      const char **url,
 				      int *limit_bw,
@@ -453,7 +506,8 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *client_idletime,
 				      int *max_clients,
 				      int *keepalive_limit_bw,
-				      int *keepalive_limit_pdu)
+				      int *keepalive_limit_pdu,
+				      int *pre_init)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -488,7 +542,8 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	}
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
-			   keepalive_limit_bw, keepalive_limit_pdu);
+			   keepalive_limit_bw, keepalive_limit_pdu,
+			   pre_init);
     }
 #else
     *url = name;
