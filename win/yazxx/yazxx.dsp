@@ -148,5 +148,9 @@ SOURCE="..\..\src\yaz-z-assoc.cpp"
 
 SOURCE="..\..\src\yaz-z-query.cpp"
 # End Source File
+# Begin Source File
+
+SOURCE="..\..\src\yaz-z-server.cpp"
+# End Source File
 # End Target
 # End Project
