@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.27 2003-10-10 12:37:26 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.28 2003-10-16 16:10:43 adam Exp $
  */
 
 #include <assert.h>
@@ -32,6 +32,7 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_APDU_file = 0;
     m_APDU_fname = 0;
     m_hostname = 0;
+    m_APDU_yazlog = 0;
 }
 
 void Yaz_Z_Assoc::set_APDU_log(const char *fname)
@@ -48,12 +49,20 @@ void Yaz_Z_Assoc::set_APDU_log(const char *fname)
     {
 	m_APDU_fname = new char[strlen(fname)+1];
 	strcpy (m_APDU_fname, fname);
-	if (*fname && strcmp(fname, "-"))
-	    m_APDU_file = fopen (fname, "a");
-	else
+	if (!strcmp(fname, "-"))
 	    m_APDU_file = stderr;
+	else if (*fname == '\0')
+	    m_APDU_file = 0;
+	else
+	    m_APDU_file = fopen (fname, "a");
 	odr_setprint(m_odr_print, m_APDU_file);
     }
+}
+
+int Yaz_Z_Assoc::set_APDU_yazlog(int v)
+{
+    int old = m_APDU_yazlog;
+    m_APDU_yazlog = v;
 }
 
 const char *Yaz_Z_Assoc::get_APDU_log()
@@ -200,6 +209,14 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     }
     else
     {
+	if (m_APDU_yazlog)
+	{   // use YAZ log FILE
+	    FILE *save = m_APDU_file;
+
+	    odr_setprint(m_odr_print, yaz_log_file());
+	    z_APDU(m_odr_print, &apdu, 0, "decode");
+	    m_APDU_file = save;
+	}
 	if (m_APDU_file)
         {
 	    z_APDU(m_odr_print, &apdu, 0, "decode");
@@ -211,6 +228,13 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 
 int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 {
+    if (m_APDU_yazlog)
+    {
+	FILE *save = m_APDU_file;
+	odr_setprint(m_odr_print, yaz_log_file()); // use YAZ log FILE
+	z_APDU(m_odr_print, &apdu, 0, "encode");
+	m_APDU_file = save;
+    }
     if (m_APDU_file)
     {
 	z_APDU(m_odr_print, &apdu, 0, "encode");

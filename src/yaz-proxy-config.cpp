@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.10 2003-10-16 13:40:41 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.11 2003-10-16 16:10:43 adam Exp $
  */
 
 #include <ctype.h>
@@ -117,38 +117,13 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *client_idletime,
 					 int *keepalive_limit_bw,
 					 int *keepalive_limit_pdu,
-					 int *pre_init,
-					 int *log_mask)
+					 int *pre_init)
 {
     *pre_init = 0;
     int no_url = 0;
     ptr = ptr->children;
     for (; ptr; ptr = ptr->next)
     {
-	if (ptr->type == XML_ELEMENT_NODE 
-	    && !strcmp((const char *) ptr->name, "log"))
-	{
-	    const char *v = get_text(ptr);
-	    *log_mask = 0;
-	    while (v && *v)
-	    {
-		const char *cp = v;
-		while (*cp && *cp != ',' && !isspace(*cp))
-		    cp++;
-		size_t len = cp - v;
-		if (len == 4 && !memcmp(v, "apdu", 4))
-		    *log_mask |= PROXY_LOG_APDU;
-		if (len == 3 && !memcmp(v, "req", 3))
-		    *log_mask |= PROXY_LOG_REQ;
-		if (isdigit(*v))
-		    *log_mask |= atoi(v);
-		if (*cp == ',')
-		    cp++;
-		while (*cp && isspace(*cp))
-		    cp++;
-		v = cp;
-	    }
-	}
 	if (ptr->type == XML_ELEMENT_NODE 
 	    && !strcmp((const char *) ptr->name, "preinit"))
 	{
@@ -488,8 +463,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *max_clients,
 				   int *keepalive_limit_bw,
 				   int *keepalive_limit_pdu,
-				   int *pre_init,
-				   int *log_mask)
+				   int *pre_init)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -514,13 +488,72 @@ int Yaz_ProxyConfig::get_target_no(int no,
 		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 				   target_idletime, client_idletime,
 				   keepalive_limit_bw, keepalive_limit_pdu,
-				   pre_init, log_mask);
+				   pre_init);
 		return 1;
 	    }
 	    i++;
 	}
 #endif
     return 0;
+}
+
+int Yaz_ProxyConfig::mycmp(const char *hay, const char *item, int len)
+{
+    if (len == strlen(item) && memcmp(hay, item, len) == 0)
+	return 1;
+    return 0;
+}
+
+void Yaz_ProxyConfig::get_generic_info(int *log_mask,
+				       int *max_clients)
+{
+#if HAVE_XML2
+    xmlNodePtr ptr;
+    if (!m_proxyPtr)
+	return;
+    for (ptr = m_proxyPtr->children; ptr; ptr = ptr->next)
+    {
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "log"))
+	{
+	    const char *v = get_text(ptr);
+	    *log_mask = 0;
+	    while (v && *v)
+	    {
+		const char *cp = v;
+		while (*cp && *cp != ',' && !isspace(*cp))
+		    cp++;
+		size_t len = cp - v;
+		if (mycmp(v, "client-apdu", len))
+		    *log_mask |= PROXY_LOG_APDU_CLIENT;
+		if (mycmp(v, "server-apdu", len))
+		    *log_mask |= PROXY_LOG_APDU_SERVER;
+		if (mycmp(v, "client-requests", len))
+		    *log_mask |= PROXY_LOG_REQ_CLIENT;
+		if (mycmp(v, "server-requests", len))
+		    *log_mask |= PROXY_LOG_REQ_SERVER;
+		if (isdigit(*v))
+		    *log_mask |= atoi(v);
+		if (*cp == ',')
+		    cp++;
+		while (*cp && isspace(*cp))
+		    cp++;
+		v = cp;
+	    }
+	}
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "max-clients"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+	    {
+		*max_clients = atoi(t);
+		if (*max_clients  < 1)
+		    *max_clients = 1;
+	    }
+	}
+    }
+#endif
 }
 
 void Yaz_ProxyConfig::get_target_info(const char *name,
@@ -533,8 +566,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *max_clients,
 				      int *keepalive_limit_bw,
 				      int *keepalive_limit_pdu,
-				      int *pre_init,
-				      int *log_mask)
+				      int *pre_init)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -570,7 +602,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
 			   keepalive_limit_bw, keepalive_limit_pdu,
-			   pre_init, log_mask);
+			   pre_init);
     }
 #else
     *url = name;

@@ -9,7 +9,7 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.9 2003-07-02 10:31:42 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.10 2003-10-16 16:10:43 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -39,6 +39,9 @@
    <simpara>
     This manual covers version @VERSION@.
     </simpara>
+   <simpara>
+    CVS ID: $Id: yaz++.xml.in,v 1.10 2003-10-16 16:10:43 adam Exp $
+   </simpara>
   </abstract>
  </bookinfo>
  

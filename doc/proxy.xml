@@ -58,7 +58,7 @@
     start it up.  It will work exactly as usual, but all the packets
     will be sent via the proxy, which will generate a log like this:
    </para>
-   <screen>
+   <screen><![CDATA[
     decode choice
     initRequest {
         referenceId OCTETSTRING(len=4) 69 6E 69 74
@@ -119,6 +119,7 @@
             }
         }
     }
+]]>
    </screen>
   </section>
   
@@ -309,7 +310,6 @@
     <para>
      <screen>
      &lt;?xml version="1.0"?>
-     &lt;!-- $Id -->
      &lt;proxy>
       &lt;target name="server1" default="1">
        &lt;!-- description of server1 .. -->
@@ -478,9 +478,9 @@
      <screen>
       &lt;proxy>
        &lt;target name="mytarget">
-	&lt;syntax type="usmarc"/>
-	&lt;syntax type="xml" marcxml="1"/>
-	&lt;syntax type="*" error="238"/>
+        &lt;syntax type="usmarc"/>
+        &lt;syntax type="xml" marcxml="1"/>
+        &lt;syntax type="*" error="238"/>
        &lt;/target>
       &lt;/proxy>
      </screen>
@@ -552,7 +552,77 @@
      </para>
      </tip>
    </section>
-   
+
+   <section id="proxy-config-log">
+    <title>Configuration: log</title>
+    <para>
+     The element <literal>log</literal> is the child of element
+     <literal>proxy</literal> and specifies what to be logged by the
+     proxy.
+     </para>
+    <para>
+     Specify the log file with command-line option <literal>-l</literal>.
+    </para>
+    <para>
+     The text of the <literal>log</literal> element is a sequence of
+     options separated by white space. See the table below:
+     <table frame="top"><title>Logging options</title>
+      <tgroup cols="2">
+       <colspec colwidth="1*" colname="option"/>
+       <colspec colwidth="2*" colname="description"/>
+       <thead>
+	<row>
+	 <entry>Option</entry>
+	 <entry>Description</entry>
+	</row>
+       </thead>
+       <tbody>
+	<row>
+	 <entry><literal>client-apdu</literal></entry>
+	 <entry>
+	  Log APDUs as reported by YAZ for the
+	  communication between the client and the proxy
+	 </entry>
+	</row>
+	<row>
+	 <entry><literal>server-apdu</literal></entry>
+	 <entry>
+	  Log APDUs as reported by YAZ for the
+	  communication between the proxy and the server (backend).
+	 </entry>
+	</row>
+	<row>
+	 <entry><literal>clients-requests</literal></entry>
+	 <entry>
+	  Log a brief description about requests transferred between
+	  the client and the proxy. The name of the request and the size
+	  of the APDU is logged.
+	 </entry>
+	</row>
+	<row>
+	 <entry><literal>server-requests</literal></entry>
+	 <entry>
+	  Log a brief description about requests transferred between
+	  the proxy and the server (backend). The name of the request
+	  and the size of the APDU is logged.
+	 </entry>
+	</row>
+       </tbody>
+      </tgroup>
+     </table>
+    </para>
+    <para>
+     To log communication in details between the proxy and the backend, th
+     following configuration could be used:
+    <screen><![CDATA[
+     <target name="mytarget">
+      <log>server-apdu server-requests</log>
+     </target>
+]]>
+     </screen>
+    </para>
+   </section>
+
   </section>
   <section id="proxy-usage">
    <title>Proxy Usage</title>

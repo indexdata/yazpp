@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.3 2003-10-10 12:37:26 adam Exp $
+ * $Id: z-assoc.h,v 1.4 2003-10-16 16:10:43 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -80,6 +80,8 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
 
     const char *get_hostname();
 
+    int set_APDU_yazlog(int v);
+
  private:
     static int yaz_init_flag;
     static int yaz_init_func();
@@ -91,6 +93,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     FILE *m_APDU_file;
     char *m_APDU_fname;
     char *m_hostname;
+    int m_APDU_yazlog;
 };
 
 #endif

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.33 2003-10-10 12:37:26 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.34 2003-10-16 16:10:43 adam Exp $
  */
 
 #include <assert.h>

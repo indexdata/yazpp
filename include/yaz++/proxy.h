@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.18 2003-10-16 13:40:41 adam Exp $
+ * $Id: proxy.h,v 1.19 2003-10-16 16:10:43 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -18,8 +18,10 @@ class Yaz_Proxy;
 
 #define MAX_ZURL_PLEX 10
 
-#define PROXY_LOG_APDU 1
-#define PROXY_LOG_REQ 1
+#define PROXY_LOG_APDU_CLIENT 1
+#define PROXY_LOG_APDU_SERVER 2
+#define PROXY_LOG_REQ_CLIENT 4
+#define PROXY_LOG_REQ_SERVER 8
 
 struct Yaz_RecordCache_Entry;
 
@@ -40,15 +42,16 @@ public:
 		      int *max_clients,
 		      int *keepalive_limit_bw,
 		      int *keepalive_limit_pdu,
-		      int *pre_init,
-		      int *log_mask);
+		      int *pre_init);
+    
+    void get_generic_info(int *log_mask, int *max_clients);
 
     void get_target_info(const char *name, const char **url,
 			 int *limit_bw, int *limit_pdu, int *limit_req,
 			 int *target_idletime, int *client_idletime,
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			 int *pre_init, int *log_mask);
+			 int *pre_init);
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
@@ -56,13 +59,14 @@ public:
 private:
     void operator=(const Yaz_ProxyConfig &conf);
 #if HAVE_XML2
+    int mycmp(const char *hay, const char *item, int len);
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
 			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			    int *pre_init, int *log_mask);
+			    int *pre_init);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
@@ -173,6 +177,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Yaz_Proxy *m_parent;
     int m_seqno;
     int m_max_clients;
+    int m_log_mask;
     int m_keepalive_limit_bw;
     int m_keepalive_limit_pdu;
     int m_client_idletime;
@@ -233,5 +238,6 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int send_to_client(Z_APDU *apdu);
     void server(const char *addr);
     void pre_init();
+    int get_log_mask() { return m_log_mask; };
 };
 
