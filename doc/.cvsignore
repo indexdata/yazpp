@@ -10,8 +10,13 @@ zoom.html
 zoom-*.html
 proxy.html
 proxy-*.html
+yaz-proxy.html
+otherinfo-encoding.html
+yaz-proxy.8
 yaz++.tex
 yaz++.log
 yaz++.aux
 yaz++.out
 yaz++.pdf
+manpage.links
+manpage.refs
