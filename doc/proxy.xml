@@ -1,10 +1,10 @@
 <chapter id="proxy">
-  <!-- $Id: proxy.xml,v 1.2 2002-10-21 13:37:31 adam Exp $ -->
+  <!-- $Id: proxy.xml,v 1.3 2002-10-22 08:23:57 adam Exp $ -->
  <title>YAZ Proxy</title>
   <para>
    The YAZ proxy is a transparent Z39.50 to Z39.50 gateway.
    It is useful for debugging Z39.50 software, redirect
-   Z39.50 packages through firewalls, etc.
+   Z39.50 packages through fire walls, etc.
   </para>
   <para>
    Furthermore, the proxy offers facilities that often
@@ -25,7 +25,7 @@
     <orderedlist>
      <listitem>
       <para> If the Initialize Request PDU from the client
-       includes OtherInformation, with OID,
+       includes Other-Information, with OID,
        <literal>1.2.840.10003.10.1000.81.1</literal>, that
        specifies the target.
       </para>
@@ -58,7 +58,7 @@
     point of view should be considered stateless.
    </para>
    <para>
-    As for the target specification, the OtherInformation
+    As for the target specification, the Other-Information
     area is used to hold the cookie with OID 
     <literal>1.2.840.10003.10.1000.81.2</literal>.
    </para>
@@ -117,7 +117,7 @@
     
     <refsect1><title>DESCRIPTION</title>
      <para>
-      The proxy is a daemon on its own and runs standalone (no
+      The proxy is a daemon on its own and runs stand-alone (no
       inetd support). The host:port specifies host address and
       listening port respectively. Use <literal>@</literal>
       for ANY address.
@@ -157,7 +157,7 @@
        <listitem><para>
          Sets level for optimization. Use zero to disable; non-zero
          to enable. Handling for this is not fully implemented;
-         we will probably use a bitmask to enable/disable specific
+         we will probably use a bit mask to enable/disable specific
          features.
         </para></listitem>
       </varlistentry>

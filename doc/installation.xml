@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.2 2002-10-21 13:37:50 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.3 2002-10-22 08:23:57 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -56,7 +56,7 @@
     <literal>./configure --help</literal>.
    </para>
    <para>
-    This is a list of what you have after succesful compilation:
+    This is a list of what you have after successful compilation:
     <variablelist>
      <varlistentry>
       <term>src/yaz-proxy</term> 
