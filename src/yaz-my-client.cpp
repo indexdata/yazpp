@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.8  2001-04-26 17:30:07  heikki
+ * Revision 1.9  2001-04-26 17:51:56  heikki
+ * better ursula request (doesn't crash)
+ *
+ * Revision 1.8  2001/04/26 17:30:07  heikki
  * Ursularequest got more default data
  *
  * Revision 1.7  2001/04/26 12:17:49  heikki
@@ -681,7 +684,7 @@ int MyClient::cmd_ursula(char *args)
     pdu->u.request->items[0]->titlePartNo=odr_strdup(odr_encode(),"31");
 #endif
     
-    pdu->u.request->counter = 0;
+    pdu->u.request->counter = odr_strdup(odr_encode(),"HB");
     pdu->u.request->priority = 0;
     pdu->u.request->disposalNote = 0;
     pdu->u.request->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
