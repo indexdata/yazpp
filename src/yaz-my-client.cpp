@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.1  2001-03-27 14:47:45  adam
+ * Revision 1.2  2001-04-04 14:02:49  adam
+ * URSULA / Z-ruth service.
+ *
+ * Revision 1.1  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  * Revision 1.17  2001/03/26 14:43:49  adam
@@ -68,9 +71,11 @@
 #include <yaz/log.h>
 #include <yaz/options.h>
 #include <yaz/diagbib1.h>
+#include <yaz/marcdisp.h>
 #include <yaz++/yaz-ir-assoc.h>
 #include <yaz++/yaz-pdu-assoc.h>
 #include <yaz++/yaz-socket-manager.h>
+#include <yaz/zes-ursula.h>
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H
@@ -124,6 +129,7 @@ public:
     int cmd_init(char *args);
     int cmd_format(char *args);
     int cmd_proxy(char *args);
+    int cmd_ursula(char *args);
 };
 
 
@@ -348,7 +354,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
      */
     if (r->direct_reference)
     {
-        printf("Record type: ");
+	printf("Record type: ");
         if (ent)
             printf("%s\n", ent->desc);
     }
@@ -383,9 +389,37 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
     }
     if (r->which == Z_External_octet && record->u.octet_aligned->len)
     {
-	recv_textRecord((int) ent->value,
-			(const char *) record->u.octet_aligned->buf,
-			(size_t) record->u.octet_aligned->len);
+	switch (ent->value)
+	{
+	case VAL_ISO2709:
+	case VAL_UNIMARC:
+	case VAL_INTERMARC:
+	case VAL_USMARC:
+	case VAL_UKMARC:
+	case VAL_NORMARC:
+	case VAL_LIBRISMARC:
+	case VAL_DANMARC:
+	case VAL_FINMARC:
+	case VAL_MAB:
+	case VAL_CANMARC:
+	case VAL_SBN:
+	case VAL_PICAMARC:
+	case VAL_AUSMARC:
+	case VAL_IBERMARC:
+	case VAL_CATMARC:
+	case VAL_MALMARC:
+	case VAL_JPMARC:
+	case VAL_SWEMARC:
+	case VAL_SIGLEMARC:
+	case VAL_ISDSMARC:
+	case VAL_RUSMARC:
+	    marc_display((char*) record->u.octet_aligned->buf,stdout);
+	    break;
+	default:
+	    recv_textRecord((int) ent->value,
+			    (const char *) record->u.octet_aligned->buf,
+			    (size_t) record->u.octet_aligned->len);
+	}
     }
     else if (ent && ent->value == VAL_SUTRS && r->which == Z_External_sutrs)
 	recv_textRecord((int) VAL_SUTRS, (const char *) r->u.sutrs->buf,
@@ -564,6 +598,56 @@ int MyClient::cmd_proxy(char *args)
     return 1;
 }
 
+int MyClient::cmd_ursula(char *args)
+{
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+
+    req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003");
+    
+    Z_External *ext = (Z_External *) odr_malloc(odr_encode(), sizeof(*ext));
+    req->taskSpecificParameters = ext;
+    ext->direct_reference = req->packageType;
+    ext->descriptor = 0;
+    ext->indirect_reference = 0;
+    
+    ext->which = Z_External_octet;
+    ext->u.single_ASN1_type = (Odr_oct *)
+	odr_malloc (odr_encode(), sizeof(Odr_oct));
+
+    Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
+    pdu->which = Z_UrsPDU_request;
+    pdu->u.request = (Z_UrsRequest *)
+	odr_malloc (odr_encode(), sizeof(*pdu->u.request));
+    pdu->u.request->libraryNo = odr_strdup(odr_encode(), "000200");
+    pdu->u.request->borrowerTickerNo = 0;
+    pdu->u.request->disposalType = 0;
+    pdu->u.request->lastUseDate = 0;
+    pdu->u.request->num_items = 0;
+    pdu->u.request->items = (Z_UrsRequestItem **) odr_nullval();
+    pdu->u.request->counter = 0;
+    pdu->u.request->priority = 0;
+    pdu->u.request->disposalNote = 0;
+    pdu->u.request->overrule = 0;
+
+    if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
+    {
+	yaz_log (LOG_LOG, "ursula encoding failed");
+	return 1;
+    }
+    char *buf = 
+	odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
+    
+    ext->u.single_ASN1_type->buf = (unsigned char*)
+	odr_malloc (odr_encode(), ext->u.single_ASN1_type->len);
+    memcpy (ext->u.single_ASN1_type->buf, buf, ext->u.single_ASN1_type->len);
+    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len;
+    
+    if (send_Z_PDU(apdu) >= 0)
+	wait();
+    return 1;
+}
+
 int MyClient::processCommand(const char *commandLine)
 {
     char cmdStr[1024], cmdArgs[1024];
@@ -584,6 +668,7 @@ int MyClient::processCommand(const char *commandLine)
 	{"init", &MyClient::cmd_init, ""},
 	{"format", &MyClient::cmd_format, "<record-syntax>"},
 	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
+	{"ursula", &MyClient::cmd_ursula, ""},
 	{0,0,0}
     };
     

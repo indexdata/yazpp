@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.9  2001-03-29 15:14:26  adam
+ * Revision 1.10  2001-04-04 14:02:49  adam
+ * URSULA / Z-ruth service.
+ *
+ * Revision 1.9  2001/03/29 15:14:26  adam
  * Minor updates.
  *
  * Revision 1.8  2001/03/27 14:47:45  adam
@@ -120,8 +123,82 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	}
 	if (!taken)
 	{
-	    yaz_log (LOG_LOG, "got request = %d", apdu_request->which);
+	    yaz_log (LOG_LOG, "unhandled request = %d", apdu_request->which);
 	    delete this;
 	}
     }
+}
+
+/*
+ * database record.
+ */
+void Yaz_Z_ServerUtility::create_databaseRecord (
+    ODR odr, Z_NamePlusRecord *rec, const char *dbname, int format,
+    const void *buf, int len)
+{
+    rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
+    rec->which = Z_NamePlusRecord_databaseRecord;
+    rec->u.databaseRecord = z_ext_record (odr, format,
+					  (const char *) buf, len);
+}
+
+/*
+ * surrogate diagnostic.
+ */
+void Yaz_Z_ServerUtility::create_surrogateDiagnostics(
+    ODR odr, Z_NamePlusRecord *rec, const char *dbname,
+    int error, char *const addinfo)
+{
+    int oid[OID_SIZE];
+    int *err = (int *)odr_malloc (odr, sizeof(*err));
+    oident bib1;
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (odr, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+	odr_malloc (odr, sizeof(*dr));
+    
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
+
+    yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
+    *err = error;
+    rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
+    rec->which = Z_NamePlusRecord_surrogateDiagnostic;
+    rec->u.surrogateDiagnostic = drec;
+    drec->which = Z_DiagRec_defaultFormat;
+    drec->u.defaultFormat = dr;
+    dr->diagnosticSetId = odr_oiddup (odr,
+                                      oid_ent_to_oid(&bib1, oid));
+    dr->condition = err;
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
+}
+
+Z_Records *Yaz_Z_ServerUtility::create_nonSurrogateDiagnostics (
+    ODR odr, int error, const char *addinfo)
+{
+    int oid[OID_SIZE];
+    Z_Records *rec = (Z_Records *)
+        odr_malloc (odr, sizeof(*rec));
+    oident bib1;
+    int *err = (int *)
+        odr_malloc (odr, sizeof(*err));
+    Z_DiagRec *drec = (Z_DiagRec *)
+        odr_malloc (odr, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+        odr_malloc (odr, sizeof(*dr));
+
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
+
+    *err = error;
+    rec->which = Z_Records_NSD;
+    rec->u.nonSurrogateDiagnostic = dr;
+    dr->diagnosticSetId =
+        odr_oiddup (odr, oid_ent_to_oid(&bib1, oid));
+    dr->condition = err;
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
+    return rec;
 }

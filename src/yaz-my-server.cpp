@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-server.cpp,v $
- * Revision 1.2  2001-03-29 15:14:26  adam
+ * Revision 1.3  2001-04-04 14:02:49  adam
+ * URSULA / Z-ruth service.
+ *
+ * Revision 1.2  2001/03/29 15:14:26  adam
  * Minor updates.
  *
  * Revision 1.1  2001/03/27 14:47:45  adam
@@ -70,6 +73,9 @@ class MyILL : public Yaz_Facility_ILL {
 public:
     int ill_init (Z_InitRequest *initRequest,
 		  Z_InitResponse *initResponse);
+    void ill_service (Z_ExtendedServicesRequest *req,
+		      Z_ItemOrder *io,
+		      Z_ExtendedServicesResponse *res);
 };
 
 class MyRetrieval : public Yaz_Facility_Retrieval, Yaz_USMARC {
@@ -88,6 +94,13 @@ public:
 		    Z_Records *records);
 };
 
+class MyUrsula : public Yaz_Facility_Ursula {
+public:
+    void ursula_service (Z_ExtendedServicesRequest *req,
+			 Z_UrsPDU *u,
+			 Z_ExtendedServicesResponse *res);
+};
+
 class MyServer : public Yaz_Z_Server {
 public:
     ~MyServer();
@@ -99,8 +112,9 @@ public:
     void connectNotify();
 
 private:
-    MyRetrieval *m_retrieval;
-    MyILL       *m_ill;
+    MyRetrieval m_retrieval;
+    MyILL       m_ill;
+    MyUrsula    m_ursula;
     int m_no;
 };
 
@@ -109,6 +123,41 @@ int MyILL::ill_init (Z_InitRequest *initRequest,
 {
     yaz_log (LOG_LOG, "MyILL::ill_init");
     return 1;
+}
+
+void MyILL::ill_service (Z_ExtendedServicesRequest *req,
+			 Z_ItemOrder *io,
+			 Z_ExtendedServicesResponse *res)
+{
+    yaz_log (LOG_LOG, "MyServer::ill_service");
+}
+
+
+void MyUrsula::ursula_service (Z_ExtendedServicesRequest *req,
+			       Z_UrsPDU *u,
+			       Z_ExtendedServicesResponse *res)
+{
+    yaz_log (LOG_LOG, "MyServer::ursula_service");
+    switch (u->which)
+    {
+    case  Z_UrsPDU_request:
+	yaz_log(LOG_LOG, "request");
+	if (u->u.request->libraryNo)
+	    yaz_log (LOG_LOG, "libraryNo: %s", u->u.request->libraryNo);
+	break;
+    case  Z_UrsPDU_update:
+	yaz_log(LOG_LOG, "request");
+	break;
+    case  Z_UrsPDU_reservation:
+	yaz_log(LOG_LOG, "request");
+	break;
+    case  Z_UrsPDU_renewal:
+	yaz_log(LOG_LOG, "request");
+	break;
+    default:
+	yaz_log(LOG_LOG, "unknown");
+	break;
+    }
 }
 
 int MyRetrieval::sr_init (Z_InitRequest *initRequest,
@@ -154,14 +203,12 @@ void MyRetrieval::sr_record (const char *resultSetName,
 {
     yaz_log (LOG_LOG, "MyServer::recv_Z_record");
     const char *rec = get_record(position);
-    create_databaseRecord (namePlusRecord, 0, VAL_USMARC, rec,
+    create_databaseRecord (odr_encode(), namePlusRecord, 0, VAL_USMARC, rec,
 			   strlen(rec));
 }
 
 MyServer::~MyServer()
 {
-    delete m_ill;
-    delete m_retrieval;
 }
 
 IYaz_PDU_Observer *MyServer::sessionNotify(
@@ -171,10 +218,9 @@ IYaz_PDU_Observer *MyServer::sessionNotify(
     m_no++;
     new_server = new MyServer(the_PDU_Observable);
     new_server->timeout(900);
-    new_server->m_retrieval = new MyRetrieval;
-    new_server->m_ill = new MyILL;
-    new_server->facility_add(new_server->m_retrieval, "my sr");
-    new_server->facility_add(new_server->m_ill, "my ill");
+    new_server->facility_add(&new_server->m_retrieval, "my sr");
+    new_server->facility_add(&new_server->m_ill, "my ill");
+    new_server->facility_add(&new_server->m_ursula, "my ill");
 
     new_server->set_APDU_log(get_APDU_log());
 
@@ -185,8 +231,6 @@ MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Server (the_PDU_Observable)
 {
     m_no = 0;
-    m_ill = 0;
-    m_retrieval = 0;
 }
 
 void MyServer::timeoutNotify()

@@ -23,6 +23,7 @@ AC_OUTPUT([
 	Makefile
 	src/Makefile
 	include/Makefile
+	include/yaz/Makefile
 	include/yaz++/Makefile
 	yaz++-config
 	src/yaz++-config
