@@ -3,7 +3,7 @@
   <title>YAZ C++ API</title>
   <para>
    The YAZ C++ API is an client - and server API that exposes
-   all YAZ features. The API doesn't hide YAZ C datastructures, but
+   all YAZ features. The API doesn't hide YAZ C data structures, but
    provides a set of useful high-level objects for creating clients -
    and servers.
   </para>
@@ -43,7 +43,7 @@
         virtual void deleteObserver(IYazSocketObserver *observer) = 0;
         // Delete all observers
         virtual void deleteObservers() = 0;
-        // Specify the events that the observer is intersted in.
+        // Specify the events that the observer is interested in.
         virtual void maskObserver(IYazSocketObserver *observer,
                                   int mask) = 0;
         // Specify timeout
@@ -229,7 +229,7 @@
        public:
          // Create object using the PDU Observer specified
          Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
-         // Destroy assocation and close PDU Observer
+         // Destroy association and close PDU Observer
          virtual ~Yaz_Z_Assoc();
          // Receive PDU
          void recv_PDU(const char *buf, int len);
