@@ -6,6 +6,7 @@ yazphp.dsl
 yazprint.dsl
 *.html
 *.php
+*.tkl
 yaz-proxy.8
 yaz++.tex
 yaz++.log
