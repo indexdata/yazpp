@@ -1,7 +1,7 @@
 # Copyright (C) 1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1999-01-28 09:41:07 adam Exp $
+# $Id: Makefile.in,v 1.2 1999-01-28 10:04:47 adam Exp $
 
 SHELL=/bin/sh
 
@@ -26,7 +26,7 @@ PROG2=yaz-server
 PROGO2=yaz-server.o
 PROG3=yaz-proxy
 PROGO3=yaz-proxy-main.o
-LIB=$(LIBDIR)/yazchan.lib
+LIB=libyaz++.lib
 PO=yaz-socket-manager.o yaz-pdu-assoc.o yaz-ir-assoc.o yaz-proxy.o
 
 .SUFFIXES: .cc
