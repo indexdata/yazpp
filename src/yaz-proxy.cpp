@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.89 2004-01-14 12:14:13 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.90 2004-01-15 15:47:52 adam Exp $
  */
 
 #include <assert.h>
@@ -111,6 +111,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
+    m_initRequest_options = 0;
+    m_initRequest_version = 0;
     m_apdu_invalid_session = 0;
     m_mem_invalid_session = 0;
     m_s2z_odr_init = 0;
@@ -426,7 +428,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
     {
 	if (apdu->which != Z_APDU_initRequest)
 	{
-	    yaz_log (LOG_LOG, "no first INIT!");
+	    yaz_log (LOG_LOG, "%sno init request as first PDU", m_session_str);
 	    return 0;
 	}
         Z_InitRequest *initRequest = apdu->u.initRequest;
@@ -445,7 +447,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
                     odr_strdup (odr_encode(), m_proxy_authentication);
             }
         }
-
 	// go through list of clients - and find the lowest/oldest one.
 	Yaz_ProxyClient *c_min = 0;
 	int min_seq = -1;
@@ -1001,6 +1002,37 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	    if (m_marcxml_flag)
 		convert_to_marcxml(p->u.databaseOrSurDiagnostics);
 	    convert_xsl(p->u.databaseOrSurDiagnostics);
+	}
+    }
+    else if (apdu->which == Z_APDU_initResponse)
+    {
+	if (m_initRequest_options)
+	{
+	    Z_Options *nopt = 
+		(Odr_bitmask *)odr_malloc(odr_encode(),
+					  sizeof(Odr_bitmask));
+	    ODR_MASK_ZERO(nopt);
+
+	    int i;
+	    for (i = 0; i<24; i++)
+		if (ODR_MASK_GET(m_initRequest_options, i) &&
+		    ODR_MASK_GET(apdu->u.initResponse->options, i))
+		    ODR_MASK_SET(nopt, i);
+	    apdu->u.initResponse->options = nopt;	    
+	}
+	if (m_initRequest_version)
+	{
+	    Z_ProtocolVersion *nopt = 
+		(Odr_bitmask *)odr_malloc(odr_encode(),
+					  sizeof(Odr_bitmask));
+	    ODR_MASK_ZERO(nopt);
+
+	    int i;
+	    for (i = 0; i<8; i++)
+		if (ODR_MASK_GET(m_initRequest_version, i) &&
+		    ODR_MASK_GET(apdu->u.initResponse->protocolVersion, i))
+		    ODR_MASK_SET(nopt, i);
+	    apdu->u.initResponse->protocolVersion = nopt;	    
 	}
     }
     int r = send_PDU_convert(apdu, &len);
@@ -1866,6 +1898,29 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 		nmem_destroy(m_initRequest_mem);
 	    m_initRequest_apdu = apdu;
 	    m_initRequest_mem = odr_extract_mem(odr_decode());
+
+	    // save init options for the response..
+	    m_initRequest_options = apdu->u.initRequest->options;
+	    
+	    apdu->u.initRequest->options = 
+		(Odr_bitmask *)nmem_malloc(m_initRequest_mem,
+					   sizeof(Odr_bitmask));
+	    ODR_MASK_ZERO(apdu->u.initRequest->options);
+	    int i;
+	    for (i = 0; i<= 24; i++)
+		ODR_MASK_SET(apdu->u.initRequest->options, i);
+	    ODR_MASK_CLEAR(apdu->u.initRequest->options,
+			   Z_Options_negotiationModel);
+
+	    // make new version
+	    m_initRequest_version = apdu->u.initRequest->protocolVersion;
+	    apdu->u.initRequest->protocolVersion = 
+		(Odr_bitmask *)nmem_malloc(m_initRequest_mem,
+					   sizeof(Odr_bitmask));
+	    ODR_MASK_ZERO(apdu->u.initRequest->protocolVersion);
+
+	    for (i = 0; i<= 8; i++)
+		ODR_MASK_SET(apdu->u.initRequest->protocolVersion, i);
 	}
 	if (m_client->m_init_flag)
 	{
@@ -1878,6 +1933,10 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 					   m_client->m_cookie);
 	    apdu2->u.initResponse->referenceId =
 		apdu->u.initRequest->referenceId;
+	    apdu2->u.initResponse->options = m_client->m_initResponse_options;
+	    apdu2->u.initResponse->protocolVersion = 
+		m_client->m_initResponse_version;
+
 	    send_to_client(apdu2);
 	    return;
 	}
@@ -2043,19 +2102,14 @@ void Yaz_ProxyClient::pre_init_client()
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
     
-    ODR_MASK_SET(req->options, Z_Options_search);
-    ODR_MASK_SET(req->options, Z_Options_present);
-    ODR_MASK_SET(req->options, Z_Options_namedResultSets);
-    ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
-    ODR_MASK_SET(req->options, Z_Options_scan);
-    ODR_MASK_SET(req->options, Z_Options_sort);
-    ODR_MASK_SET(req->options, Z_Options_extendedServices);
-    ODR_MASK_SET(req->options, Z_Options_delSet);
-    
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
-    
+    int i;
+    for (i = 0; i<= 24; i++)
+	ODR_MASK_SET(req->options, i);
+    ODR_MASK_CLEAR(apdu->u.initRequest->options,
+		   Z_Options_negotiationModel);
+    for (i = 0; i<= 10; i++)
+	ODR_MASK_SET(req->protocolVersion, i);
+
     if (send_to_target(apdu) < 0)
     {
 	delete this;
@@ -2226,6 +2280,8 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable,
     m_waiting = 0;
     m_init_odr = odr_createmem (ODR_DECODE);
     m_initResponse = 0;
+    m_initResponse_options = 0;
+    m_initResponse_version = 0;
     m_resultSetStartPoint = 0;
     m_bytes_sent = m_bytes_recv = 0;
     m_pdu_recv = 0;
@@ -2290,6 +2346,8 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 	odr_reset (m_init_odr);
         nmem_transfer (m_init_odr->mem, nmem);
         m_initResponse = apdu;
+	m_initResponse_options = apdu->u.initResponse->options;
+	m_initResponse_version = apdu->u.initResponse->protocolVersion;
 
 	Z_InitResponse *ir = apdu->u.initResponse;
 	char *im0 = ir->implementationName;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.34 2004-01-14 12:14:13 adam Exp $
+ * $Id: proxy.h,v 1.35 2004-01-15 15:47:52 adam Exp $
  */
 
 #include <sys/time.h>
@@ -167,6 +167,8 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     int m_pdu_recv;
     ODR m_init_odr;
     Z_APDU *m_initResponse;
+    Z_Options *m_initResponse_options;
+    Z_ProtocolVersion *m_initResponse_version;
     Yaz_RecordCache m_cache;
     void pre_init_client();
     int m_target_idletime;
@@ -243,6 +245,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void convert_to_marcxml(Z_NamePlusRecordList *p);
     void convert_xsl(Z_NamePlusRecordList *p);
     Z_APDU *m_initRequest_apdu;
+    Z_Options *m_initRequest_options;
+    Z_ProtocolVersion *m_initRequest_version;
     NMEM m_initRequest_mem;
     Z_APDU *m_apdu_invalid_session;
     NMEM m_mem_invalid_session;
