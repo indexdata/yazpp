@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.3 2004-02-26 23:41:58 adam Exp $
+ * $Id: zlint.cpp,v 1.4 2004-03-20 15:06:53 adam Exp $
  */
 
 #include <yaz/pquery.h>
@@ -947,24 +947,96 @@ void Zlint::args(int argc, char **argv)
     }
 }
 
-int main(int argc, char **argv)
+class Zlint_driver_t;
+class Zlint_driver : public Yaz_Z_Assoc {
+public:
+    Zlint_driver(IYaz_PDU_Observable *the_PDU_Observable);
+    ~Zlint_driver();
+    void add_test(Zlint_test *i);
+    void set_host(const char *cp);
+private:
+    void connectNotify();
+    void timeoutNotify();
+    void failNotify();
+    void recv_GDU(Z_GDU *apdu, int len);
+    IYaz_PDU_Observable *m_PDU_Observable;
+    IYaz_PDU_Observer *sessionNotify(
+	IYaz_PDU_Observable *the_PDU_Observable, int fd);
+    Zlint_driver_t *m_tests;
+    char *m_host;
+};
+
+class Zlint_driver_t {
+public:
+    friend class Zlint_driver;
+    Zlint_driver_t(Zlint_test *t);
+private:
+    Zlint_test *m_t;
+    Zlint_driver_t *m_next;
+};
+
+void Zlint_driver::set_host(const char *cp)
 {
-    Yaz_SocketManager mySocketManager;
-    Zlint z(new Yaz_PDU_Assoc(&mySocketManager));
+    xfree(m_host);
+    m_host = xstrdup(cp);
+}
+
+Zlint_driver::Zlint_driver(IYaz_PDU_Observable *the_PDU_Observable) : 
+    Yaz_Z_Assoc(the_PDU_Observable)
     
-    z.args(argc, argv);
+{
+    m_PDU_Observable = the_PDU_Observable;
+    m_host = 0;
+    m_tests = 0;
+}
 
-    z.nextTest();
 
-    while (mySocketManager.processEvent() > 0)
-	;
-    exit (0);
+Zlint_driver::~Zlint_driver()
+{
+    xfree(m_host);
+}
+
+void Zlint_driver::timeoutNotify()
+{
+}
+
+void Zlint_driver::failNotify()
+{
+}
+
+void Zlint_driver::connectNotify()
+{
+}
+
+void Zlint_driver::recv_GDU(Z_GDU *gdu, int len)
+{
+
+}
+
+IYaz_PDU_Observer *Zlint_driver::sessionNotify(
+    IYaz_PDU_Observable *the_PDU_Observable, int fd)
+{
+    return 0;
+}
+
+void Zlint_driver::add_test(Zlint_test *t)
+{
+    Zlint_driver_t **d = &m_tests;
+    while (*d)
+	d = &(*d)->m_next;
+    *d = new Zlint_driver_t(t);
+}
+
+Zlint_driver_t::Zlint_driver_t(Zlint_test *t)
+{
+    m_t = t;
+    m_next = 0;
 }
 
 class Zlint_test_01 : public Zlint_test {
 public:
     Zlint_test_01();
-    ~Zlint_test_01();
+    virtual ~Zlint_test_01();
     Zlint_code init(Zlint *z);
     Zlint_code recv_gdu(Zlint *z, Z_GDU *gdu);
     Zlint_code recv_fail(Zlint *z, int reason);
@@ -1015,3 +1087,18 @@ Zlint_code Zlint_test_01::recv_fail(Zlint *z, int reason)
 {
     return TEST_FINISHED;
 }
+
+int main(int argc, char **argv)
+{
+    Yaz_SocketManager mySocketManager;
+    Zlint z(new Yaz_PDU_Assoc(&mySocketManager));
+    
+    z.args(argc, argv);
+
+    z.nextTest();
+
+    while (mySocketManager.processEvent() > 0)
+	;
+    exit (0);
+}
+
