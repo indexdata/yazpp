@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.57 2003-10-13 19:16:29 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.58 2003-10-13 22:38:07 adam Exp $
  */
 
 #include <assert.h>
@@ -1189,8 +1189,6 @@ void Yaz_ProxyClient::shutdown()
 {
     yaz_log (LOG_LOG, "%sShutdown (proxy to target) %s", get_session_str(),
 	     get_hostname());
-    m_waiting = 1;
-    m_root->pre_init();
     delete m_server;
     delete this;
 }
@@ -1362,6 +1360,8 @@ void Yaz_ProxyClient::timeoutNotify()
 {
     yaz_log (LOG_LOG, "%sTimeout (proxy to target) %s", get_session_str(),
 	     get_hostname());
+    m_waiting = 1;
+    m_root->pre_init();
     shutdown();
 }
 
