@@ -1,6 +1,9 @@
---- 0.7.9 2004/02/24 Internal release.
+--- 0.7.9 2004/02/25 Internal release.
 
 Deal with init message sizes for reuse sessions.
+
+Add implemenation of zlint. Z39.50 utility that checks for common errors
+on servers. Ala UNIX' lint.
 
 --- 0.7.8 2004/02/16 Internal release.
 
