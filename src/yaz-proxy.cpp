@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.102 2004-02-16 10:47:37 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.103 2004-02-24 20:55:57 adam Exp $
  */
 
 #include <assert.h>
@@ -111,6 +111,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
+    m_initRequest_preferredMessageSize = 0;
+    m_initRequest_maximumRecordSize = 0;
     m_initRequest_options = 0;
     m_initRequest_version = 0;
     m_apdu_invalid_session = 0;
@@ -1079,6 +1081,18 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 		    ODR_MASK_SET(nopt, i);
 	    apdu->u.initResponse->protocolVersion = nopt;	    
 	}
+	apdu->u.initResponse->preferredMessageSize =
+	    odr_intdup(odr_encode(),
+		       m_client->m_initResponse_preferredMessageSize >
+		       m_initRequest_preferredMessageSize ?
+		       m_initRequest_preferredMessageSize :
+		       m_client->m_initResponse_preferredMessageSize);
+	apdu->u.initResponse->maximumRecordSize =
+	    odr_intdup(odr_encode(),
+		       m_client->m_initResponse_maximumRecordSize >
+		       m_initRequest_maximumRecordSize ?
+		       m_initRequest_maximumRecordSize :
+		       m_client->m_initResponse_maximumRecordSize);
     }
     int r = send_PDU_convert(apdu);
     if (r)
@@ -1971,6 +1985,13 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 	    m_initRequest_apdu = apdu;
 	    m_initRequest_mem = odr_extract_mem(odr_decode());
 
+	    m_initRequest_preferredMessageSize = *apdu->u.initRequest->
+		preferredMessageSize;
+	    *apdu->u.initRequest->preferredMessageSize = 1024*1024;
+	    m_initRequest_maximumRecordSize = *apdu->u.initRequest->
+		maximumRecordSize;
+	    *apdu->u.initRequest->maximumRecordSize = 1024*1024;
+
 	    // save init options for the response..
 	    m_initRequest_options = apdu->u.initRequest->options;
 	    
@@ -2237,6 +2258,7 @@ void Yaz_Proxy::pre_init()
 	    {
 		Yaz_ProxyClient *c;
 		int spare = 0;
+		int spare_waiting = 0;
 		int in_use = 0;
 		int other = 0;
 		for (c = m_clientPool; c; c = c->m_next)
@@ -2246,7 +2268,10 @@ void Yaz_Proxy::pre_init()
 			if (c->m_cookie == 0)
 			{
 			    if (c->m_server == 0)
-				spare++;
+				if (c->m_waiting)
+				    spare_waiting;
+				else
+				    spare++;
 			    else
 				in_use++;
 			}
@@ -2255,8 +2280,9 @@ void Yaz_Proxy::pre_init()
 		    }
 		}
 		yaz_log(LOG_LOG, "%spre-init %s %s use=%d other=%d spare=%d "
-			"preinit=%d",m_session_str,
-			name, zurl_in_use[j], in_use, other, spare, pre_init);
+			"sparew=%d preinit=%d",m_session_str,
+			name, zurl_in_use[j], in_use, other,
+			spare, spare_waiting, pre_init);
 		if (spare < pre_init)
 		{
 		    c = new Yaz_ProxyClient(m_PDU_Observable->clone(), this);
@@ -2363,6 +2389,8 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable,
     m_initResponse = 0;
     m_initResponse_options = 0;
     m_initResponse_version = 0;
+    m_initResponse_preferredMessageSize = 0;
+    m_initResponse_maximumRecordSize = 0;
     m_resultSetStartPoint = 0;
     m_bytes_sent = m_bytes_recv = 0;
     m_pdu_recv = 0;
@@ -2430,6 +2458,10 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
         m_initResponse = apdu;
 	m_initResponse_options = apdu->u.initResponse->options;
 	m_initResponse_version = apdu->u.initResponse->protocolVersion;
+	m_initResponse_preferredMessageSize = 
+	    *apdu->u.initResponse->preferredMessageSize;
+	m_initResponse_maximumRecordSize = 
+	    *apdu->u.initResponse->maximumRecordSize;
 
 	Z_InitResponse *ir = apdu->u.initResponse;
 	char *im0 = ir->implementationName;

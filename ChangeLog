@@ -1,3 +1,7 @@
+--- 0.7.9 2004/02/24 Internal release.
+
+Deal with init message sizes for reuse sessions.
+
 --- 0.7.8 2004/02/16 Internal release.
 
 For yaz-proxy, allow maximum number of files to be specified (setrlimit) with

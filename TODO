@@ -9,8 +9,6 @@ Live status (via search, present).
 
 Possible threading.
 
-Deal with Z39.50 messages sizes properly.
-
 Character set conversion for SRW queries.
 
 Throw proper CQL conversion error.
