@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.10  2000-09-08 10:23:42  adam
+ * Revision 1.11  2000-10-11 11:58:17  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.10  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.9  2000/08/07 14:19:59  adam
@@ -49,8 +53,7 @@
 #include <string.h>
 
 #include <yaz/log.h>
-#include <yaz-socket-manager.h>
-
+#include <yaz++/yaz-socket-manager.h>
 
 Yaz_SocketManager::YazSocketEntry **Yaz_SocketManager::lookupObserver(
     IYazSocketObserver *observer)

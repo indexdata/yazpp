@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.h,v 1.11 2000-09-08 10:23:42 adam Exp $
+ * $Id: yaz-ir-assoc.h,v 1.1 2000-10-11 11:58:16 adam Exp $
  */
 
-#include <yaz-z-assoc.h>
-#include <yaz-z-query.h>
+#include <yaz++/yaz-z-assoc.h>
+#include <yaz++/yaz-z-query.h>
 
 /** Information Retrieval Assocation.
     This object implements the client - and server role of a generic

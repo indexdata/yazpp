@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.3  2000-09-21 21:43:20  adam
+ * Revision 1.4  2000-10-11 11:58:17  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.3  2000/09/21 21:43:20  adam
  * Better high-level server API.
  *
  * Revision 1.2  2000/09/12 12:09:53  adam
@@ -15,7 +19,7 @@
  */
 
 #include <yaz/log.h>
-#include <yaz-z-server.h>
+#include <yaz++/yaz-z-server.h>
 
 
 Yaz_Z_Server::Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable)

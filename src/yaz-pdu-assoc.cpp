@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.16  2000-09-22 09:54:11  heikki
+ * Revision 1.17  2000-10-11 11:58:16  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.16  2000/09/22 09:54:11  heikki
  * minor
  *
  * Revision 1.15  2000/09/21 21:43:20  adam
@@ -60,7 +64,7 @@
 
 #include <assert.h>
 
-#include <yaz-pdu-assoc.h>
+#include <yaz++/yaz-pdu-assoc.h>
 
 #include <yaz/log.h>
 #include <yaz/tcpip.h>
@@ -393,7 +397,7 @@ void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)
     }
 }
 
-#if 0
+#if 1
  // 1 = single-threaded
  // 0 = multi-threaded
 
@@ -411,7 +415,7 @@ void Yaz_PDU_Assoc::childNotify(int fd)
 }
 #else
 
-#include <yaz-socket-manager.h>
+#include <yaz++/yaz-socket-manager.h>
 
 #ifdef WIN32
 #include <process.h>

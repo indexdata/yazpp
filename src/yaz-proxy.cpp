@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.18  2000-09-08 10:23:42  adam
+ * Revision 1.19  2000-10-11 11:58:16  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.18  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.17  2000/09/05 13:57:28  adam
@@ -70,7 +74,7 @@
 #include <time.h>
 
 #include <yaz/log.h>
-#include <yaz-proxy.h>
+#include <yaz++/yaz-proxy.h>
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_Z_Assoc(the_PDU_Observable)

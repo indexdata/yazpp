@@ -1,16 +1,14 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.5 2000-09-13 12:22:32 adam Exp $
+$Id: README.txt,v 1.6 2000-10-11 11:58:16 adam Exp $
  
 o Introduction
 
-YAZ is a development toolkit that implements the ANSI Z39.50 protocol.
+YAZ++ is a C++ layer for YAZ and implements the ANSI Z39.50
+protocol for information retrieval (client - and server side).
 YAZ homepage is: http://www.indexdata.dk/yaz/
-YAZ++ uses the same license as YAZ - see LICENSE file for
-details.
 
-YAZ++ is a C++ wrapper on top of that YAZ and provides a relatively
-simple interface to YAZ.
+YAZ++ uses the same license as YAZ - see LICENSE file for details.
 
 o Overview
 
@@ -29,7 +27,6 @@ Directory structure of the YAZ++ package.
   -- src (C++ source)
   -- include (C++ headers) 
   -- doc (documentation)
-  -- unix (UNIX configure script and Makefile)
   -- win (Windows build files)
 
 o Installation, Unix
@@ -37,18 +34,17 @@ o Installation, Unix
 Make sure you have a C - and C++ compiler available. gcc and
 g++ works fine.
 
-Before compilation can take place YAZ must be installed. Unpack
-yaz-<version>.tar.gz in the same directory as yaz++. First
-build YAZ:
+Before compilation can take place YAZ must be installed. It goes, roughly,
+like this:
 
   $ cd yaz-<version>
   $ ./configure
   $ make
+  $ cd ..
 
 Then, build YAZ++:
 
   $ cd yaz++-<version>
-  $ cd unix
   $ ./configure
   $ make
 

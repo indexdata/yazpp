@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-query.h,v 1.3 2000-09-08 10:23:42 adam Exp $
+ * $Id: yaz-query.h,v 1.1 2000-10-11 11:58:16 adam Exp $
  */
 
 

@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.h,v 1.7 2000-09-12 16:40:33 heikki Exp $
+ * $Id: yaz-socket-manager.h,v 1.1 2000-10-11 11:58:16 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
 #define YAZ_SOCKET_MANAGER_INCLUDED
 
-#include <yaz-socket-observer.h>
+#include <yaz++/yaz-socket-observer.h>
 #include <time.h>
 
 /** Simple Socket Manager.

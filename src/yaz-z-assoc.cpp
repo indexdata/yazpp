@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.14  2000-09-12 16:40:33  heikki
+ * Revision 1.15  2000-10-11 11:58:17  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.14  2000/09/12 16:40:33  heikki
  * minor
  *
  * Revision 1.13  2000/09/08 10:23:42  adam
@@ -58,7 +62,7 @@
 #include <assert.h>
 
 #include <yaz/log.h>
-#include <yaz-z-assoc.h>
+#include <yaz++/yaz-z-assoc.h>
 #include <yaz/otherinfo.h>
 
 int Yaz_Z_Assoc::yaz_init_func()

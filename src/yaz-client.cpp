@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.14  2000-09-08 10:23:42  adam
+ * Revision 1.15  2000-10-11 11:58:16  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.14  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.13  2000/09/06 14:23:45  adam
@@ -55,9 +59,9 @@
 #include <yaz/log.h>
 #include <yaz/options.h>
 #include <yaz/diagbib1.h>
-#include <yaz-ir-assoc.h>
-#include <yaz-pdu-assoc.h>
-#include <yaz-socket-manager.h>
+#include <yaz++/yaz-ir-assoc.h>
+#include <yaz++/yaz-pdu-assoc.h>
+#include <yaz++/yaz-socket-manager.h>
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H

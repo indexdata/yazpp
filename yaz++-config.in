@@ -1,0 +1,103 @@
+#!/bin/sh
+# $Id: yaz++-config.in,v 1.1 2000-10-11 11:58:16 adam Exp $
+yazppprefix=@prefix@
+yaz_echo_cflags=no
+yaz_echo_libs=no
+yaz_echo_help=no
+yaz_echo_tabs=no
+yaz_echo_source=yes
+yaz_echo_lalibs=no
+yazpp_src_root=@YAZPP_SRC_ROOT@
+
+yazlibs="@YAZLIB@ @LIBS@"
+YAZPPVERSION=@VERSION@
+
+usage()
+{
+	cat <<EOF
+Usage: yaz++-config [OPTIONS] [LIBRARIES]
+Options:
+	[--prefix[=DIR]]
+	[--version]
+	[--libs]
+	[--lalibs]
+	[--cflags]
+EOF
+	exit $1
+}
+
+#if test $# -eq 0; then
+#	yaz_echo_help=yes
+#fi
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
+
+  case $1 in
+    --prefix=*)
+      yazppprefix=$optarg
+      ;;
+    --prefix)
+      echo $yazppprefix
+      exit 0
+      ;;
+    --version)
+      echo $YAZPPVERSION
+      exit 0
+      ;;
+    --cflags)
+      yaz_echo_cflags=yes
+      ;;
+    --libs)
+      yaz_echo_libs=yes
+      ;;
+    --tabs)
+      yaz_echo_tabs=yes
+      ;;
+    --source)
+      yaz_echo_source=yes
+      ;;
+    --lalibs)
+      yaz_echo_lalibs=yes
+      ;;
+    -*)
+      yaz_echo_help=yes
+      ;;
+  esac
+  shift
+done
+
+if test "$yaz_echo_source" = "yes"; then
+    YAZPPLIB="-L${yazpp_src_root}/src/.libs -lyaz++ $yazlibs"
+    YAZPPLALIB="${yazpp_src_root}/src/libyaz++.la $yazlibs"
+    YAZPPINC="@YAZINC@ -I${yazpp_src_root}/include"
+else
+
+    if test "$yazppprefix" = "/usr"; then
+	YAZPPLIB="-lyaz++ $yazlibs"
+    else
+	YAZPPLIB="-L${yazppprefix}/lib -lyaz++ $yazlibs"
+    fi
+    YAZPPLALIB=$YAZPPLIB
+    if test "$yazppprefix" = "/usr"; then
+	YAZPPINC=
+    else
+	YAZPPINC="@YAZINC@ -I${yazppprefix}/include"
+    fi
+fi
+
+if test "$yaz_echo_help" = "yes"; then
+	usage 1 1>&2
+fi
+if test "$yaz_echo_cflags" = "yes"; then
+	echo $YAZPPINC
+fi
+if test "$yaz_echo_libs" = "yes"; then
+	echo $YAZPPLIB
+fi
+if test "$yaz_echo_lalibs" = "yes"; then
+	echo $YAZPPLALIB
+fi

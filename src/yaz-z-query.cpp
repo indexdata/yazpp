@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.8  2000-09-08 10:23:42  adam
+ * Revision 1.9  2000-10-11 11:58:17  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.8  2000/09/08 10:23:42  adam
  * Added skeleton of yaz-z-server.
  *
  * Revision 1.7  2000/05/10 11:36:58  ian
@@ -35,7 +39,7 @@
  *
  */
 
-#include <yaz-z-query.h>
+#include <yaz++/yaz-z-query.h>
 #include <yaz/pquery.h>
 
 Yaz_Z_Query::Yaz_Z_Query()

@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.12  2000-09-21 21:43:20  adam
+ * Revision 1.13  2000-10-11 11:58:16  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.12  2000/09/21 21:43:20  adam
  * Better high-level server API.
  *
  * Revision 1.11  2000/09/12 16:23:49  adam
@@ -45,9 +49,9 @@
  */
 
 #include <yaz/log.h>
-#include <yaz-z-server.h>
-#include <yaz-pdu-assoc.h>
-#include <yaz-socket-manager.h>
+#include <yaz++/yaz-z-server.h>
+#include <yaz++/yaz-pdu-assoc.h>
+#include <yaz++/yaz-socket-manager.h>
 
 class MyServer : public Yaz_Z_Server {
 public:

@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.13  2000-09-06 14:23:45  adam
+ * Revision 1.14  2000-10-11 11:58:16  adam
+ * Moved header files to include/yaz++. Switched to libtool and automake.
+ * Configure script creates yaz++-config script.
+ *
+ * Revision 1.13  2000/09/06 14:23:45  adam
  * WIN32 updates.
  *
  * Revision 1.12  2000/05/10 11:36:58  ian
@@ -41,7 +45,7 @@
 #include <assert.h>
 
 #include <yaz/log.h>
-#include <yaz-ir-assoc.h>
+#include <yaz++/yaz-ir-assoc.h>
 
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     : Yaz_Z_Assoc(the_PDU_Observable)

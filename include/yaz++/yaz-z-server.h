@@ -2,10 +2,10 @@
  * Copyright (c) 2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.3 2000-09-21 21:43:20 adam Exp $
+ * $Id: yaz-z-server.h,v 1.1 2000-10-11 11:58:16 adam Exp $
  */
 
-#include <yaz-z-assoc.h>
+#include <yaz++/yaz-z-assoc.h>
 
 class YAZ_EXPORT Yaz_Z_Server : public Yaz_Z_Assoc {
 public:
