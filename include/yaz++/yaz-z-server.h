@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.3 2001-03-27 14:47:45 adam Exp $
+ * $Id: yaz-z-server.h,v 1.4 2001-04-02 13:39:34 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -64,7 +64,13 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility {
     void create_surrogateDiagnostics(Z_NamePlusRecord *rec,
 				     const char *dbname, int error,
 				     char *const addinfo);
+    
+    Z_Records *create_nonSurrogateDiagnostics (int error,
+    					       const char *addinfo);
+    
+
     virtual ODR odr_encode();
+
  private:
     Z_Records *pack_records (const char *resultSetName,
 			     int start, int num,
@@ -72,9 +78,6 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IYaz_Server_Facility {
 			     int *next, int *pres,
 			     int *oid);
 
-    Z_Records *create_nonSurrogateDiagnostics (int error,
-					       const char *addinfo);
-    
     void fetch_via_piggyback (Z_SearchRequest *searchRequest,
 			      Z_SearchResponse *searchResponse);
     void fetch_via_present (Z_PresentRequest *req, Z_PresentResponse *res);

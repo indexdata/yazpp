@@ -110,6 +110,10 @@ SOURCE="..\..\include\yaz++\yaz-ir-assoc.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\src\yaz-pdu-assoc-thread.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-pdu-assoc.cpp"
 # End Source File
 # Begin Source File
@@ -155,6 +159,14 @@ SOURCE="..\..\src\yaz-z-query.cpp"
 # Begin Source File
 
 SOURCE="..\..\include\yaz++\yaz-z-query.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\src\yaz-z-server-ill.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\src\yaz-z-server-sr.cpp"
 # End Source File
 # Begin Source File
 
