@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.20  2000-11-20 11:27:33  adam
+ * Revision 1.21  2000-11-20 14:17:36  adam
+ * Yet another WIN32 fix for connect notify.
+ *
+ * Revision 1.20  2000/11/20 11:27:33  adam
  * Fixes for connect operation (timeout and notify fix).
  *
  * Revision 1.19  2000/11/01 14:22:59  adam
@@ -108,7 +111,7 @@ void Yaz_PDU_Assoc::socketNotify(int event)
     switch (m_state)
     {
     case Connecting:
-	if (event & YAZ_SOCKET_OBSERVE_READ)
+	if (event & (YAZ_SOCKET_OBSERVE_READ|YAZ_SOCKET_OBSERVE_EXCEPT))
 	{
 	    close();
 	    m_PDU_Observer->failNotify();
@@ -390,7 +393,7 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 				     YAZ_SOCKET_OBSERVE_WRITE);
     if (res >= 0)
 	m_state = Connecting;
-    // if res < 0, then cs_connect failed immediately. state is Closed..
+    // if res < 0, then cs_connect failed immediately -> m_state is Closed..
 }
 
 void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)

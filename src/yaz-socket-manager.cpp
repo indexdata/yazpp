@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.13  2000-11-20 11:27:33  adam
+ * Revision 1.14  2000-11-20 14:17:36  adam
+ * Yet another WIN32 fix for connect notify.
+ *
+ * Revision 1.13  2000/11/20 11:27:33  adam
  * Fixes for connect operation (timeout and notify fix).
  *
  * Revision 1.12  2000/10/24 12:29:57  adam
@@ -164,11 +167,20 @@ int Yaz_SocketManager::processEvent()
 	if (p->mask)
 	    no++;
 	if (p->mask & YAZ_SOCKET_OBSERVE_READ)
+        {
+            yaz_log (m_log, "select fd=%d: read fd", fd);
 	    FD_SET(fd, &in);
+        }
 	if (p->mask & YAZ_SOCKET_OBSERVE_WRITE)
+        {
+            yaz_log (m_log, "select fd=%d: write fd", fd);
 	    FD_SET(fd, &out);
+        }
 	if (p->mask & YAZ_SOCKET_OBSERVE_EXCEPT)
+        {
+            yaz_log (m_log, "select fd=%d: except fd", fd);
 	    FD_SET(fd, &except);
+        }
 	if (fd > max)
 	    max = fd;
 	if (p->timeout)
