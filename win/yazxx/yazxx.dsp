@@ -102,6 +102,49 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).dll $(ProjDir)\..\..\..\bin
 # Name "yazxx - Win32 Debug"
 # Begin Source File
 
+SOURCE=..\..\src\ursula.asn
+
+!IF  "$(CFG)" == "yazxx - Win32 Release"
+
+# Begin Custom Build
+WkspDir=.
+InputPath=..\..\src\ursula.asn
+
+BuildCmds= \
+	cd $(WkspDir)\..\src \
+	"C:\Program Files\Tcl\bin\tclsh82.exe" ..\..\yaz\util\yaz-comp -I ..\include -i yaz -d ..\..\yaz\z39.50\z.tcl -d ursula.tcl ursula.asn \
+	
+
+"$(WkspDir)\..\src\zes-ursula.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(WkspDir)\..\include\yaz\zes-ursula.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
+
+# Begin Custom Build - ASN.1 compiling...
+WkspDir=.
+InputPath=..\..\src\ursula.asn
+
+BuildCmds= \
+	cd $(WkspDir)\..\src \
+	"C:\Program Files\Tcl\bin\tclsh82.exe" ..\..\yaz\util\yaz-comp -I ..\include -i yaz -d ..\..\yaz\z39.50\z.tcl -d ursula.tcl ursula.asn \
+	
+
+"$(WkspDir)\..\src\zes-ursula.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(WkspDir)\..\include\yaz\zes-ursula.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-ir-assoc.cpp"
 # End Source File
 # Begin Source File
@@ -170,11 +213,37 @@ SOURCE="..\..\src\yaz-z-server-sr.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\src\yaz-z-server-ursula.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-server.cpp"
 # End Source File
 # Begin Source File
 
 SOURCE="..\..\include\yaz++\yaz-z-server.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\src\zes-ursula.c"
+
+!IF  "$(CFG)" == "yazxx - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\yaz\zes-ursula.h"
+
+!IF  "$(CFG)" == "yazxx - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "yazxx - Win32 Debug"
+
+!ENDIF 
+
 # End Source File
 # End Target
 # End Project
