@@ -225,6 +225,14 @@ SOURCE="..\..\include\yaz++\yaz-z-assoc.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\src\yaz-z-databases.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\yaz++\yaz-z-databases.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-query.cpp"
 # End Source File
 # Begin Source File

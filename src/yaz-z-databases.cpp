@@ -2,7 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-databases.cpp,v 1.1 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-z-databases.cpp,v 1.2 2001-11-06 20:33:32 adam Exp $
  */
 
 #include <string.h>
@@ -41,7 +41,7 @@ void Yaz_Z_Databases::get (NMEM n, int *num, char ***db)
 
 void Yaz_Z_Databases::get (ODR o, int *num, char ***db)
 {
-    return get (o->mem, num, db);
+    get (o->mem, num, db);
 }
 
 int Yaz_Z_Databases::match (Yaz_Z_Databases &db)

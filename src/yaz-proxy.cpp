@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.29 2001-11-06 17:08:05 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.30 2001-11-06 20:33:32 adam Exp $
  */
 
 #include <assert.h>
@@ -478,6 +478,7 @@ const char *Yaz_Proxy::option(const char *name, const char *value)
         }
 	return m_optimize;
     }
+    return 0;
 }
 
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
