@@ -1,5 +1,5 @@
 <chapter id="proxy">
-  <!-- $Id: proxy.xml,v 1.4 2002-10-22 14:04:17 mike Exp $ -->
+  <!-- $Id: proxy.xml,v 1.5 2002-10-22 21:21:54 adam Exp $ -->
  <title>YAZ Proxy</title>
   <para>
    The YAZ proxy is a transparent Z39.50 to Z39.50 gateway.
@@ -7,15 +7,14 @@
    Z39.50 packages through fire walls, etc.
   </para>
   <para>
-   Furthermore, the proxy offers facilities that often
-   boost performance for "connection-less" Z39.50 clients such
-   as web gateways.
+   Furthermore, the proxy offers facilities that often boost
+   performance for stateless Z39.50 clients such as web gateways.
   </para>
   <para>
    Unlike most other "server" software the proxy runs single-threaded,
    single-process. Every I/O operation
    is non-blocking so it is light-weight and very fast.
-   It does not store "state" information on the hard drive
+   It does not store state information on the hard drive
    except the log files you want.
   </para>
   <section id="proxy-target">
@@ -26,7 +25,7 @@
     <orderedlist>
      <listitem>
       <para> If the Initialize Request PDU from the client
-       includes Other-Information, with OID,
+       includes Other-Information, with OID 
        <literal>1.2.840.10003.10.1000.81.1</literal>, that
        specifies the target.
       </para>
@@ -173,11 +172,11 @@
      <title>EXAMPLES</title>
      <para>
       The following starts the proxy so that it listens on port
-      9000. The default backend target is LOC.
+      9000. The default backend target is the LOC target.
       <screen>
        $ yaz-proxy -t z3950.loc.gov:7090 @:9000
       </screen>
-      The LOC target is sometimes very slow. You can connect to
+      This target is sometimes very slow. You can connect to
       it using yaz-client as follows:
       <screen>
 $ yaz-client localhost:9000/voyager
@@ -210,7 +209,8 @@ Elapsed: 0.001417
      <para>
       The YAZ client allows you to set the backend target in
       the Initialize Request using option -p. To connect to
-      Index Data's target you could use:
+      Index Data's target through a proxy on localhost, port 9000,
+      you could use:
       <screen>
        yaz-client -p indexdata.dk localhost:9000/gils
       </screen>
