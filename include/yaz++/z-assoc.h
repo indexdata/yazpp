@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.4 2003-10-16 16:10:43 adam Exp $
+ * $Id: z-assoc.h,v 1.5 2003-10-23 11:45:08 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -35,7 +35,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     /// Begin Z39.50 client role
     int client(const char *addr);
     /// Begin Z39.50 server role
-    void server(const char *addr);
+    int server(const char *addr);
     /// Close connection
     void close();
     /// Decode Z39.50 PDU.

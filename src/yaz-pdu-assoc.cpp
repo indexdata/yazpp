@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.36 2003-10-23 08:46:55 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.37 2003-10-23 11:45:08 adam Exp $
  */
 
 #include <assert.h>
@@ -398,27 +398,26 @@ COMSTACK Yaz_PDU_Assoc::comstack(const char *type_and_host, void **vp)
     return cs_create_host(type_and_host, 2, vp);
 }
 
-void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
-			   const char *addr)
+int Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
+			  const char *addr)
 {
     close();
-
-    yaz_log (LOG_LOG, "Adding listener %s", addr);
 
     m_PDU_Observer = observer;
     void *ap;
     m_cs = comstack(addr, &ap);
 
     if (!m_cs)
-        return;
+        return -1;
     if (cs_bind(m_cs, ap, CS_SERVER) < 0)
-        return;
+        return -2;
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
     yaz_log(m_log, "maskObserver 9");
     m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
 				     YAZ_SOCKET_OBSERVE_EXCEPT);
     yaz_log (m_log, "Yaz_PDU_Assoc::listen ok fd=%d", cs_fileno(m_cs));
     m_state = Listen;
+    return 0;
 }
 
 void Yaz_PDU_Assoc::idleTime(int idleTime)

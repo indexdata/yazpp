@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.20 2003-10-20 18:31:43 adam Exp $
+ * $Id: proxy.h,v 1.21 2003-10-23 11:45:08 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -236,7 +236,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int set_config(const char *name);
     void reconfig() { m_reconfig_flag = 1; }
     int send_to_client(Z_APDU *apdu);
-    void server(const char *addr);
+    int server(const char *addr);
     void pre_init();
     int get_log_mask() { return m_log_mask; };
 };

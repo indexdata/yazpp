@@ -12,26 +12,25 @@
 PATH=/usr/local/bin:/bin:/usr/bin
 export PATH
 
-RUNAS=nobody
-LOGFILE=/var/log/proxy.log
-
-if test `whoami` != $RUNAS; then
-	touch $LOGFILE
-	chown $RUNAS $LOGFILE
-	su -c "$0 $*" $RUNAS
-	exit 0
-fi
-
 # Proxy CWD is here. Should be writable by it.
-DIR=/var/proxy
+DIR=/var/yaz-proxy
 # Proxy Path
 DAEMON=/usr/local/bin/yaz-proxy
 # Proxy PIDFILE. Must be writable by it.
-PIDFILE=$DIR/proxy.pid
+PIDFILE=$DIR/yaz-proxy.pid
+# Log file
+LOGFILE=/var/log/yaz-proxy.log
 # Port
 PORT=9000
+# Run as this user. Set to empty to keep uid as is
+RUNAS=nobody
+RUNAS=
 # Extra args . Config file _WITH_ option
 ARGS="-c config.xml"
+
+if test -n "RUNAS"; then
+	ARGS="-u $RUNAS $ARGS"
+fi
 
 # Name, Description (not essential)
 NAME=yaz-proxy
@@ -54,6 +53,7 @@ case "$1" in
 
 	if test -f $PIDFILE; then
 		kill `cat $PIDFILE`
+		rm -f $PIDFILE
 		echo "$NAME."
 	else
 		echo "No PID $PIDFILE"
@@ -68,6 +68,7 @@ case "$1" in
 	echo -n "Restarting $DESC: "
 	if test -f $PIDFILE; then
 		kill `cat $PIDFILE`
+		rm -f $PIDFILE
 	fi
 	sleep 1
 	cd $DIR

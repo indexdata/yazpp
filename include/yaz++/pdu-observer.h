@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.3 2003-10-10 12:37:26 adam Exp $
+ * $Id: pdu-observer.h,v 1.4 2003-10-23 11:45:08 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -23,7 +23,7 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     /// Connect with server specified by addr.
     virtual int connect(IYaz_PDU_Observer *observer, const char *addr) = 0;
     /// Listen on address addr.
-    virtual void listen(IYaz_PDU_Observer *observer, const char *addr) = 0;
+    virtual int listen(IYaz_PDU_Observer *observer, const char *addr) = 0;
     /// Close connection
     virtual void close() = 0;
     /// Make clone of this object using this interface

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.66 2003-10-23 09:10:12 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.67 2003-10-23 11:45:08 adam Exp $
  */
 
 #include <assert.h>
@@ -72,7 +72,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_client_idletime = 600;
     m_target_idletime = 600;
     m_optimize = xstrdup ("1");
-    strcpy(m_session_str, "0");
+    strcpy(m_session_str, "0 ");
     m_session_no=0;
     m_bytes_sent = m_bytes_recv = 0;
     m_bw_hold_PDU = 0;
@@ -1529,10 +1529,14 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
     }
 }
 
-void Yaz_Proxy::server(const char *addr)
+int Yaz_Proxy::server(const char *addr)
 {
-    Yaz_Z_Assoc::server(addr);
-
-    timeout(1);
+    int r = Yaz_Z_Assoc::server(addr);
+    if (!r)
+    {
+	yaz_log(LOG_LOG, "%sStarted proxy on %s", m_session_str, addr);
+	timeout(1);
+    }
+    return r;
 }
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.4 2003-10-23 08:48:35 adam Exp $
+ * $Id: pdu-assoc.h,v 1.5 2003-10-23 11:45:08 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -68,7 +68,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     /// connect to server (client role)
     int connect(IYaz_PDU_Observer *observer, const char *addr);
     /// listen for clients (server role)
-    void listen(IYaz_PDU_Observer *observer, const char *addr);
+    int listen(IYaz_PDU_Observer *observer, const char *addr);
     /// Socket notification
     void socketNotify(int event);
     /// Close socket

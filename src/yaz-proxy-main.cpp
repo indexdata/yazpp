@@ -2,11 +2,14 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.21 2003-10-23 09:08:52 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.22 2003-10-23 11:45:08 adam Exp $
  */
 
 #include <signal.h>
 #include <unistd.h>
+#include <pwd.h>
+#include <sys/types.h>
+
 #include <yaz/log.h>
 #include <yaz/options.h>
 
@@ -17,11 +20,12 @@
 void usage(char *prog)
 {
     fprintf (stderr, "%s: [-c config] [-a log] [-m num] [-v level] [-t target] [-i sec] "
-             "[-u auth] [-o optlevel] @:port\n", prog);
+             "[-u uid] [-p pidfile] [-o optlevel] @:port\n", prog);
     exit (1);
 }
 
 static char *pid_fname = 0;
+static char *uid = 0;
 
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
@@ -30,7 +34,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:", argv, argc, &arg)) != -2)
+    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:U:", argv, argc, &arg)) != -2)
     {
 	int err;
         switch (ret)
@@ -62,7 +66,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
         case 't':
 	    proxy->set_default_target(arg);
 	    break;
-        case 'u':
+        case 'U':
             proxy->set_proxy_authentication(arg);
             break;
         case 'o':
@@ -87,6 +91,10 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    if (!pid_fname)
 		pid_fname = xstrdup(arg);
 	    break;
+	case 'u':
+	    if (!uid)
+		uid = xstrdup(arg);
+	    break;
         default:
 	    usage(prog);
 	    return 1;
@@ -94,7 +102,11 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     }
     if (addr)
     {
-	proxy->server(addr);
+	if (proxy->server(addr))
+	{
+	    yaz_log(LOG_FATAL|LOG_ERRNO, "listen %s", addr);
+	    exit(1);
+	}
     }
     else
     {
@@ -122,25 +134,39 @@ int main(int argc, char **argv)
     signal(SIGHUP, sighup_handler);
 
     args(&proxy, argc, argv);
-    while (mySocketManager.processEvent() > 0)
-	if (!mk_pid && pid_fname)
-	{
-	    FILE *f = fopen(pid_fname, "w");
-	    if (!f)
-	    {
-		yaz_log(LOG_ERRNO|LOG_FATAL, "Couldn't create %s", pid_fname);
-		exit(0);
-	    }
-	    fprintf(f, "%ld", (long) getpid());
-	    fclose(f);
-	    mk_pid = 1;
-	}
+
     if (pid_fname)
     {
-	if (mk_pid)
-	    unlink(pid_fname);
+	FILE *f = fopen(pid_fname, "w");
+	if (!f)
+	{
+	    yaz_log(LOG_ERRNO|LOG_FATAL, "Couldn't create %s", pid_fname);
+	    exit(0);
+	}
+	fprintf(f, "%ld", (long) getpid());
+	fclose(f);
 	xfree(pid_fname);
     }
+    if (uid)
+    {
+    	struct passwd *pw;
+	
+	if (!(pw = getpwnam(uid)))
+	{
+	    yaz_log(LOG_FATAL, "%s: Unknown user", uid);
+	    exit(3);
+	}
+	if (setuid(pw->pw_uid) < 0)
+	{
+	    yaz_log(LOG_FATAL|LOG_ERRNO, "setuid");
+	    exit(4);
+	}
+	xfree(uid);
+    }
+
+    while (mySocketManager.processEvent() > 0)
+	;
+
     exit (0);
     return 0;
 }
