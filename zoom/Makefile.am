@@ -1,4 +1,4 @@
-# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.9 2003-06-10 07:18:50 adam Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.10 2003-07-02 10:30:28 adam Exp $
 
 AM_CXXFLAGS= $(YAZINC) 
 
@@ -15,7 +15,7 @@ pkginclude_HEADERS=zoom.h
 
 zclient_SOURCES=zclient.cpp
 
-EXTRA_DIST=master-header Changes README
+EXTRA_DIST=master-header README
 
 test: zclient
 	./zclient bagel.indexdata.dk 210 gils '@and mineral epicenter'
