@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.9  1999-12-06 13:52:45  adam
+ * Revision 1.10  2000-05-30 03:12:27  ian
+ * minor change to stop g++ 2.95.2 complaining about taking the address
+ * of a member function.
+ *
+ * Revision 1.9  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -518,16 +522,16 @@ int MyClient::processCommand(const char *commandLine)
         int (MyClient::*fun)(char *arg);
         char *ad;
     } cmd[] = {
-	{"open", &cmd_open, "<host>[':'<port>][/<database>]"},
-	{"connect", &cmd_connect, "<host>[':'<port>][/<database>]"},
-	{"quit", &cmd_quit, ""},
-	{"close", &cmd_close, ""},
-	{"find", &cmd_find, "<query>"},
-	{"show", &cmd_show, "[<start> [<number>]]"},
-	{"cookie", &cmd_cookie, "<cookie>"},
-	{"init", &cmd_init, ""},
-	{"format", &cmd_format, "<record-syntax>"},
-	{"proxy", &cmd_proxy, "<host>:[':'<port>]"},
+	{"open", &MyClient::cmd_open, "<host>[':'<port>][/<database>]"},
+	{"connect", &MyClient::cmd_connect, "<host>[':'<port>][/<database>]"},
+	{"quit", &MyClient::cmd_quit, ""},
+	{"close", &MyClient::cmd_close, ""},
+	{"find", &MyClient::cmd_find, "<query>"},
+	{"show", &MyClient::cmd_show, "[<start> [<number>]]"},
+	{"cookie", &MyClient::cmd_cookie, "<cookie>"},
+	{"init", &MyClient::cmd_init, ""},
+	{"format", &MyClient::cmd_format, "<record-syntax>"},
+	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
 	{0,0,0}
     };
     
