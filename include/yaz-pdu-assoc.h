@@ -4,8 +4,8 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.1.1.1  1999-01-28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 

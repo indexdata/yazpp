@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1999
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.1 1999-01-28 09:41:07 adam Exp $
+dnl $Id: configure.in,v 1.1.1.1 1999-01-28 09:41:07 adam Exp $
 AC_INIT(../include/yaz-socket-manager.h)
 dnl
 dnl ------ Checking programs

@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.1 1999-01-28 09:41:07 adam Exp $
+$Id: README.txt,v 1.1.1.1 1999-01-28 09:41:07 adam Exp $
  
 o Introduction
 
