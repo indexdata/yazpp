@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.21 2003-12-16 11:26:14 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.22 2003-12-16 11:26:42 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
