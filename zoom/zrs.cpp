@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.5 2003-07-02 10:25:13 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.6 2003-09-22 13:04:52 mike Exp $
 
 // Z39.50 Result Set class
 
@@ -14,6 +14,7 @@ namespace ZOOM {
 	const char *addinfo;
 
 	if ((errcode = ZOOM_connection_error(yazc, &errmsg, &addinfo)) != 0) {
+	    ZOOM_resultset_destroy(rs);
 	    throw bib1Exception(errcode, addinfo);
 	}
     }
