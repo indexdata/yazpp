@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.2 2003-07-25 08:57:01 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.3 2003-07-25 19:28:07 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -133,7 +133,6 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
     int len2 = -1;
     char *buf2 = odr_getbuf(o2, &len2, 0);
     
-    yaz_log(LOG_LOG, "buf1=%p buf2=%p len1=%d len2=%d", buf1, buf2, len1, len2);
     if (buf1 && buf2 && len1 && len1 == len2 && !memcmp(buf1, buf2, len1))
 	match = 1;
     else if (!buf1 && !buf2 && !len1 && !len2)
