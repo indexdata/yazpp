@@ -1,0 +1,363 @@
+<chapter id="api">
+  <!-- $Id -->
+  <title>YAZ C++ API</title>
+  <para>
+   The YAZ C++ API is an client - and server API that exposes
+   all YAZ features. The API doesn't hide YAZ C datastructures, but
+   provides a set of useful high-level objects for creating clients -
+   and servers.
+  </para>
+  <para>
+   The following sections include a short description of the
+   interfaces and implementations (concrete classes).
+  </para>
+  <para>
+   In order to understand the structure, you should look at the
+   example client <filename>yaz-my-client.cpp</filename> and
+   the example server <filename>yaz-my-server.cpp</filename>.
+   If that is too easy, you can always turn to the implementation
+   of the proxy itself and send us a patch if you implement a new
+   useful feature.
+  </para>
+  <note>
+   <para>
+    The documentation here is very limited. We plan to enhance it
+    provided there is interest for it.
+   </para>
+  </note>
+  <section id="interfaces"><title>Interfaces</title>
+   <section id="IYazSocketObservable"><title>IYazSocketObservable</title>
+    <para>
+     This interface is capable of observing sockets.
+     When a socket even occurs it invokes an object implementing the
+     <link linkend="IYazSocketObserver">IYazSocketObserver</link>
+     interface.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/socket-observer.h>
+        
+     class my_socketobservable : public IYazSocketObservable {
+        // Add an observer interested in socket fd
+        virtual void addObserver(int fd, IYazSocketObserver *observer) = 0;
+        // Delete an observer
+        virtual void deleteObserver(IYazSocketObserver *observer) = 0;
+        // Delete all observers
+        virtual void deleteObservers() = 0;
+        // Specify the events that the observer is intersted in.
+        virtual void maskObserver(IYazSocketObserver *observer,
+                                  int mask) = 0;
+        // Specify timeout
+        virtual void timeoutObserver(IYazSocketObserver *observer,
+                                     unsigned timeout)=0;
+     };
+    </synopsis>
+   </section>
+   <section id="IYazSocketObserver"><title>IYazZSocketObserver</title>
+    <para>
+     This interface is interested in socket events supporting
+     the <link linkend="IYazSocketObservable">IYazSocketObservable</link>
+     interface.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/socket-observer.h>
+
+     class my_socketobserver : public IYazSocketObserver {
+         public:
+          // Notify the observer that something happened to socket
+          virtual void socketNotify(int event) = 0;
+     }
+    </synopsis>
+   </section>
+   <section id="IYaz_PDU_Observable"><title>IYaz_PDU_Observable</title>
+    <para>
+     This interface is is responsible for sending - and receiving PDUs over
+     the network (YAZ COMSTACK). When events occur, an instance
+     implementing <link linkend="IYaz_PDU_Observer">IYaz_PDU_Observer</link>
+     is notified.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/pdu-observer.h>
+
+     class my_pduobservable : public IYaz_PDU_Observable {
+       public:
+         // Send encoded PDU buffer of specified length
+         virtual int send_PDU(const char *buf, int len) = 0;
+         // Connect with server specified by addr.
+         virtual void connect(IYaz_PDU_Observer *observer,
+                     const char *addr) = 0;
+         // Listen on address addr.
+         virtual void listen(IYaz_PDU_Observer *observer, const char *addr)=0;
+         // Close connection
+         virtual void close() = 0;
+         // Make clone of this object using this interface
+         virtual IYaz_PDU_Observable *clone() = 0;
+         // Destroy completely
+         virtual void destroy() = 0;
+         // Set Idle Time
+         virtual void idleTime (int timeout) = 0;
+     };
+    </synopsis>
+   </section>
+   <section id="IYaz_PDU_Observer"><title>IYaz_PDU_Observer</title>
+    <para>
+     This interface is interested in PDUs and using an object implementing
+     <link linkend="IYaz_PDU_Observable">IYaz_PDU_Observable</link>.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/pdu-observer.h>
+
+     class my_pduobserver : public IYaz_PDU_Observer {
+       public:
+         // A PDU has been received
+         virtual void recv_PDU(const char *buf, int len) = 0;
+         // Called when Iyaz_PDU_Observable::connect was successful.
+         virtual void connectNotify() = 0;
+         // Called whenever the connection was closed
+         virtual void failNotify() = 0;
+         // Called whenever there is a timeout
+         virtual void timeoutNotify() = 0;
+         // Make clone of observer using IYaz_PDU_Observable interface
+         virtual IYaz_PDU_Observer *sessionNotify(
+         IYaz_PDU_Observable *the_PDU_Observable, int fd) = 0;
+     };
+    </synopsis>
+   </section>
+   <section id="query"><title>Yaz_Query</title>
+    <para>
+     Abstract query.
+     </para>
+    <synopsis>
+     #include &lt;yaz++/query.h>
+     class my_query : public Yaz_Query {
+       public:
+         // Print query in buffer described by str and len
+         virtual void print (char *str, int len) = 0;
+     };
+    </synopsis>
+   </section>
+  </section>
+
+  <section id="implementations"><title>Implementations</title>
+   <section><title>Yaz_SocketManager</title>
+    <para>
+     This class implements the <link linkend="IYazSocketObservable">
+      IYazSocketObservable</link> interface and is a portable 
+     socket wrapper around the select call.
+     This implementation is useful for daemons,
+     command line clients, etc.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/socket-manager.h>
+
+     class Yaz_SocketManager : public IYazSocketObservable {
+       public:
+         // Add an observer
+         virtual void addObserver(int fd, IYazSocketObserver *observer);
+         // Delete an observer
+         virtual void deleteObserver(IYazSocketObserver *observer);
+         // Delete all observers
+         virtual void deleteObservers();
+         // Set event mask for observer
+         virtual void maskObserver(IYazSocketObserver *observer, int mask);
+         // Set timeout
+         virtual void timeoutObserver(IYazSocketObserver *observer,
+                                  unsigned timeout);
+         // Process one event. return > 0 if event could be processed;
+         int processEvent();
+         Yaz_SocketManager();
+         virtual ~Yaz_SocketManager();
+     };
+    </synopsis>
+   </section>
+   <section><title>Yaz_PDU_Assoc</title>
+    <para>
+     This class implements the interfaces
+     <link linkend="IYaz_PDU_Observable">IYaz_PDU_Observable</link>
+     and
+     <link linkend="IYazSocketObserver">IYazSocketObserver</link>.
+     This object implements a non-blocking client/server channel
+     that transmits BER encoded PDUs (or those offered by YAZ COMSTACK).
+    </para>
+    <synopsis>
+     #include &lt;yaz++/pdu-assoc.h>
+
+     class Yaz_PDU_Assoc : public IYaz_PDU_Observable,
+                                 IYazSocketObserver {
+     
+       public:
+         COMSTACK comstack(const char *type_and_host, void **vp);
+         // Create object using specified socketObservable
+         Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
+         // Create Object using existing comstack
+         Yaz_PDU_Assoc(IYazSocketObservable *socketObservable,
+                  COMSTACK cs);
+         // Close socket and destroy object.
+         virtual ~Yaz_PDU_Assoc();
+         // Clone the object
+         IYaz_PDU_Observable *clone();
+         // Send PDU
+         int send_PDU(const char *buf, int len);
+         // connect to server (client role)
+         void connect(IYaz_PDU_Observer *observer, const char *addr);
+         // listen for clients (server role)
+         void listen(IYaz_PDU_Observer *observer, const char *addr);
+         // Socket notification
+         void socketNotify(int event);
+         // Close socket
+         void close();
+         // Close and destroy
+         void destroy();
+         // Set Idle Time
+         void idleTime (int timeout);
+         // Child start...
+         virtual void childNotify(COMSTACK cs);
+     };
+    </synopsis>
+   </section>
+
+   <section id="Yaz_Z_Assoc"><title>Yaz_Z_Assoc</title>
+    <para>
+     This class implements the interface
+     <link linkend="IYaz_PDU_Observer">IYaz_PDU_Obserer</link>.
+     This object implements a Z39.50 client/server channel AKA
+     Z-Association.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/z-assoc.h>
+     
+     class Yaz_Z_Assoc : public IYaz_PDU_Observer {
+       public:
+         // Create object using the PDU Observer specified
+         Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
+         // Destroy assocation and close PDU Observer
+         virtual ~Yaz_Z_Assoc();
+         // Receive PDU
+         void recv_PDU(const char *buf, int len);
+         // Connect notification
+         virtual void connectNotify() = 0;
+         // Failure notification
+         virtual void failNotify() = 0;
+         // Timeout notification
+         virtual void timeoutNotify() = 0;
+         // Timeout specify
+         void timeout(int timeout);
+         // Begin Z39.50 client role
+         void client(const char *addr);
+         // Begin Z39.50 server role
+         void server(const char *addr);
+         // Close connection
+         void close();
+
+         // Decode Z39.50 PDU.
+         Z_APDU *decode_Z_PDU(const char *buf, int len);
+         // Encode Z39.50 PDU.
+         int encode_Z_PDU(Z_APDU *apdu, char **buf, int *len);
+         // Send Z39.50 PDU
+         int send_Z_PDU(Z_APDU *apdu);
+         // Receive Z39.50 PDU
+         virtual void recv_Z_PDU(Z_APDU *apdu) = 0;
+         // Create Z39.50 PDU with reasonable defaults
+         Z_APDU *create_Z_PDU(int type);
+         // Request Alloc
+         ODR odr_encode ();
+         ODR odr_decode ();
+         ODR odr_print ();
+         void set_APDU_log(const char *fname);
+         const char *get_APDU_log();
+
+         // OtherInformation
+         void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
+         Z_OtherInformationUnit *update_otherInformation (
+               Z_OtherInformation **otherInformationP, int createFlag,
+               int *oid, int categoryValue, int deleteFlag);
+         void set_otherInformationString (
+               Z_OtherInformation **otherInformationP,
+               int *oid, int categoryValue,
+               const char *str);
+         void set_otherInformationString (
+               Z_OtherInformation **otherInformation,
+               int oidval, int categoryValue,
+               const char *str);
+         void set_otherInformationString (
+               Z_APDU *apdu,
+               int oidval, int categoryValue,
+               const char *str);
+
+         Z_ReferenceId *getRefID(char* str);
+         Z_ReferenceId **get_referenceIdP(Z_APDU *apdu);
+         void transfer_referenceId(Z_APDU *from, Z_APDU *to);
+
+         const char *get_hostname();
+     };
+    </synopsis>
+   </section>
+   <section id="Yaz_IR_Assoc"><title>Yaz_IR_Assoc</title>
+    <para>
+     This object is just a specialization of 
+     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and provides
+     more facilities for the Z39.50 client role.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/ir-assoc.h>
+
+     class Yaz_IR_Assoc : public Yaz_Z_Assoc {
+       ...
+     };
+    </synopsis>
+    <para>
+     The example client, <filename>yaz-my-client.cpp</filename>,
+     uses this class.
+    </para>
+   </section>
+   <section id="Yaz_Z_Server"><title>Yaz_Z_Server</title>
+    <para>
+     This object is just a specialization of 
+     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and provides
+     more facilities for the Z39.50 server role.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/z-server.h>
+
+     class Yaz_Z_Server : public Yaz_Z_Server {
+       ...
+     };
+    </synopsis>
+    <para>
+     The example server, <filename>yaz-my-server.cpp</filename>,
+     uses this class.
+    </para>
+   </section>
+   <section id="Yaz_Proxy"><title>Yaz_Proxy</title>
+    <para>
+     This object is a specialization of 
+     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and implements
+     the YAZ proxy.
+    </para>
+    <synopsis>
+     #include &lt;yaz++/proxy.h>
+
+     class Yaz_Proxy : public Yaz_Z_Server {
+       ...
+     };
+    </synopsis>
+    <para>
+     The proxy server, <filename>yaz-proxy-main.cpp</filename>,
+     uses this class.
+    </para>
+   </section>
+  </section>
+ </chapter>
+ <!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ sgml-parent-document: "yaz++.xml"
+ sgml-local-catalogs: nil
+ sgml-namecase-general:t
+ End:
+ -->

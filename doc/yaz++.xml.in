@@ -5,10 +5,11 @@
      <!ENTITY chap-installation SYSTEM "installation.xml">
      <!ENTITY chap-zoom SYSTEM "zoom.xml">
      <!ENTITY chap-proxy SYSTEM "proxy.xml">
+     <!ENTITY chap-api SYSTEM "api.xml">
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.4 2002-10-23 12:46:07 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.5 2002-10-23 21:23:29 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++</title>
@@ -34,6 +35,7 @@
  &chap-installation;
  &chap-zoom;
  &chap-proxy;
+ &chap-api;
  &app-license;
 </book>
 

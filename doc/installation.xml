@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.5 2002-10-23 12:22:18 mike Exp $ -->
+  <!-- $Id: installation.xml,v 1.6 2002-10-23 21:23:29 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -121,6 +121,40 @@
       <listitem><para>
         YAZ C++ demonstration server. This server does not
         get installed in the system directories.
+       </para></listitem>
+     </varlistentry>
+    </variablelist>
+   </para>
+  </section>
+  <section id="windows">
+   <title>Building on Windows</title>
+   <para>
+    You'll find Visual Studio project files in sub directory
+    <filename>win</filename>. Open workspace <filename>yazxx.dsw</filename>
+    which includes the following projects:
+    <variablelist>
+     <varlistentry>
+      <term><literal>yazxx.dsp</literal></term>
+       <listitem><para>
+        Builds the <filename>yazxx.dll</filename>.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>yazclient.dsp</literal></term>
+       <listitem><para>
+        Builds the sample client <filename>yazmyclient.exe</filename>.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>yazserver.dsp</literal></term>
+       <listitem><para>
+        Builds the sample server <filename>yazmyserver.exe</filename>.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>yazserver.dsp</literal></term>
+       <listitem><para>
+        Builds the proxy <filename>yazproxy.exe</filename>.
        </para></listitem>
      </varlistentry>
     </variablelist>
