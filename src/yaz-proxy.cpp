@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.63 2003-10-20 18:31:44 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.64 2003-10-23 08:46:55 adam Exp $
  */
 
 #include <assert.h>
@@ -355,9 +355,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		!strcmp(m_proxyTarget, c->get_hostname()))
 	    {
 		// found it in cache
-		yaz_log (LOG_LOG, "%sREUSE %d %d %s",
-			 m_session_str,
-			 c->m_seqno, parent->m_seqno, c->get_hostname());
+		yaz_log (LOG_LOG, "%sREUSE %s",
+			 m_session_str, c->get_hostname());
 		
 		c->m_seqno = parent->m_seqno;
 		assert(c->m_server == 0);
@@ -665,7 +664,6 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
     if (apdu->which == Z_APDU_presentRequest)
     {
 	Z_PresentRequest *pr = apdu->u.presentRequest;
-	Z_NamePlusRecordList *npr;
 	int toget = *pr->numberOfRecordsRequested;
 	int start = *pr->resultSetStartPoint;
 
@@ -684,6 +682,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    send_to_client(new_apdu);
 	    return 0;
 	}
+#if 0
 	if (!strcmp(m_client->m_last_resultSetId, pr->resultSetId))
 	{
 	    if (start+toget-1 > m_client->m_last_resultCount)
@@ -717,6 +716,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		return 0;
 	    }
 	}
+#endif
     }
 
     if (apdu->which != Z_APDU_searchRequest)
@@ -1010,37 +1010,34 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     if (apdu->which == Z_APDU_searchRequest)
     {
 	Z_SearchRequest *sr = apdu->u.searchRequest;
-	if (*sr->smallSetUpperBound > 0 || *sr->mediumSetPresentNumber > 0)
+	int err = 0;
+	char *addinfo = 0;
+	Yaz_ProxyConfig *cfg = check_reconfigure();
+	
+	if (cfg)
+	    err = cfg->check_syntax(odr_encode(),
+				    m_default_target,
+				    sr->preferredRecordSyntax,
+				    &addinfo);
+	if (err == -1)
 	{
-	    int err = 0;
-	    char *addinfo = 0;
-	    Yaz_ProxyConfig *cfg = check_reconfigure();
-
-	    if (cfg)
-		err = cfg->check_syntax(odr_encode(),
-					m_default_target,
-					sr->preferredRecordSyntax,
-					&addinfo);
-	    if (err == -1)
-	    {
-		sr->preferredRecordSyntax =
-		    yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
-					   VAL_USMARC);
-		m_marcxml_flag = 1;
-	    }
-	    else if (err)
-	    {
-		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
-		
-		new_apdu->u.searchResponse->referenceId = sr->referenceId;
-		new_apdu->u.searchResponse->records =
-		    create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
-		*new_apdu->u.searchResponse->searchStatus = 0;
-		
-		send_to_client(new_apdu);
-		
-		return 0;
-	    }
+	    sr->preferredRecordSyntax =
+		yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
+				       VAL_USMARC);
+	    m_marcxml_flag = 1;
+	}
+	else if (err)
+	{
+	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+	    
+	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
+	    new_apdu->u.searchResponse->records =
+		create_nonSurrogateDiagnostics(odr_encode(), err, addinfo);
+	    *new_apdu->u.searchResponse->searchStatus = 0;
+	    
+	    send_to_client(new_apdu);
+	    
+	    return 0;
 	}
     }
     else if (apdu->which == Z_APDU_presentRequest)

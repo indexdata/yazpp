@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.35 2003-10-20 18:31:44 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.36 2003-10-23 08:46:55 adam Exp $
  */
 
 #include <assert.h>
@@ -20,6 +20,7 @@ void Yaz_PDU_Assoc::init(IYazSocketObservable *socketObservable)
     m_socketObservable = socketObservable;
     m_PDU_Observer = 0;
     m_queue_out = 0;
+    m_queue_in = 0;
     m_input_buf = 0;
     m_input_len = 0;
     m_children = 0;
@@ -208,8 +209,15 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 
 		if (!m_PDU_Observer)
 		    return;
-
+#if 0
+		PDU_Queue **pq = &m_queue_in;
+		while (*pq)
+		    pq = &(*pq)->m_next;
+		
+		*pq = new PDU_Queue(m_input_buf, res);
+#else
 		m_PDU_Observer->recv_PDU(m_input_buf, res);
+#endif
 		if (destroyed)   // it really was destroyed, return now.
 		    return;
                 m_destroyed = 0;

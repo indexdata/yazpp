@@ -1,48 +1,52 @@
 <?xml version="1.0"?>
-<!-- $Id: config.xml,v 1.13 2003-10-20 18:31:43 adam Exp $ -->
+<!-- $Id: config.xml,v 1.14 2003-10-23 08:46:55 adam Exp $ -->
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
-    <url>z3950.loc.gov:7090</url>
-    <url>z3950.loc.gov:7094</url>
+    <url>bagel.indexdata.dk</url>
+    <target-timeout>240</target-timeout>
+    <client-timeout>180</client-timeout>
     <keepalive>
-      <bandwidth>500000</bandwidth>
-      <pdu>500</pdu>
+      <bandwidth>1000000</bandwidth>
+      <pdu>1000</pdu>
     </keepalive>
-    <limit><!-- limits .. -->
-      <bandwidth>200000</bandwidth>
-      <pdu>31</pdu>
-      <retrieve>20</retrieve>
+    <limit><!-- per minute limits .. -->
+      <bandwidth>2000000</bandwidth>
+      <pdu>50</pdu>
+      <retrieve>100</retrieve>
     </limit>
     <attribute type="1" value="1-11,13-1010"/>
     <attribute type="1" value="*" error="114"/>
-    <target-timeout>240</target-timeout>
-    <client-timeout>180</client-timeout>
+    <syntax type="opac"/>
     <syntax type="usmarc"/>
+    <syntax type="none"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
-    <preinit>2</preinit>
+    <preinit>0</preinit>
   </target>
   <target name="localhost">
     <url>localhost:9999</url>
+    <url>localhost:9998</url>
+    <target-timeout>300</target-timeout>
+    <client-timeout>180</client-timeout>
     <keepalive/> <!-- keepalive enabled -->
     <limit><!-- limits .. -->
       <bandwidth>50000</bandwidth>
       <pdu>60</pdu>
       <retrieve>10</retrieve>
     </limit>
-    <target-timeout>300</target-timeout>
-    <client-timeout>180</client-timeout>
-    <attribute type="1" value="10,1023-9000" error="114"/>
+    <attribute type="1" value="1-1023">
+    <attribute type="1" value="*" error="114"/>
     <syntax type="usmarc"/>
     <syntax type="grs1"/>
     <syntax type="xml" marcxml="1"/>
+    <syntax type="none"/>
     <syntax type="*" error="238"/>
-    <preinit>0</preinit>
+    <preinit>2</preinit>
   </target>
   <target name="*">
     <!-- everything else -->
   </target>
-  <max-clients>500</max-clients>
-  <xlog>client-apdu server-apdu</xlog>
+  <max-clients>50</max-clients>
+  <log>client-apdu server-apdu</log>
 </proxy>
