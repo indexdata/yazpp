@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.10 2004-02-12 16:53:15 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.11 2004-02-12 20:35:07 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
@@ -72,11 +72,17 @@
       <title>Dublin Core</title>
       <name>dc</name>
     </syntax>
+    <syntax type="xml" marcxml="1" stylesheet="MARC21slim2MODS.xsl"
+      identifier="http://www.loc.gov/mods"
+      >
+      <title>MODS v2</title>
+      <name>mods</name>
+    </syntax>
     <syntax type="xml" marcxml="1" stylesheet="MARC21slim2MODS3.xsl"
       identifier="http://www.loc.gov/mods/v3"
       >
-      <title>MODS</title>
-      <name>mods</name>
+      <title>MODS v3</title>
+      <name>mods3</name>
     </syntax>
 
     <syntax type="*" error="238"/>
