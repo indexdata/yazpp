@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.11 2002-11-25 13:33:22 mike Exp $
+// $Id: master-header,v 1.12 2002-11-30 22:33:21 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -67,6 +67,10 @@ namespace ZOOM {
   class YAZ_EXPORT resultSet {
 *   connection &owner;
 *   ZOOM_resultset rs;
+*   friend class record; // for _getYazResultSet() & _getYazConnection()
+*   ZOOM_resultset _getYazResultSet () const { return rs; }
+*   ZOOM_connection _getYazConnection () const {
+*	return owner._getYazConnection(); }
     // resultSets are non-copyable.
     resultSet (const resultSet &);
     resultSet &operator= (const resultSet &);
@@ -79,18 +83,19 @@ namespace ZOOM {
   };
 
   class YAZ_EXPORT record {
-*   const resultSet *owner;
+*   const resultSet &owner;
 *   ZOOM_record r;
 *   friend class resultSet; // so it can use this constructor
-*   record::record (const resultSet *rs, ZOOM_record rec):
-*	owner (rs), r (rec) {}
   public:
     class syntax {
     public:
       enum value {
 	UNKNOWN, GRS1, SUTRS, USMARC, UKMARC, XML
       };
-      syntax (value rs) : i(rs) {};
+*   private:
+*     enum value val;
+*   public:
+      syntax (value rs);
       operator std::string () const;
       bool operator== (const syntax &s) const;
       bool operator== (value rs) const;
@@ -124,24 +129,27 @@ namespace ZOOM {
   public:
     systemException ();		// Uses value of system `errno'
     systemException (int code);
+*   virtual std::string errmsg () const; // Why do I have to repeat this?
   };
 
   // bib1Exception::errcode() returns a code from the
   // Bib-1 Diagnostic Set.
   class YAZ_EXPORT bib1Exception: public exception {
-*   const char *info;
+*   const string &info;
   public:
 *   ~bib1Exception ();
     bib1Exception (int code, const std::string &addinfo);
+*   virtual std::string errmsg () const; // Why do I have to repeat this?
     std::string addinfo () const;
   };
 
   class YAZ_EXPORT queryException : public exception {
-*   const char *q;
+*   const string &q;
   public:
 *   ~queryException ();
     enum { PREFIX, CCL };
     queryException (int qtype, const std::string &source);
+*   virtual std::string errmsg () const; // Why do I have to repeat this?
     std::string addinfo () const;
   };
 }

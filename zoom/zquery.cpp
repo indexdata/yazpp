@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.3 2002-10-09 09:07:10 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.4 2002-11-30 22:33:21 mike Exp $
 
 // Z39.50 Query classes
 
@@ -13,9 +13,9 @@ namespace ZOOM {
 
 
 
-    prefixQuery::prefixQuery(const char *pqn) {
+    prefixQuery::prefixQuery(const string &pqn) {
 	q = ZOOM_query_create();
-	if (ZOOM_query_prefix(q, pqn) == -1) {
+	if (ZOOM_query_prefix(q, pqn.c_str()) == -1) {
 	    ZOOM_query_destroy(q);
 	    throw queryException(queryException::PREFIX, pqn);
 	}
@@ -43,7 +43,7 @@ namespace ZOOM {
 
 
 
-    CCLQuery::CCLQuery(const char *ccl, void *qualset) {
+    CCLQuery::CCLQuery(const string &ccl, void *qualset) {
 	throw "Oops.  No CCL support in ZOOM-C yet.  Sorry.";
     }
 

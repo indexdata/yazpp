@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.4 2002-10-09 09:07:10 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.5 2002-11-30 22:33:21 mike Exp $
 
 // Z39.50 Record class
 
@@ -7,26 +7,51 @@
 
 
 namespace ZOOM {
-    record::~record() {
-	if (owner == 0) {
-	    // Must have been clone()d
-	    ZOOM_record_destroy(r);
+    record::syntax::syntax (value rs): val(rs) {}
+
+    record::syntax::operator string() const {
+	switch (val) {
+	case GRS1:   return "grs1";
+	case SUTRS:  return "sutrs";
+	case USMARC: return "usmarc";
+	case UKMARC: return "ukmarc";
+	case XML:    return "xml";
+	default: break;
 	}
+	return "unknown";
     }
 
-    // ### Would this operation be better expressed as a copy constructor?
-    record *record::clone() const {
-	// It's tempting just to replace `r' with a clone, and return
-	// `this', but probably more honest to allocate a new C++
-	// record object.
+    bool record::syntax::operator==(const record::syntax &s) const {
+	return s.val == val;
+    }
 
-	record *rec = new record(0, 0);
-	if ((rec->r = ZOOM_record_clone(r)) == 0) {
-	    // Presumably an out-of-memory error
-	    throw systemException();
+    bool record::syntax::operator==(record::syntax::value rs) const {
+	return rs == val;
+    }
+
+    record::syntax::operator record::syntax::value() const {
+	return val;
+    }
+
+
+    record::record(resultSet &rs, size_t i): owner(rs) {
+	if ((r = ZOOM_resultset_record(rs._getYazResultSet(), i)) == 0) {
+	    const char *errmsg;	// unused: carries same info as `errcode'
+	    const char *addinfo;
+	    int errcode = ZOOM_connection_error(rs._getYazConnection(),
+						&errmsg, &addinfo);
+	    throw bib1Exception(errcode, addinfo);
 	}
 
-	return rec;
+	// Memory management is odd here.  The ZOOM-C record we've
+	// just fetched (`r') is owned by the ZOOM-C result-set we
+	// fetched it from (`rs.rs'), so the underlying (ZOOM-C)
+	// record is _not_ destroyed when this object is destroyed:
+	// it's done when the underlying result-set is deleted.
+    }
+
+    record::~record() {
+	// Nothing to do -- see comment in constructor
     }
 
     // It's tempting to modify this method just to return either the
@@ -40,29 +65,29 @@ namespace ZOOM {
 
 	// These string constants are from yaz/util/oid.c
 	if (!yaz_matchstr(syn, "xml"))
-	    return XML;
+	    return syntax::XML;
 	else if (!yaz_matchstr(syn, "GRS-1"))
-	    return GRS1;
+	    return syntax::GRS1;
 	else if (!yaz_matchstr(syn, "SUTRS"))
-	    return SUTRS;
+	    return syntax::SUTRS;
 	else if (!yaz_matchstr(syn, "USmarc"))
-	    return USMARC;
+	    return syntax::USMARC;
 	else if (!yaz_matchstr(syn, "UKmarc"))
-	    return UKMARC;
+	    return syntax::UKMARC;
 	else if (!yaz_matchstr(syn, "XML") ||
 		 !yaz_matchstr(syn, "text-XML") ||
 		 !yaz_matchstr(syn, "application-XML"))
-	    return XML;
+	    return syntax::XML;
 
-	return UNKNOWN;
+	return syntax::UNKNOWN;
     }
 
-    const char *record::render() const {
+    string record::render() const {
 	int len;
 	return ZOOM_record_get(r, "render", &len);
     }
 
-    const char *record::rawdata() const {
+    string record::rawdata() const {
 	int len;
 	return ZOOM_record_get(r, "raw", &len);
     }

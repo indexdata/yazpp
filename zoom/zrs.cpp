@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.3 2002-10-09 09:07:10 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.4 2002-11-30 22:33:21 mike Exp $
 
 // Z39.50 Result Set class
 
@@ -22,38 +22,16 @@ namespace ZOOM {
 	ZOOM_resultset_destroy(rs);
     }
 
-    const char *resultSet::option(const char *key) const {
-	return ZOOM_resultset_option_get(rs, key);
+    string resultSet::option(const string &key) const {
+	return ZOOM_resultset_option_get(rs, key.c_str());
     }
 
-    const char *resultSet::option(const char *key, const char *val) {
-	// ### There may be memory-management issues here.
-	const char *old = ZOOM_resultset_option_get(rs, key);
-	ZOOM_resultset_option_set(rs, key, val);
-	return old;
+    bool resultSet::option(const string &key, const string &val) {
+      ZOOM_resultset_option_set(rs, key.c_str(), val.c_str());
+	return true;
     }
 
     size_t resultSet::size() const {
 	return ZOOM_resultset_size(rs);
-    }
-
-    const record *resultSet::getRecord(size_t i) const {
-	ZOOM_record rec;
-	if ((rec = ZOOM_resultset_record(rs, i)) == 0) {
-	    const char *errmsg;	// unused: carries same info as `errcode'
-	    const char *addinfo;
-	    int errcode = ZOOM_connection_error(owner._getYazConnection(),
-						&errmsg, &addinfo);
-	    throw bib1Exception(errcode, addinfo);
-	}
-
-	// Memory management is odd here.  The ZOOM-C record we've
-	// just fetched (`rec') is owned by the ZOOM-C result-set we
-	// fetched it from (`rs'), so all we need to allocate is a
-	// ZOOM-C++ wrapper for it, which is destroyed at the
-	// appropriate time -- but the underlying (ZOOM-C) record is
-	// _not_ destroyed at that time, because it's done when the
-	// underlying result-set is deleted.
-	return new record(this, rec);
     }
 }
