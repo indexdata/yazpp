@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.h,v 1.1 2000-10-11 11:58:16 adam Exp $
+ * $Id: yaz-socket-manager.h,v 1.2 2001-11-04 22:36:21 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -22,6 +22,7 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
 	int fd;
 	unsigned mask;
 	unsigned timeout;
+        unsigned timeout_this;
 	time_t last_activity;
 	YazSocketEntry *next;
     };

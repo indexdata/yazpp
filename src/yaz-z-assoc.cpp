@@ -2,79 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.21  2001-08-13 16:39:12  adam
- * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
- *
- * Revision 1.20  2001/04/25 18:59:30  adam
- * Added referenceId handling for server.
- *
- * Revision 1.19  2001/03/27 14:47:45  adam
- * New server facility scheme.
- *
- * Revision 1.18  2001/03/26 14:43:49  adam
- * New threaded PDU association.
- *
- * Revision 1.17  2001/01/04 14:25:25  heikki
- * No SIGPIPES in windows...
- *
- * Revision 1.16  2000/12/14 16:00:39  adam
- * Ignoring signal SIGPIPE.
- *
- * Revision 1.15  2000/10/11 11:58:17  adam
- * Moved header files to include/yaz++. Switched to libtool and automake.
- * Configure script creates yaz++-config script.
- *
- * Revision 1.14  2000/09/12 16:40:33  heikki
- * minor
- *
- * Revision 1.13  2000/09/08 10:23:42  adam
- * Added skeleton of yaz-z-server.
- *
- * Revision 1.12  2000/09/05 13:57:28  adam
- * Fixed get_otherInfoAPDU to return otherInfo for extended services.
- *
- * Revision 1.11  2000/09/04 08:59:16  adam
- * Changed call to logging functions (yaz_ added).
- *
- * Revision 1.10  2000/09/04 08:29:22  adam
- * Fixed memory leak(s). Added re-use of associations, rather than
- * re-init, when maximum number of targets are in use.
- *
- * Revision 1.9  2000/08/10 08:42:42  adam
- * Fixes for {set,get}_APDU_log.
- *
- * Revision 1.8  2000/08/07 14:19:59  adam
- * Fixed serious bug regarding timeouts. Improved logging for proxy.
- *
- * Revision 1.7  2000/05/10 11:36:58  ian
- * Added default parameters for refid to request functions.
- * Added default parameter for result set name to search and present request.
- * Commented out forced logging of PDU contents.
- * Added send_deleteResultSetRequest
- *
- * Revision 1.6  1999/12/06 13:52:45  adam
- * Modified for new location of YAZ header files. Experimental threaded
- * operation.
- *
- * Revision 1.5  1999/11/10 10:02:34  adam
- * Work on proxy.
- *
- * Revision 1.4  1999/09/13 12:53:44  adam
- * Proxy removes OtherInfo Proxy Address and Session ID. Other
- * Otherinfo remains untouched.
- *
- * Revision 1.3  1999/04/21 12:09:01  adam
- * Many improvements. Modified to proxy server to work with "sessions"
- * based on cookies.
- *
- * Revision 1.2  1999/04/20 10:30:05  adam
- * Implemented various stuff for client and proxy. Updated calls
- * to ODR to reflect new name parameter.
- *
- * Revision 1.1  1999/04/09 11:46:57  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
+ * $Id: yaz-z-assoc.cpp,v 1.22 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <assert.h>
@@ -89,7 +17,6 @@ int Yaz_Z_Assoc::yaz_init_func()
 #ifndef WIN32
     signal (SIGPIPE, SIG_IGN);
 #endif
-    nmem_init();
     return 1;
 }
 

@@ -2,16 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-pdu-assoc-thread.cpp,v $
- * Revision 1.3  2001-08-13 16:39:12  adam
- * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
- *
- * Revision 1.2  2001/03/27 14:47:45  adam
- * New server facility scheme.
- *
- * Revision 1.1  2001/03/26 14:43:49  adam
- * New threaded PDU association.
- *
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.4 2001-11-04 22:36:21 adam Exp $
  */
 
 #ifdef WIN32

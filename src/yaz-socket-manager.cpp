@@ -1,61 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.16  2001-08-13 16:39:12  adam
- * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
- *
- * Revision 1.15  2001/03/26 14:43:49  adam
- * New threaded PDU association.
- *
- * Revision 1.14  2000/11/20 14:17:36  adam
- * Yet another WIN32 fix for connect notify.
- *
- * Revision 1.13  2000/11/20 11:27:33  adam
- * Fixes for connect operation (timeout and notify fix).
- *
- * Revision 1.12  2000/10/24 12:29:57  adam
- * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
- * two Yaz_Proxy's (fatal).
- *
- * Revision 1.11  2000/10/11 11:58:17  adam
- * Moved header files to include/yaz++. Switched to libtool and automake.
- * Configure script creates yaz++-config script.
- *
- * Revision 1.10  2000/09/08 10:23:42  adam
- * Added skeleton of yaz-z-server.
- *
- * Revision 1.9  2000/08/07 14:19:59  adam
- * Fixed serious bug regarding timeouts. Improved logging for proxy.
- *
- * Revision 1.8  1999/12/06 13:52:45  adam
- * Modified for new location of YAZ header files. Experimental threaded
- * operation.
- *
- * Revision 1.7  1999/04/28 13:02:08  adam
- * Added include of string.h.
- *
- * Revision 1.6  1999/04/21 12:09:01  adam
- * Many improvements. Modified to proxy server to work with "sessions"
- * based on cookies.
- *
- * Revision 1.5  1999/04/09 11:46:57  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
- * Revision 1.4  1999/03/23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
- * Revision 1.3  1999/02/02 14:01:23  adam
- * First WIN32 port of YAZ++.
- *
- * Revision 1.2  1999/01/28 13:08:48  adam
- * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
- * yaz-socket-manager.cc.
- *
- * Revision 1.1.1.1  1999/01/28 09:41:07  adam
- * First implementation of YAZ++.
- *
+ * $Id: yaz-socket-manager.cpp,v 1.17 2001-11-04 22:36:21 adam Exp $
  */
 #include <assert.h>
 #ifdef WIN32
@@ -201,6 +148,9 @@ int Yaz_SocketManager::processEvent()
 		timeout_this = 1;
 	    if (!timeout || timeout_this < timeout)
 		timeout = timeout_this;
+            p->timeout_this = timeout_this;
+            yaz_log (m_log, "Yaz_SocketManager::select timeout_this=%d", 
+                     p->timeout_this);
 	}
     }
     if (!no)
@@ -215,7 +165,8 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = timeout;
     to.tv_usec = 0;
     
-    yaz_log (m_log, "Yaz_SocketManager::select no=%d timeout=%d", no, timeout);
+    yaz_log (m_log, "Yaz_SocketManager::select begin no=%d timeout=%d",
+             no, timeout);
     while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;
@@ -241,12 +192,12 @@ int Yaz_SocketManager::processEvent()
 	    event->event = mask;
 	    putEvent (event);
 	}
-	else if (p->timeout && p->last_activity && 
-		 now >= p->last_activity + (int) (p->timeout))
+	else if (res == 0 && p->timeout && p->timeout_this == timeout)
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
+            assert (p->last_activity);
 	    yaz_log (m_log, "timeout, now = %ld last_activity=%ld timeout=%d",
-		  now, p->last_activity, p->timeout);
+                     now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;
 	    event->event = YAZ_SOCKET_OBSERVE_TIMEOUT;
@@ -259,7 +210,8 @@ int Yaz_SocketManager::processEvent()
 	delete event;
 	return 1;
     }
-    return 0;
+    yaz_log (LOG_WARN, "unhandled event in processEvent");
+    return 1;
 }
 
 

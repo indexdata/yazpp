@@ -2,10 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-marc-sample.cpp,v $
- * Revision 1.1  2001-03-27 14:47:45  adam
- * New server facility scheme.
- *
+ * $Id: yaz-marc-sample.cpp,v 1.2 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <yaz++/yaz-z-server.h>

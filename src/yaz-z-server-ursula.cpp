@@ -2,22 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-server-ursula.cpp,v $
- * Revision 1.5  2001-08-13 16:39:12  adam
- * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
- *
- * Revision 1.4  2001/04/25 19:40:18  adam
- * Added refernceId handling for other services.
- *
- * Revision 1.3  2001/04/11 12:33:42  heikki
- * Working on ursula things
- *
- * Revision 1.2  2001/04/05 15:12:24  adam
- * WIN32 updates.
- *
- * Revision 1.1  2001/04/04 14:02:49  adam
- * URSULA / Z-ruth service.
- *
+ * $Id: yaz-z-server-ursula.cpp,v 1.6 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <yaz/log.h>

@@ -2,50 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.16  2001-08-13 16:39:12  adam
- * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
- *
- * Revision 1.15  2001/04/26 12:17:49  heikki
- * Ursula stuff, mostly in the test client
- *
- * Revision 1.14  2000/10/11 11:58:16  adam
- * Moved header files to include/yaz++. Switched to libtool and automake.
- * Configure script creates yaz++-config script.
- *
- * Revision 1.13  2000/09/06 14:23:45  adam
- * WIN32 updates.
- *
- * Revision 1.12  2000/05/10 11:36:58  ian
- * Added default parameters for refid to request functions.
- * Added default parameter for result set name to search and present request.
- * Commented out forced logging of PDU contents.
- * Added send_deleteResultSetRequest
- *
- * Revision 1.11  1999/12/06 13:52:45  adam
- * Modified for new location of YAZ header files. Experimental threaded
- * operation.
- *
- * Revision 1.10  1999/04/29 07:33:28  adam
- * Changed setting of host in connect/proxy setting. YAZ' strtoaddr now
- * ignores database part of host.
- *
- * Revision 1.9  1999/04/28 13:29:14  adam
- * Yet another fix regarding database settings.
- *
- * Revision 1.8  1999/04/28 13:04:03  adam
- * Fixed setting of proxy otherInfo so that database(s) are removed.
- *
- * Revision 1.7  1999/04/21 12:09:01  adam
- * Many improvements. Modified to proxy server to work with "sessions"
- * based on cookies.
- *
- * Revision 1.6  1999/04/20 10:30:05  adam
- * Implemented various stuff for client and proxy. Updated calls
- * to ODR to reflect new name parameter.
- *
- * Revision 1.5  1999/04/09 11:46:57  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
+ * $Id: yaz-ir-assoc.cpp,v 1.17 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <assert.h>

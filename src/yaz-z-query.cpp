@@ -1,42 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-query.cpp,v $
- * Revision 1.9  2000-10-11 11:58:17  adam
- * Moved header files to include/yaz++. Switched to libtool and automake.
- * Configure script creates yaz++-config script.
- *
- * Revision 1.8  2000/09/08 10:23:42  adam
- * Added skeleton of yaz-z-server.
- *
- * Revision 1.7  2000/05/10 11:36:58  ian
- * Added default parameters for refid to request functions.
- * Added default parameter for result set name to search and present request.
- * Commented out forced logging of PDU contents.
- * Added send_deleteResultSetRequest
- *
- * Revision 1.6  1999/12/06 13:52:45  adam
- * Modified for new location of YAZ header files. Experimental threaded
- * operation.
- *
- * Revision 1.5  1999/04/27 07:52:13  adam
- * Improved proxy; added query match for result set re-use.
- *
- * Revision 1.4  1999/04/21 12:09:01  adam
- * Many improvements. Modified to proxy server to work with "sessions"
- * based on cookies.
- *
- * Revision 1.3  1999/04/20 10:30:05  adam
- * Implemented various stuff for client and proxy. Updated calls
- * to ODR to reflect new name parameter.
- *
- * Revision 1.2  1999/04/09 11:46:57  adam
- * Added object Yaz_Z_Assoc. Much more functional client.
- *
- * Revision 1.1  1999/03/23 14:17:57  adam
- * More work on timeout handling. Work on yaz-client.
- *
+ * $Id: yaz-z-query.cpp,v 1.10 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <yaz++/yaz-z-query.h>

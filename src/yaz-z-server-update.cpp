@@ -2,15 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-server-update.cpp,v $
- * Revision 1.2  2001-05-17 14:18:03  adam
- * New handler for old version item update for server:
- *  void update_service0 (Z_ExtendedServicesRequest *req,
- *                        Z_IU0Update *io, Z_ExtendedServicesResponse *res)
- *
- * Revision 1.1  2001/05/03 12:42:57  adam
- * Added update server service.
- *
+ * $Id: yaz-z-server-update.cpp,v 1.3 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <yaz/log.h>

@@ -2,45 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-server.cpp,v $
- * Revision 1.12  2001-04-25 19:40:18  adam
- * Added refernceId handling for other services.
- *
- * Revision 1.11  2001/04/12 15:12:10  heikki
- * minor ursula stuff
- *
- * Revision 1.10  2001/04/04 14:02:49  adam
- * URSULA / Z-ruth service.
- *
- * Revision 1.9  2001/03/29 15:14:26  adam
- * Minor updates.
- *
- * Revision 1.8  2001/03/27 14:47:45  adam
- * New server facility scheme.
- *
- * Revision 1.7  2001/03/26 14:43:49  adam
- * New threaded PDU association.
- *
- * Revision 1.6  2001/01/29 11:18:24  adam
- * Server sets OPTIONS search and present.
- *
- * Revision 1.5  2000/10/24 12:29:57  adam
- * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
- * two Yaz_Proxy's (fatal).
- *
- * Revision 1.4  2000/10/11 11:58:17  adam
- * Moved header files to include/yaz++. Switched to libtool and automake.
- * Configure script creates yaz++-config script.
- *
- * Revision 1.3  2000/09/21 21:43:20  adam
- * Better high-level server API.
- *
- * Revision 1.2  2000/09/12 12:09:53  adam
- * More work on high-level server.
- *
- * Revision 1.1  2000/09/08 10:23:42  adam
- * Added skeleton of yaz-z-server.
- *
+ * $Id: yaz-z-server.cpp,v 1.13 2001-11-04 22:36:21 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -130,7 +92,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	}
 	if (!taken)
 	{
-	    yaz_log (LOG_LOG, "unhandled request = %d", apdu_request->which);
+	    yaz_log (LOG_WARN, "unhandled request = %d", apdu_request->which);
 	    delete this;
 	}
     }

@@ -2,15 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Log: yaz-z-server-sr.cpp,v $
- * Revision 1.3  2001-04-25 18:59:30  adam
- * Added referenceId handling for server.
- *
- * Revision 1.2  2001/04/04 14:02:49  adam
- * URSULA / Z-ruth service.
- *
- * Revision 1.1  2001/03/27 15:02:14  adam
- * New server facility scheme.
+ * $Id: yaz-z-server-sr.cpp,v 1.4 2001-11-04 22:36:21 adam Exp $
  *
  */
 
