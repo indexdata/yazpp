@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.10 2001-05-17 14:18:03 adam Exp $
+ * $Id: yaz-z-server.h,v 1.11 2002-04-24 12:21:03 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -23,6 +23,10 @@ class YAZ_EXPORT Yaz_Z_ServerUtility {
     
     Z_Records *create_nonSurrogateDiagnostics (ODR odr, int error,
     					       const char *addinfo);
+
+    void Yaz_Z_ServerUtility::create_diagnostics (
+        ODR odr, int error, const char *addinfo,
+        Z_DiagRec ***dreca, int *num);
 };
 
 class YAZ_EXPORT IYaz_Server_Facility {
