@@ -1,4 +1,6 @@
 
+Use YAZ_DOC macro to setup documentation.
+
 --- 0.8 2004/04/23
 
 Proxy now a separate project. See http://indexdata.dk/yazproxy/
