@@ -1,7 +1,6 @@
-YAZ++ - A C++ library for YAZ
+YAZ++ - A C++ library for YAZ and a ZOOM C++ API.
 
-$Id: README,v 1.2 2004-03-29 22:46:50 adam Exp $
- 
+$Id: README,v 1.3 2004-03-30 11:46:11 adam Exp $
 
 Introduction
 ------------
@@ -9,8 +8,13 @@ Introduction
 YAZ++ is a C++ layer for YAZ and implements the ANSI Z39.50
 protocol for information retrieval (client and server side).
 The YAZ++ homepage is: http://www.indexdata.dk/yaz++/
+Later versions of YAZ++ also supports SRW/SRU.
 
-YAZ++ uses the same license as YAZ - see LICENSE file for details.
+YAZ++ and ZOOM C++ uses the same license as YAZ - see LICENSE file
+for details.
+
+This package also contains a proxy as well as a proxy library. This
+component is covered by the GPL. See LICENSE.proxy for details.
 
 Documentation
 -------------
@@ -22,7 +26,7 @@ Overview
 --------
 
 YAZ++ builds a programmers' library libyaz++.lib and a few
-example applications:
+applications:
 
   yaz-my-client      basic client
   yaz-my-server      basic server
@@ -62,15 +66,15 @@ version of that as well (not just the runtime). Libxml2/libxslt can also be
 compiled easily on most systems. See http://www.xmlsoft.org/ for more
 information.
 
-Then, build YAZ++:
+Then build YAZ++:
 
   $ cd yaz++-<version>
   $ ./configure
   $ make
 
 If you do have libxslt installed and configure above does not find it,
-use option --with-xslt=PREFIX to specify location of libxslt and libxml2.
-yaz++ configure looks for PREFIX/bin/xslt-config.
+use option --with-xslt=PREFIX to specify location of libxslt (which includes
+libxml2). The configure script looks for PREFIX/bin/xslt-config.
 
 Installation, Windows
 ---------------------
@@ -85,7 +89,6 @@ those compilers.
     yazclient.dsp   -   builds yazmyclient.exe
     yazserver.dsp   -   builds yazmyserver.exe
     yazproxy.dsp    -   builds yazproxy.exe
-
 
 About the proxy
 ---------------
