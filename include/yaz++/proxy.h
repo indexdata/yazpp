@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.3 2002-11-26 11:13:40 mike Exp $
+ * $Id: proxy.h,v 1.4 2003-07-18 13:27:20 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -10,6 +10,21 @@
 #include <yaz++/z-databases.h>
 
 class Yaz_Proxy;
+
+class Yaz_RecordCache_Entry;
+
+class YAZ_EXPORT Yaz_RecordCache {
+ public:
+    Yaz_RecordCache ();
+    ~Yaz_RecordCache ();
+    void add (ODR o, Z_NamePlusRecordList *npr, int start);
+    int lookup (ODR o, Z_NamePlusRecordList **npr, int start, int num,
+		Odr_oid *syntax);
+    void clear();
+ private:
+    NMEM m_mem;
+    Yaz_RecordCache_Entry *m_entries;
+};
 
 /// Private class
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
@@ -36,8 +51,10 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     int m_sr_transform;
     int m_seqno;
     int m_waiting;
+    int m_resultSetStartPoint;
     ODR m_init_odr;
     Z_APDU *m_initResponse;
+    Yaz_RecordCache m_cache;
 };
 
 /// Information Retrieval Proxy Server.
