@@ -2,7 +2,7 @@
  * Copyright (c) 2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.2 2000-09-12 12:09:53 adam Exp $
+ * $Id: yaz-z-server.h,v 1.3 2000-09-21 21:43:20 adam Exp $
  */
 
 #include <yaz-z-assoc.h>
@@ -22,15 +22,25 @@ public:
 				int *format,
 				Z_RecordComposition *comp,
 				Z_NamePlusRecord *namePlusRecord,
-				Z_DefaultDiagFormat *diagnostics) = 0;
+				Z_Records *diagnostics) = 0;
+    Z_Records *Yaz_Z_Server::create_nonSurrogateDiagnostics (
+	int error, const char *addinfo);
+    void create_databaseRecord (Z_NamePlusRecord *rec,
+				const char *dbname, int format,
+				const void *buf, int len);
+    void create_surrogateDiagnostics(Z_NamePlusRecord *rec,
+				     const char *dbname, int error,
+				     char *const addinfo);
+
  private:
     Z_Records *pack_records (const char *resultSetName,
-			     int start, int *num,
+			     int start, int num,
 			     Z_RecordComposition *comp,
 			     int *next, int *pres,
 			     int *oid);
-    void piggyback (Z_SearchRequest *searchRequest,
-		    Z_SearchResponse *searchResponse);
+    void fetch_via_piggyback (Z_SearchRequest *searchRequest,
+			      Z_SearchResponse *searchResponse);
+    void fetch_via_present (Z_PresentRequest *req, Z_PresentResponse *res);
     int m_preferredMessageSize;
     int m_maximumRecordSize;
 };

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.2  2000-09-12 12:09:53  adam
+ * Revision 1.3  2000-09-21 21:43:20  adam
+ * Better high-level server API.
+ *
+ * Revision 1.2  2000/09/12 12:09:53  adam
  * More work on high-level server.
  *
  * Revision 1.1  2000/09/08 10:23:42  adam
@@ -20,14 +23,85 @@ Yaz_Z_Server::Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable)
 {
 }
 
+/*
+ * database record.
+ */
+void Yaz_Z_Server::create_databaseRecord (
+    Z_NamePlusRecord *rec, const char *dbname, int format, const void *buf, int len)
+{
+    rec->databaseName = dbname ? odr_strdup (odr_encode(), dbname) : 0;
+    rec->which = Z_NamePlusRecord_databaseRecord;
+    rec->u.databaseRecord = z_ext_record (odr_encode(), format,
+					  (const char *) buf, len);
+}
+
+/*
+ * surrogate diagnostic.
+ */
+void Yaz_Z_Server::create_surrogateDiagnostics(
+    Z_NamePlusRecord *rec, const char *dbname, int error, char *const addinfo)
+{
+    int oid[OID_SIZE];
+    int *err = (int *)odr_malloc (odr_encode(), sizeof(*err));
+    oident bib1;
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (odr_encode(), sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+	odr_malloc (odr_encode(), sizeof(*dr));
+    
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
+
+    yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
+    *err = error;
+    rec->databaseName = dbname ? odr_strdup (odr_encode(), dbname) : 0;
+    rec->which = Z_NamePlusRecord_surrogateDiagnostic;
+    rec->u.surrogateDiagnostic = drec;
+    drec->which = Z_DiagRec_defaultFormat;
+    drec->u.defaultFormat = dr;
+    dr->diagnosticSetId = odr_oiddup (odr_encode(),
+                                      oid_ent_to_oid(&bib1, oid));
+    dr->condition = err;
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (odr_encode(), addinfo ? addinfo : "");
+}
+
+Z_Records *Yaz_Z_Server::create_nonSurrogateDiagnostics (
+    int error, const char *addinfo)
+{
+    int oid[OID_SIZE];
+    Z_Records *rec = (Z_Records *)
+        odr_malloc (odr_encode(), sizeof(*rec));
+    oident bib1;
+    int *err = (int *)
+        odr_malloc (odr_encode(), sizeof(*err));
+    Z_DiagRec *drec = (Z_DiagRec *)
+        odr_malloc (odr_encode(), sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+        odr_malloc (odr_encode(), sizeof(*dr));
+
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
+
+    *err = error;
+    rec->which = Z_Records_NSD;
+    rec->u.nonSurrogateDiagnostic = dr;
+    dr->diagnosticSetId =
+        odr_oiddup (odr_encode(), oid_ent_to_oid(&bib1, oid));
+    dr->condition = err;
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (odr_encode(), addinfo ? addinfo : "");
+    return rec;
+}
+
 Z_Records *Yaz_Z_Server::pack_records (const char *resultSetName,
-				       int start, int *num,
+				       int start, int xnum,
 				       Z_RecordComposition *comp,
 				       int *next, int *pres,
 				       int *format)
 {
-#if 0
-    int recno, total_length = 0, toget = *num, dumped_records = 0;
+    int recno, total_length = 0, toget = xnum, dumped_records = 0;
     Z_Records *records =
 	(Z_Records *) odr_malloc (odr_encode(), sizeof(*records));
     Z_NamePlusRecordList *reclist =
@@ -40,156 +114,95 @@ Z_Records *Yaz_Z_Server::pack_records (const char *resultSetName,
     reclist->num_records = 0;
     reclist->records = list;
     *pres = Z_PRES_SUCCESS;
-    *num = 0;
     *next = 0;
 
     yaz_log(LOG_LOG, "Request to pack %d+%d", start, toget);
-    yaz_log(LOG_DEBUG, "pms=%d, mrs=%d", m_preferredMessageSize,
-    	m_maximumRecordSize);
+    yaz_log(LOG_LOG, "pms=%d, mrs=%d", m_preferredMessageSize,
+	    m_maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
-	Z_NamePlusRecord *rec =
-	    (Z_NamePlusRecord *) odr_malloc (odr_encode(), sizeof(*rec));
-	rec->databaseName = 0;
-	rec->which = Z_NamePlusRecord_databaseRecord;
-	rec->u.databaseRecord = 0;
+	Z_NamePlusRecord *this_rec =
+	    (Z_NamePlusRecord *) odr_malloc (odr_encode(), sizeof(*this_rec));
+	this_rec->databaseName = 0;
+	this_rec->which = Z_NamePlusRecord_databaseRecord;
+	this_rec->u.databaseRecord = 0;
 
-	Z_DefaultDiagFormat *diagnostics = (Z_DefaultDiagFormat *)
-	    odr_malloc (odr_encode(), sizeof(*diagnostics));
-	diagnostics->diagnosticSetId = 0;
-	diagnostics->condition = 0;
-	diagnostics->which = Z_DefaultDiagFormat_v2Addinfo;
-	
-	recv_Z_record (resultSetName, recno, format, comp, rec, diagnostics);
-
-    	bend_fetch_rr freq;
-	Z_NamePlusRecord *thisrec;
 	int this_length = 0;
+
+	recv_Z_record (resultSetName, recno, format, comp, this_rec, records);
+
+	if (records->which != Z_Records_DBOSD)
+	{
+	    *pres = Z_PRES_FAILURE;
+	    return records;
+	}
+
+	if (this_rec->which == Z_NamePlusRecord_databaseRecord &&
+	    this_rec->u.databaseRecord == 0)
+	{   // handler did not return a record..
+	    create_surrogateDiagnostics(this_rec, 0, 14, 0);
+	}
 	/*
 	 * we get the number of bytes allocated on the stream before any
 	 * allocation done by the backend - this should give us a reasonable
 	 * idea of the total size of the data so far.
 	 */
-	total_length = odr_total(a->encode) - dumped_records;
-	freq.errcode = 0;
-	freq.errstring = 0;
-	freq.basename = 0;
-	freq.len = 0;
-	freq.record = 0;
-	freq.last_in_set = 0;
-	freq.setname = setname;
-	freq.surrogate_flag = 0;
-	freq.number = recno;
-	freq.comp = comp;
-	freq.request_format = format;
-	freq.request_format_raw = oid;
-	freq.output_format = format;
-	freq.output_format_raw = 0;
-	freq.stream = a->encode;
-	freq.print = a->print;
-	freq.surrogate_flag = 0;
-	freq.referenceId = referenceId;
-	(*a->init->bend_fetch)(a->backend, &freq);
-	/* backend should be able to signal whether error is system-wide
-	   or only pertaining to current record */
-	if (freq.errcode)
-	{
-	    if (!freq.surrogate_flag)
-	    {
-		*pres = Z_PRES_FAILURE;
-		return diagrec(a, freq.errcode, freq.errstring);
-	    }
-	    reclist->records[reclist->num_records] =
-		surrogatediagrec(a, freq.basename, freq.errcode,
-				 freq.errstring);
-	    reclist->num_records++;
-	    *next = freq.last_in_set ? 0 : recno + 1;
-	    continue;
-	}
-	if (freq.len >= 0)
-	    this_length = freq.len;
-	else
-	    this_length = odr_total(a->encode) - total_length;
-	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d",
-	    this_length, total_length);
-	if (this_length + total_length > a->preferredMessageSize)
+	total_length = odr_total(odr_encode()) - dumped_records;
+	this_length = odr_total(odr_encode()) - total_length;
+	yaz_log(LOG_LOG, "  fetched record, len=%d, total=%d",
+		this_length, total_length);
+	if (this_length + total_length > m_preferredMessageSize)
 	{
 	    /* record is small enough, really */
-	    if (this_length <= a->preferredMessageSize)
+	    if (this_length <= m_preferredMessageSize)
 	    {
-	    	yaz_log(LOG_DEBUG, "  Dropped last normal-sized record");
+	    	yaz_log(LOG_LOG, "  Dropped last normal-sized record");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
-	    /* record can only be fetched by itself */
-	    if (this_length < a->maximumRecordSize)
+	    if (this_length >= m_maximumRecordSize)
+	    {   /* too big entirely */
+	    	yaz_log(LOG_LOG, "Record > maxrcdsz");
+		reclist->records[reclist->num_records] = this_rec;
+		create_surrogateDiagnostics(this_rec,
+					    this_rec->databaseName, 17, 0);
+		reclist->num_records++;
+		*next = recno + 1;
+		dumped_records += this_length;
+		continue;
+	    }
+	    else /* record can only be fetched by itself */
 	    {
-	    	yaz_log(LOG_DEBUG, "  Record > prefmsgsz");
+	    	yaz_log(LOG_LOG, "  Record > prefmsgsz");
 	    	if (toget > 1)
 		{
 		    yaz_log(LOG_DEBUG, "  Dropped it");
-		    reclist->records[reclist->num_records] =
-		   	 surrogatediagrec(a, freq.basename, 16, 0);
+		    reclist->records[reclist->num_records] = this_rec;
+		    create_surrogateDiagnostics(this_rec,
+						this_rec->databaseName,
+						16, 0);
 		    reclist->num_records++;
-		    *next = freq.last_in_set ? 0 : recno + 1;
+		    // *next = freq.last_in_set ? 0 : recno + 1;
+		    *next = recno + 1;
 		    dumped_records += this_length;
 		    continue;
 		}
 	    }
-	    else /* too big entirely */
-	    {
-	    	yaz_log(LOG_DEBUG, "Record > maxrcdsz");
-		reclist->records[reclist->num_records] =
-		    surrogatediagrec(a, freq.basename, 17, 0);
-		reclist->num_records++;
-		*next = freq.last_in_set ? 0 : recno + 1;
-		dumped_records += this_length;
-		continue;
-	    }
 	}
-
-	if (!(thisrec = (Z_NamePlusRecord *)
-	      odr_malloc(a->encode, sizeof(*thisrec))))
-	    return 0;
-	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
-	    strlen(freq.basename) + 1)))
-	    return 0;
-	strcpy(thisrec->databaseName, freq.basename);
-	thisrec->which = Z_NamePlusRecord_databaseRecord;
-
-	if (freq.output_format_raw)
-	{
-	    struct oident *ident = oid_getentbyoid(freq.output_format_raw);
-	    freq.output_format = ident->value;
-	}
-	thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
-						 freq.record, freq.len);
-	if (!thisrec->u.databaseRecord)
-	    return 0;
-	reclist->records[reclist->num_records] = thisrec;
+	reclist->records[reclist->num_records] = this_rec;
 	reclist->num_records++;
-	*next = freq.last_in_set ? 0 : recno + 1;
+	*next = recno + 1;
     }
-    *num = reclist->num_records;
     return records;
-#endif
-    return 0;
 }
 
-void Yaz_Z_Server::piggyback (Z_SearchRequest *req,
-			      Z_SearchResponse *res)
+void Yaz_Z_Server::fetch_via_piggyback (Z_SearchRequest *req,
+					Z_SearchResponse *res)
 {
     bool_t *sr = (bool_t *)odr_malloc (odr_encode(), sizeof(*sr));
     *sr = 1;
     
-    int *next = (int *)odr_malloc (odr_encode(), sizeof(*next));
-    *next = 0;
-    
-    int *toget = (int *)odr_malloc (odr_encode(), sizeof(*toget));
-    *toget = 0;
-    
-    int *presst = (int *)odr_malloc (odr_encode(), sizeof(*presst));
-    *presst = 0;
+    int toget = 0;
     
     Z_RecordComposition comp, *compp = 0;
     int hits = *res->resultCount;
@@ -197,53 +210,65 @@ void Yaz_Z_Server::piggyback (Z_SearchRequest *req,
     int *nulint = (int *)odr_malloc (odr_encode(), sizeof(*nulint));
     *nulint = 0;
     
-    res->records = 0;
-    
     comp.which = Z_RecordComp_simple;
     /* how many records does the user agent want, then? */
     if (hits <= *req->smallSetUpperBound)
     {
-	*toget = hits;
+	toget = hits;
 	if ((comp.u.simple = req->smallSetElementSetNames))
 	    compp = &comp;
     }
     else if (hits < *req->largeSetLowerBound)
     {
-	*toget = *req->mediumSetPresentNumber;
-	if (*toget > hits)
-	    *toget = hits;
+	toget = *req->mediumSetPresentNumber;
+	if (toget > hits)
+	    toget = hits;
 	if ((comp.u.simple = req->mediumSetElementSetNames))
 	    compp = &comp;
     }
-    else
-	*toget = 0;
     
-    if (*toget && !res->records)
+    if (toget && !res->records)
     {
+	res->presentStatus = (int *) odr_malloc (odr_encode(), sizeof(int));
+	*res->presentStatus = Z_PRES_SUCCESS;
 	res->records =
-	    pack_records(req->resultSetName, 1,
-			 toget, compp, next, presst,
+	    pack_records(req->resultSetName, 1, toget, compp, 
+			 res->nextResultSetPosition,
+			 res->presentStatus,
 			 req->preferredRecordSyntax);
 	if (!res->records)
 	    return;
-	res->numberOfRecordsReturned = toget;
-	res->nextResultSetPosition = next;
+	if (res->records->which == Z_Records_DBOSD)
+	    *res->numberOfRecordsReturned =
+		res->records->u.databaseOrSurDiagnostics->num_records;
 	res->searchStatus = sr;
 	res->resultSetStatus = 0;
-	res->presentStatus = presst;
     }
     else
     {
 	if (hits)
-	    *next = 1;
+	    *res->nextResultSetPosition = 1;
 	res->numberOfRecordsReturned = nulint;
-	res->nextResultSetPosition = next;
 	res->searchStatus = sr;
 	res->resultSetStatus = 0;
 	res->presentStatus = 0;
     }
 }
 
+void Yaz_Z_Server::fetch_via_present (Z_PresentRequest *req,
+				      Z_PresentResponse *res)
+{
+    res->records = pack_records (req->resultSetId,*req->resultSetStartPoint, 
+				 *req->numberOfRecordsRequested,
+				 req->recordComposition,
+				 res->nextResultSetPosition,
+				 res->presentStatus,
+				 req->preferredRecordSyntax);
+    if (res->records->which == Z_Records_DBOSD)
+	*res->numberOfRecordsReturned =
+	    res->records->u.databaseOrSurDiagnostics->num_records;
+}
+    
 void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 {   
     Z_APDU *apdu_response;
@@ -254,6 +279,10 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	apdu_response = create_Z_PDU(Z_APDU_initResponse);
 	recv_Z_init (apdu_request->u.initRequest,
 		     apdu_response->u.initResponse);
+	m_preferredMessageSize =
+	    *apdu_request->u.initRequest->preferredMessageSize;
+	m_maximumRecordSize =
+	    *apdu_request->u.initRequest->maximumRecordSize;
 	send_Z_PDU(apdu_response);
         break;
     case Z_APDU_searchRequest:
@@ -263,8 +292,8 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 		       apdu_response->u.searchResponse);
 	if (!apdu_response->u.searchResponse->records)
 	{
-	    piggyback(apdu_request->u.searchRequest,
-		      apdu_response->u.searchResponse);
+	    fetch_via_piggyback(apdu_request->u.searchRequest,
+				apdu_response->u.searchResponse);
 	}
 	send_Z_PDU(apdu_response);
         break;
@@ -273,6 +302,9 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	apdu_response = create_Z_PDU(Z_APDU_presentResponse);
 	recv_Z_present (apdu_request->u.presentRequest,
 			apdu_response->u.presentResponse);
+	if (!apdu_response->u.presentResponse->records)
+	    fetch_via_present(apdu_request->u.presentRequest,
+			      apdu_response->u.presentResponse);
 	send_Z_PDU(apdu_response);
         break;
     }

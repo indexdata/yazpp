@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.14  2000-09-12 12:09:53  adam
+ * Revision 1.15  2000-09-21 21:43:20  adam
+ * Better high-level server API.
+ *
+ * Revision 1.14  2000/09/12 12:09:53  adam
  * More work on high-level server.
  *
  * Revision 1.13  2000/09/08 10:23:42  adam
@@ -138,18 +141,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    int fd = cs_fileno(new_line);
 	    logf (m_log, "accept ok fd = %d", fd);
 	    cs_fileno(new_line) = -1;  
-	    cs_close (new_line);        /* potential problem ... */
-#if 1
+	    cs_close (new_line);
 	    childNotify(fd);
-#else
-	    Yaz_PDU_Assoc *assoc = new Yaz_PDU_Assoc (m_socketObservable);
-	    assoc->m_parent = this;
-	    assoc->m_next = m_children;
-	    m_children = assoc;
- 
-	    assoc->m_PDU_Observer = m_PDU_Observer->clone(assoc);
-	    socket(fd);
-#endif
 	}
     }
     else if (m_state == Ready)
@@ -402,13 +395,13 @@ void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)
 // Single-threaded... Only useful for non-blocking handlers
 void Yaz_PDU_Assoc::childNotify(int fd)
 {
-    /// Clone PDU Observable (keep socket manager)
+    // Clone PDU Observable (keep socket manager)
     IYaz_PDU_Observable *new_observable = clone();
 
-    /// Clone PDU Observer
+    // Clone PDU Observer
     IYaz_PDU_Observer *observer = m_PDU_Observer->clone(new_observable);
 
-    /// Attach new socket to it
+    // Attach new socket to it
     new_observable->socket(observer, fd);
 }
 #else
