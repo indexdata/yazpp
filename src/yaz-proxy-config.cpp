@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.15 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.16 2003-12-20 22:44:30 adam Exp $
  */
 
 #include <ctype.h>
@@ -118,7 +118,8 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 					 int *keepalive_limit_bw,
 					 int *keepalive_limit_pdu,
 					 int *pre_init,
-					 const char **cql2rpn)
+					 const char **cql2rpn,
+					 const char **zeerex)
 {
     *pre_init = 0;
     int no_url = 0;
@@ -181,6 +182,13 @@ void Yaz_ProxyConfig::return_target_info(xmlNodePtr ptr,
 	    const char *t = get_text(ptr);
 	    if (t)
 		*cql2rpn = t;
+	}
+	if (ptr->type == XML_ELEMENT_NODE 
+	    && !strcmp((const char *) ptr->name, "zeerex"))
+	{
+	    const char *t = get_text(ptr);
+	    if (t)
+		*zeerex = t;
 	}
     }
 }
@@ -478,7 +486,8 @@ int Yaz_ProxyConfig::get_target_no(int no,
 				   int *keepalive_limit_bw,
 				   int *keepalive_limit_pdu,
 				   int *pre_init,
-				   const char **cql2rpn)
+				   const char **cql2rpn,
+				   const char **zeerex)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -503,7 +512,7 @@ int Yaz_ProxyConfig::get_target_no(int no,
 		return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 				   target_idletime, client_idletime,
 				   keepalive_limit_bw, keepalive_limit_pdu,
-				   pre_init, cql2rpn);
+				   pre_init, cql2rpn, zeerex);
 		return 1;
 	    }
 	    i++;
@@ -582,7 +591,8 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 				      int *keepalive_limit_bw,
 				      int *keepalive_limit_pdu,
 				      int *pre_init,
-				      const char **cql2rpn)
+				      const char **cql2rpn,
+				      const char **zeerex)
 {
 #if HAVE_XML2
     xmlNodePtr ptr;
@@ -618,7 +628,7 @@ void Yaz_ProxyConfig::get_target_info(const char *name,
 	return_target_info(ptr, url, limit_bw, limit_pdu, limit_req,
 			   target_idletime, client_idletime,
 			   keepalive_limit_bw, keepalive_limit_pdu,
-			   pre_init, cql2rpn);
+			   pre_init, cql2rpn, zeerex);
     }
 #else
     *url = name;

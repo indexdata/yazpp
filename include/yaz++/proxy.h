@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.22 2003-12-16 14:17:01 adam Exp $
+ * $Id: proxy.h,v 1.23 2003-12-20 22:44:30 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -43,7 +43,8 @@ public:
 		      int *keepalive_limit_bw,
 		      int *keepalive_limit_pdu,
 		      int *pre_init,
-		      const char **cql2rpn);
+		      const char **cql2rpn,
+		      const char **zeerex);
     
     void get_generic_info(int *log_mask, int *max_clients);
 
@@ -53,7 +54,8 @@ public:
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu,
 			 int *pre_init,
-			 const char **cql2rpn);
+			 const char **cql2rpn,
+			 const char **zeerex);
 
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
@@ -68,7 +70,8 @@ private:
 			    int *limit_bw, int *limit_pdu, int *limit_req,
 			    int *target_idletime, int *client_idletime,
 			    int *keepalive_limit_bw, int *keepalive_limit_pdu,
-			    int *pre_init, const char **cql2rpn);
+			    int *pre_init, const char **cql2rpn,
+			    const char **zeerex);
     void return_limit(xmlNodePtr ptr,
 		      int *limit_bw, int *limit_pdu, int *limit_req);
     int check_type_1(ODR odr, xmlNodePtr ptr, Z_RPNQuery *query,
@@ -236,7 +239,8 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Z_APDU *m_apdu_invalid_session;
     NMEM m_mem_invalid_session;
     int send_PDU_convert(Z_APDU *apdu, int *len);
-    ODR m_s2z_odr;
+    ODR m_s2z_odr_init;
+    ODR m_s2z_odr_search;
     int m_s2z_hit_count;
     int m_s2z_packing;
     Z_APDU *m_s2z_init_apdu;
@@ -244,15 +248,17 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Z_APDU *m_s2z_present_apdu;
     char *m_soap_ns;
     int send_to_srw_client_error(int error);
-    int send_to_srw_client_ok(int hits, Z_Records *records);
+    int send_to_srw_client_ok(int hits, Z_Records *records, int start);
     int send_http_response(int code);
     int send_srw_response(Z_SRW_PDU *srw_pdu);
+    int send_srw_explain();
 
     int z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
 		      Z_DefaultDiagFormat *ddf);
     int m_http_keepalive;
     const char *m_http_version;
     Yaz_cql2rpn m_cql2rpn;
+    const char *m_zeerex_fname;
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);

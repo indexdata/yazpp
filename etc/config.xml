@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<!-- $Id: config.xml,v 1.2 2003-12-16 14:17:00 adam Exp $ -->
+<!-- $Id: config.xml,v 1.3 2003-12-20 22:44:30 adam Exp $ -->
 <proxy>
-  <target default="1" name="voyager">
+  <target name="bagel">
     <!-- default target -->
-    <url>bagel.indexdata.dk</url>
+    <url>indexdata.dk</url>
     <target-timeout>240</target-timeout>
     <client-timeout>180</client-timeout>
     <keepalive>
@@ -23,10 +23,11 @@
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
     <preinit>0</preinit>
+    <cql2rpn>pqf.properties</cql2rpn>
+    <zeerex>zeerex.xml</zeerex>
   </target>
-  <target name="localhost">
+  <target default="1" name="localhost">
     <url>localhost:9999</url>
-    <url>localhost:9998</url>
     <target-timeout>300</target-timeout>
     <client-timeout>180</client-timeout>
     <keepalive/> <!-- keepalive enabled -->
@@ -43,11 +44,11 @@
     <syntax type="none"/>
     <syntax type="*" error="238"/>
     <preinit>2</preinit>
-    <cql2rpn>pqf.properties</cql2pqf>
+    <cql2rpn>pqf.properties</cql2rpn>
+    <zeerex>zeerex.xml</zeerex>
   </target>
   <target name="*">
     <!-- everything else -->
   </target>
   <max-clients>50</max-clients>
-  <log>client-apdu server-apdu</log>
 </proxy>

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.71 2003-12-16 14:17:01 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.72 2003-12-20 22:44:30 adam Exp $
  */
 
 #include <assert.h>
@@ -105,7 +105,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_initRequest_mem = 0;
     m_apdu_invalid_session = 0;
     m_mem_invalid_session = 0;
-    m_s2z_odr = 0;
+    m_s2z_odr_init = 0;
+    m_s2z_odr_search = 0;
     m_s2z_init_apdu = 0;
     m_s2z_search_apdu = 0;
     m_s2z_present_apdu = 0;
@@ -113,6 +114,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_http_version = 0;
     m_soap_ns = 0;
     m_s2z_packing = Z_SRW_recordPacking_string;
+    m_zeerex_fname = 0;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
@@ -125,8 +127,10 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
-    if (m_s2z_odr)
-	odr_destroy(m_s2z_odr);
+    if (m_s2z_odr_init)
+	odr_destroy(m_s2z_odr_init);
+    if (m_s2z_odr_search)
+	odr_destroy(m_s2z_odr_search);
     delete m_config;
 }
 
@@ -310,7 +314,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 				 &m_keepalive_limit_bw,
 				 &m_keepalive_limit_pdu,
 				 &pre_init,
-				 &cql2rpn_fname);
+				 &cql2rpn_fname,
+				 &m_zeerex_fname);
 	}
 	if (client_idletime != -1)
 	{
@@ -318,10 +323,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu, const char *cookie,
 	    timeout(m_client_idletime);
 	}
 	if (cql2rpn_fname)
-	{
-	    yaz_log(LOG_LOG, "set_pqf_file %s", cql2rpn_fname);
 	    m_cql2rpn.set_pqf_file(cql2rpn_fname);
-	}
 	if (!url[0])
 	{
 	    yaz_log(LOG_LOG, "%sNo default target", m_session_str);
@@ -639,10 +641,9 @@ int Yaz_Proxy::send_http_response(int code)
     Z_HTTP_Response *hres = gdu->u.HTTP_Response;
     if (m_http_version)
 	hres->version = odr_strdup(o, m_http_version);
+    m_http_keepalive = 0;
     int len;
-    int r = send_GDU(gdu, &len);
-    delete this;
-    return r;
+    return send_GDU(gdu, &len);
 }
 
 int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
@@ -659,7 +660,7 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
 
     static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XML2
-	{"http://www.loc.gov/zing/srw/v1.0/", 0,
+	{"http://www.loc.gov/zing/srw/", 0,
 	 (Z_SOAP_fun) yaz_srw_codec},
 #endif
 	{0, 0, 0}
@@ -677,9 +678,7 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
 			       &hres->content_buf, &hres->content_len,
 			       soap_handlers, 0);
     int len;
-    int r = send_GDU(gdu, &len);
-    if (!m_http_keepalive)
-	delete this;
+    return send_GDU(gdu, &len);
 }
 
 int Yaz_Proxy::send_to_srw_client_error(int srw_error)
@@ -711,7 +710,7 @@ int Yaz_Proxy::z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
     return 0;
 }
 
-int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
+int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records, int start)
 {
     ODR o = odr_encode();
     Z_SRW_PDU *srw_pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
@@ -734,7 +733,7 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
 		srw_res->records[i].recordPacking = m_s2z_packing;
 		srw_res->records[i].recordData_buf = "67";
 		srw_res->records[i].recordData_len = 2;
-		srw_res->records[i].recordPosition = 0;
+		srw_res->records[i].recordPosition = odr_intdup(o, i+start);
 		continue;
 	    }
 	    Z_External *r = npr->u.databaseRecord;
@@ -746,7 +745,7 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
 		srw_res->records[i].recordData_buf = (char*) 
 		    r->u.octet_aligned->buf;
 		srw_res->records[i].recordData_len = r->u.octet_aligned->len;
-		srw_res->records[i].recordPosition = 0;
+		srw_res->records[i].recordPosition = odr_intdup(o, i+start);
 	    }
 	    else
 	    {
@@ -754,7 +753,7 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
 		srw_res->records[i].recordPacking = m_s2z_packing;
 		srw_res->records[i].recordData_buf = "67";
 		srw_res->records[i].recordData_len = 2;
-		srw_res->records[i].recordPosition = 0;
+		srw_res->records[i].recordPosition = odr_intdup(o, i+start);
 	    }
 	}
     }
@@ -769,44 +768,87 @@ int Yaz_Proxy::send_to_srw_client_ok(int hits, Z_Records *records)
     return send_srw_response(srw_pdu);
     
 }
+
+int Yaz_Proxy::send_srw_explain()
+{
+    Z_SRW_PDU *res = yaz_srw_get(odr_encode(), Z_SRW_explain_response);
+    Z_SRW_explainResponse *er = res->u.explain_response;
+    
+    if (m_zeerex_fname)
+    {
+	FILE *inf = fopen(m_zeerex_fname, "rb");
+	if (inf)
+	{
+	    fseek(inf, 0L, SEEK_END);
+	    long sz = ftell(inf);
+	    fseek(inf, 0L, SEEK_SET);
+	    if (sz > 0)
+	    {
+		er->record.recordData_buf = 
+		    (char*) odr_malloc(odr_encode(), sz);
+		size_t s = fread(er->record.recordData_buf, 1,sz, inf);
+		if (s > 0)
+		    er->record.recordData_len = s;
+	    }
+	    else
+		yaz_log(LOG_WARN|LOG_ERRNO, "zeerex file: ftell");
+	    fclose(inf);
+	}
+	else
+	    yaz_log(LOG_WARN|LOG_ERRNO, "zeerex file: fopen");
+    }
+    else
+	yaz_log(LOG_LOG, "zeerex file: not defined");
+    return send_srw_response(res);
+}
+
 int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 {
-    if (m_s2z_init_apdu && apdu->which == Z_APDU_initResponse)
+    if (m_http_version)
     {
-	m_s2z_init_apdu = 0;
-	Z_InitResponse *res = apdu->u.initResponse;
-	if (*res->result == 0)
+	if (apdu->which == Z_APDU_initResponse)
 	{
-	    send_to_srw_client_error(3);
+	    Z_InitResponse *res = apdu->u.initResponse;
+	    if (*res->result == 0)
+	    {
+		send_to_srw_client_error(3);
+	    }
+	    else if (!m_s2z_search_apdu)
+	    {
+		send_srw_explain();
+	    }
+	    else
+	    {
+		handle_incoming_Z_PDU(m_s2z_search_apdu);
+	    }
 	}
-	else
+	else if (m_s2z_search_apdu && apdu->which == Z_APDU_searchResponse)
 	{
-	    handle_incoming_Z_PDU(m_s2z_search_apdu);
+	    m_s2z_search_apdu = 0;
+	    Z_SearchResponse *res = apdu->u.searchResponse;
+	    m_s2z_hit_count = *res->resultCount;
+	    if (res->records && res->records->which == Z_Records_NSD)
+	    {
+		send_to_srw_client_ok(0, res->records, 1);
+	    }
+	    else if (m_s2z_present_apdu)
+	    {
+		handle_incoming_Z_PDU(m_s2z_present_apdu);
+	    }
+	    else
+	    {
+		send_to_srw_client_ok(m_s2z_hit_count, res->records, 1);
+	    }
 	}
-    }
-    else if (m_s2z_search_apdu && apdu->which == Z_APDU_searchResponse)
-    {
-	m_s2z_search_apdu = 0;
-	Z_SearchResponse *res = apdu->u.searchResponse;
-	m_s2z_hit_count = *res->resultCount;
-	if (res->records && res->records->which == Z_Records_NSD)
+	else if (m_s2z_present_apdu && apdu->which == Z_APDU_presentResponse)
 	{
-	    send_to_srw_client_ok(0, res->records);
+	    int start = 
+		*m_s2z_present_apdu->u.presentRequest->resultSetStartPoint;
+
+	    m_s2z_present_apdu = 0;
+	    Z_PresentResponse *res = apdu->u.presentResponse;
+	    send_to_srw_client_ok(m_s2z_hit_count, res->records, start);
 	}
-	else if (m_s2z_present_apdu)
-	{
-	    handle_incoming_Z_PDU(m_s2z_present_apdu);
-	}
-	else
-	{
-	    send_to_srw_client_ok(m_s2z_hit_count, res->records);
-	}
-    }
-    else if (m_s2z_present_apdu && apdu->which == Z_APDU_presentResponse)
-    {
-	m_s2z_present_apdu = 0;
-	Z_PresentResponse *res = apdu->u.presentResponse;
-	send_to_srw_client_ok(m_s2z_hit_count, res->records);
     }
     else
 	return send_Z_PDU(apdu, len);
@@ -880,6 +922,18 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	delete m_client;
 	m_client = 0;
 	m_parent->pre_init();
+    }
+    if (m_http_version)
+    {
+	if (!m_http_keepalive)
+	{
+#if 1
+	    timeout(1);
+#else
+	    shutdown();
+	    return -1;
+#endif
+	}
     }
     return r;
 }
@@ -1146,8 +1200,6 @@ void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
     int bw_total = m_bw_stat.get_total();
     int pdu_total = m_pdu_stat.get_total();
 
-    yaz_log(LOG_LOG, "%sstat bw=%d pdu=%d limit-bw=%d limit-pdu=%d",
-	    m_session_str, bw_total, pdu_total, m_bw_max, m_pdu_max);
     int reduce = 0;
     if (m_bw_max)
     {
@@ -1166,7 +1218,10 @@ void Yaz_Proxy::recv_GDU(Z_GDU *apdu, int len)
     }
     if (reduce)  
     {
-	yaz_log(LOG_LOG, "%sLimit delay=%d", m_session_str, reduce);
+	yaz_log(LOG_LOG, "%sdelay=%d bw=%d pdu=%d limit-bw=%d limit-pdu=%d",
+		m_session_str, reduce, bw_total, pdu_total,
+		m_bw_max, m_pdu_max);
+	
 	m_bw_hold_PDU = apdu;  // save PDU and signal "on hold"
 	timeout(reduce);       // call us reduce seconds later
     }
@@ -1343,221 +1398,19 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     return apdu;
 }
 
-static int hex_digit (int ch)
-{
-    if (ch >= '0' && ch <= '9')
-        return ch - '0';
-    else if (ch >= 'a' && ch <= 'f')
-        return ch - 'a'+10;
-    else if (ch >= 'A' && ch <= 'F')
-        return ch - 'A'+10;
-    return 0;
-}
-
-static char *uri_val(const char *path, const char *name, ODR o)
-{
-    size_t nlen = strlen(name);
-    if (*path != '?')
-        return 0;
-    path++;
-    while (path && *path)
-    {
-        const char *p1 = strchr(path, '=');
-        if (!p1)
-            break;
-        if ((size_t)(p1 - path) == nlen && !memcmp(path, name, nlen))
-        {
-            size_t i = 0;
-            char *ret;
-            
-            path = p1 + 1;
-            p1 = strchr(path, '&');
-            if (!p1)
-                p1 = strlen(path) + path;
-            ret = (char*) odr_malloc(o, p1 - path + 1);
-            while (*path && *path != '&')
-            {
-                if (*path == '+')
-                {
-                    ret[i++] = ' ';
-                    path++;
-                }
-                else if (*path == '%' && path[1] && path[2])
-                {
-                    ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
-                    path = path + 3;
-                }
-                else
-                    ret[i++] = *path++;
-            }
-            ret[i] = '\0';
-            return ret;
-        }
-        path = strchr(p1, '&');
-        if (path)
-            path++;
-    }
-    return 0;
-}
-
-void uri_val_int(const char *path, const char *name, ODR o, int **intp)
-{
-    const char *v = uri_val(path, name, o);
-    if (v)
-        *intp = odr_intdup(o, atoi(v));
-}
-
-int yaz_check_for_sru(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-		      char **soap_ns, ODR decode)
-{
-    if (!strcmp(hreq->method, "GET"))
-    {
-        char *db = "Default";
-        const char *p0 = hreq->path, *p1;
-#if HAVE_XML2
-        int ret = -1;
-        char *charset = 0;
-        Z_SOAP *soap_package = 0;
-        static Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/v1.0/", 0,
-             (Z_SOAP_fun) yaz_srw_codec},
-            {0, 0, 0}
-        };
-#endif
-        
-        if (*p0 == '/')
-            p0++;
-        p1 = strchr(p0, '?');
-        if (!p1)
-            p1 = p0 + strlen(p0);
-        if (p1 != p0)
-        {
-            db = (char*) odr_malloc(decode, p1 - p0 + 1);
-            memcpy (db, p0, p1 - p0);
-            db[p1 - p0] = '\0';
-        }
-#if HAVE_XML2
-        if (p1 && *p1 == '?' && p1[1])
-        {
-            Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_searchRetrieve_request);
-            char *query = uri_val(p1, "query", decode);
-            char *pQuery = uri_val(p1, "pQuery", decode);
-            char *sortKeys = uri_val(p1, "sortKeys", decode);
-            
-	    *srw_pdu = sr;
-            if (query)
-            {
-                sr->u.request->query_type = Z_SRW_query_type_cql;
-                sr->u.request->query.cql = query;
-            }
-            if (pQuery)
-            {
-                sr->u.request->query_type = Z_SRW_query_type_pqf;
-                sr->u.request->query.pqf = pQuery;
-            }
-            if (sortKeys)
-            {
-                sr->u.request->sort_type = Z_SRW_sort_type_sort;
-                sr->u.request->sort.sortKeys = sortKeys;
-            }
-            sr->u.request->recordSchema = uri_val(p1, "recordSchema", decode);
-            sr->u.request->recordPacking = uri_val(p1, "recordPacking", decode);
-            if (!sr->u.request->recordPacking)
-                sr->u.request->recordPacking = "xml";
-            uri_val_int(p1, "maximumRecords", decode, 
-                        &sr->u.request->maximumRecords);
-            uri_val_int(p1, "startRecord", decode,
-                        &sr->u.request->startRecord);
-            if (sr->u.request->startRecord)
-                yaz_log(LOG_LOG, "startRecord=%d", *sr->u.request->startRecord);
-            sr->u.request->database = db;
-	    *soap_ns = "SRU";
-	    return 0;
-        }
-#endif
-	return 1;
-    }
-    return 2;
-}
-
-int yaz_check_for_srw(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-		      char **soap_ns, ODR decode)
-{
-    if (!strcmp(hreq->method, "POST"))
-    {
-	const char *content_type = z_HTTP_header_lookup(hreq->headers,
-							"Content-Type");
-	if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
-	{
-	    char *db = "Default";
-	    const char *p0 = hreq->path, *p1;
-	    Z_SOAP *soap_package = 0;
-            int ret = -1;
-            int http_code = 500;
-            const char *charset_p = 0;
-            char *charset = 0;
-	    
-            static Z_SOAP_Handler soap_handlers[2] = {
-#if HAVE_XML2
-                {"http://www.loc.gov/zing/srw/v1.0/", 0,
-                 (Z_SOAP_fun) yaz_srw_codec},
-#endif
-                {0, 0, 0}
-            };
-	    
-	    if (*p0 == '/')
-		p0++;
-	    p1 = strchr(p0, '?');
-	    if (!p1)
-		p1 = p0 + strlen(p0);
-	    if (p1 != p0)
-	    {
-		db = (char*) odr_malloc(decode, p1 - p0 + 1);
-		memcpy (db, p0, p1 - p0);
-		db[p1 - p0] = '\0';
-	    }
-
-            if ((charset_p = strstr(content_type, "; charset=")))
-            {
-                int i = 0;
-                charset_p += 10;
-                while (i < 20 && charset_p[i] &&
-                       !strchr("; \n\r", charset_p[i]))
-                    i++;
-                charset = (char*) odr_malloc(decode, i+1);
-                memcpy(charset, charset_p, i);
-                charset[i] = '\0';
-                yaz_log(LOG_LOG, "SOAP encoding %s", charset);
-            }
-            ret = z_soap_codec(decode, &soap_package, 
-                               &hreq->content_buf, &hreq->content_len,
-                               soap_handlers);
-	    if (!ret && soap_package->which == Z_SOAP_generic &&
-		soap_package->u.generic->no == 0)
-	    {
-		*srw_pdu = (Z_SRW_PDU*) soap_package->u.generic->p;
-		
-		if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
-		    (*srw_pdu)->u.request->database == 0)
-		    (*srw_pdu)->u.request->database = db;
-
-		*soap_ns = odr_strdup(decode, soap_package->ns);
-		return 0;
-	    }
-	    return 1;
-	}
-    }
-    return 2;
-}
-
 void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 {
     Z_SRW_PDU *srw_pdu = 0;
     char *soap_ns = 0;
-    if (m_s2z_odr)
+    if (m_s2z_odr_init)
     {
-	odr_destroy(m_s2z_odr);
-	m_s2z_odr = 0;
+	odr_destroy(m_s2z_odr_init);
+	m_s2z_odr_init = 0;
+    }
+    if (m_s2z_odr_search)
+    {
+	odr_destroy(m_s2z_odr_search);
+	m_s2z_odr_search = 0;
     }
 
     m_http_keepalive = 0;
@@ -1584,8 +1437,9 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
     if (yaz_check_for_srw(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0
 	|| yaz_check_for_sru(hreq, &srw_pdu, &soap_ns, odr_decode()) == 0)
     {
-	m_s2z_odr = odr_createmem(ODR_ENCODE);
-	m_soap_ns = odr_strdup(m_s2z_odr, soap_ns);
+	m_s2z_odr_init = odr_createmem(ODR_ENCODE);
+	m_s2z_odr_search = odr_createmem(ODR_ENCODE);
+	m_soap_ns = odr_strdup(m_s2z_odr_search, soap_ns);
 	m_s2z_init_apdu = 0;
 	m_s2z_search_apdu = 0;
 	m_s2z_present_apdu = 0;
@@ -1601,27 +1455,28 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		m_s2z_packing = Z_SRW_recordPacking_string;
 
 	    // prepare search PDU
-	    m_s2z_search_apdu = zget_APDU(m_s2z_odr, Z_APDU_searchRequest);
+	    m_s2z_search_apdu = zget_APDU(m_s2z_odr_search,
+					  Z_APDU_searchRequest);
 	    Z_SearchRequest *z_searchRequest =
 		m_s2z_search_apdu->u.searchRequest;
 
 	    z_searchRequest->num_databaseNames = 1;
 	    z_searchRequest->databaseNames = (char**)
-		odr_malloc(m_s2z_odr, sizeof(char *));
-	    z_searchRequest->databaseNames[0] = odr_strdup(m_s2z_odr,
+		odr_malloc(m_s2z_odr_search, sizeof(char *));
+	    z_searchRequest->databaseNames[0] = odr_strdup(m_s2z_odr_search,
 							   srw_req->database);
 	    
 	    // query transformation
 	    Z_Query *query = (Z_Query *)
-		odr_malloc(odr_encode(), sizeof(Z_Query));
+		odr_malloc(m_s2z_odr_search, sizeof(Z_Query));
 	    z_searchRequest->query = query;
 	    
 	    if (srw_req->query_type == Z_SRW_query_type_cql)
 	    {
 		Z_External *ext = (Z_External *) 
-		    odr_malloc(m_s2z_odr, sizeof(*ext));
+		    odr_malloc(m_s2z_odr_search, sizeof(*ext));
 		ext->direct_reference = 
-		    odr_getoidbystr(m_s2z_odr, "1.2.840.10003.16.2");
+		    odr_getoidbystr(m_s2z_odr_search, "1.2.840.10003.16.2");
 		ext->indirect_reference = 0;
 		ext->descriptor = 0;
 		ext->which = Z_External_CQL;
@@ -1637,7 +1492,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		
 		pqf_parser = yaz_pqf_create ();
 		
-		RPNquery = yaz_pqf_parse (pqf_parser, m_s2z_odr,
+		RPNquery = yaz_pqf_parse (pqf_parser, m_s2z_odr_search,
 					  srw_req->query.pqf);
 		if (!RPNquery)
 		{
@@ -1677,25 +1532,31 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		    *z_searchRequest->mediumSetPresentNumber = max;
 		    *z_searchRequest->largeSetLowerBound = 2000000000; // 2e9
 		    z_searchRequest->preferredRecordSyntax =
-			yaz_oidval_to_z3950oid(m_s2z_odr, CLASS_RECSYN,
+			yaz_oidval_to_z3950oid(m_s2z_odr_search, CLASS_RECSYN,
 					       VAL_TEXT_XML);
 		}
 		else   // Z39.50 present
 		{
-		    m_s2z_present_apdu = zget_APDU(m_s2z_odr, 
+		    m_s2z_present_apdu = zget_APDU(m_s2z_odr_search, 
 						   Z_APDU_presentRequest);
 		    Z_PresentRequest *z_presentRequest = 
 			m_s2z_present_apdu->u.presentRequest;
 		    *z_presentRequest->resultSetStartPoint = start;
 		    *z_presentRequest->numberOfRecordsRequested = max;
 		    z_presentRequest->preferredRecordSyntax =
-			yaz_oidval_to_z3950oid(m_s2z_odr, CLASS_RECSYN,
+			yaz_oidval_to_z3950oid(m_s2z_odr_search, CLASS_RECSYN,
 					       VAL_TEXT_XML);
 		}
 	    }
 	    if (!m_client)
 	    {
-		m_s2z_init_apdu = zget_APDU(m_s2z_odr, Z_APDU_initRequest);
+		yaz_log(LOG_LOG, "handle_incoming: initRequest");
+		m_s2z_init_apdu = zget_APDU(m_s2z_odr_init,
+					    Z_APDU_initRequest);
+		
+		// prevent m_initRequest_apdu memory from being grabbed
+		// in Yaz_Proxy::handle_incoming_Z_PDU
+		m_initRequest_apdu = m_s2z_init_apdu;
 		handle_incoming_Z_PDU(m_s2z_init_apdu);
 		return;
 	    }
@@ -1704,6 +1565,23 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		handle_incoming_Z_PDU(m_s2z_search_apdu);
 		return;
 	    }
+	}
+	else if (srw_pdu->which == Z_SRW_explain_request)
+	{
+	    if (!m_client)
+	    {
+		yaz_log(LOG_LOG, "handle_incoming: initRequest");
+		m_s2z_init_apdu = zget_APDU(m_s2z_odr_init,
+					    Z_APDU_initRequest);
+		
+		// prevent m_initRequest_apdu memory from being grabbed
+		// in Yaz_Proxy::handle_incoming_Z_PDU
+		m_initRequest_apdu = m_s2z_init_apdu;
+		handle_incoming_Z_PDU(m_s2z_init_apdu);
+	    }
+	    else
+		send_srw_explain();
+	    return;
 	}
     }
     int len = 0;
@@ -1754,12 +1632,14 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 	{
 	    if (handle_init_response_for_invalid_session(apdu))
 		return;
-	    Z_APDU *apdu = m_client->m_initResponse;
-	    apdu->u.initResponse->otherInfo = 0;
+	    Z_APDU *apdu2 = m_client->m_initResponse;
+	    apdu2->u.initResponse->otherInfo = 0;
 	    if (m_client->m_cookie && *m_client->m_cookie)
-		set_otherInformationString(apdu, VAL_COOKIE, 1,
+		set_otherInformationString(apdu2, VAL_COOKIE, 1,
 					   m_client->m_cookie);
-	    send_to_client(apdu);
+	    apdu2->u.initResponse->referenceId =
+		apdu->u.initRequest->referenceId;
+	    send_to_client(apdu2);
 	    return;
 	}
 	m_client->m_init_flag = 1;
@@ -1956,6 +1836,7 @@ void Yaz_Proxy::pre_init()
     int keepalive_limit_bw, keepalive_limit_pdu;
     int pre_init;
     const char *cql2rpn = 0;
+    const char *zeerex = 0;
 
     Yaz_ProxyConfig *cfg = check_reconfigure();
 
@@ -1973,7 +1854,8 @@ void Yaz_Proxy::pre_init()
 					  &keepalive_limit_bw,
 					  &keepalive_limit_pdu,
 					  &pre_init,
-					  &cql2rpn) ; i++)
+					  &cql2rpn,
+					  &zeerex) ; i++)
     {
 	if (pre_init)
 	{
