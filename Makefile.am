@@ -8,7 +8,8 @@ aclocal_DATA = yazpp.m4
 EXTRA_DIST= LICENSE LICENSE.proxy TODO yaz++-config.in yazpp.m4
 
 dist-hook:
-	cp -R $(srcdir)/win $(distdir)
+	mkdir $(distdir)/win
+	cp $(srcdir)/win/makefile $(distdir)/win/
 	mkdir $(distdir)/debian
 	cp $(srcdir)/debian/control $(distdir)/debian
 	cp $(srcdir)/debian/changelog $(distdir)/debian
