@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: config.xml,v 1.10 2003-10-13 21:30:59 adam Exp $ -->
+<!-- $Id: config.xml,v 1.11 2003-10-14 13:48:26 adam Exp $ -->
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
@@ -14,13 +14,14 @@
       <pdu>31</pdu>
       <retrieve>20</retrieve>
     </limit>
-    <attribute type="1" value="10" error="114"/>
+    <attribute type="1" value="1-11,13-1010"/>
+    <attribute type="1" value="*" error="114"/>
     <target-timeout>300</target-timeout>
     <client-timeout>180</client-timeout>
     <syntax type="usmarc"/>
     <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
-    <preinit>1</preinit>
+    <preinit>2</preinit>
   </target>
   <target name="localhost">
     <url>localhost:9999</url>
