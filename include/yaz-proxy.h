@@ -4,8 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-02-02 14:01:15  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  *
  */
@@ -15,7 +18,7 @@
 class Yaz_Proxy;
 
 /// Private class
-class Yaz_ProxyClient : public Yaz_IR_Assoc {
+class YAZ_EXPORT Yaz_ProxyClient : public Yaz_IR_Assoc {
     friend Yaz_Proxy;
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
     void recv_Z_PDU(Z_APDU *apdu);
@@ -25,7 +28,7 @@ class Yaz_ProxyClient : public Yaz_IR_Assoc {
 };
 
 /// Private class
-class Yaz_ProxyMap {
+class YAZ_EXPORT Yaz_ProxyMap {
     friend Yaz_Proxy;
     char *m_databaseName;      /* from database name */
     char *m_ZURL;              /* to this address */
@@ -33,7 +36,7 @@ class Yaz_ProxyMap {
 };
 
 /// Information Retrieval Proxy Server.
-class Yaz_Proxy : public Yaz_IR_Assoc {
+class YAZ_EXPORT Yaz_Proxy : public Yaz_IR_Assoc {
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.2  1999-01-28 13:08:42  adam
+ * Revision 1.3  1999-02-02 14:01:18  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:42  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -18,12 +21,12 @@
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
 
-class MyClient : public Yaz_IR_Assoc {
+class YAZ_EXPORT MyClient : public Yaz_IR_Assoc {
 public:
     MyClient(IYaz_PDU_Observable *the_PDU_Observable);
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer *clone(IYaz_PDU_Observable *the_PDU_Observable);
-    void sendInit();
+    void init();
 };
 
 void MyClient::recv_Z_PDU(Z_APDU *apdu)
@@ -48,10 +51,9 @@ IYaz_PDU_Observer *MyClient::clone(IYaz_PDU_Observable *the_PDU_Observable)
 MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_IR_Assoc (the_PDU_Observable)
 {
-
 }
 
-void MyClient::sendInit()
+void MyClient::init()
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
@@ -75,12 +77,13 @@ void MyClient::sendInit()
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
+    Yaz_PDU_Assoc *some = new Yaz_PDU_Assoc(&mySocketManager, 0);
 
-    MyClient z(new Yaz_PDU_Assoc(&mySocketManager, 0));
+    MyClient z(some);
 
-    z.client("localhost:9999");
-    z.sendInit();
-    
+    z.client(argc < 2 ? "localhost:9999" : argv[1]);
+    z.init();
     while (mySocketManager.processEvent() > 0)
 	;
+    return 0;
 }

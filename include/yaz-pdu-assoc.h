@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.h,v $
- * Revision 1.2  1999-01-28 13:08:40  adam
+ * Revision 1.3  1999-02-02 14:01:13  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:40  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -23,7 +26,7 @@
     the method connect. The server role is initiated by using the
     listen method.
  */
-class Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
+class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
  private:
     enum { Connecting, Connected, Listen, Ready, Closed } m_state;
     class PDU_Queue {

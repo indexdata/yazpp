@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.2  1999-01-28 13:08:45  adam
+ * Revision 1.3  1999-02-02 14:01:21  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:45  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -12,6 +15,8 @@
  * First implementation of YAZ++.
  *
  */
+
+#include <log.h>
 
 #include <yaz-socket-manager.h>
 #include <yaz-pdu-assoc.h>

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.2  1999-01-28 13:08:47  adam
+ * Revision 1.3  1999-02-02 14:01:22  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:47  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -87,4 +90,5 @@ int main(int argc, char **argv)
     }
     while (!stop && mySocketManager.processEvent() > 0)
 	;
+    return 0;
 }

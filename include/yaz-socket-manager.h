@@ -4,8 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-02-02 14:01:16  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -15,7 +18,7 @@
     Implements a stand-alone simple model that uses select(2) to
     observe socket events.
 */
-class Yaz_SocketManager : public IYazSocketObservable {
+class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
  private:
     struct YazSocketEntry {
 	IYazSocketObserver *observer;

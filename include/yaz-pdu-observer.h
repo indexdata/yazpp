@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-observer.h,v $
- * Revision 1.2  1999-01-28 13:08:41  adam
+ * Revision 1.3  1999-02-02 14:01:14  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:41  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -24,7 +27,7 @@ class IYaz_PDU_Observer;
     transmitted/received over the network. To use this interface the
     IYaz_PDU_Observer interface must be implemented.
  */
-class IYaz_PDU_Observable {
+class YAZ_EXPORT IYaz_PDU_Observable {
  public:
     /// Send encoded PDU buffer of specified length
     virtual int send_PDU(const char *buf, int len) = 0;
@@ -44,7 +47,7 @@ class IYaz_PDU_Observable {
     This interface is used together with the IYaz_PDU_Observable interface
     and acts as a callback interface for it.
  */
-class IYaz_PDU_Observer {
+class YAZ_EXPORT IYaz_PDU_Observer {
  public:
     /// A PDU has been received
     virtual void recv_PDU(const char *buf, int len) = 0;

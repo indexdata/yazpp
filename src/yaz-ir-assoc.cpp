@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.2  1999-01-28 13:08:43  adam
+ * Revision 1.3  1999-02-02 14:01:19  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:43  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -15,6 +18,16 @@
 
 #include <log.h>
 #include <yaz-ir-assoc.h>
+
+int Yaz_IR_Assoc::yaz_init_func()
+{
+    logf (LOG_LOG, "nmem_init");
+    nmem_init();
+    logf (LOG_LOG, "done");
+    return 1;
+}
+
+int Yaz_IR_Assoc::yaz_init_flag = Yaz_IR_Assoc::yaz_init_func();
 
 Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
 {

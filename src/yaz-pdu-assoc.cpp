@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.2  1999-01-28 13:08:44  adam
+ * Revision 1.3  1999-02-02 14:01:20  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:44  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -147,14 +150,13 @@ void Yaz_PDU_Assoc::close()
 	cs_close (m_cs);
     }
     m_cs = 0;
-    PDU_Queue **q = &m_queue_out;
-    while (*q)
+    while (m_queue_out)
     {
-	PDU_Queue *q_this = *q;
-	*q = (*q)->m_next;
+	PDU_Queue *q_this = m_queue_out;
+	m_queue_out = m_queue_out->m_next;
 	delete q_this;
     }
-    free (m_input_buf);
+//   free (m_input_buf);
     m_input_buf = 0;
     m_input_len = 0;
 }
@@ -243,6 +245,7 @@ int Yaz_PDU_Assoc::flush_PDU()
 
 int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
 {
+    logf (LOG_LOG, "send_PDU");
     PDU_Queue **pq = &m_queue_out;
     int is_idle = (*pq ? 0 : 1);
     
@@ -283,6 +286,7 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
     void *ap;
     COMSTACK cs = comstack();
 
+    logf (LOG_LOG, "Yaz_PDU_Assoc::listen %s", addr);
     m_PDU_Observer = observer;
     if (!cs)
         return;
@@ -300,13 +304,16 @@ void Yaz_PDU_Assoc::listen(IYaz_PDU_Observer *observer,
 void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 			    const char *addr)
 {
-    logf (LOG_LOG, "Yaz_PDU_Assoc::connect");
+    logf (LOG_LOG, "Yaz_PDU_Assoc::connect %s", addr);
     close();
     m_PDU_Observer = observer;
     COMSTACK cs = comstack();
     void *ap = cs_straddr (cs, addr);
     if (!ap)
-        return;
+    {
+	logf (LOG_LOG, "cs_straddr failed");
+	return;
+    }
     int res = cs_connect (cs, ap);
     if (res < 0)
     {

@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.2 1999-01-28 10:04:46 adam Exp $
+$Id: README.txt,v 1.3 1999-02-02 14:01:10 adam Exp $
  
 o Introduction
 
@@ -52,10 +52,15 @@ Then, build YAZ++:
 
 o Installation, Windows
 
-Software is 32-bit based and should run on Windows 95/98 and
-Windows NT 4.0 The software was build using Microsoft Visual C++ 5.0 and
-6.0. Other compilers should work but the makefile/project files will have
-created for those compiler environments.
-  > cd win
-  > nmake      (Visual C++ makefile not yet created)
+Software is WIN32 and should run on Windows 95/98 and Windows NT 4.0.
+Yaz++ was build using Microsoft Visual C++ 5.0 and 6.0. Other compilers
+should work but makefile/project files will have created for those
+compiler environments.
+
+  Open workspace yazxx.dsw that includes four projects
+    yazxx.dsp       -   builds yazxx.dll
+    yazclient.dsp   -   builds yazclient.exe
+    yazserver.dsp   -   builds yazserver.exe
+    yazproxy.dsp    -   builds yazproxy.exe
+
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.h,v $
- * Revision 1.2  1999-01-28 13:08:39  adam
+ * Revision 1.3  1999-02-02 14:01:12  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:39  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -22,7 +25,7 @@
     This object implements the client - and server role of a generic
     Z39.50 Association.
 */
-class Yaz_IR_Assoc : public IYaz_PDU_Observer {
+class YAZ_EXPORT Yaz_IR_Assoc : public IYaz_PDU_Observer {
  public:
     /// Create object using the PDU Observer specified
     Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
@@ -48,6 +51,8 @@ class Yaz_IR_Assoc : public IYaz_PDU_Observer {
     virtual void recv_Z_PDU (Z_APDU *apdu) = 0;
     /// Create Z39.50 with reasonable defaults
     Z_APDU *create_Z_PDU(int type);
+    static int yaz_init_flag;
+    static int yaz_init_func();
  private:
     IYaz_PDU_Observable *m_PDU_Observable;
     ODR m_odr_in;

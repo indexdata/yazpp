@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.2  1999-01-28 13:08:48  adam
+ * Revision 1.3  1999-02-02 14:01:23  adam
+ * First WIN32 port of YAZ++.
+ *
+ * Revision 1.2  1999/01/28 13:08:48  adam
  * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
  * yaz-socket-manager.cc.
  *
@@ -13,7 +16,7 @@
  *
  */
 #include <assert.h>
-#ifdef WINDOWS
+#ifdef WIN32
 #include <winsock.h>
 #else
 #include <sys/time.h>
@@ -99,6 +102,7 @@ void Yaz_SocketManager::timeoutObserver(IYazSocketObserver *observer,
 
 int Yaz_SocketManager::processEvent()
 {
+    YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
     if (event)
     {
@@ -122,7 +126,7 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = 60;
     to.tv_usec = 0;
 
-    for (YazSocketEntry *p = m_observers; p; p = p->next)
+    for (p = m_observers; p; p = p->next)
     {
 	int fd = p->fd;
 	logf (LOG_LOG, "fd = %d mask=%d", fd, p->mask);
@@ -143,7 +147,7 @@ int Yaz_SocketManager::processEvent()
 	if (errno != EINTR)
 	    return -1;
 
-    for (YazSocketEntry * p = m_observers; p; p = p->next)
+    for (p = m_observers; p; p = p->next)
     {
 	int fd = p->fd;
 	int mask = 0;
