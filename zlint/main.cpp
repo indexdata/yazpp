@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <yaz++/pdu-assoc.h>
 #include <yaz++/socket-manager.h>
 
