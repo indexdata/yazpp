@@ -8,3 +8,4 @@ configure
 libtool
 yaz++-config
 autom4te.cache
+bin
