@@ -1,6 +1,6 @@
 # Copyright (C) 1993-2004, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.3 2004-03-30 18:58:40 adam Exp $
+# $Id: makefile,v 1.4 2004-04-11 17:49:36 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -11,27 +11,9 @@ DEBUG=0   # 0 for release, 1 for debug
 # YAZ
 YAZ_DIR=c:\yaz
 
-# iconv charcter conversion utility
-HAVE_ICONV=1
-ICONV_DIR = c:\iconv-1.9.1.win32
-
-# libxslt
-HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.4.win32
-
-# libxml2 (used by libxslt)
-HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.7.win32
-
-# zlib compression (used by libxml2)
-ZLIB_DIR = c:\zlib-1.1.4.win32
-
-# get WIN32 binaries for libxslt, libxml, iconv, zlib from here:
-# http://www.zlatkovic.com/libxml.en.html
-
 default: all
 
-all: dirs generated dll zclient proxy iconv libxml2 libxslt yaz
+all: dirs generated dll zclient yaz
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -65,16 +47,11 @@ TMP=$(TMPDIR)
 ###########################################################
 
 YAZPP_DLL=$(BINDIR)\yazpp.dll
-YAZPROXY_DLL=$(BINDIR)\yazproxy.dll
 YAZPP_IMPLIB=$(LIBDIR)\yazpp.lib
-YAZPROXY_IMPLIB=$(LIBDIR)\yazproxy.lib
-
-YAZPROXY=$(BINDIR)\yaz-proxy.exe
 ZCLIENT=$(BINDIR)\zclient.exe
 
 # shortcut names defined here
-dll: $(YAZPP_DLL) $(YAZPROXY_DLL)
-proxy: $(YAZPROXY)
+dll: $(YAZPP_DLL)
 zclient: $(ZCLIENT)
 
 ###########################################################
@@ -88,68 +65,13 @@ yaz: $(BINDIR)\yaz.dll $(BINDIR)\yaz.dll
 $(BINDIR)\yaz.dll: $(YAZ_DIR)\bin\yaz.dll
   copy "$(YAZ_DIR)\bin\yaz.dll" $(BINDIR)
 
-!if $(HAVE_ICONV)
-ICONV_DEF= \
-  /D HAVE_ICONV_H=1 \
-  /I"$(ICONV_DIR)\include"
-ICONV_LIB= \
-  "$(ICONV_DIR)\lib\iconv.lib"
-iconv: $(BINDIR)\iconv.dll
-
-$(BINDIR)\iconv.dll:
-  copy "$(ICONV_DIR)\lib\iconv.dll" $(BINDIR)
-!else
-ICONV_DEF= \
-  /D HAVE_ICONV_H=0
-ICONV_LIB=
-iconv:
-
-!endif
-
-!if $(HAVE_LIBXML2)
-LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
-LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
-libxml2: $(BINDIR)\libxml2.dll $(BINDIR)\zlib.dll
-
-$(BINDIR)\libxml2.dll:
-  copy "$(LIBXML2_DIR)\lib\libxml2.dll" $(BINDIR)
-
-$(BINDIR)\zlib.dll:
-  copy "$(ZLIB_DIR)\lib\zlib.dll" $(BINDIR)
-
-!else
-LIBXML2_LIB=
-LIBXML2_DEF=/D HAVE_XML2=0
-libxml2: 
-
-!endif
-
-!if $(HAVE_LIBXSLT)
-LIBXSLT_LIB="$(LIBXSLT_DIR)\lib\libxslt.lib"
-LIBXSLT_DEF=/D HAVE_XSLT=1 /I"$(LIBXSLT_DIR)\include"
-libxslt: $(BINDIR)\libxslt.dll $(BINDIR)\zlib.dll
-
-$(BINDIR)\libxslt.dll:
-  copy "$(LIBXSLT_DIR)\lib\libxslt.dll" $(BINDIR)
-
-!else
-LIBXSLT_LIB=
-LIBXSLT_DEF=/D HAVE_XSLT=0
-libxslt: 
-
-!endif
-
-
 ### C and CPP compiler  (the same thing)
 # Note: $(CPP) has already been defined in the environment
 # (if you set things up right!)
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
-  $(ICONV_DEF)             \
   $(YAZ_DEF)               \
-  $(LIBXML2_DEF)           \
-  $(LIBXSLT_DEF)           \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /D "HAVE_WCHAR_H=1"      \
@@ -225,9 +147,6 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 ###############  Source and object modules
 ###########################################################
 
-YAZPROXY_OBJS= \
-   "$(OBJDIR)\yaz-proxy-main.obj"
-
 YAZPP_DLL_OBJS = \
    "$(OBJDIR)\yaz-socket-manager.obj" \
    "$(OBJDIR)\yaz-pdu-assoc.obj" \
@@ -248,11 +167,6 @@ YAZPP_DLL_OBJS = \
    "$(OBJDIR)\zrs.obj" \
    "$(OBJDIR)\zrec.obj"
 
-YAZPROXY_DLL_OBJS = \
-   "$(OBJDIR)\yaz-proxy.obj" \
-   "$(OBJDIR)\yaz-proxy-config.obj" \
-   "$(OBJDIR)\yaz-bw.obj"
-
 ZCLIENT_OBJS = \
    "$(OBJDIR)\zclient.obj"
 
@@ -262,9 +176,6 @@ ZCLIENT_OBJS = \
 
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
-
-{$(PROXYDIR)}.cpp{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $<
 
 {$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
@@ -310,34 +221,6 @@ $(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
 		/map:"$(LIBDIR)\yazpp.map"  
 <<
 
-$(YAZPROXY_DLL) $(YAZPROXY_IMPLIB): "$(BINDIR)" $(YAZPROXY_DLL_OBJS) $(YAZPP_IMPLIB)
-	@echo Linking $(YAZPROXY_DLL)
-	$(LINK) @<<
-		$(LNKOPT) 
-		$(LINK_LIBS) 
-		$(DLL_LINK_OPTIONS)
-		$(YAZPP_IMPLIB)
-		$(YAZPROXY_DLL_OBJS)
-		/out:$(YAZPROXY_DLL) 
-		/implib:"$(YAZPROXY_IMPLIB)"
-		/map:"$(LIBDIR)\yazproxy.map"  
-<<
-
-
-$(YAZPROXY) : "$(BINDIR)" $(YAZPROXY_OBJS) $(YAZPP_IMPLIB) $(YAZPROXY_IMPLIB)
-	@echo Linking $(YAZPROXY)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-            $(YAZPP_IMPLIB)
-	      $(YAZPROXY_IMPLIB)
-		$(IMPLIB)
-		$(YAZPROXY_OBJS)
-		/map:"$(LIBDIR)\yaz-proxy.map"
-		/out:$(YAZPROXY)
-<<
-
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
 	@echo Linking $(ZCLIENT)
 	$(LINK) @<<
@@ -345,7 +228,6 @@ $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
 		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
             $(YAZPP_IMPLIB)
-		$(IMPLIB)
 		$(ZCLIENT_OBJS)
 		/map:"$(LIBDIR)\zclient.map"
 		/out:$(ZCLIENT)
