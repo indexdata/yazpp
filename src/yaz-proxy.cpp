@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.82 2004-01-07 21:29:26 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.83 2004-01-07 22:19:05 adam Exp $
  */
 
 #include <assert.h>
@@ -1604,6 +1604,11 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    
 	    if (srw_req->query_type == Z_SRW_query_type_cql)
 	    {
+                if (!srw_req->query.cql)
+                {
+		    send_to_srw_client_error(7);
+		    return;
+                }
 		Z_External *ext = (Z_External *) 
 		    odr_malloc(m_s2z_odr_search, sizeof(*ext));
 		ext->direct_reference = 
@@ -1643,7 +1648,7 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    }
 	    else
 	    {
-		send_to_srw_client_error(11);
+		send_to_srw_client_error(7);
 		return;
 	    }
 
@@ -1747,6 +1752,10 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		send_srw_explain();
 	    return;
 	}
+	else
+        {
+	    send_to_srw_client_error(4);
+        }
     }
     int len = 0;
     Z_GDU *p = z_get_HTTP_Response(odr_encode(), 400);
