@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-client.cpp,v $
- * Revision 1.2  2001-04-04 14:02:49  adam
+ * Revision 1.3  2001-04-05 13:09:44  adam
+ * Removed ursula dependancy.
+ *
+ * Revision 1.2  2001/04/04 14:02:49  adam
  * URSULA / Z-ruth service.
  *
  * Revision 1.1  2001/03/27 14:47:45  adam
@@ -75,7 +78,10 @@
 #include <yaz++/yaz-ir-assoc.h>
 #include <yaz++/yaz-pdu-assoc.h>
 #include <yaz++/yaz-socket-manager.h>
+
+#if HAVE_YAZ_URSULA_H
 #include <yaz/zes-ursula.h>
+#endif
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H
@@ -129,7 +135,9 @@ public:
     int cmd_init(char *args);
     int cmd_format(char *args);
     int cmd_proxy(char *args);
+#if HAVE_YAZ_URSULA_H
     int cmd_ursula(char *args);
+#endif
 };
 
 
@@ -598,6 +606,7 @@ int MyClient::cmd_proxy(char *args)
     return 1;
 }
 
+#if HAVE_YAZ_URSULA_H
 int MyClient::cmd_ursula(char *args)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
@@ -647,6 +656,7 @@ int MyClient::cmd_ursula(char *args)
 	wait();
     return 1;
 }
+#endif
 
 int MyClient::processCommand(const char *commandLine)
 {
@@ -668,7 +678,9 @@ int MyClient::processCommand(const char *commandLine)
 	{"init", &MyClient::cmd_init, ""},
 	{"format", &MyClient::cmd_format, "<record-syntax>"},
 	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
+#if HAVE_YAZ_URSULA_H
 	{"ursula", &MyClient::cmd_ursula, ""},
+#endif
 	{0,0,0}
     };
     

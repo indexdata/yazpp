@@ -1,2 +1,2 @@
 
-SUBDIRS = yaz yaz++
+SUBDIRS = yaz++
