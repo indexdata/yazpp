@@ -1,32 +1,42 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.10 2001-11-06 17:08:05 adam Exp $
+$Id: README.txt,v 1.11 2002-10-23 13:32:57 mike Exp $
  
-o Introduction
+
+Introduction
+------------
 
 YAZ++ is a C++ layer for YAZ and implements the ANSI Z39.50
-protocol for information retrieval (client - and server side).
-YAZ homepage is: http://www.indexdata.dk/yaz/
+protocol for information retrieval (client and server side).
+The YAZ homepage is: http://www.indexdata.dk/yaz/
 
 YAZ++ uses the same license as YAZ - see LICENSE file for details.
 
-o Overview
+
+Overview
+--------
 
 YAZ++ builds a programmers' library libyaz++.lib and a few
 example applications:
+
   yaz-my-client      basic client
   yaz-my-server      basic server
   yaz-proxy          not-so-basic proxy server
 
 Directory structure of the YAZ++ package:
 
-  -- src (C++ source)
+  -- src (C++ library and proxy source)
+  -- zoom (C++ source for ZOOM)
   -- include/yaz++ (C++ headers) 
+  -- lib (compiled libraries)
   -- win (Windows build files)
+  -- doc (DocBook-format documentation)
 
-o Installation, Unix
 
-Make sure you have a C - and C++ compiler available. gcc and g++ works fine.
+Installation, Unix
+------------------
+
+Make sure you have a C and C++ compiler available.  gcc and g++ work fine.
 
 Before compilation can take place YAZ must be installed. It goes, roughly,
 like this:
@@ -34,6 +44,9 @@ like this:
   $ cd yaz-<version>
   $ ./configure
   $ make
+  $ su
+  # make install
+  $ ^D
   $ cd ..
 
 Then, build YAZ++:
@@ -42,7 +55,9 @@ Then, build YAZ++:
   $ ./configure
   $ make
 
-o Installation, Windows
+
+Installation, Windows
+---------------------
 
 YAZ++ for WIN32 should run on Windows 95/98/2K and Windows NT 4.0.
 Yaz++ was built using Microsoft Visual C++ 6.0. Other compilers
@@ -55,46 +70,61 @@ those compilers.
     yazserver.dsp   -   builds yazmyserver.exe
     yazproxy.dsp    -   builds yazproxy.exe
 
-o About the proxy..
+
+About the proxy
+---------------
 
 For the proxy the actual target is determined in by the OtherInfo
 part of the InitRequest. We've defined an OID for this which we call
-PROXY. OID is 1.2.840.10003.10.1000.81.1. 
+PROXY. The OID is 1.2.840.10003.10.1000.81.1. 
 
   OtherInformation   ::= [201] IMPLICIT SEQUENCE OF SEQUENCE{
-    category            [1]   IMPLICIT InfoCategory OPTIONAL, 
+    category           [1]   IMPLICIT InfoCategory OPTIONAL, 
     information        CHOICE{
-      characterInfo        [2]  IMPLICIT InternationalString,
-      binaryInfo        [3]  IMPLICIT OCTET STRING,
+      characterInfo            [2]  IMPLICIT InternationalString,
+      binaryInfo               [3]  IMPLICIT OCTET STRING,
       externallyDefinedInfo    [4]  IMPLICIT EXTERNAL,
-      oid          [5]  IMPLICIT OBJECT IDENTIFIER}}
+      oid                      [5]  IMPLICIT OBJECT IDENTIFIER}}
 --
   InfoCategory ::= SEQUENCE{
-      categoryTypeId  [1]   IMPLICIT OBJECT IDENTIFIER OPTIONAL,
-      categoryValue  [2]   IMPLICIT INTEGER}
+      categoryTypeId   [1]   IMPLICIT OBJECT IDENTIFIER OPTIONAL,
+      categoryValue    [2]   IMPLICIT INTEGER}
 
 The InfoCategory is present with categoryTypeId set to the PROXY OID
 and categoryValue set to 0. The information in OtherInformation uses
 characterInfo to represent the target using the form target[:port][/db].
 
-For the client that doesn't set the PROXY OtherInformation, a default
+For clients that don't set the PROXY OtherInformation, a default
 target can be specified using option -t for proxy.
 
 Example:
   We start the proxy so that it listens on port 9000. The default
-  target is Bell Labs Library unless it is specified by a client in
+  target is Bell Labs Library unless it is overridden by a client in
   the InitRequest.
 
      $ ./yaz-proxy -t z3950.bell-labs.com/books @:9000
 
   The client is started and talks to the proxy without specifying
   a target. Hence this client will talk to the Bell Labs server.
+
      $ ./yaz-client localhost:9000
 
   The client is started and it specifies the actual target itself.
+
      $ ./yaz-client -p localhost:9000 bagel.indexdata.dk/gils
 
   For ZAP the equivalent would be
      proxy=localhost:9000
      target=bagel.indexdata.dk/gils
   Simple, huh!
+
+
+ZOOM-C++
+--------
+
+The ZOOM library in this distribution implements the ZOOM C++ binding
+described on the ZOOM web-site at 
+	http://zoom.z3950.org/bind/cplusplus/index.html
+It provides a simple but powerful API for constructing Z39.50 client
+applications.  See the documentation in doc/zoom.xml for much more
+information.
