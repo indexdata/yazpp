@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.59 2003-10-14 20:19:43 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.60 2003-10-16 08:28:10 adam Exp $
  */
 
 #include <assert.h>
@@ -53,7 +53,7 @@ static const char *apdu_name(Z_APDU *apdu)
 }
 
 Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
-		     Yaz_Proxy *parent = 0) :
+		     Yaz_Proxy *parent) :
     Yaz_Z_Assoc(the_PDU_Observable), m_bw_stat(60), m_pdu_stat(60)
 {
     m_PDU_Observable = the_PDU_Observable;
@@ -1213,7 +1213,6 @@ void Yaz_ProxyClient::connectNotify()
     const char *h = get_hostname();
     yaz_log (LOG_LOG, "%sConnection accepted by %s timeout=%d", s, h,
 	     m_target_idletime);
-    int to;
     timeout(m_target_idletime);
     if (!m_server)
 	pre_init_client();

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.16 2003-10-13 19:16:28 adam Exp $
+ * $Id: proxy.h,v 1.17 2003-10-16 08:28:10 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -225,7 +225,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void set_target_idletime (int t) { m_target_idletime = (t > 1) ? t : 600; };
     int get_target_idletime () { return m_target_idletime; }
     int set_config(const char *name);
-    int reconfig() { m_reconfig_flag = 1; }
+    void reconfig() { m_reconfig_flag = 1; }
     int send_to_client(Z_APDU *apdu);
     void server(const char *addr);
     void pre_init();
