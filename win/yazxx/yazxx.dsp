@@ -193,5 +193,25 @@ SOURCE="..\..\src\yaz-z-server.cpp"
 
 SOURCE="..\..\include\yaz++\yaz-z-server.h"
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\zoom\zconn.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\zoom\zexcept.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\zoom\zquery.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\zoom\zrec.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\zoom\zrs.cpp
+# End Source File
 # End Target
 # End Project

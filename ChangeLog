@@ -1,3 +1,5 @@
+Fixed Windows Compile.
+
 --- 0.6 2003/09/04 Third release
 
 Fixed handling of cookies so they can be of any length.
