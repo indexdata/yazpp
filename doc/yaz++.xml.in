@@ -9,7 +9,7 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.10 2003-10-16 16:10:43 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.11 2004-02-23 11:03:43 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -23,6 +23,7 @@
    <year>2001</year>
    <year>2002</year>
    <year>2003</year>
+   <year>2004</year>
    <holder>Index Data Aps and Mike Taylor</holder>
   </copyright>
   <abstract>
@@ -40,7 +41,7 @@
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yaz++.xml.in,v 1.10 2003-10-16 16:10:43 adam Exp $
+    CVS ID: $Id: yaz++.xml.in,v 1.11 2004-02-23 11:03:43 adam Exp $
    </simpara>
   </abstract>
  </bookinfo>
