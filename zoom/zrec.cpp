@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.6 2003-07-02 10:25:13 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.7 2003-09-22 13:06:27 mike Exp $
 
 // Z39.50 Record class
 
@@ -84,11 +84,13 @@ namespace ZOOM {
 
     std::string record::render() const {
 	int len;
-	return ZOOM_record_get(r, "render", &len);
+	const char* data = ZOOM_record_get(r, "render", &len);
+	return std::string(data, len);
     }
 
     std::string record::rawdata() const {
 	int len;
-	return ZOOM_record_get(r, "raw", &len);
+	const char* data = ZOOM_record_get(r, "raw", &len);
+	return std::string(data, len);
     }
 }
