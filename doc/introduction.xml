@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.2 2004-04-11 11:16:39 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.3 2004-04-11 12:13:32 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
    <ulink url="http://www.indexdata.dk/yazplusplus/">YAZ++</ulink> 
@@ -14,21 +14,11 @@
   <para>
    Later versions (0.7+) of YAZ++ also supports SRW/SRU.
   </para>
-  <para>
-   This package also contains a proxy application and proxy developer
-   library.
-   The proxy application can be used to debug existing Z39.50
-   implementations, optimize Z39.50 operation (by caching and other
-   mechanisms), and offer a SRW/SRU service.
-  </para>
-
   <section>
    <title>Licensing</title>
    <para>
-   The proxy application and the proxy library is covered by the 
-    <link linkend="gpl">GPL</link>.
-   The remaning parts: the ZOOM-C++ library and the YAZ++ library is covered
-   by the <link linkend="yaz.license">YAZ license</link>.
+    YAZ++ and ZOOM-C++ is is covered
+    by the <link linkend="yaz.license">YAZ license</link>.
    </para>
   </section>
  </chapter>

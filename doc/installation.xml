@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.10 2004-03-31 18:28:05 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.11 2004-04-11 12:13:32 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -52,15 +52,6 @@
         what you want.
        </para></listitem>
      </varlistentry>
-     <varlistentry>
-      <term><literal>--with-xslt </literal>directory</term>
-      <listitem><para>
-        Specifies prefix for libxslt (and libxml2).
-	configure must be able to locate <command>xslt-config</command>
-	in PREFIX/bin. If this option is omitted, configure looks
-	for <command>xslt-config</command> in the current PATH.
-       </para></listitem>
-     </varlistentry>
     </variablelist>
     For the whole list of <literal>configure</literal> options, refer
     to the help:
@@ -79,15 +70,6 @@
     This is what you have after successful compilation:
     <variablelist>
      <varlistentry>
-      <term><literal>proxy/yaz-proxy</literal></term> 
-      <listitem><para>
-        The YAZ <link linkend="proxy">Z39.50 Proxy</link>.
-	This program gets installed in your binaries directory
-	(<parameter>prefix</parameter><literal>/bin</literal>).
-       </para></listitem>
-     </varlistentry>
-
-     <varlistentry>
       <term><literal>src/libyazcpp.la</literal></term> 
       <listitem><para>
         The YAZ++ library.
@@ -105,15 +87,6 @@
        </para></listitem>
      </varlistentry>
      
-     <varlistentry>
-      <term><literal>proxy/libyazproxy.la</literal></term> 
-      <listitem><para>
-        The YAZ proxy library. This library gets installed in
-	your libraries directory
-	(<parameter>prefix</parameter><literal>/lib</literal>).
-       </para></listitem>
-     </varlistentry>
-
      <varlistentry>
       <term><literal>include/yaz++/*.h</literal></term> 
       <listitem><para>
@@ -188,65 +161,6 @@
 	(code generation is multi-threaded DLL).
        </para></listitem>
      </varlistentry>
-
-     <varlistentry>
-      <term><literal>HAVE_XSLT</literal>,
-       <literal>LIBXSLT_DIR</literal></term>
-      <listitem>
-       <para>
-	If <literal>HAVE_LIBXSLT</literal> is set to 1, the proxy is compiled
-	with XSLT and XML support. In this configuration, set 
-	<literal>LIBXSLT_DIR</literal> to the 
-	<ulink url="http://www.xmlsoft.org/">libxslt</ulink> source
-	directory.
-       </para>
-       
-       <note>
-	<para>
-	 If you enable libXSLT you have to enable libxml2 and its
-	 sub components zlib and iconv as well.
-	</para>
-       </note>
-       
-       <para>
-	Windows versions of libxslt, libxml2, zlib and iconv can be found
-	<ulink url="http://www.zlatkovic.com/libxml.en.html">
-	 here</ulink>.
-       </para>
-      </listitem>
-     </varlistentry>
-
-     <varlistentry>
-      <term><literal>HAVE_ICONV</literal>,
-       <literal>ICONV_DIR</literal></term>
-      <listitem><para>
-	If <literal>HAVE_ICONV</literal> is set to 1, the proxy is
-	compiled with iconv support. In this configuration, set 
-	<literal>ICONV_DIR</literal> to the iconv source directory.
-       </para></listitem>
-     </varlistentry>
-     
-     <varlistentry>
-      <term><literal>HAVE_LIBXML2</literal>,
-       <literal>LIBXML2_DIR</literal></term>
-      <listitem>
-       <para>
-	If <literal>HAVE_LIBXML2</literal> is set to 1, the proxy is compiled
-	with XML support. In this configuration, set 
-	<literal>LIBXML2_DIR</literal> to the 
-	<ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory
-	and
-	<literal>ZLIB_DIR</literal> to the zlib directory.
-       </para>
-       
-       <note>
-	<para>
-	 YAZ++ is not using ZLIB. But libxml2 is.
-	</para>
-       </note>
-      </listitem>
-     </varlistentry>
-     
     </variablelist>
    </para>
    <para>
@@ -282,25 +196,9 @@
 	YAZ++ DLL . Includes ZOOM C++ as well.
        </para></listitem></varlistentry>
      
-     <varlistentry><term><filename>lib/yaz.lib</filename></term>
+     <varlistentry><term><filename>lib/yazpp.lib</filename></term>
       <listitem><para>
 	Import library for <filename>yazpp.dll</filename>.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><filename>bin/yazproxy.dll</filename></term>
-      <listitem><para>
-	YAZ proxy DLL.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><filename>lib/yazproxy.lib</filename></term>
-      <listitem><para>
-	Import library for <filename>yazproxy.dll</filename>.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><filename>bin/yaz-proxy.exe</filename></term>
-      <listitem><para>
-	YAZ proxy. It's a WIN32 console application.
-	See <xref linkend="proxy"/> for more information.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>bin/zclient.exe</filename></term>

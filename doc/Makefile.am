@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.13 2004-03-31 18:28:05 adam Exp $
+## $Id: Makefile.am,v 1.14 2004-04-11 12:13:32 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -11,35 +11,19 @@ XMLFILES = \
  introduction.xml \
  installation.xml \
  zoom.xml \
- proxy.xml \
  api.xml \
- yaz-proxy-ref.xml \
- yaz-proxy-man.sgml \
  license.xml \
  yaz++.xml.in
  
 TOP=yaz++.xml
-MANFILES=yaz-proxy.8
+MANFILES=
 HTMLFILES = \
  api.html \
  implementations.html \
  installation.html \
  introduction.html \
  license.html \
- other-optimizations.html \
- otherinfo-encoding.html \
- proxy-config-file.html \
- proxy-keepalive.html \
- proxy-target.html \
- proxy-usage.html \
- proxy.html \
- query-cache.html \
- query-validation.html \
- record-cache.html \
- record-validation.html \
  windows.html \
- yaz-proxy.html \
- yaz.license.html \
  yazpp.html \
  zoom-connection.html \
  zoom-exception.html \
@@ -56,9 +40,6 @@ EXTRA_DIST = $(SUPPORTFILES) $(XMLFILES) $(doc_DATA) $(man_MANS)
 
 $(HTMLFILES): $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
-
-yaz-proxy.8: yaz-proxy-man.sgml yaz-proxy-ref.xml
-	docbook2man $(srcdir)/yaz-proxy-man.sgml
 
 yazpp.php: $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl $(TOP)

@@ -4,12 +4,10 @@
      <!ENTITY chap-introduction SYSTEM "introduction.xml">
      <!ENTITY chap-installation SYSTEM "installation.xml">
      <!ENTITY chap-zoom SYSTEM "zoom.xml">
-     <!ENTITY chap-proxy SYSTEM "proxy.xml">
      <!ENTITY chap-api SYSTEM "api.xml">
-     <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.12 2004-03-31 18:28:06 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.13 2004-04-11 12:13:32 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -34,14 +32,13 @@
     <ulink url="http://www.indexdata.dk/yaz/">YAZ toolkit</ulink>
     from C++, together with some utilities written using these
     libraries.  It includes an implementation of the C++ binding for
-    ZOOM (<link linkend="zoom">ZOOM-C++</link>) and a powerful,
-    general-purpose Z39.50 <link linkend="proxy">proxy</link>.
+    ZOOM (<link linkend="zoom">ZOOM-C++</link>).
    </simpara>
    <simpara>
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yaz++.xml.in,v 1.12 2004-03-31 18:28:06 adam Exp $
+    CVS ID: $Id: yaz++.xml.in,v 1.13 2004-04-11 12:13:32 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>
@@ -56,7 +53,6 @@
  &chap-introduction;
  &chap-installation;
  &chap-zoom;
- &chap-proxy;
  &chap-api;
  &app-license;
 </book>
