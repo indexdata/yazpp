@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.54 2003-10-09 12:11:10 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.55 2003-10-10 12:37:26 adam Exp $
  */
 
 #include <assert.h>
@@ -288,7 +288,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		yaz_log (LOG_LOG, "%s REOPEN target=%s", m_session_str,
 			 c->get_hostname());
 		c->close();
-		c->client(m_proxyTarget);
 		c->m_init_flag = 0;
 
 		c->m_last_ok = 0;
@@ -297,6 +296,11 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		c->m_sr_transform = 0;
 		c->m_waiting = 0;
 		c->m_resultSetStartPoint = 0;
+		if (c->client(m_proxyTarget))
+		{
+		    delete c;
+		    return 0;
+		}
 		c->timeout(m_target_idletime); 
 	    }
 	    c->m_seqno = parent->m_seqno;
@@ -429,7 +433,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    c->m_cookie = xstrdup(cookie);
 
 	c->m_seqno = parent->m_seqno;
-	c->client(m_proxyTarget);
 	c->m_init_flag = 0;
 	c->m_last_resultCount = 0;
         c->m_last_ok = 0;
@@ -437,9 +440,14 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	c->m_sr_transform = 0;
 	c->m_waiting = 0;
 	c->m_resultSetStartPoint = 0;
+	(parent->m_seqno)++;
+	if (c->client(m_proxyTarget))
+ 	{
+	    delete c;
+	    return 0;
+        }
 	c->timeout(30);
 
-	(parent->m_seqno)++;
     }
     yaz_log (LOG_DEBUG, "get_client 3 %p %p", this, c);
     return c;

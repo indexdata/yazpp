@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.26 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.27 2003-10-10 12:37:26 adam Exp $
  */
 
 #include <assert.h>
@@ -233,12 +233,12 @@ const char *Yaz_Z_Assoc::get_hostname()
     return m_hostname;
 }
 
-void Yaz_Z_Assoc::client(const char *addr)
+int Yaz_Z_Assoc::client(const char *addr)
 {
     delete [] m_hostname;
     m_hostname = new char[strlen(addr)+1];
     strcpy (m_hostname, addr);
-    m_PDU_Observable->connect (this, addr);
+    return m_PDU_Observable->connect (this, addr);
 }
 
 void Yaz_Z_Assoc::close()

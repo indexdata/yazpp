@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.2 2003-10-01 13:13:51 adam Exp $
+ * $Id: pdu-observer.h,v 1.3 2003-10-10 12:37:26 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -21,7 +21,7 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     /// Send encoded PDU buffer of specified length
     virtual int send_PDU(const char *buf, int len) = 0;
     /// Connect with server specified by addr.
-    virtual void connect(IYaz_PDU_Observer *observer, const char *addr) = 0;
+    virtual int connect(IYaz_PDU_Observer *observer, const char *addr) = 0;
     /// Listen on address addr.
     virtual void listen(IYaz_PDU_Observer *observer, const char *addr) = 0;
     /// Close connection

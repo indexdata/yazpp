@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.32 2003-10-10 10:50:37 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.33 2003-10-10 12:37:26 adam Exp $
  */
 
 #include <assert.h>
@@ -420,7 +420,7 @@ void Yaz_PDU_Assoc::idleTime(int idleTime)
     m_socketObservable->timeoutObserver(this, m_idleTime);
 }
 
-void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
+int Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 			    const char *addr)
 {
     yaz_log (m_log, "Yaz_PDU_Assoc::connect %s", addr);
@@ -429,10 +429,7 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     void *ap;
     m_cs = comstack(addr, &ap);
     if (!m_cs)
-    {
-        m_PDU_Observer->failNotify();
-	return;
-    }
+	return -1;
     int res = cs_connect (m_cs, ap);
     yaz_log (m_log, "Yaz_PDU_Assoc::connect fd=%d res=%d", cs_fileno(m_cs),
 	     res);
@@ -466,6 +463,7 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_WRITE|
 					 YAZ_SOCKET_OBSERVE_EXCEPT);
     }
+    return 0;
 }
 
 // Single-threaded... Only useful for non-blocking handlers
