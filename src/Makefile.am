@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.11 2002-10-09 16:17:26 adam Exp $
+## $Id: Makefile.am,v 1.12 2002-10-21 13:39:03 adam Exp $
 
 AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
 
@@ -13,7 +13,8 @@ EXTRA_DIST=yaz-z-server-ursula.cpp
 
 libyazcpp_la_LDFLAGS=-version-info 0:0:0
 
-bin_PROGRAMS = yaz-my-client yaz-my-server yaz-proxy
+bin_PROGRAMS = yaz-proxy
+noinst_PROGRAMS = yaz-my-server yaz-my-client
 bin_SCRIPTS = yaz++-config
 
 yaz_my_client_SOURCES=yaz-my-client.cpp
