@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.11 2004-03-30 22:11:12 adam Exp $
+## $Id: Makefile.am,v 1.12 2004-03-30 22:26:16 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -19,12 +19,31 @@ XMLFILES = \
  
 TOP=yaz++.xml
 MANFILES=yaz-proxy.8
-HTMLFILES = api.html implementations.html installation.html license.html \
- other-optimizations.html otherinfo-encoding.html proxy-keepalive.html \
- proxy-target.html proxy-usage.html proxy.html query-cache.html \
- query-validation.html record-cache.html record-validation.html windows.html \
- yaz-proxy.html yazpp.html zoom-connection.html zoom-exception.html \
- zoom-query.html zoom-record.html zoom-resultset.html zoom.html
+HTMLFILES = \
+ api.html \
+ implementations.html \
+ installation.html \
+ license.html \
+ other-optimizations.html \
+ otherinfo-encoding.html \
+ proxy-config-file.html \
+ proxy-keepalive.html \
+ proxy-target.html \
+ proxy-usage.html \
+ proxy.html \
+ query-cache.html \
+ query-validation.html \
+ record-cache.html \
+ record-validation.html \
+ windows.html \
+ yaz-proxy.html \
+ yazpp.html \
+ zoom-connection.html \
+ zoom-exception.html \
+ zoom-query.html \
+ zoom-record.html \
+ zoom-resultset.html \
+ zoom.html
 
 doc_DATA = $(HTMLFILES) yaz++.pdf yaz.css
 
@@ -49,9 +68,6 @@ yaz++.pdf: $(XMLFILES)
 
 index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl $(TOP)
-
-dist-hook: zoom.html
-	cp $(srcdir)/*.html $(distdir)
 
 clean-data-hook:
 	rm -f [0-9]* *.bak
