@@ -1,0 +1,50 @@
+#include <yaz++/pdu-assoc.h>
+#include <yaz++/socket-manager.h>
+
+#include <zlint.h>
+
+int main(int argc, char **argv)
+{
+    Yaz_SocketManager mySocketManager;
+    Zlint z(new Yaz_PDU_Assoc(&mySocketManager));
+ 
+    if (argc > 1)
+	z.set_host(argv[1]);
+    else
+	z.set_host("localhost:9999");
+
+    Zlint_test_init_01 t01;
+    z.add_test(&t01);
+
+    Zlint_test_init_02 t02;
+    z.add_test(&t02);
+
+    Zlint_test_init_03 t03;
+    z.add_test(&t03);
+
+    Zlint_test_init_04 t04;
+    z.add_test(&t04);
+
+    Zlint_test_init_05 t05;
+    z.add_test(&t05);
+
+    Zlint_test_init_06 t06;
+    z.add_test(&t06);
+
+    Zlint_test_init_07 t07;
+    z.add_test(&t07);
+
+    Zlint_test_init_08 t08;
+    z.add_test(&t08);
+
+    Zlint_test_search_01 s01;
+    z.add_test(&s01);
+
+    Zlint_test_scan_01 scan01;
+    z.add_test(&scan01);
+
+    while (mySocketManager.processEvent() > 0)
+	;
+    exit (0);
+}
+
