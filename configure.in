@@ -9,34 +9,6 @@ AM_DISABLE_SHARED
 AM_PROG_LIBTOOL
 
 YAZ_INIT(threads,2.0.12)
-
-AC_CHECK_FUNCS(setrlimit getrlimit gettimeofday)
-dnl
-dnl ----- libXSLT
-AC_SUBST(XSLT_LIBS)
-AC_SUBST(XSLT_CFLAGS)
-xsltdir=yes
-AC_ARG_WITH(xslt, [  --with-xslt[=PREFIX]      use libxslt in PREFIX],[xsltdir=$withval])
-if test "$xsltdir" = "yes"; then
-	for d in /usr /usr/local; do
-		if test -x $d/bin/xslt-config; then
-			xsltdir=$d
-		fi
-	done
-fi
-if test "$xsltdir" != "no"; then
-	AC_MSG_CHECKING(for libXSLT)
-	if test -x $xsltdir/bin/xslt-config; then
-		XSLT_LIBS=`$xsltdir/bin/xslt-config --libs`
-		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
-		XSLT_VER=`$xsltdir/bin/xslt-config --version`
-		AC_MSG_RESULT($XSLT_VER)
-		AC_DEFINE(HAVE_XSLT)
-	else
-		AC_MSG_RESULT(Not found)
-	fi
-fi
-
 dnl
 dnl ----- DOCBOOK DTD
 AC_SUBST(DTD_DIR)
