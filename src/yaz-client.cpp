@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.13  2000-09-06 14:23:45  adam
+ * Revision 1.14  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.13  2000/09/06 14:23:45  adam
  * WIN32 updates.
  *
  * Revision 1.12  2000/09/04 08:59:16  adam

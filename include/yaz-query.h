@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-query.h,v 1.2 1999-04-20 10:30:05 adam Exp $
+ * $Id: yaz-query.h,v 1.3 2000-09-08 10:23:42 adam Exp $
  */
 
 

@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.7  1999-12-06 13:52:45  adam
+ * Revision 1.8  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.7  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -31,11 +33,11 @@
  */
 
 #include <yaz/log.h>
-#include <yaz-z-assoc.h>
+#include <yaz-z-server.h>
 #include <yaz-pdu-assoc.h>
 #include <yaz-socket-manager.h>
 
-class MyServer : public Yaz_Z_Assoc {
+class MyServer : public Yaz_Z_Server {
 public:
     MyServer(IYaz_PDU_Observable *the_PDU_Observable);
     void recv_Z_PDU(Z_APDU *apdu);
@@ -84,7 +86,7 @@ IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable)
 }
 
 MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
-    Yaz_Z_Assoc (the_PDU_Observable)
+    Yaz_Z_Server (the_PDU_Observable)
 {
     m_no = 0;
 }

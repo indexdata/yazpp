@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.9  2000-08-07 14:19:59  adam
+ * Revision 1.10  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.9  2000/08/07 14:19:59  adam
  * Fixed serious bug regarding timeouts. Improved logging for proxy.
  *
  * Revision 1.8  1999/12/06 13:52:45  adam

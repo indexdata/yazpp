@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-socket-manager.h,v 1.5 1999-12-06 13:52:45 adam Exp $
+ * $Id: yaz-socket-manager.h,v 1.6 2000-09-08 10:23:42 adam Exp $
  */
 
 #include <yaz-socket-observer.h>

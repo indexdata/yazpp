@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-ir-assoc.h,v 1.10 2000-09-06 14:23:45 adam Exp $
+ * $Id: yaz-ir-assoc.h,v 1.11 2000-09-08 10:23:42 adam Exp $
  */
 
 #include <yaz-z-assoc.h>

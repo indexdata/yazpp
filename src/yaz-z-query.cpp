@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.7  2000-05-10 11:36:58  ian
+ * Revision 1.8  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.7  2000/05/10 11:36:58  ian
  * Added default parameters for refid to request functions.
  * Added default parameter for result set name to search and present request.
  * Commented out forced logging of PDU contents.

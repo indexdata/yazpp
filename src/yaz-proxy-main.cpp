@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1998-1999, Index Data.
+ * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy-main.cpp,v $
- * Revision 1.10  2000-09-04 08:59:16  adam
+ * Revision 1.11  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.10  2000/09/04 08:59:16  adam
  * Changed call to logging functions (yaz_ added).
  *
  * Revision 1.9  2000/08/07 14:19:59  adam

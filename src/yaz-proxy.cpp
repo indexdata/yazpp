@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.17  2000-09-05 13:57:28  adam
+ * Revision 1.18  2000-09-08 10:23:42  adam
+ * Added skeleton of yaz-z-server.
+ *
+ * Revision 1.17  2000/09/05 13:57:28  adam
  * Fixed get_otherInfoAPDU to return otherInfo for extended services.
  *
  * Revision 1.16  2000/09/04 08:29:22  adam
