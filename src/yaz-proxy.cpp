@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.88 2004-01-12 22:35:59 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.89 2004-01-14 12:14:13 adam Exp $
  */
 
 #include <assert.h>
@@ -899,7 +899,7 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 	    {
 		send_to_srw_client_ok(0, res->records, 1);
 	    }
-	    else if (m_s2z_present_apdu)
+	    else if (m_s2z_present_apdu && m_s2z_hit_count > 0)
 	    {
 		// adjust 
 		Z_PresentRequest *pr = m_s2z_present_apdu->u.presentRequest;
@@ -915,6 +915,7 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 	    }
 	    else
 	    {
+		m_s2z_present_apdu = 0;
 		send_to_srw_client_ok(m_s2z_hit_count, res->records, 1);
 	    }
 	}
@@ -2183,6 +2184,12 @@ void Yaz_Proxy::timeoutNotify()
     }
 }
 
+void Yaz_Proxy::markInvalid()
+{
+    m_client = 0;
+    m_invalid_session = 1;
+}
+
 void Yaz_ProxyClient::timeoutNotify()
 {
     if (m_server)
@@ -2192,6 +2199,14 @@ void Yaz_ProxyClient::timeoutNotify()
 	     get_hostname());
     m_waiting = 1;
     m_root->pre_init();
+    if (m_server && m_init_flag)
+    {
+	// target timed out in a session that was properly initialized
+	// server object stay alive but we mark it as invalid so it
+	// gets initialized again
+	m_server->markInvalid();
+	m_server = 0;
+    }
     shutdown();
 }
 

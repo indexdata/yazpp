@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.33 2004-01-09 18:11:15 adam Exp $
+ * $Id: proxy.h,v 1.34 2004-01-14 12:14:13 adam Exp $
  */
 
 #include <sys/time.h>
@@ -283,6 +283,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void failNotify();
     void timeoutNotify();
     void connectNotify();
+    void markInvalid();
     const char *option(const char *name, const char *value);
     void set_default_target(const char *target);
     void set_proxy_authentication (const char *auth);
