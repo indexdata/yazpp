@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.6 2002-10-23 21:23:29 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.7 2002-10-30 10:27:37 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -157,7 +157,25 @@
         Builds the proxy <filename>yazproxy.exe</filename>.
        </para></listitem>
      </varlistentry>
+     <varlistentry>
+      <term><literal>zoomxxclient.dsp</literal></term>
+       <listitem><para>
+        Builds the ZOOM C++ demo client <filename>zoomxxclient.exe</filename>.
+       </para></listitem>
+     </varlistentry>
     </variablelist>
+   </para>
+   <para>
+    By default, the include path and library path for the projects assumes
+    that YAZ is located in <filename>..\yaz</filename> 
+    (i.e. same prefix as the YAZ++ source).
+    If YAZ is in a different directory you'll have to modify
+    the include path in 
+    <literal>Project | Settings | C/C++ | Preprocessor | Additional include
+     directories</literal>
+    and library path in
+    <literal>Project | Settings | Link | Input | Additional library
+     path</literal>.
    </para>
   </section>
  </chapter>
