@@ -1,19 +1,26 @@
 /*
- * Copyright (c) 1998-2004, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.30 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.31 2005-01-14 10:13:50 adam Exp $
  */
-#include <assert.h>
 #ifdef WIN32
 #include <winsock.h>
-#else
+#endif
+
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 
 #include <yaz/log.h>
 #include <yaz++/socket-manager.h>

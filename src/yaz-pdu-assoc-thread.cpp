@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.8 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.9 2005-01-14 10:13:50 adam Exp $
  */
 
 #ifdef WIN32
@@ -15,12 +15,16 @@
 
 #if USE_THREADS
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifdef WIN32
 #include <process.h>
 #else
 #include <pthread.h>
-#include <unistd.h>
 #endif
+
 
 #include <errno.h>
 #include <yaz/log.h>
