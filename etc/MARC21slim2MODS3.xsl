@@ -624,7 +624,7 @@ Added Log Comment
 				<place>
 					<placeTerm>
 						<xsl:attribute name="type">text</xsl:attribute>
-							<xsl:call-template name="chopPunctuationFront">
+							<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">
 								<xsl:call-template name="chopPunctuation">
 									<xsl:with-param name="chopString" select="."/>
@@ -1707,7 +1707,7 @@ Added Log Comment
 							</xsl:call-template>
 						</xsl:attribute>
 					</xsl:if>											
-					<xsl:value-of select="concat('hdl:',substring-after(marc:subfield[@code='u'],'http://hdl.loc.gov/')"/>
+					<xsl:value-of select="concat('hdl:',substring-after(marc:subfield[@code='u']),'http://hdl.loc.gov/')"/>
 				</identifier>
 			</xsl:if>
 		</xsl:for-each>
@@ -2614,6 +2614,6 @@ Added Log Comment
 	</xsl:template>
 </xsl:stylesheet><!-- Stylus Studio meta-information - (c)1998-2003 Copyright Sonic Software Corporation. All rights reserved.
 <metaInformation>
-<scenarios ><scenario default="no" name="Scenario1" userelativepaths="yes" externalpreview="no" url="..\TESTSETS\marc\78x.xml" htmlbaseurl="" outputurl="..\TESTSETS\marc\78xmods.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="yes" name="v3Test" userelativepaths="yes" externalpreview="no" url="v3.xml" htmlbaseurl="" outputurl="..\modsv3Test.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="no" name="Apr 02 Test" userelativepaths="yes" externalpreview="no" url="..\TESTSETS\marc\MODStest.Apr.02.03.xml" htmlbaseurl="" outputurl="" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="no" name="v3Test1" userelativepaths="yes" externalpreview="no" url="..\test_files\marcxml.xml" htmlbaseurl="" outputurl="..\test_files\modsv3Converted.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="no" name="subfieldh" userelativepaths="yes" externalpreview="no" url="v3.xml" htmlbaseurl="" outputurl="" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/></scenarios><MapperInfo srcSchemaPath="" srcSchemaRoot="" srcSchemaPathIsRelative="yes" srcSchemaInterpretAsXML="no" destSchemaPath="" destSchemaRoot="" destSchemaPathIsRelative="yes" destSchemaInterpretAsXML="no"/>
+<scenarios ><scenario default="no" name="Scenario1" userelativepaths="yes" externalpreview="no" url="..\..\TESTSETS\marc\78x.xml" htmlbaseurl="" outputurl="..\..\TESTSETS\marc\78xmods.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="no" name="v3Test" userelativepaths="yes" externalpreview="no" url="..\..\TESTSETS\marc\tempsubj.xml" htmlbaseurl="" outputurl="..\modsv3Test.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="no" name="Apr 02 Test" userelativepaths="yes" externalpreview="no" url="..\..\TESTSETS\marc\MODStest.Apr.02.03.xml" htmlbaseurl="" outputurl="" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/><scenario default="yes" name="v3Test1" userelativepaths="yes" externalpreview="no" url="..\test_files\marcxml.xml" htmlbaseurl="" outputurl="..\test_files\modsv3Converted.xml" processortype="internal" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext=""/></scenarios><MapperInfo srcSchemaPath="" srcSchemaRoot="" srcSchemaPathIsRelative="yes" srcSchemaInterpretAsXML="no" destSchemaPath="" destSchemaRoot="" destSchemaPathIsRelative="yes" destSchemaInterpretAsXML="no"/>
 </metaInformation>
 -->
