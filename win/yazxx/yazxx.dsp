@@ -146,11 +146,23 @@ SOURCE="..\..\src\yaz-z-assoc.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\yaz-z-assoc.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-query.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\yaz-z-query.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\src\yaz-z-server.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\yaz-z-server.h"
 # End Source File
 # End Target
 # End Project
