@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.23 2003-10-23 12:14:48 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.24 2003-10-23 13:00:35 adam Exp $
  */
 
 #include <signal.h>
@@ -121,6 +121,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 static Yaz_Proxy *static_yaz_proxy = 0;
 static void sighup_handler(int num)
 {
+    signal(SIGHUP, sighup_handler);
     if (static_yaz_proxy)
 	static_yaz_proxy->reconfig();
 }
