@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.12 2003-10-20 18:31:44 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.13 2003-10-24 10:21:24 adam Exp $
  */
 
 #include <ctype.h>
@@ -213,60 +213,67 @@ int Yaz_ProxyConfig::match_list(int v, const char *m)
 }
 
 #if HAVE_XML2
-int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptr,
+int Yaz_ProxyConfig::check_type_1_attributes(ODR odr, xmlNodePtr ptrl,
 					     Z_AttributeList *attrs,
 					     char **addinfo)
 {
-    for(ptr = ptr->children; ptr; ptr = ptr->next)
+    int i;
+    for (i = 0; i<attrs->num_attributes; i++)
     {
-	if (ptr->type == XML_ELEMENT_NODE &&
-	    !strcmp((const char *) ptr->name, "attribute"))
+	Z_AttributeElement *el = attrs->attributes[i];
+	
+	if (!el->attributeType)
+	    continue;
+	int type = *el->attributeType;
+	int *value = 0;
+	
+	if (el->which == Z_AttributeValue_numeric && el->value.numeric)
+	    value = el->value.numeric;
+	
+	xmlNodePtr ptr;
+	for(ptr = ptrl->children; ptr; ptr = ptr->next)
 	{
-	    const char *match_type = 0;
-	    const char *match_value = 0;
-	    const char *match_error = 0;
-	    struct _xmlAttr *attr;
-	    for (attr = ptr->properties; attr; attr = attr->next)
+	    if (ptr->type == XML_ELEMENT_NODE &&
+		!strcmp((const char *) ptr->name, "attribute"))
 	    {
-		if (!strcmp((const char *) attr->name, "type") &&
-		    attr->children && attr->children->type == XML_TEXT_NODE)
-		    match_type = (const char *) attr->children->content;
-		if (!strcmp((const char *) attr->name, "value") &&
-		    attr->children && attr->children->type == XML_TEXT_NODE)
-		    match_value = (const char *) attr->children->content;
-		if (!strcmp((const char *) attr->name, "error") &&
-		    attr->children && attr->children->type == XML_TEXT_NODE)
-		    match_error = (const char *) attr->children->content;
-	    }
-	    int i;
-
-	    if (match_type && match_value)
-	    {
-		for (i = 0; i<attrs->num_attributes; i++)
+		const char *match_type = 0;
+		const char *match_value = 0;
+		const char *match_error = 0;
+		struct _xmlAttr *attr;
+		for (attr = ptr->properties; attr; attr = attr->next)
 		{
-		    Z_AttributeElement *el = attrs->attributes[i];
-		    char value_str[20];
-		    
-		    value_str[0] = '\0';
-		    if (!el->attributeType)
-			continue;
-		    int type = *el->attributeType;
-
+		    if (!strcmp((const char *) attr->name, "type") &&
+			attr->children && attr->children->type == XML_TEXT_NODE)
+			match_type = (const char *) attr->children->content;
+		    if (!strcmp((const char *) attr->name, "value") &&
+			attr->children && attr->children->type == XML_TEXT_NODE)
+			match_value = (const char *) attr->children->content;
+		    if (!strcmp((const char *) attr->name, "error") &&
+			attr->children && attr->children->type == XML_TEXT_NODE)
+			match_error = (const char *) attr->children->content;
+		}
+		if (match_type && match_value)
+		{
+		    char addinfo_str[20];
 		    if (!match_list(type, match_type))
 			continue;
-		    if (el->which == Z_AttributeValue_numeric && 
-			el->value.numeric)
+		    
+		    *addinfo_str = '\0';
+		    if (!strcmp(match_type, "*"))
+			sprintf (addinfo_str, "%d", type);
+		    else if (value)
 		    {
-			if (!match_list(*el->value.numeric, match_value))
+			if (!match_list(*value, match_value))
 			    continue;
-			sprintf (value_str, "%d", *el->value.numeric);
+			sprintf (addinfo_str, "%d", *value);
 		    }
 		    else
 			continue;
+		    
 		    if (match_error)
 		    {
-			if (*value_str)
-			    *addinfo = odr_strdup(odr, value_str);
+			if (*addinfo_str)
+			    *addinfo = odr_strdup(odr, addinfo_str);
 			return atoi(match_error);
 		    }
 		    return 0;
