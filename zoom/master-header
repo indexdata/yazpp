@@ -1,4 +1,4 @@
-// $Id: master-header,v 1.15 2003-09-22 12:45:26 mike Exp $
+// $Id: master-header,v 1.16 2003-09-22 12:56:09 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -49,6 +49,7 @@ namespace ZOOM {
 * protected:
 *   ZOOM_query q;
   public:
+    query ();
     virtual ~query ();
   };
 
