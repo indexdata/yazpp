@@ -1,6 +1,9 @@
-debian/tmp/usr/include/yaz++/*
-debian/tmp/usr/lib/lib*.a
-debian/tmp/usr/lib/lib*.so
-debian/tmp/usr/lib/lib*.la
+debian/tmp/usr/include/yaz++/*.h
+debian/tmp/usr/lib/libyazcpp*.a
+debian/tmp/usr/lib/libzoomcpp*.a
+debian/tmp/usr/lib/libyazcpp.so
+debian/tmp/usr/lib/libzoomcpp.so
+debian/tmp/usr/lib/libyazcpp.la
+debian/tmp/usr/lib/libzoomcpp.la
 debian/tmp/usr/bin/yaz++-config
 debian/tmp/usr/share/aclocal/yazpp.m4

@@ -1,13 +1,16 @@
 
+SUBDIRS = proxy
+
 pkginclude_HEADERS = \
 	ir-assoc.h \
 	pdu-assoc.h \
 	pdu-observer.h \
-	proxy.h \
 	query.h \
 	socket-manager.h \
 	socket-observer.h \
 	z-assoc.h \
 	z-query.h \
 	z-server.h \
-	z-databases.h
+	z-databases.h \
+	record-cache.h \
+	cql2rpn.h

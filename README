@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README,v 1.1 2004-03-29 20:00:07 adam Exp $
+$Id: README,v 1.2 2004-03-29 22:46:50 adam Exp $
  
 
 Introduction
@@ -30,9 +30,11 @@ example applications:
 
 Directory structure of the YAZ++ package:
 
-  -- src (C++ library and proxy source)
+  -- src (C++ library)
   -- zoom (C++ source for ZOOM)
+  -- proxy (C++ source for proxy)
   -- include/yaz++ (C++ headers) 
+  -- include/yaz++/proxy (C++ headers for proxy) 
   -- lib (compiled libraries)
   -- win (Windows build files)
   -- doc (DocBook-format documentation)

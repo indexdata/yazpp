@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz++-config.in,v 1.6 2004-02-11 10:05:19 adam Exp $
+# $Id: yaz++-config.in,v 1.7 2004-03-29 22:46:50 adam Exp $
 yazppprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -28,9 +28,9 @@ EOF
 	exit $1
 }
 
-#if test $# -eq 0; then
-#	yaz_echo_help=yes
-#fi
+if test $# -eq 0; then
+	yaz_echo_help=yes
+fi
 
 while test $# -gt 0; do
   case "$1" in

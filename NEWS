@@ -1,3 +1,7 @@
+--- 0.7.13 2004/03/30 Internal release.
+
+Move proxy to separate sub directory and change license to GPL.
+
 --- 0.7.12 2004/03/17 Internal release.
 
 Force libXSLT to reports errors to log file (similar to libXML2).

@@ -1,1 +1,2 @@
-debian/tmp/usr/lib/lib*.so.*
+debian/tmp/usr/lib/libyazcpp*.so.*
+debian/tmp/usr/lib/libzoomcpp*.so.*

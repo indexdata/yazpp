@@ -1,15 +1,31 @@
-/*
- * Copyright (c) 1998-2004, Index Data.
- * See the file LICENSE for details.
- * 
- * $Id: proxy.h,v 1.41 2004-02-27 00:42:57 adam Exp $
+/* $Id: proxy.h,v 1.1 2004-03-29 22:46:50 adam Exp $
+   Copyright (c) 1998-2004, Index Data.
+
+This file is part of the yaz-proxy.
+
+Zebra is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Zebra is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License
+along with Zebra; see the file LICENSE.proxy.  If not, write to the
+Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
  */
 
 #include <sys/time.h>
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
+#include <yaz++/cql2rpn.h>
 #include <yaz/cql.h>
+#include <yaz++/proxy/bw.h>
 #if HAVE_XSLT
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -119,19 +135,6 @@ class YAZ_EXPORT Yaz_RecordCache {
     int m_max_size;
 };
 
-class YAZ_EXPORT Yaz_bw {
- public:
-    Yaz_bw(int sz);
-    ~Yaz_bw();
-    void add_bytes(int m);
-    int get_total();
- private:
-    long m_sec;   // time of most recent bucket
-    int *m_bucket;
-    int m_ptr;
-    int m_size;
-};
-
 /// Private class
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     friend class Yaz_Proxy;
@@ -176,17 +179,6 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     void pre_init_client();
     int m_target_idletime;
     Yaz_Proxy *m_root;
-};
-
-class YAZ_EXPORT Yaz_cql2rpn {
- public:
-    Yaz_cql2rpn();
-    ~Yaz_cql2rpn();
-    void set_pqf_file(const char *fname);
-    int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o,
-			char **addinfop);
- private:
-    cql_transform_t m_transform;
 };
 
 

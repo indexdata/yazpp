@@ -2,11 +2,12 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.8 2004-01-24 21:32:31 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.9 2004-03-29 22:46:51 adam Exp $
  */
 
 #include <yaz/log.h>
-#include <yaz++/proxy.h>
+#include <yaz/proto.h>
+#include <yaz++/record-cache.h>
 
 struct Yaz_RecordCache_Entry {
     int m_offset;

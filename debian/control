@@ -15,7 +15,7 @@ Description: YAZ++ development library for Z39.50 applications in C++.
 Package: libyaz++-dev
 Section: devel
 Architecture: any
-Depends: libyaz++ (= ${Source-Version}), libxml2-dev, libxslt-dev, libyaz-dev
+Depends: libyaz++ (= ${Source-Version}), libyaz-dev
 Description: YAZ++ library for Z39.50 applications in C++.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
@@ -31,3 +31,24 @@ Section: doc
 Architecture: all
 Description: Documentation for YAZ++.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
+
+Package: libyazproxy
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, libyaz++ (= ${Source-Version})
+Description: YAZ Proxy.
+ Libraries for YAZ proxy.
+
+Package: libyazproxy-dev
+Section: devel
+Architecture: any
+Depends: libyazproxy (= ${Source-Version}), libyaz++-dev (= ${Source-Version}), libxml2-dev, libxslt-dev
+Description: YAZ Proxy.
+ Development libraries for YAZ proxy.
+
+Package: yazproxy
+Section: utils
+Architecture: any
+Depends: libyazproxy (= ${Source-Version})
+Description: YAZ Proxy.
+ Powerful Proxy that converts Z39.50/SRW/SRU to Z39.50.

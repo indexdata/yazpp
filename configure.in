@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
-AM_INIT_AUTOMAKE("yaz++",0.7.12)
+AM_INIT_AUTOMAKE("yaz++",0.7.13)
 
 AC_PROG_CC
 AC_PROG_CPP
@@ -28,7 +28,6 @@ if test "$xsltdir" != "no"; then
 	AC_MSG_CHECKING(for libXSLT)
 	if test -x $xsltdir/bin/xslt-config; then
 		XSLT_LIBS=`$xsltdir/bin/xslt-config --libs`
-		LIBS="$XSLT_LIBS $LIBS"
 		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
 		XSLT_VER=`$xsltdir/bin/xslt-config --version`
 		AC_MSG_RESULT($XSLT_VER)
@@ -101,6 +100,8 @@ AC_OUTPUT([
 	src/Makefile
 	include/Makefile
 	include/yaz++/Makefile
+	include/yaz++/proxy/Makefile
+	proxy/Makefile
 	zlint/Makefile
 	yaz++-config
 	zoom/Makefile
