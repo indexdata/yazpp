@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.16  2000-12-14 16:00:39  adam
+ * Revision 1.17  2001-01-04 14:25:25  heikki
+ * No SIGPIPES in windows...
+ *
+ * Revision 1.16  2000/12/14 16:00:39  adam
  * Ignoring signal SIGPIPE.
  *
  * Revision 1.15  2000/10/11 11:58:17  adam
@@ -71,7 +74,9 @@
 
 int Yaz_Z_Assoc::yaz_init_func()
 {
+#ifndef WIN32
     signal (SIGPIPE, SIG_IGN);
+#endif
     nmem_init();
     return 1;
 }
