@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.2 2002-10-23 10:15:17 adam Exp $
+ * $Id: proxy.h,v 1.3 2002-11-26 11:13:40 mike Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -13,7 +13,7 @@ class Yaz_Proxy;
 
 /// Private class
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
-    friend Yaz_Proxy;
+    friend class Yaz_Proxy;
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_ProxyClient();
     void recv_Z_PDU(Z_APDU *apdu);
