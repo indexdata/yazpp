@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.8 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.9 2001-11-06 17:08:05 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -258,10 +258,14 @@ int main(int argc, char **argv)
 	    return 1;
 	}
     }
+#if YAZ_POSIX_THREADS
     if (thread_flag)
 	my_PDU_Assoc = new Yaz_PDU_AssocThread(&mySocketManager);
     else
 	my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
+#else
+    my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
+#endif
     
     z = new MyServer(my_PDU_Assoc);
     z->server(addr);

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.25 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.26 2001-11-06 17:08:05 adam Exp $
  */
 
 #include <assert.h>
@@ -286,7 +286,7 @@ void Yaz_PDU_Assoc::destroy()
 
 Yaz_PDU_Assoc::PDU_Queue::PDU_Queue(const char *buf, int len)
 {
-    m_buf = (char *) malloc (len);
+    m_buf = (char *) xmalloc (len);
     memcpy (m_buf, buf, len);
     m_len = len;
     m_next = 0;
@@ -294,7 +294,7 @@ Yaz_PDU_Assoc::PDU_Queue::PDU_Queue(const char *buf, int len)
 
 Yaz_PDU_Assoc::PDU_Queue::~PDU_Queue()
 {
-    free (m_buf);
+    xfree (m_buf);
 }
 
 int Yaz_PDU_Assoc::flush_PDU()
@@ -420,7 +420,7 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
 
     if (res >= 0)
-    {   // Connect pending or complet
+    {   // Connect pending or complete
 	m_state = Connecting;
 	unsigned mask = YAZ_SOCKET_OBSERVE_EXCEPT;
 	if (m_cs->io_pending & CS_WANT_WRITE)
@@ -441,8 +441,6 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 // Single-threaded... Only useful for non-blocking handlers
 void Yaz_PDU_Assoc::childNotify(COMSTACK cs)
 {
-
- 
     Yaz_PDU_Assoc *new_observable =
 	new Yaz_PDU_Assoc (m_socketObservable, cs);
     

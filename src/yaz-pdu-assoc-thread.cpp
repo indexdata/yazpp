@@ -2,8 +2,18 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.4 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.5 2001-11-06 17:08:05 adam Exp $
  */
+
+#ifdef WIN32
+#define USE_THREADS 1
+#endif
+
+#if YAZ_POSIX_THREADS
+#define USE_THREADS 1
+#endif
+
+#if USE_THREADS
 
 #ifdef WIN32
 #include <process.h>
@@ -12,15 +22,12 @@
 #include <unistd.h>
 #endif
 
-
 #include <errno.h>
 #include <yaz/log.h>
 #include <yaz/tcpip.h>
 
 #include <yaz++/yaz-pdu-assoc.h>
 #include <yaz++/yaz-socket-manager.h>
-
-
 
 Yaz_PDU_AssocThread::Yaz_PDU_AssocThread(
     IYazSocketObservable *socketObservable)
@@ -78,3 +85,4 @@ void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
 	pthread_detach (tid);
 #endif
 }
+#endif

@@ -2,11 +2,12 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.h,v 1.3 2001-03-26 14:43:49 adam Exp $
+ * $Id: yaz-proxy.h,v 1.4 2001-11-06 17:08:05 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
 #include <yaz++/yaz-z-query.h>
+#include <yaz++/yaz-z-databases.h>
 
 class Yaz_Proxy;
 
@@ -28,6 +29,7 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     Yaz_ProxyClient **m_prev;
     int m_init_flag;
     Yaz_Z_Query *m_last_query;
+    Yaz_Z_Databases m_last_databases;
     int m_last_resultCount;
     int m_sr_transform;
     int m_seqno;
@@ -52,6 +54,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_keepalive;
     char *m_proxyTarget;
     long m_seed;
+    char *m_optimize;
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();
@@ -61,6 +64,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void failNotify();
     void timeoutNotify();
     void connectNotify();
+    const char *option(const char *name, const char *value);
     void set_proxyTarget(const char *target);
     char *get_proxyTarget() { return m_proxyTarget; };
     void set_max_clients(int m) { m_max_clients = m; };

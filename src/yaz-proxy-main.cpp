@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.14 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.15 2001-11-06 17:08:05 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -14,7 +14,7 @@
 
 void usage(char *prog)
 {
-    fprintf (stderr, "%s: [-a log] [-c num] [-v level] [-t target] @:port\n", prog);
+    fprintf (stderr, "%s: [-a log] [-c num] [-v level] [-t target] [-o optlevel] @:port\n", prog);
     exit (1);
 }
 
@@ -26,7 +26,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("a:t:v:c:", argv, argc, &arg)) != -2)
+    while ((ret = options("o:a:t:v:c:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -43,6 +43,9 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    break;
         case 't':
 	    proxy->set_proxyTarget(arg);
+	    break;
+        case 'o':
+	    proxy->option("optimize", arg);
 	    break;
 	case 'v':
 	    yaz_log_init_level (yaz_log_mask_str(arg));

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.8 2001-11-04 22:36:21 adam Exp $
+## $Id: Makefile.am,v 1.9 2001-11-06 17:08:05 adam Exp $
 
 CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
 
@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libyaz++.la
 libyaz___la_SOURCES=yaz-socket-manager.cpp yaz-pdu-assoc.cpp \
 	yaz-z-assoc.cpp yaz-proxy.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
 	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp yaz-z-server-sr.cpp \
-	yaz-z-server-ill.cpp yaz-z-server-update.cpp
+	yaz-z-server-ill.cpp yaz-z-server-update.cpp yaz-z-databases.cpp
 
 EXTRA_DIST=yaz-z-server-ursula.cpp
 

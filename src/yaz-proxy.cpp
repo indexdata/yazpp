@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.28 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.29 2001-11-06 17:08:05 adam Exp $
  */
 
 #include <assert.h>
@@ -23,11 +23,13 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_proxyTarget = 0;
     m_max_clients = 50;
     m_seed = time(0);
+    m_optimize = xstrdup ("1");
 }
 
 Yaz_Proxy::~Yaz_Proxy()
 {
     xfree (m_proxyTarget);
+    xfree (m_optimize);
 }
 
 void Yaz_Proxy::set_proxyTarget(const char *target)
@@ -90,34 +92,28 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     
     get_otherInfoAPDU(apdu, &oi);
     char *cookie = get_cookie(oi);
-    yaz_log (LOG_LOG, "Yaz_Proxy::get_client cookie=%s", cookie ? cookie :
-	  "null");
 
     const char *proxy_host = get_proxy(oi);
     if (proxy_host)
 	set_proxyTarget(proxy_host);
-    yaz_log (LOG_LOG, "proxy_host = %s", m_proxyTarget ? m_proxyTarget:"none");
     
     // no target specified at all?
     if (!m_proxyTarget)
 	return 0;
 
+    if (!strcmp(m_proxyTarget, "stop"))
+	exit (0);
     if (cookie && *cookie)
     {
-	yaz_log (LOG_LOG, "lookup of clients cookie=%s target=%s",
-	      cookie, m_proxyTarget);
 	Yaz_ProxyClient *cc = 0;
 	
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
-	    yaz_log (LOG_LOG, " found client cookie = %s target=%s seqno=%d",
-		  c->m_cookie, c->get_hostname(), c->m_seqno);
 	    assert (c->m_prev);
 	    assert (*c->m_prev == c);
 	    if (!strcmp(cookie,c->m_cookie) &&
 		!strcmp(m_proxyTarget, c->get_hostname()))
 	    {
-		yaz_log (LOG_LOG, "found!");
 		cc = c;
 	    }
 	}
@@ -148,7 +144,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    c->m_server = this;
 	    c->m_seqno = parent->m_seqno;
 	    (parent->m_seqno)++;
-	    yaz_log (LOG_LOG, "get_client 1 %p %p", this, c);
+	    yaz_log (LOG_DEBUG, "get_client 1 %p %p", this, c);
 	    return c;
 	}
     }
@@ -201,7 +197,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		    delete c->m_server;
 		}
 		(parent->m_seqno)++;
-		yaz_log (LOG_LOG, "get_client 2 %p %p", this, c);
+		yaz_log (LOG_DEBUG, "get_client 2 %p %p", this, c);
 		return c;
 	    }
 	}
@@ -235,7 +231,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 
 	(parent->m_seqno)++;
     }
-    yaz_log (LOG_LOG, "get_client 3 %p %p", this, c);
+    yaz_log (LOG_DEBUG, "get_client 3 %p %p", this, c);
     return c;
 }
 
@@ -243,13 +239,20 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 {
     if (apdu->which != Z_APDU_searchRequest)
 	return apdu;
+    if (*m_parent->m_optimize != '1')
+        return apdu;
     Z_SearchRequest *sr = apdu->u.searchRequest;
     Yaz_Z_Query *this_query = new Yaz_Z_Query;
+    Yaz_Z_Databases this_databases;
+
+    this_databases.set(sr->num_databaseNames, (const char **)
+                       sr->databaseNames);
     
     this_query->set_Z_Query(sr->query);
     
     if (m_client->m_last_query &&
-	m_client->m_last_query->match(this_query))
+	m_client->m_last_query->match(this_query) &&
+        m_client->m_last_databases.match(this_databases))
     {
 	delete this_query;
 	if (m_client->m_last_resultCount > *sr->smallSetUpperBound &&
@@ -311,6 +314,8 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	yaz_log (LOG_LOG, "Yaz_Proxy::result_set_optimize new set");
 	delete m_client->m_last_query;
 	m_client->m_last_query = this_query;
+        m_client->m_last_databases.set(sr->num_databaseNames,
+                                       (const char **) sr->databaseNames);
     }
     return apdu;
 }
@@ -369,28 +374,30 @@ void Yaz_Proxy::connectNotify()
 
 void Yaz_Proxy::shutdown()
 {
-    yaz_log (LOG_LOG, "shutdown (client to proxy)");
     // only keep if keep_alive flag and cookie is set...
     if (m_keepalive && m_client && m_client->m_cookie[0])
     {
-	yaz_log (LOG_LOG, "shutdown - keepalive this=%p, m_server=%p",
-            this, m_client->m_server);
 	if (m_client->m_waiting == 2)
 	    abort();
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
+        yaz_log (LOG_LOG, "shutdown (client to proxy) keepalive %s", m_client->get_hostname());
     }
     else if (m_client)
     {
-	yaz_log (LOG_LOG, "deleting %p %p", this, m_client);
 	if (m_client->m_waiting == 2)
 	    abort();
+        yaz_log (LOG_LOG, "shutdown (client to proxy) close %s", m_client->get_hostname());
 	delete m_client;
     }
     else if (!m_parent)
     {
-	yaz_log (LOG_LOG, "abort %p", this);
+        yaz_log (LOG_LOG, "shutdown (client to proxy) bad state");
         abort();
+    }
+    else 
+    {
+        yaz_log (LOG_LOG, "shutdown (client to proxy)");
     }
     delete this;
 }
@@ -404,7 +411,7 @@ void Yaz_ProxyClient::shutdown()
 
 void Yaz_Proxy::failNotify()
 {
-    yaz_log (LOG_LOG, "connection closed by client");
+    yaz_log (LOG_LOG, "Yaz_Proxy connection closed by client");
     shutdown();
 }
 
@@ -462,6 +469,17 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_waiting = 0;
 }
 
+const char *Yaz_Proxy::option(const char *name, const char *value)
+{
+    if (!strcmp (name, "optimize")) {
+	if (value) {
+            xfree (m_optimize);	
+	    m_optimize = xstrdup (value);
+        }
+	return m_optimize;
+    }
+}
+
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 {
     m_waiting = 0;
@@ -491,7 +509,7 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 	sr->numberOfRecordsReturned = pr->numberOfRecordsReturned;
 	apdu = new_apdu;
     }
-    if (m_cookie)
+    if (m_cookie && *m_cookie)
 	set_otherInformationString (apdu, VAL_COOKIE, 1, m_cookie);
     if (m_server)
     {
