@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.6 2000-10-11 11:58:16 adam Exp $
+$Id: README.txt,v 1.7 2000-10-26 21:31:50 adam Exp $
  
 o Introduction
 
@@ -14,9 +14,9 @@ o Overview
 
 YAZ++ builds a programmers' library libyaz++.lib and a few
 example applications:
-  yaz-client   -  small client
-  yaz-server   -  small server
-  yaz-proxy    -  simple proxy server
+  yaz-client++       basic client
+  yaz-server++       basic server
+  yaz-proxy          proxy server
 
 Description in HTML format of object model can be found in the sub
 directory doc. The top-page of the documentaion is index.html. The
