@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ursula.cpp,v $
- * Revision 1.3  2001-04-11 12:33:42  heikki
+ * Revision 1.4  2001-04-25 19:40:18  adam
+ * Added refernceId handling for other services.
+ *
+ * Revision 1.3  2001/04/11 12:33:42  heikki
  * Working on ursula things
  *
  * Revision 1.2  2001/04/05 15:12:24  adam
@@ -59,6 +62,7 @@ int Yaz_Facility_Ursula::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
     ursula_service(req, pdu, apdu_response->u.extendedServicesResponse, NULL);
       // FIXME: Initialize the response pdu...   ADAM!!!
+    s->transfer_referenceId(apdu_request, apdu_response);
     s->send_Z_PDU(apdu_response);
     return 1;
 }

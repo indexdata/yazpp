@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.11  2001-04-12 15:12:10  heikki
+ * Revision 1.12  2001-04-25 19:40:18  adam
+ * Added refernceId handling for other services.
+ *
+ * Revision 1.11  2001/04/12 15:12:10  heikki
  * minor ursula stuff
  *
  * Revision 1.10  2001/04/04 14:02:49  adam
@@ -111,6 +114,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	    f->m_facility->init(this, req, resp);
 	    f = f->m_next;
 	}
+	transfer_referenceId(apdu_request, apdu_response);
 	send_Z_PDU(apdu_response);
     }
     else

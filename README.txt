@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.8 2001-01-10 09:14:08 adam Exp $
+$Id: README.txt,v 1.9 2001-04-25 19:40:18 adam Exp $
  
 o Introduction
 
@@ -14,19 +14,14 @@ o Overview
 
 YAZ++ builds a programmers' library libyaz++.lib and a few
 example applications:
-  yaz-client++       basic client
-  yaz-server++       basic server
-  yaz-proxy          proxy server
-
-Description in HTML format of object model can be found in the sub
-directory doc. The top-page of the documentaion is index.html. The
-documentation was auto-generated from YAZ++ source using doc++.
+  yaz-my-client      basic client
+  yaz-my-server      basic server
+  yaz-proxy          not-so-basic proxy server
 
 Directory structure of the YAZ++ package.
 
   -- src (C++ source)
-  -- include (C++ headers) 
-  -- doc (documentation)
+  -- include/yaz++ (C++ headers) 
   -- win (Windows build files)
 
 o Installation, Unix
@@ -56,8 +51,8 @@ those compilers.
 
   Workspace yazxx.dsw includes the projects
     yazxx.dsp       -   builds yazxx.dll
-    yazclient.dsp   -   builds yazclient.exe
-    yazserver.dsp   -   builds yazserver.exe
+    yazclient.dsp   -   builds yazmyclient.exe
+    yazserver.dsp   -   builds yazmyserver.exe
     yazproxy.dsp    -   builds yazproxy.exe
 
 o About the proxy..

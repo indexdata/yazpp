@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ill.cpp,v $
- * Revision 1.4  2001-04-04 14:02:49  adam
+ * Revision 1.5  2001-04-25 19:40:18  adam
+ * Added refernceId handling for other services.
+ *
+ * Revision 1.4  2001/04/04 14:02:49  adam
  * URSULA / Z-ruth service.
  *
  * Revision 1.3  2001/04/03 14:37:19  adam
@@ -45,6 +48,7 @@ int Yaz_Facility_ILL::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
     ill_service(req, req->taskSpecificParameters->u.itemOrder,
         apdu_response->u.extendedServicesResponse);
+    s->transfer_referenceId(apdu_request, apdu_response);
     s->send_Z_PDU(apdu_response);
     return 1;
 }
