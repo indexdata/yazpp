@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.12 2004-04-11 17:54:48 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.13 2004-09-09 09:43:20 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -38,7 +38,7 @@
        </para></listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>--with-yazconfig </literal>directory</term>
+      <term><literal>--with-yaz-config </literal>directory</term>
       <listitem><para>
         Specifies the location of <filename>yaz-config</filename>.
         The <filename>yaz-config</filename> program is generated in
