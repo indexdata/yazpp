@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.4 2002-10-10 22:47:51 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.5 2002-10-30 09:13:31 adam Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -122,8 +122,10 @@ namespace ZOOM {
 *   const char *q;
   public:
 *   ~queryException ();
-    static const int PREFIX = 1;
-    static const int CCL = 2;
+    enum {
+     PREFIX = 1,
+     CCL = 2
+    };
     queryException (int qtype, const char *source);
     int errcode () const;
     const char *errmsg () const;

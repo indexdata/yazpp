@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.4 2002-10-11 11:54:05 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.5 2002-10-30 09:13:12 adam Exp $
 
 // Z39.50 Exception classes
 
@@ -26,7 +26,7 @@ namespace ZOOM {
 
 
 
-    systemException::systemException() : exception::exception(errno){
+    systemException::systemException() : exception(errno){
 	code = errno;
     }
 
@@ -41,7 +41,7 @@ namespace ZOOM {
 
     
     bib1Exception::bib1Exception(int errcode, const char *addinfo) :
-	exception::exception(errcode) {
+	exception(errcode) {
 	info = new char[strlen(addinfo)+1];
 	strcpy((char*) info, addinfo);
 	//fprintf(stderr, "made new bib1Exception 0x%lx (%d, 0x%lx=%s)\n",
@@ -50,7 +50,7 @@ namespace ZOOM {
 
 #if 0
     bib1Exception::bib1Exception(bib1Exception& src) :
-	exception::exception(src) {
+	exception(src) {
         code = src.code;
 	info = new char[strlen(src.info)+1];
 	strcpy((char*) info, src.info);
@@ -84,7 +84,7 @@ namespace ZOOM {
 
 
     queryException::queryException(int qtype, const char *source) :
-	exception::exception(qtype) {
+	exception(qtype) {
 	q = new char[strlen(source)+1];
 	strcpy((char*) q, source);
     }
