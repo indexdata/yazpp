@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-client.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:42  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -72,8 +76,7 @@ int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
 
-    Yaz_PDU_Assoc my_PDU_Assoc(&mySocketManager, 0);
-    MyClient z(&my_PDU_Assoc);
+    MyClient z(new Yaz_PDU_Assoc(&mySocketManager, 0));
 
     z.client("localhost:9999");
     z.sendInit();

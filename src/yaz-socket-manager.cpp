@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:48  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 #include <assert.h>
@@ -99,6 +103,7 @@ int Yaz_SocketManager::processEvent()
     if (event)
     {
 	event->observer->socketNotify(event->event);
+	delete event;
 	return 1;
     }
 
@@ -114,7 +119,7 @@ int Yaz_SocketManager::processEvent()
     FD_ZERO(&except);
 
     timeout = &to; /* hang on select */
-    to.tv_sec = 5*60;
+    to.tv_sec = 60;
     to.tv_usec = 0;
 
     for (YazSocketEntry *p = m_observers; p; p = p->next)
@@ -162,6 +167,7 @@ int Yaz_SocketManager::processEvent()
     if ((event = getEvent()))
     {
 	event->observer->socketNotify(event->event);
+	delete event;
 	return 1;
     }
     return 0;
@@ -169,7 +175,6 @@ int Yaz_SocketManager::processEvent()
 
 void Yaz_SocketManager::putEvent(YazSocketEvent *event)
 {
-    logf (LOG_LOG, "putEvent p=%p event=%d", event, event->event);
     // put in back of queue
     if (m_queue_back)
     {

@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:39  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -17,7 +21,7 @@
 /** Information Retrieval Assocation.
     This object implements the client - and server role of a generic
     Z39.50 Association.
- */
+*/
 class Yaz_IR_Assoc : public IYaz_PDU_Observer {
  public:
     /// Create object using the PDU Observer specified
@@ -43,7 +47,7 @@ class Yaz_IR_Assoc : public IYaz_PDU_Observer {
     /// Receive Z39.50 PDU
     virtual void recv_Z_PDU (Z_APDU *apdu) = 0;
     /// Create Z39.50 with reasonable defaults
-   Z_APDU *create_Z_PDU(int type);
+    Z_APDU *create_Z_PDU(int type);
  private:
     IYaz_PDU_Observable *m_PDU_Observable;
     ODR m_odr_in;

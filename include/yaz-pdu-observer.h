@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-observer.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:41  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -32,6 +36,8 @@ class IYaz_PDU_Observable {
     virtual void close() = 0;
     /// Make clone of this object using this interface
     virtual IYaz_PDU_Observable *clone() = 0;
+    /// Destroy completely
+    virtual void destroy() = 0;
 };
 
 /** Protocol Data Unit Observer.

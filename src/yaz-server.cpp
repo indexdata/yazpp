@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-server.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:47  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -19,6 +23,9 @@ public:
     MyServer(IYaz_PDU_Observable *the_PDU_Observable);
     void recv_Z_PDU(Z_APDU *apdu);
     IYaz_PDU_Observer* clone(IYaz_PDU_Observable *the_PDU_Observable);
+    void failNotify();
+private:
+    int m_no;
 };
 
 static int stop = 0;
@@ -49,24 +56,35 @@ void MyServer::recv_Z_PDU(Z_APDU *apdu)
 
 IYaz_PDU_Observer *MyServer::clone(IYaz_PDU_Observable *the_PDU_Observable)
 {
+    logf (LOG_LOG, "clone %d", m_no);
+    m_no++;
     return new MyServer(the_PDU_Observable);
 }
 
 MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
     Yaz_IR_Assoc (the_PDU_Observable)
 {
+    m_no = 0;
+}
 
+void MyServer::failNotify()
+{
+    delete this;
 }
 
 int main(int argc, char **argv)
 {
     Yaz_SocketManager mySocketManager;
 
-    Yaz_PDU_Assoc my_PDU_Assoc(&mySocketManager, 0);
-    MyServer z(&my_PDU_Assoc);
-
-    z.server("@:9999");
-
+    MyServer z(new Yaz_PDU_Assoc(&mySocketManager, 0));
+    
+    if (argc <= 1)
+	z.server("@:9999");
+    else
+    {
+	for (int i = 1; i < argc; i++)
+	    z.server(argv[i]);
+    }
     while (!stop && mySocketManager.processEvent() > 0)
 	;
 }

@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.h,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:40  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -41,6 +45,7 @@ class Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
     int m_input_len;
     PDU_Queue *m_queue_out;
     int Yaz_PDU_Assoc::flush_PDU();
+    int *m_destroyed;
  public:
     /// Create object using specified socketObservable
     Yaz_PDU_Assoc(IYazSocketObservable *socketObservable, COMSTACK cs);
@@ -58,4 +63,6 @@ class Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver {
     void socketNotify(int event);
     /// Close socket
     void close();
+    /// Close and destroy
+    void destroy();
 };

@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:44  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -29,6 +33,7 @@ Yaz_PDU_Assoc::Yaz_PDU_Assoc(IYazSocketObservable *socketObservable,
     m_children = 0;
     m_parent = 0;
     m_next = 0;
+    m_destroyed = 0;
 }
 
 IYaz_PDU_Observable *Yaz_PDU_Assoc::clone()
@@ -39,31 +44,7 @@ IYaz_PDU_Observable *Yaz_PDU_Assoc::clone()
 
 Yaz_PDU_Assoc::~Yaz_PDU_Assoc()
 {
-    Yaz_PDU_Assoc **c;
-    close();
-
-    logf (LOG_LOG, "m_children=%p m_parent=%p", m_children,
-	  m_parent);
-    // delete from parent's child list (if any)
-    if (m_parent)
-    {
-	c = &m_parent->m_children;
-	while (*c != this)
-	{
-	    assert (*c);
-	    c = &(*c)->m_next;
-	}
-	*c = (*c)->m_next;
-    }
-    // delete all children ...
-    c = &m_children;
-    while (*c)
-    {
-	Yaz_PDU_Assoc *here = *c;
-	*c = (*c)->m_next;
-	here->m_parent = 0;
-	delete here;
-    }
+    destroy();
 }
 
 void Yaz_PDU_Assoc::socketNotify(int event)
@@ -95,7 +76,6 @@ void Yaz_PDU_Assoc::socketNotify(int event)
     }
     else if (m_state == Listen)
     {
-	logf (LOG_LOG, "handler_listen %d", event);
 	if (event & YAZ_SOCKET_OBSERVE_READ)
 	{
 	    int res;
@@ -129,12 +109,10 @@ void Yaz_PDU_Assoc::socketNotify(int event)
     {
 	if (event & YAZ_SOCKET_OBSERVE_WRITE)
 	{
-	    logf (LOG_LOG, "socketNotify write");
 	    flush_PDU();
 	}
 	if (event & YAZ_SOCKET_OBSERVE_READ)
 	{
-	    logf (LOG_LOG, "socketNotify read");
 	    do
 	    {
 		int res = cs_get (m_cs, &m_input_buf, &m_input_len);
@@ -142,13 +120,19 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 		    return;
 		else if (res <= 0)
 		{
-		    logf (LOG_LOG, "Connection closed by server");
+		    logf (LOG_LOG, "Connection closed by client");
 		    close();
 		    m_PDU_Observer->failNotify();
 		    return;
 		}
+		// lock it, so we know if recv_PDU deletes it.
+		int destroyed = 0;
+		m_destroyed = &destroyed;
+
 		m_PDU_Observer->recv_PDU(m_input_buf, res);
-	    } while (cs_more (m_cs));
+		if (destroyed)   // it really was destroyed, return now.
+		    return;
+	    } while (m_cs && cs_more (m_cs));
 	}
     }
 }
@@ -175,6 +159,35 @@ void Yaz_PDU_Assoc::close()
     m_input_len = 0;
 }
 
+void Yaz_PDU_Assoc::destroy()
+{
+    close();
+    if (m_destroyed)
+	*m_destroyed = 1;
+    Yaz_PDU_Assoc **c;
+
+    // delete from parent's child list (if any)
+    if (m_parent)
+    {
+	c = &m_parent->m_children;
+	while (*c != this)
+	{
+	    assert (*c);
+	    c = &(*c)->m_next;
+	}
+	*c = (*c)->m_next;
+    }
+    // delete all children ...
+    c = &m_children;
+    while (*c)
+    {
+	Yaz_PDU_Assoc *here = *c;
+	*c = (*c)->m_next;
+	here->m_parent = 0;
+	delete here;
+    }
+}
+
 Yaz_PDU_Assoc::PDU_Queue::PDU_Queue(const char *buf, int len)
 {
     m_buf = (char *) malloc (len);
@@ -192,7 +205,6 @@ int Yaz_PDU_Assoc::flush_PDU()
 {
     int r;
 
-    logf (LOG_LOG, "flush_PDU fd=%d", cs_fileno(m_cs));
     if (m_state != Ready)
 	return 1;
     PDU_Queue *q = m_queue_out;
@@ -234,8 +246,6 @@ int Yaz_PDU_Assoc::send_PDU(const char *buf, int len)
     PDU_Queue **pq = &m_queue_out;
     int is_idle = (*pq ? 0 : 1);
     
-    logf (LOG_LOG, "send_PDU, m_queue_out=%p fd=%d", m_queue_out,
-	  cs_fileno(m_cs));
     if (!m_cs)
     {
 	logf (LOG_LOG, "send_PDU failed, m_cs == 0");
@@ -302,14 +312,17 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     {
 	logf (LOG_DEBUG, "Yaz_PDU_Assoc::connect failed");
         close ();
-        return;
     }
-    m_socketObservable->addObserver(cs_fileno(cs), this);
-    m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
-				     YAZ_SOCKET_OBSERVE_EXCEPT|
-				     YAZ_SOCKET_OBSERVE_WRITE);
-    if (res == 1)
-	m_state = Connecting;
     else
-	m_state = Connected;
+    {
+	logf (LOG_LOG, "Yaz_PDU_Assoc::connect fd=%d", cs_fileno(cs));
+	m_socketObservable->addObserver(cs_fileno(cs), this);
+	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
+					 YAZ_SOCKET_OBSERVE_EXCEPT|
+					 YAZ_SOCKET_OBSERVE_WRITE);
+	if (res == 1)
+	    m_state = Connecting;
+	else
+	    m_state = Connected;
+    }
 }

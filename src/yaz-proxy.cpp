@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:46  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -50,12 +54,14 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
 
 void Yaz_Proxy::failNotify()
 {
+    logf (LOG_LOG, "failNotity server");
     delete m_client;
     delete this;
 }
 
 void Yaz_ProxyClient::failNotify()
 {
+    logf (LOG_LOG, "failNotity client");
     delete m_server;
     delete this;
 }

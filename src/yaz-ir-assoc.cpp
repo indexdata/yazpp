@@ -4,8 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.1  1999-01-28 09:41:07  adam
- * Initial revision
+ * Revision 1.2  1999-01-28 13:08:43  adam
+ * Yaz_PDU_Assoc better encapsulated. Memory leak fix in
+ * yaz-socket-manager.cc.
+ *
+ * Revision 1.1.1.1  1999/01/28 09:41:07  adam
+ * First implementation of YAZ++.
  *
  */
 
@@ -22,8 +26,8 @@ Yaz_IR_Assoc::Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
 
 Yaz_IR_Assoc::~Yaz_IR_Assoc()
 {
-    if (m_PDU_Observable)
-	m_PDU_Observable->close();
+    m_PDU_Observable->destroy();
+    delete m_PDU_Observable;
     odr_destroy (m_odr_print);
     odr_destroy (m_odr_out);
     odr_destroy (m_odr_in);
