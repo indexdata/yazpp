@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.93 2004-01-30 00:38:28 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.94 2004-01-30 11:45:26 adam Exp $
  */
 
 #include <assert.h>
@@ -15,11 +15,6 @@
 #include <yaz/diagbib1.h>
 #include <yaz++/proxy.h>
 #include <yaz/pquery.h>
-
-#if HAVE_XSLT
-#include <libxslt/xsltutils.h>
-#include <libxslt/transform.h>
-#endif
 
 static const char *apdu_name(Z_APDU *apdu)
 {
@@ -95,7 +90,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_optimize = xstrdup ("1");
     strcpy(m_session_str, "0 ");
     m_session_no=0;
-    m_bytes_sent = m_bytes_recv = 0;
+    m_bytes_sent = 0;
+    m_bytes_recv = 0;
     m_bw_hold_PDU = 0;
     m_bw_max = 0;
     m_pdu_max = 0;
@@ -106,7 +102,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_invalid_session = 0;
     m_config = 0;
     m_marcxml_flag = 0;
-    m_stylesheet_schema = 0;
+    m_stylesheet_xsp = 0;
     m_s2z_stylesheet = 0;
     m_s2z_database = 0;
     m_schema = 0;
@@ -139,7 +135,10 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
-    xfree (m_stylesheet_schema);
+
+    if (m_stylesheet_xsp)
+	xsltFreeStylesheet(m_stylesheet_xsp);
+
     xfree (m_schema);
     if (m_s2z_odr_init)
 	odr_destroy(m_s2z_odr_init);
@@ -583,43 +582,62 @@ void Yaz_Proxy::display_diagrecs(Z_DiagRec **pp, int num)
     }
 }
 
-void Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p)
+int Yaz_Proxy::convert_xsl(Z_NamePlusRecordList *p, Z_APDU *apdu)
 {
-    if (!m_stylesheet_schema)
-	return;
-    xsltStylesheetPtr xsp;
+    if (!m_stylesheet_xsp || p->num_records <= 0)
+	return 0;  /* no XSLT to be done ... */
 
-    xsp = xsltParseStylesheetFile((const xmlChar *) m_stylesheet_schema);
+    m_stylesheet_offset = 0;
+    m_stylesheet_nprl = p;
+    m_stylesheet_apdu = apdu;
+    timeout(0);
+    return 1;
+}
 
-    int i;
-    for (i = 0; i < p->num_records; i++)
+void Yaz_Proxy::convert_xsl_delay()
+{
+    Z_NamePlusRecord *npr = m_stylesheet_nprl->records[m_stylesheet_offset];
+    if (npr->which == Z_NamePlusRecord_databaseRecord)
     {
-	Z_NamePlusRecord *npr = p->records[i];
-	if (npr->which == Z_NamePlusRecord_databaseRecord)
+	Z_External *r = npr->u.databaseRecord;
+	if (r->which == Z_External_octet)
 	{
-	    Z_External *r = npr->u.databaseRecord;
-	    if (r->which == Z_External_octet)
+	    xmlDocPtr res, doc = xmlParseMemory(
+		(char*) r->u.octet_aligned->buf,
+		r->u.octet_aligned->len);
+	    
+	    yaz_log(LOG_LOG, "%sXSLT convert %d",
+		    m_session_str, m_stylesheet_offset);
+	    res = xsltApplyStylesheet(m_stylesheet_xsp, doc, 0);
+	    if (res)
 	    {
-		xmlDocPtr res, doc = xmlParseMemory(
-		    (char*) r->u.octet_aligned->buf,
-		    r->u.octet_aligned->len);
-		
-		res = xsltApplyStylesheet(xsp, doc, 0);
-		
 		xmlChar *out_buf;
 		int out_len;
 		xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
-
-		p->records[i]->u.databaseRecord = 
+		
+		m_stylesheet_nprl->records[m_stylesheet_offset]->
+		    u.databaseRecord = 
 		    z_ext_record(odr_encode(), VAL_TEXT_XML,
 				 (char*) out_buf, out_len);
 		xmlFree(out_buf);
-		xmlFreeDoc(doc);
 		xmlFreeDoc(res);
 	    }
+	    xmlFreeDoc(doc);
 	}
     }
-    xsltFreeStylesheet(xsp);
+    m_stylesheet_offset++;
+    if (m_stylesheet_offset == m_stylesheet_nprl->num_records)
+    {
+	if (m_stylesheet_xsp)
+	    xsltFreeStylesheet(m_stylesheet_xsp);
+	m_stylesheet_xsp = 0;
+	timeout(m_client_idletime);
+	int r = send_PDU_convert(m_stylesheet_apdu);
+	if (r)
+	    return;
+    }
+    else
+	timeout(0);
 }
 
 void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
@@ -718,6 +736,8 @@ int Yaz_Proxy::send_http_response(int code)
     }
     int len;
     int r = send_GDU(gdu, &len);
+    m_bytes_sent += len;
+    m_bw_stat.add_bytes(len);
     logtime();
     return r;
 }
@@ -762,6 +782,8 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     }
     int len;
     int r = send_GDU(gdu, &len);
+    m_bytes_sent += len;
+    m_bw_stat.add_bytes(len);
     logtime();
     return r;
 }
@@ -879,7 +901,7 @@ int Yaz_Proxy::send_srw_explain_response(Z_SRW_diagnostic *diagnostics,
     return send_http_response(404);
 }
 
-int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
+int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu)
 {
     if (m_http_version)
     {
@@ -940,10 +962,13 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
     }
     else
     {
+	int len = 0;
 	if (m_log_mask & PROXY_LOG_REQ_CLIENT)
 	    yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
 		     apdu_name(apdu));
-	int r = send_Z_PDU(apdu, len);
+	int r = send_Z_PDU(apdu, &len);
+	m_bytes_sent += len;
+	m_bw_stat.add_bytes(len);
 	logtime();
 	return r;
     }
@@ -952,7 +977,6 @@ int Yaz_Proxy::send_PDU_convert(Z_APDU *apdu, int *len)
 
 int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 {
-    int len = 0;
     int kill_session = 0;
     if (apdu->which == Z_APDU_searchResponse)
     {
@@ -973,7 +997,9 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	    {
 		if (m_marcxml_flag)
 		    convert_to_marcxml(p->u.databaseOrSurDiagnostics);
-		convert_xsl(p->u.databaseOrSurDiagnostics);
+		if (convert_xsl(p->u.databaseOrSurDiagnostics, apdu))
+		    return 0;
+		    
 	    }
 	    if (sr->resultCount)
 	    {
@@ -1009,7 +1035,8 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	{
 	    if (m_marcxml_flag)
 		convert_to_marcxml(p->u.databaseOrSurDiagnostics);
-	    convert_xsl(p->u.databaseOrSurDiagnostics);
+	    if (convert_xsl(p->u.databaseOrSurDiagnostics, apdu))
+		return 0;
 	}
     }
     else if (apdu->which == Z_APDU_initResponse)
@@ -1043,11 +1070,9 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	    apdu->u.initResponse->protocolVersion = nopt;	    
 	}
     }
-    int r = send_PDU_convert(apdu, &len);
+    int r = send_PDU_convert(apdu);
     if (r)
 	return r;
-    m_bytes_sent += len;
-    m_bw_stat.add_bytes(len);
     if (kill_session)
     {
 	delete m_client;
@@ -1486,12 +1511,22 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	    rc_temp.u.simple = sr->smallSetElementSetNames;
 	    rc = &rc_temp;
 	}
-	    
+
+	char *stylesheet_name = 0;
 	if (cfg)
 	    err = cfg->check_syntax(odr_encode(),
 				    m_default_target,
 				    sr->preferredRecordSyntax, rc,
-				    &addinfo, &m_stylesheet_schema, &m_schema);
+				    &addinfo, &stylesheet_name, &m_schema);
+	if (stylesheet_name)
+	{
+	    if (m_stylesheet_xsp)
+		xsltFreeStylesheet(m_stylesheet_xsp);
+	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
+						       stylesheet_name);
+	    m_stylesheet_offset = 0;
+	    xfree(stylesheet_name);
+	}
 	if (err == -1)
 	{
 	    sr->preferredRecordSyntax =
@@ -1519,11 +1554,21 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 	char *addinfo = 0;
 	Yaz_ProxyConfig *cfg = check_reconfigure();
 
+	char *stylesheet_name = 0;
 	if (cfg)
 	    err = cfg->check_syntax(odr_encode(), m_default_target,
 				    pr->preferredRecordSyntax,
 				    pr->recordComposition,
-				    &addinfo, &m_stylesheet_schema, &m_schema);
+				    &addinfo, &stylesheet_name, &m_schema);
+	if (stylesheet_name)
+	{
+	    if (m_stylesheet_xsp)
+		xsltFreeStylesheet(m_stylesheet_xsp);
+	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
+						       stylesheet_name);
+	    m_stylesheet_offset = 0;
+	    xfree(stylesheet_name);
+	}
 	if (err == -1)
 	{
 	    pr->preferredRecordSyntax =
@@ -1765,12 +1810,12 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 		    z_presentRequest->preferredRecordSyntax =
 			yaz_oidval_to_z3950oid(m_s2z_odr_search, CLASS_RECSYN,
 					       VAL_TEXT_XML);
-		    z_presentRequest->recordComposition =
-			(Z_RecordComposition *)
-			odr_malloc(m_s2z_odr_search,
-				   sizeof(Z_RecordComposition));
 		    if (srw_req->recordSchema)
 		    {
+			z_presentRequest->recordComposition =
+			    (Z_RecordComposition *)
+			    odr_malloc(m_s2z_odr_search,
+				       sizeof(Z_RecordComposition));
 			z_presentRequest->recordComposition->which = 
 			    Z_RecordComp_simple;		    
 			z_presentRequest->recordComposition->u.simple =
@@ -2226,6 +2271,8 @@ void Yaz_Proxy::timeoutNotify()
 	    else if (apdu->which == Z_GDU_HTTP_Request)
 		handle_incoming_HTTP(apdu->u.HTTP_Request);
 	}
+	else if (m_stylesheet_nprl)
+	    convert_xsl_delay();
 	else
 	{
 	    inc_request_no();
@@ -2336,6 +2383,8 @@ int Yaz_Proxy::handle_init_response_for_invalid_session(Z_APDU *apdu)
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
 {
     m_bytes_recv += len;
+    yaz_log(LOG_LOG, "m_bytes_recv += %d (now %d)", len, m_bytes_recv);
+
     m_pdu_recv++;
     m_waiting = 0;
     if (m_root->get_log_mask() & PROXY_LOG_REQ_SERVER)

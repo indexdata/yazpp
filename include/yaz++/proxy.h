@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.36 2004-01-15 23:44:58 adam Exp $
+ * $Id: proxy.h,v 1.37 2004-01-30 11:45:25 adam Exp $
  */
 
 #include <sys/time.h>
@@ -13,6 +13,8 @@
 #if HAVE_XSLT
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxslt/xsltutils.h>
+#include <libxslt/transform.h>
 #endif
 
 class Yaz_Proxy;
@@ -240,17 +242,21 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_request_no;
     int m_invalid_session;
     int m_marcxml_flag;
-    char *m_stylesheet_schema;
+    xsltStylesheetPtr m_stylesheet_xsp;
+    int m_stylesheet_offset;
+    Z_APDU *m_stylesheet_apdu;
+    Z_NamePlusRecordList *m_stylesheet_nprl;
     char *m_schema;
     void convert_to_marcxml(Z_NamePlusRecordList *p);
-    void convert_xsl(Z_NamePlusRecordList *p);
+    int convert_xsl(Z_NamePlusRecordList *p, Z_APDU *apdu);
+    void convert_xsl_delay();
     Z_APDU *m_initRequest_apdu;
     Z_Options *m_initRequest_options;
     Z_ProtocolVersion *m_initRequest_version;
     NMEM m_initRequest_mem;
     Z_APDU *m_apdu_invalid_session;
     NMEM m_mem_invalid_session;
-    int send_PDU_convert(Z_APDU *apdu, int *len);
+    int send_PDU_convert(Z_APDU *apdu);
     ODR m_s2z_odr_init;
     ODR m_s2z_odr_search;
     int m_s2z_hit_count;
