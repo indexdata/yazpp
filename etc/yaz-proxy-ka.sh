@@ -1,5 +1,7 @@
 #!/bin/sh
-# $Id: yaz-proxy-ka.sh,v 1.2 2003-10-24 11:19:54 adam Exp $
+# $Id: yaz-proxy-ka.sh,v 1.3 2003-10-24 12:35:37 adam Exp $
+#
+# YAZ proxy keepalive wrapper, use this when testing the proxy.
 #
 # Allow core dumps when testing.
 ulimit -c 200000
