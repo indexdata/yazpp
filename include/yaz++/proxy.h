@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.30 2004-01-07 20:56:02 adam Exp $
+ * $Id: proxy.h,v 1.31 2004-01-07 21:29:26 adam Exp $
  */
 
 #include <sys/time.h>
@@ -254,6 +254,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Z_APDU *m_s2z_init_apdu;
     Z_APDU *m_s2z_search_apdu;
     Z_APDU *m_s2z_present_apdu;
+    char *m_s2z_stylesheet;
     char *m_soap_ns;
     int send_to_srw_client_error(int error);
     int send_to_srw_client_ok(int hits, Z_Records *records, int start);

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.81 2004-01-07 21:04:10 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.82 2004-01-07 21:29:26 adam Exp $
  */
 
 #include <assert.h>
@@ -107,6 +107,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_config = 0;
     m_marcxml_flag = 0;
     m_stylesheet_schema = 0;
+    m_s2z_stylesheet = 0;
     m_schema = 0;
     m_initRequest_apdu = 0;
     m_initRequest_mem = 0;
@@ -744,7 +745,7 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     soap_package->ns = m_soap_ns;
     z_soap_codec_enc_xsl(o, &soap_package,
 			 &hres->content_buf, &hres->content_len,
-			 soap_handlers, 0, 0);
+			 soap_handlers, 0, m_s2z_stylesheet);
     if (m_log_mask & PROXY_LOG_REQ_CLIENT)
     {
 	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
@@ -1565,10 +1566,18 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	m_s2z_init_apdu = 0;
 	m_s2z_search_apdu = 0;
 	m_s2z_present_apdu = 0;
+
+	m_s2z_stylesheet = 0;
+	
 	if (srw_pdu->which == Z_SRW_searchRetrieve_request)
 	{
 	    Z_SRW_searchRetrieveRequest *srw_req = srw_pdu->u.request;
 
+	    // save stylesheet
+	    if (srw_req->stylesheet)
+		m_s2z_stylesheet =
+		    odr_strdup(m_s2z_odr_init, srw_req->stylesheet);
+					      
 	    // set packing for response records ..
 	    if (srw_req->recordPacking &&
 		!strcmp(srw_req->recordPacking, "xml"))
@@ -1712,7 +1721,12 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	else if (srw_pdu->which == Z_SRW_explain_request)
 	{
 	    Z_SRW_explainRequest *srw_req = srw_pdu->u.explain_request;
-	    
+
+	    // save stylesheet
+	    if (srw_req->stylesheet)
+		m_s2z_stylesheet =
+		    odr_strdup(m_s2z_odr_init, srw_req->stylesheet);
+
 	    if (srw_req->recordPacking &&
 		!strcmp(srw_req->recordPacking, "xml"))
 		m_s2z_packing = Z_SRW_recordPacking_XML;
@@ -1721,7 +1735,6 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 
 	    if (!m_client)
 	    {
-		yaz_log(LOG_LOG, "handle_incoming: initRequest");
 		m_s2z_init_apdu = zget_APDU(m_s2z_odr_init,
 					    Z_APDU_initRequest);
 		
