@@ -1,10 +1,10 @@
-// $Id: master-header,v 1.12 2002-11-30 22:33:21 mike Exp $
+// $Id: master-header,v 1.13 2002-12-02 15:55:57 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
 //
-// Derived from version 1.0g at
-//	http://zoom.z3950.org/bind/cplusplus/zoom-1.0g.hh
+// Derived from version 1.3a at
+//	http://zoom.z3950.org/bind/cplusplus/zoom-1.3a.hh
 
 #include <stddef.h>		// for size_t
 #include <string>
