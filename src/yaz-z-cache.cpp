@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.6 2003-10-08 08:52:59 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.7 2003-10-10 17:58:30 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -87,7 +87,10 @@ void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
 			   int hits)
 {
     if (nmem_total(m_mem) > m_max_size)
+    {
+	yaz_log(LOG_LOG, "cache size");
 	return;
+    }
     // Build appropriate compspec for this response
     Z_RecordComposition *comp = 0;
     if (hits == -1 && m_presentRequest)
@@ -116,7 +119,11 @@ void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
     {
 	Yaz_RecordCache_Entry *entry = (Yaz_RecordCache_Entry *)
 	    nmem_malloc(m_mem, sizeof(*entry));
-	entry->m_record = npr->records[i];
+	entry->m_record = (Z_NamePlusRecord *)
+	    nmem_malloc(m_mem, sizeof(*entry->m_record));
+	entry->m_record->databaseName = npr->records[i]->databaseName;
+	entry->m_record->which = npr->records[i]->which;
+	entry->m_record->u.databaseRecord  = npr->records[i]->u.databaseRecord;
 	entry->m_comp = comp;
 	entry->m_offset = i + start;
 	entry->m_next = m_entries;
@@ -150,7 +157,6 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
     odr_destroy(o2);
     if (!match)
 	return 0;
-
     if (!syntax)
 	return 0;
     // See if offset, OID match..
@@ -159,6 +165,14 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
 	!oid_oidcmp(entry->m_record->u.databaseRecord->direct_reference,
 		    syntax))
 	return 1;
+#if 0
+    char mstr1[100];
+    oid_to_dotstring(entry->m_record->u.databaseRecord->direct_reference, mstr1);
+    char mstr2[100];
+    oid_to_dotstring(syntax, mstr2);
+    yaz_log(LOG_LOG, "match fail 3 d=%s s=%s", mstr1, mstr2);
+#endif
+
     return 0;
 }
 
@@ -191,7 +205,12 @@ int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 		break;
 	if (!entry)
 	    return 0;
-	(*npr)->records[i] = entry->m_record;
+	(*npr)->records[i] = (Z_NamePlusRecord *)
+	    odr_malloc(o, sizeof(Z_NamePlusRecord));
+	(*npr)->records[i]->databaseName = entry->m_record->databaseName;
+	(*npr)->records[i]->which = entry->m_record->which;
+	(*npr)->records[i]->u.databaseRecord =
+	    entry->m_record->u.databaseRecord;
     }
     return 1;
 }

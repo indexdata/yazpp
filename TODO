@@ -1,4 +1,6 @@
 
+Control the various optimizations with config..
+
 Handle invalidate sessions (-1 hit, control-number search).
 
 MARCXML support.

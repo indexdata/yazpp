@@ -18,21 +18,21 @@
     <target-timeout>180</target-timeout>
     <client-timeout>120</client-timeout>
     <syntax type="usmarc"/>
+    <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
   </target>
   <target name="localhost">
     <url>localhost:9999</url>
-    <url>localhost:9998</url>
     <keepalive/> <!-- keepalive enabled -->
     <limit><!-- limits .. -->
       <bandwidth>50000</bandwidth>
-      <pdu>11</pdu>
+      <pdu>60</pdu>
       <retrieve>10</retrieve>
     </limit>
     <attribute type="1" value="10,1023-9000" error="114"/>
     <syntax type="usmarc"/>
     <syntax type="grs1"/>
-    <syntax type="xml"/>
+    <syntax type="xml" marcxml="1"/>
     <syntax type="*" error="238"/>
   </target>
   <target name="*">

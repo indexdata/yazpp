@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.7 2003-10-09 12:11:10 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.8 2003-10-10 17:58:29 adam Exp $
  */
 
 #include <ctype.h>
@@ -24,15 +24,6 @@ Yaz_ProxyConfig::~Yaz_ProxyConfig()
     if (!m_copy && m_docPtr)
 	xmlFreeDoc(m_docPtr);
 #endif
-}
-
-void Yaz_ProxyConfig::operator=(const Yaz_ProxyConfig &conf)
-{
-#if HAVE_XML2
-    m_docPtr = conf.m_docPtr;
-    m_proxyPtr = conf.m_proxyPtr;
-#endif
-    m_copy = 1;
 }
 
 int Yaz_ProxyConfig::read_xml(const char *fname)
@@ -348,6 +339,7 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	    int match = 0;  // if we match record syntax
 	    const char *match_type = 0;
 	    const char *match_error = 0;
+	    const char *match_marcxml = 0;
 	    struct _xmlAttr *attr;
 	    for (attr = ptr->properties; attr; attr = attr->next)
 	    {
@@ -357,6 +349,9 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		if (!strcmp((const char *) attr->name, "error") &&
 		    attr->children && attr->children->type == XML_TEXT_NODE)
 		    match_error = (const char *) attr->children->content;
+		if (!strcmp((const char *) attr->name, "marcxml") &&
+		    attr->children && attr->children->type == XML_TEXT_NODE)
+		    match_marcxml = (const char *) attr->children->content;
 	    }
 	    if (match_type)
 	    {
@@ -377,6 +372,10 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 	    }
 	    if (match)
 	    {
+		if (match_marcxml)
+		{
+		    return -1;
+		}
 		if (match_error)
 		{
 		    if (syntax)

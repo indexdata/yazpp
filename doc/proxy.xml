@@ -157,33 +157,36 @@
    </para>
   </section>
   <section id="proxy-keepalive">
-   <title>Keep-alive Facility for Stateless Clients</title>
+   <title>Keep-alive Facility</title>
    <para>
-    Stateless clients such as web gateways may generate a cookie for a Z39.50
-    session which is sent to the proxy as part of PDUs. 
-    In this case, the proxy will keep alive its Z39.50 session
-    to the backend target even when the connection from the client
-    to the proxy is closed. When the client contacts the
-    proxy again, and re-issues the same cookie, the proxy reuses the
-    Z39.50 connection with the backend target.
+   The keep-alive is a facility where the proxy keeps the connection to the
+   backend - even if the client closes the connection to the proxy.
    </para>
    <para>
-    There is no
-    guarantee that the Z39.50 connection to the backend
-    target is kept forever: the proxy will shut it down after certain
-    idle time.
-    So in effect, the connection from the client's
-    point of view should be considered stateless, and the keep-alive
-    facility should be treated only as a performance booster.
+   If a new or another client connects to the proxy again and requests the
+   same backend it will be reassigned to this backend. In this case, the
+   proxy sends an initialize response directly to the client and an
+   initialize handshake with the backend is omitted.
    </para>
    <para>
-    Cookies may be passed in an
+   When a client reconnects, query and record caching works better, if the
+   proxy assigns it to the same backend as before. And the result set
+   (if any) is re-used. To achive this, Index Data defined a session
+   cookie which identifies the backend session.
+   </para>
+   <para>
+   The cookie is defined by the client and is sent as part of the
+   Initialize Request and passed in an
     <link linkend="otherinfo-encoding"><literal>otherInfo</literal></link>
      element with OID <literal>1.2.840.10003.10.1000.81.2</literal>.
    </para>
+   <para>
+   Clients that do not send a cookie as part of the initialize request
+   may still better performance, since the init handshake is saved.
+   </para>
   </section>
 
-  <section id="proxy-cache">
+  <section id="query-cache">
    <title>Query Caching</title>
    <para>
     Simple stateless clients often send identical Z39.50 searches
@@ -208,11 +211,34 @@
     You can enable/disable query caching using option -o.
    </para>
   </section>
+  
 
-  <section id="proxy-optimizations">
+  <section id="record-cache">
+  <title>Record Caching</title>
+  <para>
+  As an	option, the proxy may also cache result set records for the
+  last search.
+  The proxy takes into account the Record Syntax and CompSpec.
+  The CompSpec includes simple element set names as well.
+  </para>
+  </section>
+
+  <section id="query-validation">
+  <title>Query Validation</title>
+  <para>
+  </para>
+  </section>
+
+  <section id="record-validation">
+  <title>Record Syntax Validation</title>
+  <para>
+  </para>
+  </section>
+
+  <section id="other-optimizations">
    <title>Other Optimizations</title>
-   <para>
-    We've had some plans to support caching of result set records,
+     <para>
+     We've had some plans to support global caching of result set records,
     but this has not yet been implemented.
    </para>
   </section>

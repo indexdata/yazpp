@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.14 2003-10-09 12:11:09 adam Exp $
+ * $Id: proxy.h,v 1.15 2003-10-10 17:58:29 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -30,11 +30,11 @@ public:
 			 int *target_idletime, int *client_idletime,
 			 int *max_clients,
 			 int *keepalive_limit_bw, int *keepalive_limit_pdu);
-    void operator=(const Yaz_ProxyConfig &conf);
     int check_query(ODR odr, const char *name, Z_Query *query, char **addinfo);
     int check_syntax(ODR odr, const char *name,
 		     Odr_oid *syntax, char **addinfo);
 private:
+    void operator=(const Yaz_ProxyConfig &conf);
 #if HAVE_XML2
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
@@ -159,7 +159,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     char *m_optimize;
     int m_session_no;         // sequence for each client session
     char m_session_str[30];  // session string (time:session_no)
-    Yaz_ProxyConfig m_config;
+    Yaz_ProxyConfig *m_config;
     char *m_config_fname;
     int m_bytes_sent;
     int m_bytes_recv;
@@ -178,9 +178,11 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Z_APDU *handle_syntax_validation(Z_APDU *apdu);
     const char *load_balance(const char **url);
     int m_reconfig_flag;
-    void check_reconfigure();
+    Yaz_ProxyConfig *check_reconfigure();
     int m_request_no;
     int m_invalid_session;
+    int m_marcxml_flag;
+    void convert_to_marcxml(Z_NamePlusRecordList *p);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();

@@ -2,12 +2,14 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.55 2003-10-10 12:37:26 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.56 2003-10-10 17:58:29 adam Exp $
  */
 
 #include <assert.h>
 #include <time.h>
 
+#include <yaz/marcdisp.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 #include <yaz++/proxy.h>
@@ -79,6 +81,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_config_fname = 0;
     m_request_no = 0;
     m_invalid_session = 0;
+    m_config = 0;
+    m_marcxml_flag = 0;
 }
 
 Yaz_Proxy::~Yaz_Proxy()
@@ -89,15 +93,16 @@ Yaz_Proxy::~Yaz_Proxy()
     xfree (m_default_target);
     xfree (m_proxy_authentication);
     xfree (m_optimize);
-    if (m_parent)
-	m_parent->check_reconfigure();
+    delete m_config;
 }
 
 int Yaz_Proxy::set_config(const char *config)
 {
+    delete m_config;
+    m_config = new Yaz_ProxyConfig();
     xfree(m_config_fname);
     m_config_fname = xstrdup(config);
-    int r = m_config.read_xml(config);
+    int r = m_config->read_xml(config);
     return r;
 }
 
@@ -117,16 +122,20 @@ void Yaz_Proxy::set_proxy_authentication (const char *auth)
 	m_proxy_authentication = (char *) xstrdup (auth);
 }
 
-void Yaz_Proxy::check_reconfigure()
+Yaz_ProxyConfig *Yaz_Proxy::check_reconfigure()
 {
+    if (m_parent)
+	return m_parent->check_reconfigure();
+
+    Yaz_ProxyConfig *cfg = m_config;
     if (m_reconfig_flag)
     {
 	yaz_log(LOG_LOG, "reconfigure");
 	yaz_log_reopen();
-	if (m_config_fname)
+	if (m_config_fname && cfg)
 	{
 	    yaz_log(LOG_LOG, "reconfigure config %s", m_config_fname);
-	    int r = m_config.read_xml(m_config_fname);
+	    int r = cfg->read_xml(m_config_fname);
 	    if (r)
 		yaz_log(LOG_WARN, "reconfigure failed");
 	}
@@ -134,6 +143,7 @@ void Yaz_Proxy::check_reconfigure()
 	    yaz_log(LOG_LOG, "reconfigure");
 	m_reconfig_flag = 0;
     }
+    return cfg;
 }
 
 IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
@@ -142,7 +152,7 @@ IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
     check_reconfigure();
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
-    new_proxy->m_config = m_config;
+    new_proxy->m_config = 0;
     new_proxy->m_config_fname = 0;
     new_proxy->timeout(m_client_idletime);
     new_proxy->m_target_idletime = m_target_idletime;
@@ -231,19 +241,21 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     {
 	const char *url[MAX_ZURL_PLEX];
 	const char *proxy_host = get_proxy(oi);
+	Yaz_ProxyConfig *cfg = check_reconfigure();
 	if (proxy_host)
 	{
 	    xfree(m_default_target);
 	    m_default_target = xstrdup(proxy_host);
 	    proxy_host = m_default_target;
 	}
-	
 	int client_idletime = -1;
-	m_config.get_target_info(proxy_host, url, &m_bw_max,
+	if (cfg)
+	    cfg->get_target_info(proxy_host, url, &m_bw_max,
 				 &m_pdu_max, &m_max_record_retrieve,
 				 &m_target_idletime, &client_idletime,
 				 &parent->m_max_clients,
-				 &m_keepalive_limit_bw, &m_keepalive_limit_pdu);
+				 &m_keepalive_limit_bw,
+				 &m_keepalive_limit_pdu);
 	if (client_idletime != -1)
 	{
 	    m_client_idletime = client_idletime;
@@ -489,6 +501,67 @@ void Yaz_Proxy::display_diagrecs(Z_DiagRec **pp, int num)
     }
 }
 
+void Yaz_Proxy::convert_to_marcxml(Z_NamePlusRecordList *p)
+{
+    int i;
+
+    yaz_marc_t mt = yaz_marc_create();
+    yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+    for (i = 0; i < p->num_records; i++)
+    {
+	Z_NamePlusRecord *npr = p->records[i];
+	if (npr->which == Z_NamePlusRecord_databaseRecord)
+	{
+	    Z_External *r = npr->u.databaseRecord;
+	    if (r->which == Z_External_octet)
+	    {
+		int rlen;
+		char *result;
+		if (yaz_marc_decode_buf(mt, (char*) r->u.octet_aligned->buf,
+					r->u.octet_aligned->len,
+					&result, &rlen))
+		{
+		    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC-8");
+		    WRBUF wrbuf = wrbuf_alloc();
+		    
+		    char outbuf[120];
+		    size_t inbytesleft = rlen;
+		    const char *inp = result;
+		    while (cd && inbytesleft)
+		    {
+			size_t outbytesleft = sizeof(outbuf);
+			char *outp = outbuf;
+			size_t r;
+			
+			r = yaz_iconv (cd, (char**) &inp,
+				       &inbytesleft,
+				       &outp, &outbytesleft);
+			if (r == (size_t) (-1))
+			{
+			    int e = yaz_iconv_error(cd);
+			    if (e != YAZ_ICONV_E2BIG)
+			    {
+				yaz_log(LOG_WARN, "conversion failure");
+				break;
+			    }
+			}
+			wrbuf_write(wrbuf, outbuf, outp - outbuf);
+		    }
+		    if (cd)
+			yaz_iconv_close(cd);
+
+		    npr->u.databaseRecord = z_ext_record(odr_encode(),
+							 VAL_TEXT_XML,
+							 wrbuf_buf(wrbuf),
+							 wrbuf_len(wrbuf));
+		    wrbuf_free(wrbuf, 1);
+		}
+	    }
+	}
+    }
+    yaz_marc_destroy(mt);
+}
+
 int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 {
     int len = 0;
@@ -506,6 +579,8 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	}
 	else
 	{
+	    if (m_marcxml_flag && p && p->which == Z_Records_DBOSD)
+		convert_to_marcxml(p->u.databaseOrSurDiagnostics);
 	    if (sr->resultCount)
 	    {
 		yaz_log(LOG_LOG, "%s%d hits", m_session_str,
@@ -527,6 +602,8 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 
 	    display_diagrecs(&dr_p, 1);
 	}
+	if (m_marcxml_flag && p && p->which == Z_Records_DBOSD)
+	    convert_to_marcxml(p->u.databaseOrSurDiagnostics);
     }
     int r = send_Z_PDU(apdu, &len);
     yaz_log (LOG_DEBUG, "%sSending %s to client %d bytes", m_session_str,
@@ -597,7 +674,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
     
     this_query->set_Z_Query(sr->query);
 
-    char query_str[80];
+    char query_str[120];
     this_query->print(query_str, sizeof(query_str)-1);
     yaz_log(LOG_LOG, "%sQuery %s", m_session_str, query_str);
 
@@ -845,10 +922,13 @@ Z_APDU *Yaz_Proxy::handle_query_validation(Z_APDU *apdu)
     if (apdu->which == Z_APDU_searchRequest)
     {
 	Z_SearchRequest *sr = apdu->u.searchRequest;
-	int err;
+	int err = 0;
 	char *addinfo = 0;
-	err = m_config.check_query(odr_encode(), m_default_target, sr->query,
-				   &addinfo);
+
+	Yaz_ProxyConfig *cfg = check_reconfigure();
+	if (cfg)
+	    err = cfg->check_query(odr_encode(), m_default_target,
+				   sr->query, &addinfo);
 	if (err)
 	{
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
@@ -868,17 +948,29 @@ Z_APDU *Yaz_Proxy::handle_query_validation(Z_APDU *apdu)
 
 Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 {
+    m_marcxml_flag = 0;
     if (apdu->which == Z_APDU_searchRequest)
     {
 	Z_SearchRequest *sr = apdu->u.searchRequest;
 	if (*sr->smallSetUpperBound > 0 || *sr->largeSetLowerBound > 1)
 	{
-	    int err;
+	    int err = 0;
 	    char *addinfo = 0;
-	    err = m_config.check_syntax(odr_encode(), m_default_target,
+	    Yaz_ProxyConfig *cfg = check_reconfigure();
+
+	    if (cfg)
+		err = cfg->check_syntax(odr_encode(),
+					m_default_target,
 					sr->preferredRecordSyntax,
 					&addinfo);
-	    if (err)
+	    if (err == -1)
+	    {
+		sr->preferredRecordSyntax =
+		    yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
+					   VAL_USMARC);
+		m_marcxml_flag = 1;
+	    }
+	    else if (err)
 	    {
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 		
@@ -896,12 +988,22 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     else if (apdu->which == Z_APDU_presentRequest)
     {
 	Z_PresentRequest *pr = apdu->u.presentRequest;
-	int err;
+	int err = 0;
 	char *addinfo = 0;
-	err = m_config.check_syntax(odr_encode(), m_default_target,
+	Yaz_ProxyConfig *cfg = check_reconfigure();
+
+	if (cfg)
+	    err = cfg->check_syntax(odr_encode(), m_default_target,
 				    pr->preferredRecordSyntax,
 				    &addinfo);
-	if (err)
+	if (err == -1)
+	{
+	    pr->preferredRecordSyntax =
+		yaz_oidval_to_z3950oid(odr_decode(), CLASS_RECSYN,
+				       VAL_USMARC);
+	    m_marcxml_flag = 1;
+	}
+	else if (err)
 	{
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentResponse);
 	    
@@ -1044,7 +1146,7 @@ void Yaz_Proxy::shutdown()
 const char *Yaz_ProxyClient::get_session_str() 
 {
     if (!m_server)
-	return "0";
+	return "0 ";
     return m_server->get_session_str();
 }
 
