@@ -1,13 +1,19 @@
  <chapter id="proxy">
   <title>The YAZ Proxy</title>
   <para>
-   The YAZ proxy is a transparent Z39.50-to-Z39.50 gateway.  That is,
-   it is a Z39.50 server which has as its back-end a Z39.50 client
-   that forwards requests on to another server (known as the
-   <firstterm>backend target</firstterm>.)
+   The YAZ proxy is a transparent SRW/SRU/Z39.50-to-Z39.50 gateway.
+   That is, it is a SRW/SRU/Z39.50 server which has as its back-end a
+   Z39.50 client that forwards requests on to another server (known as 
+   the <firstterm>backend target</firstterm>.)
   </para>
   <para>
-   The YAZ Proxy is useful for debugging Z39.50 software, logging
+   -- All config directives --
+   -- SRW/SRU ..
+   -- Example config
+   -- Mention XSLT conversion
+  </para>
+  <para>
+   The YAZ Proxy is useful for debugging SRW/SRU/Z39.50 software, logging
    APDUs, redirecting Z39.50 packages through firewalls, etc.
    Furthermore, it offers facilities that often
    boost performance for connectionless Z39.50 clients such
@@ -126,11 +132,11 @@
   <section id="proxy-target">
    <title>Specifying the Backend Target</title>
    <para>
-    When the proxy accepts a Z39.50 client session, it
-    determines the backend target by the following rules:
+    When the proxy receives a Z39.50 Initialize Request from a Z39.50
+    client, it determines the backend target by the following rules:
     <orderedlist>
      <listitem>
-      <para> If the <literal>InitializeRequest</literal> PDU from the
+      <para>If the <literal>InitializeRequest</literal> PDU from the
        client includes an 
        <link linkend="otherinfo-encoding"><literal>otherInfo</literal></link>
        element with OID
@@ -139,19 +145,19 @@
        usual YAZ address format (typically
        <literal>tcp:<parameter>hostname</parameter>:<parameter>port</parameter></literal>)
        as described in
-       <ulink url="http://www.indexdata.dk/yaz/doc/comstack.addresses.php"
+       <ulink url="http://www.indexdata.dk/yaz/doc/comstack.addresses.tkl"
 	>the Addresses section of the YAZ manual</ulink>.
       </para>
      </listitem>
      <listitem>
-      <para> Otherwise, the Proxy uses the default target, if one was
+      <para>Otherwise, the Proxy uses the default target, if one was
        specified on the command-line with the <literal>-t</literal>
        option. A default target can also be specified in the 
        XML Config file.
       </para>
      </listitem>
      <listitem>
-      <para> Otherwise, the proxy closes the connection with
+      <para>Otherwise, the proxy closes the connection with
        the client.
       </para>
      </listitem>
@@ -247,9 +253,10 @@
     client. Finally, the proxy may convert records.
    </para>
    <para>
-    In the current version the only supported conversion is
-    MARC21/USMARC in MARC-8 charset to MARCXML in UTF-8. Future version of
-    the proxy may do other record/charset conversions.
+    The proxy can convert from MARC to MARCXML and thereby offer an
+    XML version of any MARC record as long as it is ISO2709 encoded.
+    If the proxy is compiled with libXSLT support it can also
+    perform XSLT on XML.
    </para>
   </section>
   
@@ -264,11 +271,11 @@
   <section id="proxy-config-file">
    <title>Proxy Configuration File</title>
    <para>
-    The Proxy as an option may read a configuration file using option
+    The Proxy may read a configuration file using option
     <literal>-c</literal> followed by the filename of a config file.
     </para>
    <para>
-    The config file is in XML format. The YAZ proxy must be compiled 
+    The config file is XML based. The YAZ proxy must be compiled 
     with <ulink url="http://www.xmlsoft.org/">libxml2</ulink> and
     <ulink url="http://xmlsoft.org/XSLT/">libXSLT</ulink> support in
     order for the config file facility to be enabled.

@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.11 2002-11-08 13:38:45 adam Exp $ -->
+ <!-- $Id: zoom.xml,v 1.12 2004-04-11 11:16:39 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -56,7 +56,7 @@
    implementation of the C binding.  For information on the supported
    options and other such details, see the ZOOM-C documentation, which
    can be found on-line at
-   <ulink url="http://www.indexdata.dk/yaz/doc/zoom.php"/>
+   <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl"/>
   </para>
   <para>
    All of the classes defined by ZOOM-C++ are in the
@@ -157,7 +157,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.php#zoom.connections"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl#zoom.connections"
 	>The Connections section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -187,7 +187,7 @@
    <para>
     This class enables a query to be created by compiling YAZ's
     cryptic but powerful
-    <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#PQF"
+    <ulink url="http://www.indexdata.dk/yaz/doc/tools.tkl#PQF"
 	>Prefix Query Notation (PQN)</ulink>.
    </para>
   </sect2>
@@ -204,7 +204,7 @@
    <para>
     This class enables a query to be created using the simpler but
     less expressive
-    <ulink url="http://www.indexdata.dk/yaz/doc/tools.php#CCL"
+    <ulink url="http://www.indexdata.dk/yaz/doc/tools.tkl#CCL"
 	>Common Command Language (CCL)</ulink>.
     The qualifiers recognised by the CCL parser are specified in an
     external configuration file in the format described by the YAZ
@@ -257,7 +257,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.query.php"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.query.tkl"
 	>The Queries section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -339,7 +339,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.resultsets.php"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.resultsets.tkl"
 	>The Result Sets section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -423,7 +423,7 @@
   <sect2>
    <title>Memory Management</title>
    <para>
-    The <literal>record</literal> obejcts returned from
+    The <literal>record</literal> objects returned from
     <literal>resultSet::getRecord()</literal> are ``owned'' by the
     result set object: that means that the application is not
     responsible for <literal>delete</literal>ing them - each
@@ -469,7 +469,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.records.php"
+      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.records.tkl"
 	>The Records section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -667,7 +667,7 @@
     <literal>exception</literal> class and its subclasses.  The
     closest thing is the <literal>ZOOM_connection_error</literal>
     function described in
-    <ulink url="http://www.indexdata.dk/yaz/doc/zoom.php#zoom.connections"
+    <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl#zoom.connections"
 	>The Connections section</ulink> of the documentation.
    </para>
   </sect2>

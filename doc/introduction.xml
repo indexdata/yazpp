@@ -1,11 +1,11 @@
-<!-- $Id: introduction.xml,v 1.1 2004-03-31 18:28:06 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.2 2004-04-11 11:16:39 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
    <ulink url="http://www.indexdata.dk/yazplusplus/">YAZ++</ulink> 
    is a C++ layer for YAZ and implements the ANSI Z39.50
    protocol for information retrieval (client and server side).
    While YAZ itself can be used from both C and C++ it is limited by the
-   common denomiator: C.
+   common denominator C.
   </para>
   <para>
    The YAZ++ packages also features a ZOOM interface for C++ (
@@ -15,24 +15,19 @@
    Later versions (0.7+) of YAZ++ also supports SRW/SRU.
   </para>
   <para>
-   YAZ++ and ZOOM C++ uses the same license as YAZ - see LICENSE file
-   for details.
-  </para>
-  <para>
-   This package also contains a proxy as well as a proxy library.
-   The proxy can be used to debug existing Z39.50 implementations, 
-   optimize Z39.50 operation (by caching and other mechanisms), and
-   offer a SRW/SRU service.
-   The proxy and the proxy library is covered by the GPL.
-   See LICENSE.proxy for details.
+   This package also contains a proxy application and proxy developer
+   library.
+   The proxy application can be used to debug existing Z39.50
+   implementations, optimize Z39.50 operation (by caching and other
+   mechanisms), and offer a SRW/SRU service.
   </para>
 
   <section>
    <title>Licensing</title>
    <para>
-   The Proxy and its companion library is covered by the 
+   The proxy application and the proxy library is covered by the 
     <link linkend="gpl">GPL</link>.
-   The remaning parts: the ZOOM-C++ binding and the YAZ++ library is covered
+   The remaning parts: the ZOOM-C++ library and the YAZ++ library is covered
    by the <link linkend="yaz.license">YAZ license</link>.
    </para>
   </section>
