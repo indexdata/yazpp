@@ -1,4 +1,6 @@
 
+Fix include path order to avoid yaz++ from using old headers.
+
 Use YAZ_DOC macro to setup documentation.
 
 --- 0.8 2004/04/23
