@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id -->
+<!-- $Id: config.xml,v 1.10 2003-10-13 21:30:59 adam Exp $ -->
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
