@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.6 2002-10-10 22:48:10 mike Exp $ -->
+ <!-- $Id: zoom.xml,v 1.7 2002-10-11 12:19:09 mike Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -25,11 +25,10 @@
   <para>
    For example, here is a tiny Z39.50 client that fetches and displays
    the MARC record for Farlow & Brett Surman's
-   <!-- ### there must be a better way to mark up a book title? -->
-   <emphasis>The Complete Dinosaur</emphasis>
+   <citetitle>The Complete Dinosaur</citetitle>
    from the Library of Congress's Z39.50 server:
   </para>
-  <synopsis>
+  <programlisting>
     #include &lt;iostream&gt;
     #include &lt;yaz++/zoom.h&gt;
 
@@ -39,14 +38,16 @@
     {
         connection conn("z3950.loc.gov", 7090);
         conn.option("databaseName", "Voyager");
-        resultSet rs(conn, prefixQuery("@attr attr 1=7 0253333490"));
+        conn.option("preferredRecordSyntax", "USMARC");
+        resultSet rs(conn, prefixQuery("@attr 1=7 0253333490"));
         const record *rec = rs.getRecord(0);
         cout &lt;&lt; rec-&gt;render() &lt;&lt; endl;
     }
-  </synopsis>
+  </programlisting>
   <para>
-   (Note that, for the sake of simplicity, this does not check for
-   errors: we show a more realistic version of this program later.)
+   (Note that, for the sake of simplicity, this program does not check
+   for errors: we show a more robust version of the same program
+   <link linkend="revised-sample">later</link>.)
   </para>
   <para>
    Yaz++'s implementation of the C++ binding is a thin layer over Yaz's
@@ -432,10 +433,10 @@
     Usually that's what you want: it means that you can easily fetch a
     record, use it and forget all about it, like this:
    </para>
-   <screen>
+   <programlisting>
     resultSet rs(conn, query);
     cout &lt;&lt; rs.getRecord(0)-&gt;render();
-   </screen>
+   </programlisting>
    <para>
     But sometimes you want a <literal>record</literal> to live on past
     the lifetime of the <literal>resultSet</literal> from which it was
@@ -443,7 +444,7 @@
     be used to make an autonomous copy.  The application must
     <literal>delete</literal> it when it doesn't need it any longer:
    </para>
-   <screen>
+   <programlisting>
     record *rec;
     {
         resultSet rs(conn, query);
@@ -452,7 +453,7 @@
     }
     cout &lt;&lt; rec-&gt;render();
     delete rec;
-   </screen>
+   </programlisting>
   </sect2>
 
   <sect2>
@@ -580,6 +581,63 @@
     malformed; and <literal>addinfo()</literal> returns a copy of the
     query itself (that is, the value of <literal>source</literal> with
     which the exception object was created.)
+   </para>
+  </sect2>
+
+  <sect2 id="revised-sample">
+   <title>Revised Sample Program</title>
+   <para>
+    Now we can revise the sample program from the
+    <link linkend="zoom-introduction">introduction</link>
+    to catch exceptions and report any errors:
+   </para>
+   <programlisting>
+    /* g++ -o zoom-c++-hw zoom-c++-hw.cpp -lyaz++ -lyaz */
+
+    #include &lt;iostream&gt;
+    #include &lt;yaz++/zoom.h&gt;
+
+    using namespace ZOOM;
+
+    int main(int argc, char **argv)
+    {
+        try {
+            connection conn("z3950.loc.gov", 7090);
+            conn.option("databaseName", "Voyager");
+            conn.option("preferredRecordSyntax", "USMARC");
+            resultSet rs(conn, prefixQuery("@attr 1=7 0253333490"));
+            const record *rec = rs.getRecord(0);
+            cout &lt;&lt; rec-&gt;render() &lt;&lt; endl;
+        } catch (systemException &amp;e) {
+            cerr &lt;&lt; "System error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; ")" &lt;&lt; endl;
+        } catch (bib1Exception &amp;e) {
+            cerr &lt;&lt; "BIB-1 error " &lt;&lt; 
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; "): " &lt;&lt; e.addinfo() &lt;&lt; endl;
+        } catch (queryException &amp;e) {
+            cerr &lt;&lt; "Query error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; "): " &lt;&lt; e.addinfo() &lt;&lt; endl;
+        } catch (exception &amp;e) {
+            cerr &lt;&lt; "Error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; ")" &lt;&lt; endl;
+        }
+    }
+   </programlisting>
+   <para>
+    The heart of this program is the same as in the original version,
+    but it's now wrapped in a <literal>try</literal> block followed by
+    several <literal>catch</literal> blocks which try to give helpful
+    diagnostics if something goes wrong.
+   </para>
+   <para>
+    The first such block diagnoses system-level errors such as memory
+    exhaustion or a network connection being broken by a server's
+    untimely death; the second catches errors at the Z39.50 level,
+    such as a server's report that it can't provide records in USMARC
+    syntax; the third is there in case there's something wrong with
+    the syntax of the query (although in this case it's correct); and
+    finally, the last <literal>catch</literal> block is a
+    belt-and-braces measure to be sure that nothing escapes us.
    </para>
   </sect2>
 
