@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.39 2003-06-09 22:20:39 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.40 2003-06-11 08:22:18 adam Exp $
  */
 
 #include <assert.h>
@@ -154,7 +154,6 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    if (c->m_server && c->m_server != this)
 		c->m_server->m_client = 0;
 	    c->m_server = this;
-	    c->m_seqno = parent->m_seqno;
 	    (parent->m_seqno)++;
 	    yaz_log (LOG_DEBUG, "get_client 1 %p %p", this, c);
 	    return c;
@@ -179,12 +178,14 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    // found it in cache
 	    c = cc;
 
+	    yaz_log (LOG_LOG, "Reuse session %d to %d %s",
+		     c->m_seqno, parent->m_seqno, c->get_hostname());
+
 	    c->m_seqno = parent->m_seqno;
 	    assert(c->m_server == 0);
 	    c->m_server = this;
-	    c->m_seqno = parent->m_seqno;
+	    
 	    (parent->m_seqno)++;
-	    yaz_log (LOG_LOG, "get_client 10 %p %p", this, c);
 	    return c;
 	}
     }
@@ -216,7 +217,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	Yaz_ProxyClient *c_min = 0;
 	int min_seq = -1;
 	int no_of_clients = 0;
-	yaz_log (LOG_LOG, "Existing sessions");
+	if (parent->m_clientPool)
+	    yaz_log (LOG_LOG, "Existing sessions");
 	for (c = parent->m_clientPool; c; c = c->m_next)
 	{
 	    yaz_log (LOG_LOG, " Session %-3d wait=%d %s", c->m_seqno,
@@ -241,8 +243,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    }
 	    else
 	    {
-		yaz_log (LOG_LOG, "Reuse session %d to %d",
-		      c->m_seqno, parent->m_seqno);
+		yaz_log (LOG_LOG, "Move session %d to %d %s",
+		      c->m_seqno, parent->m_seqno, c->get_hostname());
 		if (cookie)
 		    strcpy (c->m_cookie, cookie);
 		else
@@ -460,7 +462,7 @@ void Yaz_Proxy::connectNotify()
 void Yaz_Proxy::shutdown()
 {
     // only keep if keep_alive flag is set...
-    if (m_keepalive && m_client)
+    if (m_keepalive && m_client && m_client->m_waiting == 0)
     {
         yaz_log (LOG_LOG, "shutdown (client to proxy) keepalive %s",
                  m_client->get_hostname());
