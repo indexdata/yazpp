@@ -84,7 +84,10 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	cp LICENSE debian/copyright
-	dh_installdocs -A README LICENSE.proxy
+	cp LICENSE.proxy debian/libyazproxy.copyright
+	cp LICENSE.proxy debian/libyazproxy-dev.copyright
+	cp LICENSE.proxy debian/yazproxy.copyright
+	dh_installdocs -A README
 	dh_installchangelogs NEWS
 	dh_installdocs
 	dh_installexamples
