@@ -109,9 +109,9 @@ binary-arch: build install
 	dh_fixperms
 #	dh_perl
 #	dh_python
-	dh_makeshlibs -V 'libyaz++ (>= 0.7.13)'
+	dh_makeshlibs -V 'libyaz++ (>= 0.8)'
 	dh_installdeb
-	dh_shlibdeps -l debian/libyaz++/usr/lib:debian/libyazproxy/usr/lib
+	dh_shlibdeps -l debian/libyaz++/usr/lib
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

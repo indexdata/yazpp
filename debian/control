@@ -23,33 +23,3 @@ Section: doc
 Architecture: all
 Description: Documentation for YAZ++.
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
-
-Package: libyazproxy
-Section: libs
-Architecture: any
-Depends: ${shlibs:Depends}, libyaz++ (= ${Source-Version})
-Description: YAZ Proxy libraries.
- YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
- converts them to Z39.50 client requests. The proxy has several facilities
- to optimize performance and tries to reduce the commnication with the
- backend server.
-
-Package: libyazproxy-dev
-Section: devel
-Architecture: any
-Depends: libyazproxy (= ${Source-Version}), libyaz++-dev (= ${Source-Version}), libxml2-dev, libxslt1-dev
-Description: YAZ Proxy development libraries.
- YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
- converts them to Z39.50 client requests. The proxy has several facilities
- to optimize performance and tries to reduce the commnication with the
- backend server.
-
-Package: yazproxy
-Section: utils
-Architecture: any
-Depends: libyazproxy (= ${Source-Version})
-Description: YAZ Proxy.
- YAZ proxy is a daemon that accepts Z39.50/SRW/SRU incoming requests and
- converts them to Z39.50 client requests. The proxy has several facilities
- to optimize performance and tries to reduce the commnication with the
- backend server.
