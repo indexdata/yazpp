@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.68 2003-10-23 13:49:58 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.69 2003-10-23 13:59:37 adam Exp $
  */
 
 #include <assert.h>
@@ -1340,8 +1340,8 @@ void Yaz_Proxy::pre_init()
 			    other++;
 		    }
 		}
-		yaz_log(LOG_LOG, "%s pre-init%s %s use=%d other=%d spare=%d preinit=%d",
-			m_session_str,
+		yaz_log(LOG_LOG, "%spre-init %s %s use=%d other=%d spare=%d "
+			"preinit=%d",m_session_str,
 			name, zurl_in_use[j], in_use, other, spare, pre_init);
 		if (spare < pre_init)
 		{
