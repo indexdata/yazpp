@@ -9,7 +9,7 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.6 2002-10-23 22:12:07 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.7 2002-10-24 07:43:12 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++</title>
@@ -36,7 +36,7 @@
     general-purpose Z39.50 <link linkend="proxy">proxy</link>.
    </simpara>
    <simpara>
-    This manual convers version @VERSION@.
+    This manual covers version @VERSION@.
     </simpara>
   </abstract>
  </bookinfo>
