@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.65 2003-10-23 09:08:52 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.66 2003-10-23 09:10:12 adam Exp $
  */
 
 #include <assert.h>
@@ -1533,7 +1533,6 @@ void Yaz_Proxy::server(const char *addr)
 {
     Yaz_Z_Assoc::server(addr);
 
-    yaz_log(LOG_LOG, "started OK");
     timeout(1);
 }
 
