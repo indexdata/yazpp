@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.10 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.11 2002-10-28 12:16:09 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -45,15 +45,6 @@ public:
 		    Z_Records *records);
 };
 
-#if HAVE_YAZ_URSULA_H
-class MyUrsula : public Yaz_Facility_Ursula {
-public:
-    void ursula_service (Z_ExtendedServicesRequest *req,
-			 Z_UrsPDU *u,
-			 Z_ExtendedServicesResponse *res);
-};
-#endif
-
 class MyServer : public Yaz_Z_Server {
 public:
     ~MyServer();
@@ -68,9 +59,6 @@ private:
     MyRetrieval m_retrieval;
     MyILL       m_ill;
     MyUpdate    m_update;
-#if HAVE_YAZ_URSULA_H
-    MyUrsula    m_ursula;
-#endif
     int m_no;
 };
 
@@ -94,35 +82,6 @@ void MyUpdate::update_service0 (Z_ExtendedServicesRequest *req,
 {
     yaz_log (LOG_LOG, "MyServer::update_service (v1.0)");
 }
-
-#if HAVE_YAZ_URSULA_H
-void MyUrsula::ursula_service (Z_ExtendedServicesRequest *req,
-			       Z_UrsPDU *u,
-			       Z_ExtendedServicesResponse *res)
-{
-    yaz_log (LOG_LOG, "MyServer::ursula_service");
-    switch (u->which)
-    {
-    case  Z_UrsPDU_request:
-	yaz_log(LOG_LOG, "request");
-	if (u->u.request->libraryNo)
-	    yaz_log (LOG_LOG, "libraryNo: %s", u->u.request->libraryNo);
-	break;
-    case  Z_UrsPDU_update:
-	yaz_log(LOG_LOG, "request");
-	break;
-    case  Z_UrsPDU_reservation:
-	yaz_log(LOG_LOG, "request");
-	break;
-    case  Z_UrsPDU_renewal:
-	yaz_log(LOG_LOG, "request");
-	break;
-    default:
-	yaz_log(LOG_LOG, "unknown");
-	break;
-    }
-}
-#endif
 
 int MyRetrieval::sr_init (Z_InitRequest *initRequest,
 		       Z_InitResponse *initResponse)
@@ -185,10 +144,6 @@ IYaz_PDU_Observer *MyServer::sessionNotify(
     new_server->facility_add(&new_server->m_retrieval, "my sr");
     new_server->facility_add(&new_server->m_ill, "my ill");
     new_server->facility_add(&new_server->m_update, "my update");
-#if HAVE_YAZ_URSULA_H
-    new_server->facility_add(&new_server->m_ursula, "my ursula");
-#endif
-
     new_server->set_APDU_log(get_APDU_log());
 
     return new_server;

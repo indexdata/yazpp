@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.11 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.12 2002-10-28 12:16:09 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -12,10 +12,6 @@
 #include <yaz++/ir-assoc.h>
 #include <yaz++/pdu-assoc.h>
 #include <yaz++/socket-manager.h>
-
-#if HAVE_YAZ_URSULA_H
-#include <yaz/zes-ursula.h>
-#endif
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H
@@ -51,9 +47,6 @@ public:
 		     const char *databaseName);
     void recv_textRecord(int type, const char *buf, size_t len);
     void recv_genericRecord(Z_GenericRecord *r);
-#if HAVE_YAZ_URSULA_H
-    void recv_extendedServicesResponse(Z_ExtendedServicesResponse *extendedServicesResponse);
-#endif
     void display_genericRecord(Z_GenericRecord *r, int level);
     void display_variant(Z_Variant *v, int level);
     void connectNotify();
@@ -72,10 +65,6 @@ public:
     int cmd_init(char *args);
     int cmd_format(char *args);
     int cmd_proxy(char *args);
-#if HAVE_YAZ_URSULA_H
-    int cmd_ursula(char *args);
-    int cmd_ursula_renew(char *args);
-#endif
 };
 
 
@@ -446,19 +435,6 @@ void MyClient::recv_presentResponse(Z_PresentResponse *presentResponse)
     recv_records (presentResponse->records);
 }
 
-#if HAVE_YAZ_URSULA_H
-void MyClient::recv_extendedServicesResponse(Z_ExtendedServicesResponse *extendedServicesResponse)
-{
-    printf("Got ESresponse\n");
-    printf(" OperationStatus=%d with %d diagnostics:\n", 
-        *extendedServicesResponse->operationStatus,
-         extendedServicesResponse->num_diagnostics);
-    recv_diagrecs(extendedServicesResponse->diagnostics,
-                  extendedServicesResponse->num_diagnostics);
-    //TODO: Add more info !
-}
-#endif
-
 int MyClient::wait()
 {
     set_lastReceived(0);
@@ -560,122 +536,6 @@ int MyClient::cmd_proxy(char *args)
     return 1;
 }
 
-#if HAVE_YAZ_URSULA_H
-int MyClient::cmd_ursula(char *args)
-{
-    Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
-    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-
-    req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003");
-//  req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003.9.1000.105.3");
-    
-    Z_External *ext = (Z_External *) odr_malloc(odr_encode(), sizeof(*ext));
-    req->taskSpecificParameters = ext;
-    ext->direct_reference = req->packageType;
-    ext->descriptor = 0;
-    ext->indirect_reference = 0;
-    
-    ext->which = Z_External_octet;
-    ext->u.single_ASN1_type = (Odr_oct *)
-    	odr_malloc (odr_encode(), sizeof(Odr_oct));
-
-    Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
-    pdu->which = Z_UrsPDU_request;
-    pdu->u.request = (Z_UrsRequest *)
-    	odr_malloc (odr_encode(), sizeof(*pdu->u.request));
-    pdu->u.request->libraryNo = odr_strdup(odr_encode(), "000200");
-    pdu->u.request->borrowerTickerNo = odr_strdup(odr_encode(),"1234567973");
-    pdu->u.request->disposalType = 0;
-    pdu->u.request->lastUseDate = odr_strdup(odr_encode(),"20011224");
-#ifdef SKIPTHIS
-    pdu->u.request->num_items = 0;
-    pdu->u.request->items = (Z_UrsRequestItem **) odr_nullval();
-#else
-    pdu->u.request->num_items = 1;
-    pdu->u.request->items = (Z_UrsRequestItem **) 
-                odr_malloc(odr_encode(), 1 * sizeof(Z_UrsRequestItem*) );
-    pdu->u.request->items[0] = (Z_UrsRequestItem*)
-                odr_malloc(odr_encode(), sizeof(Z_UrsRequestItem) );
-    pdu->u.request->items[0]->id = odr_strdup(odr_encode(),"002231336x");
-    pdu->u.request->items[0]->titlePartNo=odr_strdup(odr_encode(),"31");
-#endif
-    
-    pdu->u.request->counter = odr_strdup(odr_encode(),"HB");
-    pdu->u.request->priority = 0;
-    pdu->u.request->disposalNote = 0;
-    pdu->u.request->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
-    *pdu->u.request->overrule = false;
-
-    if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
-    {
-        yaz_log (LOG_LOG, "ursula encoding failed");
-        return 1;
-    }
-    char *buf = 
-	    odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
-    
-    ext->u.single_ASN1_type->buf = (unsigned char*)
-	odr_malloc (odr_encode(), ext->u.single_ASN1_type->len);
-    memcpy (ext->u.single_ASN1_type->buf, buf, ext->u.single_ASN1_type->len);
-    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len;
-    
-    if (send_Z_PDU(apdu) >= 0)
-	wait();
-    return 1;
-}
-
-int MyClient::cmd_ursula_renew(char *args)
-{
-    Z_APDU *apdu = create_Z_PDU(Z_APDU_extendedServicesRequest);
-    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-
-    req->packageType = odr_getoidbystr(odr_encode(), "1.2.840.10003");
-    
-    Z_External *ext = (Z_External *) odr_malloc(odr_encode(), sizeof(*ext));
-    req->taskSpecificParameters = ext;
-    ext->direct_reference = req->packageType;
-    ext->descriptor = 0;
-    ext->indirect_reference = 0;
-    
-    ext->which = Z_External_octet;
-    ext->u.single_ASN1_type = (Odr_oct *)
-    	odr_malloc (odr_encode(), sizeof(Odr_oct));
-
-    Z_UrsPDU *pdu = (Z_UrsPDU *) odr_malloc (odr_encode(), sizeof(*pdu));
-    pdu->which = Z_UrsPDU_renewal;
-    pdu->u.renewal = (Z_UrsRenewal *)
-	   odr_malloc (odr_encode(), sizeof(*pdu->u.renewal));
-    pdu->u.renewal->libraryNo = odr_strdup(odr_encode(), "000200");
-    pdu->u.renewal->borrowerTicketNo = odr_strdup(odr_encode(),"1234567973");
-    pdu->u.renewal->num_copies=1;
-    pdu->u.renewal->copies = (Z_InternationalString **)
-            odr_malloc(odr_encode(),1* sizeof(Z_InternationalString *) );
-    pdu->u.renewal->copies[0]= odr_strdup(odr_encode(), "000035238");
-    pdu->u.renewal->newReturnDate=odr_strdup(odr_encode(), "20011224");
-    pdu->u.renewal->overrule=(bool_t*)odr_malloc(odr_encode(),sizeof(bool_t));
-    *pdu->u.renewal->overrule=false;
-
-    if (!z_UrsPDU (odr_encode(), &pdu, 0, ""))
-    {
-	yaz_log (LOG_LOG, "ursula encoding failed");
-	return 1;
-    }
-    char *buf = 
-	odr_getbuf (odr_encode(), &ext->u.single_ASN1_type->len, 0);
-    
-    ext->u.single_ASN1_type->buf = (unsigned char*)
-	odr_malloc (odr_encode(), ext->u.single_ASN1_type->len);
-    memcpy (ext->u.single_ASN1_type->buf, buf, ext->u.single_ASN1_type->len);
-    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len;
-    
-    if (send_Z_PDU(apdu) >= 0)
-	wait();
-    return 1;
-}
-
-
-#endif
-
 int MyClient::processCommand(const char *commandLine)
 {
     char cmdStr[1024], cmdArgs[1024];
@@ -696,13 +556,6 @@ int MyClient::processCommand(const char *commandLine)
 	{"init", &MyClient::cmd_init, ""},
 	{"format", &MyClient::cmd_format, "<record-syntax>"},
 	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
-#if HAVE_YAZ_URSULA_H
-	{"ursula", &MyClient::cmd_ursula, ""},
-	{"ursula_request", &MyClient::cmd_ursula, ""},
-	{"ursreq", &MyClient::cmd_ursula, ""},
-	{"ursnew", &MyClient::cmd_ursula_renew, ""},
-	{"ursula_renew", &MyClient::cmd_ursula_renew, ""},
-#endif
 	{0,0,0}
     };
     
