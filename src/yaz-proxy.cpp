@@ -2,11 +2,14 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.104 2004-02-26 23:43:07 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.105 2004-02-27 00:42:58 adam Exp $
  */
 
+#include <unistd.h>
 #include <assert.h>
 #include <time.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include <yaz/srw.h>
 #include <yaz/marcdisp.h>
@@ -128,6 +131,8 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
     m_s2z_packing = Z_SRW_recordPacking_string;
     m_time_tv.tv_sec = 0;
     m_time_tv.tv_usec = 0;
+    if (!m_parent)
+	low_socket_open();
 }
 
 Yaz_Proxy::~Yaz_Proxy()
@@ -151,6 +156,8 @@ Yaz_Proxy::~Yaz_Proxy()
 	odr_destroy(m_s2z_odr_init);
     if (m_s2z_odr_search)
 	odr_destroy(m_s2z_odr_search);
+    if (!m_parent)
+	low_socket_close();
     delete m_config;
 }
 
@@ -639,6 +646,7 @@ void Yaz_Proxy::convert_xsl_delay()
 	    yaz_log(LOG_LOG, "%sXSLT convert %d",
 		    m_session_str, m_stylesheet_offset);
 	    res = xsltApplyStylesheet(m_stylesheet_xsp, doc, 0);
+
 	    if (res)
 	    {
 		xmlChar *out_buf;
@@ -652,6 +660,7 @@ void Yaz_Proxy::convert_xsl_delay()
 		xmlFree(out_buf);
 		xmlFreeDoc(res);
 	    }
+
 	    xmlFreeDoc(doc);
 	}
     }
@@ -1567,12 +1576,17 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 				    &addinfo, &stylesheet_name, &m_schema);
 	if (stylesheet_name)
 	{
+	    m_parent->low_socket_close();
+
 	    if (m_stylesheet_xsp)
 		xsltFreeStylesheet(m_stylesheet_xsp);
+
 	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
 						       stylesheet_name);
 	    m_stylesheet_offset = 0;
 	    xfree(stylesheet_name);
+
+	    m_parent->low_socket_open();
 	}
 	if (err == -1)
 	{
@@ -1609,12 +1623,17 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
 				    &addinfo, &stylesheet_name, &m_schema);
 	if (stylesheet_name)
 	{
+	    m_parent->low_socket_close();
+
 	    if (m_stylesheet_xsp)
 		xsltFreeStylesheet(m_stylesheet_xsp);
+
 	    m_stylesheet_xsp = xsltParseStylesheetFile((const xmlChar*)
 						       stylesheet_name);
 	    m_stylesheet_offset = 0;
 	    xfree(stylesheet_name);
+
+	    m_parent->low_socket_open();
 	}
 	if (err == -1)
 	{
@@ -2556,6 +2575,21 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu, int len)
     {
 	shutdown();
     }
+}
+
+void Yaz_Proxy::low_socket_close()
+{
+    int i;
+    for (i = 0; i<NO_SPARE_SOLARIS_FD; i++)
+	if  (m_lo_fd[i] >= 0)
+	    ::close(m_lo_fd[i]);
+}
+
+void Yaz_Proxy::low_socket_open()
+{
+    int i;
+    for (i = 0; i<NO_SPARE_SOLARIS_FD; i++)
+	m_lo_fd[i] = open("/dev/null", O_RDONLY);
 }
 
 int Yaz_Proxy::server(const char *addr)

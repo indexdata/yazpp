@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.40 2004-02-24 20:55:57 adam Exp $
+ * $Id: proxy.h,v 1.41 2004-02-27 00:42:57 adam Exp $
  */
 
 #include <sys/time.h>
@@ -93,7 +93,6 @@ private:
     int m_copy;
     int match_list(int v, const char *m);
     int atoi_l(const char **cp);
-
 };
 
 class YAZ_EXPORT Yaz_RecordCache {
@@ -287,6 +286,10 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     Z_ElementSetNames *mk_esn_from_schema(ODR o, const char *schema);
     Z_ReferenceId *m_referenceId;
     NMEM m_referenceId_mem;
+#define NO_SPARE_SOLARIS_FD 10
+    int m_lo_fd[NO_SPARE_SOLARIS_FD];
+    void low_socket_open();
+    void low_socket_close();
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable,
 	      Yaz_Proxy *parent = 0);

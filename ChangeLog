@@ -1,5 +1,8 @@
 --- 0.7.10 2004/02/27 Internal release.
 
+Make workaround for FILE handles for libxml2 on Solaris where
+maximum is 256 on 32-bit systems. Unix fd handles are OK.
+
 Revise proxy algorithm for backend target selection.
 
 --- 0.7.9 2004/02/25 Internal release.
