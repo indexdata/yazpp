@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.73 2003-12-22 15:16:23 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.74 2003-12-22 19:01:34 adam Exp $
  */
 
 #include <assert.h>
@@ -1580,7 +1580,6 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
 	    }
 	    if (!m_client)
 	    {
-		yaz_log(LOG_LOG, "handle_incoming: initRequest");
 		m_s2z_init_apdu = zget_APDU(m_s2z_odr_init,
 					    Z_APDU_initRequest);
 		
