@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-proxy.sh,v 1.2 2003-10-24 10:33:01 adam Exp $
+# $Id: yaz-proxy.sh,v 1.3 2003-10-24 11:19:54 adam Exp $
 # YAZ proxy start/stop init.d script.
 #
 PATH=/usr/local/bin:/bin:/usr/bin
@@ -7,8 +7,9 @@ export PATH
 
 # Proxy CWD is here. Should be writable by it.
 DIR=/var/yaz-proxy
-# Proxy Path
-DAEMON="/usr/local/bin/yaz-proxy"
+# Proxy Path (either the actual one, or the keepalive one (for testing)
+DAEMON=/usr/local/bin/yaz-proxy
+DAEMON=/var/yaz-proxy/yaz-proxy-ka.sh
 
 # Proxy PIDFILE. Must be writable by it.
 PIDFILE="/var/run/yaz-proxy.pid"
@@ -28,6 +29,9 @@ ARGS="-c config.xml"
 if test -n "RUNAS"; then
 	ARGS="-u $RUNAS $ARGS"
 fi
+
+# Increase number of sockets, if needed
+#ulimit -n 1050
 
 # Name, Description (not essential)
 NAME=yaz-proxy
