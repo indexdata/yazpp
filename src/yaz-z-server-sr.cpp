@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.5 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.6 2003-10-01 13:13:51 adam Exp $
  *
  */
 
@@ -230,7 +230,7 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 	    fetch_via_piggyback(s, apdu_request->u.searchRequest,
 				apdu_response->u.searchResponse);
 	}
-	s->send_Z_PDU(apdu_response);
+	s->send_Z_PDU(apdu_response, 0);
 	return 1;
     case Z_APDU_presentRequest:
         yaz_log (LOG_LOG, "got PresentRequest p=%p", this);
@@ -241,7 +241,7 @@ int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 	if (!apdu_response->u.presentResponse->records)
 	    fetch_via_present(s, apdu_request->u.presentRequest,
 			      apdu_response->u.presentResponse);
-	s->send_Z_PDU(apdu_response);
+	s->send_Z_PDU(apdu_response, 0);
 	return 1;
     }
     return 0;

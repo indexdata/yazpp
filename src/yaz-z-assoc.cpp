@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.25 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.26 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <assert.h>
@@ -78,7 +78,7 @@ void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
     Z_APDU *apdu = decode_Z_PDU (buf, len);
     if (apdu)
     {
-	recv_Z_PDU (apdu);
+	recv_Z_PDU (apdu, len);
     }
     else
     {
@@ -169,12 +169,16 @@ void Yaz_Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
 	*id_to = 0;
 }
 
-int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu)
+int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
 {
     char *buf;
     int len;
     if (encode_Z_PDU(apdu, &buf, &len) > 0)
+    {
+	if (plen)
+	    *plen = len;
 	return m_PDU_Observable->send_PDU(buf, len);
+    }
     return -1;
 }
 

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.18 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.19 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <assert.h>
@@ -149,9 +149,9 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
     *elementSetName = m_elementSetNames->u.generic;
 }
 
-void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
+void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
 {
-    yaz_log (m_log, "recv_Z_PDU");
+    yaz_log (m_log, "recv_Z_PDU %d bytes", len);
     m_lastReceived = apdu->which;
     switch (apdu->which)
     {
@@ -227,7 +227,7 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
         req->resultSetName = pResultSetId;
     }
 
-    return send_Z_PDU(apdu);
+    return send_Z_PDU(apdu, 0);
 }
 
 int Yaz_IR_Assoc::send_presentRequest(int start, 
@@ -276,7 +276,7 @@ int Yaz_IR_Assoc::send_presentRequest(int start,
         req->resultSetId = pResultSetId;
     }
 
-    return send_Z_PDU(apdu);
+    return send_Z_PDU(apdu, 0);
 }
 
 void Yaz_IR_Assoc::set_proxy(const char *str)
@@ -330,19 +330,19 @@ const char *Yaz_IR_Assoc::get_host()
 void Yaz_IR_Assoc::recv_searchRequest(Z_SearchRequest *searchRequest)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_searchResponse);
-    send_Z_PDU(apdu);
+    send_Z_PDU(apdu, 0);
 }
 
 void Yaz_IR_Assoc::recv_presentRequest(Z_PresentRequest *presentRequest)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_presentResponse);
-    send_Z_PDU(apdu);
+    send_Z_PDU(apdu, 0);
 }
 
 void Yaz_IR_Assoc::recv_initRequest(Z_InitRequest *initRequest)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initResponse);
-    send_Z_PDU(apdu);
+    send_Z_PDU(apdu, 0);
 }
 
 void Yaz_IR_Assoc::recv_searchResponse (Z_SearchResponse *searchResponse)
@@ -398,7 +398,7 @@ int Yaz_IR_Assoc::send_initRequest(char* pRefId)
 	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
     if (m_cookie)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
-    return send_Z_PDU(apdu);
+    return send_Z_PDU(apdu, 0);
 }
 
 int Yaz_IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
@@ -430,8 +430,7 @@ int Yaz_IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     if (m_cookie)
         set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
 
-
-    return send_Z_PDU(apdu);
+    return send_Z_PDU(apdu, 0);
 }
 
 

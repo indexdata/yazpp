@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2000-2001, Index Data.
+ * Copyright (c) 2000-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.15 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.16 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -48,7 +48,7 @@ void Yaz_Z_Server::facility_add(IYaz_Server_Facility *facility,
     (*p)->m_facility = facility;
 }
 
-void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
+void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
 {   
     Yaz_Z_Server_Facility_Info *f = m_facilities;
     
@@ -77,7 +77,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request)
 	    f = f->m_next;
 	}
 	transfer_referenceId(apdu_request, apdu_response);
-	send_Z_PDU(apdu_response);
+	send_Z_PDU(apdu_response, 0);
     }
     else
     {

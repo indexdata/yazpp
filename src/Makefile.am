@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.14 2003-07-18 13:27:20 adam Exp $
+## $Id: Makefile.am,v 1.15 2003-10-01 13:13:51 adam Exp $
 
-AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
+AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include $(XML2_CFLAGS)
 
 noinst_LTLIBRARIES = libyazcpp.la
 
@@ -8,7 +8,7 @@ libyazcpp_la_SOURCES=yaz-socket-manager.cpp yaz-pdu-assoc.cpp \
 	yaz-z-assoc.cpp yaz-proxy.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
 	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp yaz-z-server-sr.cpp \
 	yaz-z-server-ill.cpp yaz-z-server-update.cpp yaz-z-databases.cpp \
-	yaz-z-cache.cpp
+	yaz-z-cache.cpp yaz-proxy-config.cpp yaz-bw.cpp
 
 bin_PROGRAMS = yaz-proxy
 noinst_PROGRAMS = yaz-my-server yaz-my-client

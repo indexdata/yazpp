@@ -2,16 +2,42 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.7 2003-09-04 20:11:03 adam Exp $
+ * $Id: proxy.h,v 1.8 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 #include <yaz++/z-databases.h>
 
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#endif
+
 class Yaz_Proxy;
 
 struct Yaz_RecordCache_Entry;
+
+class YAZ_EXPORT Yaz_ProxyConfig {
+public:
+    Yaz_ProxyConfig();
+    ~Yaz_ProxyConfig();
+    int read_xml(const char *fname);
+    void get_target_info(const char *name, const char **url, int *keepalive,
+			 int *limit_bw, int *limit_pdu, int *limit_req);
+    void operator=(const Yaz_ProxyConfig &conf);
+private:
+#if HAVE_XML2
+    xmlDocPtr m_docPtr;
+    xmlNodePtr m_proxyPtr;
+    void return_target_info(xmlNodePtr ptr, const char **url, int *keepalive,
+			    int *limit_bw, int *limit_pdu, int *limit_req);
+    void return_limit(xmlNodePtr ptr,
+		      int *limit_bw, int *limit_pdu, int *limit_req);
+    const char *get_text(xmlNodePtr ptr);
+#endif
+    int m_copy;
+};
 
 class YAZ_EXPORT Yaz_RecordCache {
  public:
@@ -35,12 +61,25 @@ class YAZ_EXPORT Yaz_RecordCache {
 	       Z_RecordComposition *comp);
 };
 
+class YAZ_EXPORT Yaz_bw {
+ public:
+    Yaz_bw(int sz);
+    ~Yaz_bw();
+    void add_bytes(int m);
+    int get_total();
+ private:
+    long m_sec;   // time of most recent bucket
+    int *m_bucket;
+    int m_ptr;
+    int m_size;
+};
+
 /// Private class
 class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     friend class Yaz_Proxy;
     Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_ProxyClient();
-    void recv_Z_PDU(Z_APDU *apdu);
+    void recv_Z_PDU(Z_APDU *apdu, int len);
     IYaz_PDU_Observer* sessionNotify
 	(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void shutdown();
@@ -48,6 +87,8 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     void failNotify();
     void timeoutNotify();
     void connectNotify();
+    int send_to_target(Z_APDU *apdu);
+    const char *get_session_str();
     char *m_cookie;
     Yaz_ProxyClient *m_next;
     Yaz_ProxyClient **m_prev;
@@ -61,6 +102,8 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     int m_seqno;
     int m_waiting;
     int m_resultSetStartPoint;
+    int m_bytes_sent;
+    int m_bytes_recv;
     ODR m_init_odr;
     Z_APDU *m_initResponse;
     Yaz_RecordCache m_cache;
@@ -82,25 +125,46 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_seqno;
     int m_max_clients;
     int m_keepalive;
-    int m_idletime;
+    int m_client_idletime;
+    int m_target_idletime;
     char *m_proxyTarget;
+    char *m_default_target;
     char *m_proxy_authentication;
     long m_seed;
     char *m_optimize;
+    int m_session_no;         // sequence for each client session
+    char m_session_str[20];  // session string (time:session_no)
+    Yaz_ProxyConfig m_config;
+    int m_bytes_sent;
+    int m_bytes_recv;
+    int m_bw_max;
+    Yaz_bw m_bw_stat;
+    int m_pdu_max;
+    Yaz_bw m_pdu_stat;
+    Z_APDU *m_bw_hold_PDU;
+    int m_max_record_retrieve;
+    void handle_max_record_retrieve(Z_APDU *apdu);
+    void display_diagrecs(Z_DiagRec **pp, int num);
  public:
     Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable);
     ~Yaz_Proxy();
-    void recv_Z_PDU(Z_APDU *apdu);
+    void recv_Z_PDU(Z_APDU *apdu, int len);
+    void recv_Z_PDU_0(Z_APDU *apdu);
     IYaz_PDU_Observer* sessionNotify
 	(IYaz_PDU_Observable *the_PDU_Observable, int fd);
     void failNotify();
     void timeoutNotify();
     void connectNotify();
     const char *option(const char *name, const char *value);
-    void set_proxy_target(const char *target);
+    void set_default_target(const char *target);
     void set_proxy_authentication (const char *auth);
     char *get_proxy_target() { return m_proxyTarget; };
+    char *get_session_str() { return m_session_str; };
     void set_max_clients(int m) { m_max_clients = m; };
-    void set_idletime (int t) { m_idletime = (t > 1) ? t : 600; };
+    void set_client_idletime (int t) { m_client_idletime = (t > 1) ? t : 600; };
+    void set_target_idletime (int t) { m_target_idletime = (t > 1) ? t : 600; };
+    int get_target_idletime () { return m_target_idletime; }
+    int set_config(const char *name);
+    int send_to_client(Z_APDU *apdu);
 };
 

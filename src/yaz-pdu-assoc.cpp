@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.29 2003-07-25 19:27:36 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.30 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <assert.h>
@@ -433,8 +433,17 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
 	     res);
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
 
-    if (res >= 0)
-    {   // Connect pending or complete
+    if (res == 0)
+    {   // Connect complete
+	m_state = Connecting;
+	unsigned mask = YAZ_SOCKET_OBSERVE_EXCEPT;
+	mask |= YAZ_SOCKET_OBSERVE_WRITE;
+	mask |= YAZ_SOCKET_OBSERVE_READ;
+	yaz_log(m_log, "maskObserver 11");
+	m_socketObservable->maskObserver(this, mask);
+    }
+    else if (res > 0)
+    {   // Connect pending
 	m_state = Connecting;
 	unsigned mask = YAZ_SOCKET_OBSERVE_EXCEPT;
 	if (m_cs->io_pending & CS_WANT_WRITE)
@@ -467,4 +476,9 @@ void Yaz_PDU_Assoc::childNotify(COMSTACK cs)
     // Clone PDU Observer
     new_observable->m_PDU_Observer = m_PDU_Observer->sessionNotify
 	(new_observable, cs_fileno(cs));
+}
+
+const char*Yaz_PDU_Assoc::getpeername()
+{
+    return cs_addrstr(m_cs);
 }

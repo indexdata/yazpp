@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: z-query.h,v 1.2 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -33,4 +33,8 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     ODR odr_decode;
     ODR odr_encode;
     ODR odr_print;
+    void oid2str(Odr_oid *o, WRBUF buf);
+    int rpn2pquery(Z_RPNStructure *s, WRBUF buf);
+    WRBUF zquery2pquery(Z_Query *q);
+    void pr_term(WRBUF wbuf, char *buf, int len);
 };

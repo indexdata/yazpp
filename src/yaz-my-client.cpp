@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.12 2002-10-28 12:16:09 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.13 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz/log.h>

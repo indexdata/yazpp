@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.4 2003-08-28 18:46:54 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.5 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -160,7 +160,7 @@ int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 			     Z_RecordComposition *comp)
 {
     int i;
-    yaz_log(LOG_LOG, "cache lookup start=%d num=%d", start, num);
+    yaz_log(LOG_DEBUG, "cache lookup start=%d num=%d", start, num);
 
     for (i = 0; i<num; i++)
     {

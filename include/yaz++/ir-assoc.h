@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: ir-assoc.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: ir-assoc.h,v 1.2 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -19,7 +19,7 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
     /// Destroy assocation and close PDU Observer
     virtual ~Yaz_IR_Assoc();
     /// Receive Z39.50 PDU
-    void recv_Z_PDU(Z_APDU *apdu);
+    void recv_Z_PDU(Z_APDU *apdu, int len);
     /// Set Database Names
     void set_databaseNames (int num, const char **list);
     void set_databaseNames(const char *dblist, const char *sep);

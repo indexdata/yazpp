@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: z-assoc.h,v 1.2 2003-10-01 13:13:51 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -43,9 +43,9 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     /// Encode Z39.50 PDU.
     int encode_Z_PDU(Z_APDU *apdu, char **buf, int *len);
     /// Send Z39.50 PDU
-    int send_Z_PDU(Z_APDU *apdu);
+    int send_Z_PDU(Z_APDU *apdu, int *len);
     /// Receive Z39.50 PDU
-    virtual void recv_Z_PDU(Z_APDU *apdu) = 0;
+    virtual void recv_Z_PDU(Z_APDU *apdu, int len) = 0;
     /// Create Z39.50 PDU with reasonable defaults
     Z_APDU *create_Z_PDU(int type);
     /// Request Alloc

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: pdu-assoc.h,v 1.2 2003-10-01 13:13:51 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -78,6 +78,7 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, IYazSocketObserver 
     void idleTime (int timeout);
     /// Child start...
     virtual void childNotify(COMSTACK cs);
+    const char *getpeername();
 };
 
 class YAZ_EXPORT Yaz_PDU_AssocThread : public Yaz_PDU_Assoc {

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: pdu-observer.h,v 1.2 2003-10-01 13:13:51 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -32,6 +32,8 @@ class YAZ_EXPORT IYaz_PDU_Observable {
     virtual void destroy() = 0;
     /// Set Idle Time
     virtual void idleTime (int timeout) = 0;
+    /// Get peername
+    virtual const char *getpeername() = 0;
 };
 
 /** Protocol Data Unit Observer.

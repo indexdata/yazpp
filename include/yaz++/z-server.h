@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.2 2002-10-28 12:16:09 adam Exp $
+ * $Id: z-server.h,v 1.3 2003-10-01 13:13:51 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -119,7 +119,7 @@ class YAZ_EXPORT Yaz_Z_Server : public Yaz_Z_Assoc {
 public:
     Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable);
     virtual ~Yaz_Z_Server();
-    virtual void recv_Z_PDU(Z_APDU *apdu);
+    virtual void recv_Z_PDU(Z_APDU *apdu, int len);
     void facility_add(IYaz_Server_Facility *facility, const char *name);
     void facility_reset ();
 
