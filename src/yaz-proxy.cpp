@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.41 2003-06-11 21:59:07 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.42 2003-06-11 22:08:56 adam Exp $
  */
 
 #include <assert.h>
@@ -442,7 +442,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
 	{
 	    Z_APDU *apdu = m_client->m_initResponse;
 	    apdu->u.initResponse->otherInfo = 0;
-	    if (m_client->m_cookie)
+	    if (m_client->m_cookie && *m_client->m_cookie)
 		set_otherInformationString(apdu, VAL_COOKIE, 1,
 					   m_client->m_cookie);
 	    send_Z_PDU(apdu);
