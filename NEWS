@@ -1,4 +1,6 @@
 
+Renamed configure option for yaz-config. It is now --with-yaz-config.
+
 Fix include path order to avoid yaz++ from using old headers.
 
 Use YAZ_DOC macro to setup documentation.
