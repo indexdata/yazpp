@@ -2,12 +2,12 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.4 2003-09-23 16:26:16 mike Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.5 2003-10-16 10:26:58 adam Exp $
  */
 
 #include <yaz++/z-server.h>
 
-static char *marc_records[] = {
+static const char *marc_records[] = {
   "\x30\x30\x33\x36\x36\x6E\x61\x6D\x20\x20\x32\x32\x30\x30\x31\x36"
   "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
   "\x30\x30\x30\x30\x30\x30\x33\x30\x30\x30\x34\x30\x30\x30\x31\x33"

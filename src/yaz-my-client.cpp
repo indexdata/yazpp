@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.13 2003-10-01 13:13:51 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.14 2003-10-16 10:26:58 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -542,9 +542,9 @@ int MyClient::processCommand(const char *commandLine)
     cmdArgs[0] = '\0';
     cmdStr[0] = '\0';
     static struct {
-        char *cmd;
+        const char *cmd;
         int (MyClient::*fun)(char *arg);
-        char *ad;
+        const char *ad;
     } cmd[] = {
 	{"open", &MyClient::cmd_open, "<host>[':'<port>][/<database>]"},
 	{"connect", &MyClient::cmd_connect, "<host>[':'<port>][/<database>]"},
