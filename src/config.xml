@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: config.xml,v 1.14 2003-10-23 08:46:55 adam Exp $ -->
+<!-- $Id: config.xml,v 1.15 2003-10-23 11:57:23 adam Exp $ -->
 <proxy>
   <target default="1" name="voyager">
     <!-- default target -->
@@ -35,7 +35,7 @@
       <pdu>60</pdu>
       <retrieve>10</retrieve>
     </limit>
-    <attribute type="1" value="1-1023">
+    <attribute type="1" value="1-1023"/>
     <attribute type="1" value="*" error="114"/>
     <syntax type="usmarc"/>
     <syntax type="grs1"/>
