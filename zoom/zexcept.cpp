@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.3 2002-10-09 09:07:10 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.4 2002-10-11 11:54:05 mike Exp $
 
 // Z39.50 Exception classes
 
@@ -90,7 +90,7 @@ namespace ZOOM {
     }
 
     queryException::~queryException() {
-	delete q;
+	//delete q; // ### see comment on bib1Exception destructor
     }
 
     int queryException::errcode() const {
