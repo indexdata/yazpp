@@ -327,24 +327,6 @@
      uses this class.
     </para>
    </section>
-   <section id="Yaz_Proxy"><title>Yaz_Proxy</title>
-    <para>
-     This object is a specialization of 
-     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and implements
-     the YAZ proxy.
-    </para>
-    <synopsis>
-     #include &lt;yaz++/proxy.h>
-
-     class Yaz_Proxy : public Yaz_Z_Server {
-       ...
-     };
-    </synopsis>
-    <para>
-     The proxy server, <filename>yaz-proxy-main.cpp</filename>,
-     uses this class.
-    </para>
-   </section>
   </section>
  </chapter>
  <!-- Keep this comment at the end of the file
