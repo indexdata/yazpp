@@ -1,10 +1,10 @@
-// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.3 2002-10-08 23:55:52 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.4 2002-10-09 09:07:10 mike Exp $
 
 // Simple sample client
 
 #include <stdlib.h>		// for atoi()
 #include <iostream.h>
-#include "zoom++.h"
+#include "zoom.h"
 
 
 int main(int argc, char **argv)

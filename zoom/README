@@ -17,9 +17,9 @@ by asterisks ("*").  So we have:
 	interface.h	The read-only, automatically-generated file
 			that can be considered a formal specification
 			of the ZOOM C++ interface.
-	zoom++.h	The read-only, automatically-generated file
+	zoom.h		The read-only, automatically-generated file
 			that is actually used in the build process,
-			and ought quite possibly to be moved into
+			and ultimately installed into
 			../include/yaz++/zoom.h
 
 Documentation (in DocBook format) is in "../doc/zoom.xml"

@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.2 2002-10-08 23:57:29 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.3 2002-10-09 09:07:10 mike Exp $
 
 // Z39.50 Exception classes
 
@@ -6,7 +6,7 @@
 #include <string.h>		// for strerror(), strlen(), strcpy()
 #include <stdio.h>		// for sprintf()
 #include <yaz/diagbib1.h>
-#include "zoom++.h"
+#include "zoom.h"
 
 
 namespace ZOOM {

@@ -1,4 +1,9 @@
+.deps
+.libs
 Makefile
 Makefile.in
 interface.h
-zoom++.h
+zoom.h
+libzoomcpp.la
+zclient
+*.lo

@@ -1,8 +1,8 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.3 2002-08-08 16:14:26 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.4 2002-10-09 09:07:10 mike Exp $
 
 // Z39.50 Record class
 
-#include "zoom++.h"
+#include "zoom.h"
 #include <yaz/yaz-util.h>	// for yaz_matchstr()
 
 
