@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.42 2003-06-11 22:08:56 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.43 2003-06-25 21:57:45 adam Exp $
  */
 
 #include <assert.h>
@@ -632,5 +632,9 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
     {
 	yaz_log (LOG_LOG, "Sending %s to client", apdu_name(apdu));
 	m_server->send_Z_PDU(apdu);
+    }
+    if (apdu->which == Z_APDU_close)
+    {
+	shutdown();
     }
 }

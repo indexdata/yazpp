@@ -1,3 +1,7 @@
+Proxy now closes socket when Close PDU is received from target.
+
+Proxy does keep alive of sockets for anonymous sessions.
+
 Bug fix: in some cases the Proxy could issue a Present Request
 which was out of range (code 13).
 
