@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.30 2001-11-06 20:33:32 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.31 2002-01-14 12:01:28 adam Exp $
  */
 
 #include <assert.h>
@@ -21,6 +21,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_seqno = 1;
     m_keepalive = 1;
     m_proxyTarget = 0;
+    m_proxy_authentication = 0;
     m_max_clients = 50;
     m_seed = time(0);
     m_optimize = xstrdup ("1");
@@ -29,15 +30,24 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
 Yaz_Proxy::~Yaz_Proxy()
 {
     xfree (m_proxyTarget);
+    xfree (m_proxy_authentication);
     xfree (m_optimize);
 }
 
-void Yaz_Proxy::set_proxyTarget(const char *target)
+void Yaz_Proxy::set_proxy_target(const char *target)
 {
     xfree (m_proxyTarget);
     m_proxyTarget = 0;
     if (target)
 	m_proxyTarget = (char *) xstrdup (target);
+}
+
+void Yaz_Proxy::set_proxy_authentication (const char *auth)
+{
+    xfree (m_proxy_authentication);
+    m_proxy_authentication = 0;
+    if (auth)
+	m_proxy_authentication = (char *) xstrdup (auth);
 }
 
 IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
@@ -46,8 +56,9 @@ IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
     new_proxy->timeout(500);
-    new_proxy->set_proxyTarget(m_proxyTarget);
+    new_proxy->set_proxy_target(m_proxyTarget);
     new_proxy->set_APDU_log(get_APDU_log());
+    new_proxy->set_proxy_authentication(m_proxy_authentication);
     return new_proxy;
 }
 
@@ -95,7 +106,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 
     const char *proxy_host = get_proxy(oi);
     if (proxy_host)
-	set_proxyTarget(proxy_host);
+	set_proxy_target(proxy_host);
     
     // no target specified at all?
     if (!m_proxyTarget)
@@ -130,9 +141,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		c->close();
 		c->client(m_proxyTarget);
 		c->m_init_flag = 0;
-		
-		delete c->m_last_query;
-		c->m_last_query = 0;
+
+		c->m_last_ok = 0;
 		c->m_last_resultCount = 0;
 		c->m_sr_transform = 0;
 		c->m_waiting = 0;
@@ -156,7 +166,23 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    return 0;
 	}
 	yaz_log (LOG_LOG, "got InitRequest");
-	    
+        Z_InitRequest *initRequest = apdu->u.initRequest;
+
+        if (!initRequest->idAuthentication)
+        {
+            if (m_proxy_authentication)
+            {
+                initRequest->idAuthentication =
+                    (Z_IdAuthentication *)
+                    odr_malloc (odr_encode(),
+                                sizeof(*initRequest->idAuthentication));
+                initRequest->idAuthentication->which =
+                    Z_IdAuthentication_open;
+                initRequest->idAuthentication->u.open =
+                    odr_strdup (odr_encode(), m_proxy_authentication);
+            }
+        }
+
 	// go through list of clients - and find the lowest/oldest one.
 	Yaz_ProxyClient *c_min = 0;
 	int min_seq = -1;
@@ -221,10 +247,8 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	c->m_seqno = parent->m_seqno;
 	c->client(m_proxyTarget);
 	c->m_init_flag = 0;
-
-	delete c->m_last_query;
-	c->m_last_query = 0;
 	c->m_last_resultCount = 0;
+        c->m_last_ok = 0;
 	c->m_sr_transform = 0;
 	c->m_waiting = 0;
 	c->timeout(10);
@@ -250,7 +274,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
     
     this_query->set_Z_Query(sr->query);
     
-    if (m_client->m_last_query &&
+    if (m_client->m_last_ok && m_client->m_last_query &&
 	m_client->m_last_query->match(this_query) &&
         m_client->m_last_databases.match(this_databases))
     {
@@ -259,6 +283,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	    m_client->m_last_resultCount < *sr->largeSetLowerBound)
 	{
 	    // medium Set
+            // send present request (medium size)
 	    yaz_log (LOG_LOG, "Yaz_Proxy::result_set_optimize medium set");
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
 	    Z_PresentRequest *pr = new_apdu->u.presentRequest;
@@ -279,7 +304,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	else if (m_client->m_last_resultCount >= *sr->largeSetLowerBound ||
 	    m_client->m_last_resultCount == 0)
 	{
-	    // large set
+            // large set. Return pseudo-search response immediately
 	    yaz_log (LOG_LOG, "Yaz_Proxy::result_set_optimize large set");
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
 	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
@@ -291,6 +316,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	else
 	{
 	    // small set
+            // send a present request (small set)
 	    yaz_log (LOG_LOG, "Yaz_Proxy::result_set_optimize small set");
 	    Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentRequest);
 	    Z_PresentRequest *pr = new_apdu->u.presentRequest;
@@ -314,6 +340,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	yaz_log (LOG_LOG, "Yaz_Proxy::result_set_optimize new set");
 	delete m_client->m_last_query;
 	m_client->m_last_query = this_query;
+        m_client->m_last_ok = 0;
         m_client->m_last_databases.set(sr->num_databaseNames,
                                        (const char **) sr->databaseNames);
     }
@@ -465,6 +492,7 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_init_flag = 0;
     m_last_query = 0;
     m_last_resultCount = 0;
+    m_last_ok = 0;
     m_sr_transform = 0;
     m_waiting = 0;
 }
@@ -489,13 +517,10 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
     {
 	m_last_resultCount = *apdu->u.searchResponse->resultCount;
 	int status = *apdu->u.searchResponse->searchStatus;
-	if (! status || (
-		apdu->u.searchResponse->records &&
-		apdu->u.searchResponse->records->which != Z_Records_DBOSD))
-	{
-	    delete m_last_query;
-	    m_last_query = 0;
-	}
+	if (status && 
+		(!apdu->u.searchResponse->records ||
+                 apdu->u.searchResponse->records->which == Z_Records_DBOSD))
+            m_last_ok = 1;
     }
     if (apdu->which == Z_APDU_presentResponse && m_sr_transform)
     {
