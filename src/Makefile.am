@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2001-05-03 12:39:39 adam Exp $
+## $Id: Makefile.am,v 1.7 2001-08-09 09:01:03 adam Exp $
 
 INCLUDES=$(YAZINC) -I$(srcdir)/../include
 
@@ -8,6 +8,8 @@ libyaz___la_SOURCES=yaz-socket-manager.cpp yaz-pdu-assoc.cpp \
 	yaz-z-assoc.cpp yaz-proxy.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
 	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp yaz-z-server-sr.cpp \
 	yaz-z-server-ill.cpp yaz-z-server-update.cpp
+
+EXTRA_DIST=yaz-z-server-ursula.cpp
 
 libyaz___la_LDFLAGS=-version-info 0:0:0
 
