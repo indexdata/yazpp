@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.15  2000-09-21 21:43:20  adam
+ * Revision 1.16  2000-09-22 09:54:11  heikki
+ * minor
+ *
+ * Revision 1.15  2000/09/21 21:43:20  adam
  * Better high-level server API.
  *
  * Revision 1.14  2000/09/12 12:09:53  adam
@@ -390,7 +393,9 @@ void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)
     }
 }
 
-#if 1
+#if 0
+ // 1 = single-threaded
+ // 0 = multi-threaded
 
 // Single-threaded... Only useful for non-blocking handlers
 void Yaz_PDU_Assoc::childNotify(int fd)
