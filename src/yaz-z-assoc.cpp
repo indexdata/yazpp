@@ -4,7 +4,13 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.6  1999-12-06 13:52:45  adam
+ * Revision 1.7  2000-05-10 11:36:58  ian
+ * Added default parameters for refid to request functions.
+ * Added default parameter for result set name to search and present request.
+ * Commented out forced logging of PDU contents.
+ * Added send_deleteResultSetRequest
+ *
+ * Revision 1.6  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -111,7 +117,7 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
     }
     else
     {
-	z_APDU(m_odr_print, &apdu, 0, "decode");
+	// z_APDU(m_odr_print, &apdu, 0, "decode");
         return apdu;
     }
 }
@@ -123,7 +129,7 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
-    z_APDU(m_odr_print, &apdu, 0, "encode");
+    // z_APDU(m_odr_print, &apdu, 0, "encode");
     *buf = odr_getbuf (m_odr_out, len, 0);
     odr_reset (m_odr_out);
     return *len;
@@ -249,5 +255,19 @@ Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
     return yaz_oi_update (otherInformationP,
 			  (createFlag ? odr_encode() : 0),
 			  oid, categoryValue, deleteFlag);
+}
+
+Z_ReferenceId* Yaz_Z_Assoc::getRefID(char* str)
+{
+    Z_ReferenceId* id = NULL;
+
+    if ( str )
+    {
+        id = (Z_ReferenceId*) odr_malloc (m_odr_out, sizeof(*id));
+        id->size = id->len = strlen(str);
+        id->buf = (unsigned char *) str;
+    }
+
+    return id;
 }
 

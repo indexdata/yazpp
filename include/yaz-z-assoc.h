@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-assoc.h,v 1.5 1999-12-06 13:52:45 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.6 2000-05-10 11:36:58 ian Exp $
  */
 
 #include <yaz/proto.h>
@@ -69,6 +69,9 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
 	int oidval, int categoryValue,
 	const char *str);
     void set_apdu_log(const char *file);
+
+    Z_ReferenceId* getRefID(char* str);
+
  private:
     static int yaz_init_flag;
     static int yaz_init_func();

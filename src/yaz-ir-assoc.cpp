@@ -4,7 +4,13 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.11  1999-12-06 13:52:45  adam
+ * Revision 1.12  2000-05-10 11:36:58  ian
+ * Added default parameters for refid to request functions.
+ * Added default parameter for result set name to search and present request.
+ * Commented out forced logging of PDU contents.
+ * Added send_deleteResultSetRequest
+ *
+ * Revision 1.11  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -205,7 +211,9 @@ void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
     }
 }
 
-int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
+int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
+                                     char* pResultSetId,
+                                     char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
@@ -233,10 +241,24 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
 	assert (req->otherInfo);
     }
+
+    if ( pRefId )
+    {
+        req->referenceId = getRefID(pRefId);
+    }
+
+    if ( pResultSetId )
+    {
+        req->resultSetName = pResultSetId;
+    }
+
     return send_Z_PDU(apdu);
 }
 
-int Yaz_IR_Assoc::send_presentRequest(int start, int number)
+int Yaz_IR_Assoc::send_presentRequest(int start, 
+                                      int number, 
+                                      char* pResultSetId,
+                                      char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
@@ -265,8 +287,20 @@ int Yaz_IR_Assoc::send_presentRequest(int start, int number)
         compo.which = Z_RecordComp_simple;
         compo.u.simple = elementSetNames;
     }
+
     if (m_cookie)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+
+    if ( pRefId )
+    {
+        req->referenceId = getRefID(pRefId);
+    }
+
+    if ( pResultSetId )
+    {
+        req->resultSetId = pResultSetId;
+    }
+
     return send_Z_PDU(apdu);
 }
 
@@ -358,7 +392,7 @@ void Yaz_IR_Assoc::set_lastReceived(int lastReceived)
     m_lastReceived = lastReceived;
 }
 
-int Yaz_IR_Assoc::send_initRequest()
+int Yaz_IR_Assoc::send_initRequest(char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
@@ -376,10 +410,50 @@ int Yaz_IR_Assoc::send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
+    if ( pRefId )
+    {
+        req->referenceId = getRefID(pRefId);
+    }
+
     if (m_proxy && m_host)
 	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
     if (m_cookie)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);
 }
+
+int Yaz_IR_Assoc::send_deleteResultSetRequest(char* pResultSetId = NULL, char* pRefId = NULL)
+{
+    char* ResultSetIds[1];
+
+    Z_APDU *apdu = create_Z_PDU(Z_APDU_deleteResultSetRequest);
+    Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
+
+
+    if ( pResultSetId )
+    {
+        *req->deleteFunction = Z_DeleteResultSetRequest_list;
+        req->num_resultSetList = 1;
+        ResultSetIds[0] = pResultSetId;
+        req->resultSetList = ResultSetIds;
+    }
+    else
+    {
+        *req->deleteFunction = Z_DeleteResultSetRequest_all;
+    }
+    
+    if ( pRefId )
+    {
+        req->referenceId = getRefID(pRefId);
+    }
+
+    if (m_proxy && m_host)
+        set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+    if (m_cookie)
+        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+
+
+    return send_Z_PDU(apdu);
+}
+
 

@@ -4,7 +4,13 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.6  1999-12-06 13:52:45  adam
+ * Revision 1.7  2000-05-10 11:36:58  ian
+ * Added default parameters for refid to request functions.
+ * Added default parameter for result set name to search and present request.
+ * Commented out forced logging of PDU contents.
+ * Added send_deleteResultSetRequest
+ *
+ * Revision 1.6  1999/12/06 13:52:45  adam
  * Modified for new location of YAZ header files. Experimental threaded
  * operation.
  *
@@ -48,7 +54,7 @@ int Yaz_Z_Query::set_rpn (const char *rpn)
 	return -1;
     if (!z_Query (odr_encode, &query, 0, 0))
 	return -1;
-    z_Query(odr_print, &query, 0, 0);
+    // z_Query(odr_print, &query, 0, 0);
     buf = odr_getbuf (odr_encode, &len, 0);
     return len;
 }
