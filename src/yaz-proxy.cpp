@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.36 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.37 2002-10-23 10:15:18 adam Exp $
  */
 
 #include <assert.h>
@@ -24,6 +24,7 @@ Yaz_Proxy::Yaz_Proxy(IYaz_PDU_Observable *the_PDU_Observable) :
     m_proxy_authentication = 0;
     m_max_clients = 50;
     m_seed = time(0);
+    m_idletime = 600;
     m_optimize = xstrdup ("1");
 }
 
@@ -55,7 +56,7 @@ IYaz_PDU_Observer *Yaz_Proxy::sessionNotify(IYaz_PDU_Observable
 {
     Yaz_Proxy *new_proxy = new Yaz_Proxy(the_PDU_Observable);
     new_proxy->m_parent = this;
-    new_proxy->timeout(500);
+    new_proxy->timeout(m_idletime);
     new_proxy->set_proxy_target(m_proxyTarget);
     new_proxy->set_APDU_log(get_APDU_log());
     new_proxy->set_proxy_authentication(m_proxy_authentication);
@@ -147,7 +148,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 		c->m_last_resultCount = 0;
 		c->m_sr_transform = 0;
 		c->m_waiting = 0;
-		c->timeout(600); 
+		c->timeout(m_idletime); 
 	    }
 	    c->m_seqno = parent->m_seqno;
 	    if (c->m_server && c->m_server != this)
@@ -252,7 +253,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
         c->m_last_ok = 0;
 	c->m_sr_transform = 0;
 	c->m_waiting = 0;
-	c->timeout(10);
+	c->timeout(20);
 
 	(parent->m_seqno)++;
     }
@@ -430,23 +431,24 @@ void Yaz_Proxy::shutdown()
     // only keep if keep_alive flag and cookie is set...
     if (m_keepalive && m_client && m_client->m_cookie[0])
     {
-	if (m_client->m_waiting == 2)
-	    abort();
+        yaz_log (LOG_LOG, "shutdown (client to proxy) keepalive %s",
+                 m_client->get_hostname());
+        assert (m_client->m_waiting != 2);
 	// Tell client (if any) that no server connection is there..
 	m_client->m_server = 0;
-        yaz_log (LOG_LOG, "shutdown (client to proxy) keepalive %s", m_client->get_hostname());
+
     }
     else if (m_client)
     {
-	if (m_client->m_waiting == 2)
-	    abort();
-        yaz_log (LOG_LOG, "shutdown (client to proxy) close %s", m_client->get_hostname());
+        yaz_log (LOG_LOG, "shutdown (client to proxy) close %s",
+                 m_client->get_hostname());
+        assert (m_client->m_waiting != 2);
 	delete m_client;
     }
     else if (!m_parent)
     {
         yaz_log (LOG_LOG, "shutdown (client to proxy) bad state");
-        abort();
+        assert (m_parent);
     }
     else 
     {

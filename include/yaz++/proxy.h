@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: proxy.h,v 1.2 2002-10-23 10:15:17 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -56,6 +56,7 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     int m_seqno;
     int m_max_clients;
     int m_keepalive;
+    int m_idletime;
     char *m_proxyTarget;
     char *m_proxy_authentication;
     long m_seed;
@@ -74,5 +75,6 @@ class YAZ_EXPORT Yaz_Proxy : public Yaz_Z_Assoc {
     void set_proxy_authentication (const char *auth);
     char *get_proxy_target() { return m_proxyTarget; };
     void set_max_clients(int m) { m_max_clients = m; };
+    void set_idletime (int t) { m_idletime = (t > 1) ? t : 600; };
 };
 
