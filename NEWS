@@ -1,8 +1,9 @@
+--- 0.9 2005/02/07
 
 Fixed bug #188: unhandled event in processEvent. The error was seen in
 rare cases when timeout socket events occurred.
 
-Renamed configure option for yaz-config. It is now --with-yaz-config.
+Configure option --with-yazconfig renamed to --with-yaz.
 
 Fix include path order to avoid yaz++ from using old headers.
 
