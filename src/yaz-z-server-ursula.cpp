@@ -2,11 +2,11 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-ursula.cpp,v 1.6 2001-11-04 22:36:21 adam Exp $
+ * $Id: yaz-z-server-ursula.cpp,v 1.7 2002-10-23 21:24:19 adam Exp $
  */
 
 #include <yaz/log.h>
-#include <yaz++/yaz-z-server.h>
+#include <yaz++/z-server.h>
 
 #if HAVE_YAZ_URSULA_H
 int Yaz_Facility_Ursula::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
