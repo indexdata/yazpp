@@ -1,10 +1,10 @@
-# $Header: /home/cvsroot/yaz++/zoom/Attic/Makefile,v 1.1 2002-08-08 13:31:54 mike Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Attic/Makefile,v 1.2 2002-08-08 16:06:50 mike Exp $
 
 CCC = g++	# ... until I figure out what the standard
 		# Make macro name is for the C++ compiler.
 CPPFLAGS := -Wall -g
 L = libzoom.a
-OBJ = $L(zerr.o) $L(zconn.o) $L(zquery.o) $L(zrs.o) $L(zrec.o)
+OBJ = $L(zexcept.o) $L(zconn.o) $L(zquery.o) $L(zrs.o) $L(zrec.o)
 
 all: interface.h zclient
 
