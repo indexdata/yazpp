@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 # skeleton	example file to build /etc/init.d/ scripts.
 #		This file should be used to construct scripts for /etc/init.d.
@@ -15,16 +15,20 @@ export PATH
 # Proxy CWD is here. Should be writable by it.
 DIR=/var/yaz-proxy
 # Proxy Path
-DAEMON=/usr/local/bin/yaz-proxy
+DAEMON="/usr/local/bin/yaz-proxy"
+
 # Proxy PIDFILE. Must be writable by it.
-PIDFILE=$DIR/yaz-proxy.pid
+PIDFILE="$DIR/yaz-proxy.pid"
+
 # Log file
 LOGFILE=/var/log/yaz-proxy.log
+
 # Port
 PORT=9000
+
 # Run as this user. Set to empty to keep uid as is
 RUNAS=nobody
-RUNAS=
+
 # Extra args . Config file _WITH_ option
 ARGS="-c config.xml"
 

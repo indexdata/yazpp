@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.22 2003-10-23 11:45:08 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.23 2003-10-23 12:14:48 adam Exp $
  */
 
 #include <signal.h>
@@ -26,6 +26,7 @@ void usage(char *prog)
 
 static char *pid_fname = 0;
 static char *uid = 0;
+static char *log_file = 0;
 
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
@@ -77,6 +78,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    break;
 	case 'l':
 	    yaz_log_init_file (arg);
+	    log_file = xstrdup(arg);
 	    break;
 	case 'm':
 	    proxy->set_max_clients(atoi(arg));
@@ -150,12 +152,18 @@ int main(int argc, char **argv)
     if (uid)
     {
     	struct passwd *pw;
-	
+
 	if (!(pw = getpwnam(uid)))
 	{
 	    yaz_log(LOG_FATAL, "%s: Unknown user", uid);
 	    exit(3);
 	}
+	if (log_file)
+	{
+	    chown(log_file, pw->pw_uid,  pw->pw_gid);
+	    xfree(log_file);
+	}
+
 	if (setuid(pw->pw_uid) < 0)
 	{
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "setuid");
