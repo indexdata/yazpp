@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-query.h,v 1.4 1999-04-21 12:09:01 adam Exp $
+ * $Id: yaz-z-query.h,v 1.5 1999-04-27 07:52:13 adam Exp $
  */
 
 #include <proto.h>
@@ -26,6 +26,8 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     Z_Query *get_Z_Query ();
     /// print query
     void print(char *str, int len);
+    /// match query
+    int match(Yaz_Z_Query *other);
  private:
     char *buf;
     int len;

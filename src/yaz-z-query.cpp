@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-query.cpp,v $
- * Revision 1.4  1999-04-21 12:09:01  adam
+ * Revision 1.5  1999-04-27 07:52:13  adam
+ * Improved proxy; added query match for result set re-use.
+ *
+ * Revision 1.4  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -76,4 +79,15 @@ Z_Query *Yaz_Z_Query::get_Z_Query ()
 void Yaz_Z_Query::print(char *str, int len)
 {
 
+}
+
+int Yaz_Z_Query::match(Yaz_Z_Query *other)
+{
+    if (len != other->len)
+	return 0;
+    if (!buf || !other->buf)
+	return 0;
+    if (memcmp(buf, other->buf, len))
+	return 0;
+    return 1;
 }

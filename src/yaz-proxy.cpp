@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.5  1999-04-21 12:09:01  adam
+ * Revision 1.6  1999-04-27 07:52:13  adam
+ * Improved proxy; added query match for result set re-use.
+ *
+ * Revision 1.5  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -138,6 +141,44 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     return c;
 }
 
+Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
+{
+    if (apdu->which != Z_APDU_searchRequest)
+	return apdu;
+    Z_SearchRequest *sr = apdu->u.searchRequest;
+    Yaz_Z_Query *this_query = new Yaz_Z_Query;
+    
+    this_query->set_Z_Query(sr->query);
+    
+    if (m_client->m_last_query &&
+	m_client->m_last_query->match(this_query))
+    {
+	delete this_query;
+	if (*sr->smallSetUpperBound == 0)
+	{
+	    Z_APDU *new_apdu;
+	    logf (LOG_LOG, "query match");
+	    new_apdu = create_Z_PDU(Z_APDU_searchResponse);
+	    new_apdu->u.searchResponse->referenceId = sr->referenceId;
+	    new_apdu->u.searchResponse->resultCount =
+		&m_client->m_last_resultCount;
+	    send_Z_PDU(new_apdu);
+	    return 0;
+	}
+	else
+	{
+	    logf (LOG_LOG, "query match (piggy back)");
+	}
+    }
+    else
+    {
+	logf (LOG_LOG, "query doesn't match");
+	delete m_client->m_last_query;
+	m_client->m_last_query = this_query;
+    }
+    return apdu;
+}
+
 void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
 {
     logf (LOG_LOG, "Yaz_Proxy::recv_Z_PDU");
@@ -153,6 +194,23 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     Z_OtherInformation **oi;
     get_otherInfoAPDU(apdu, &oi);
     *oi = 0;
+    if (apdu->which == Z_APDU_initRequest)
+    {
+	if (m_client->m_init_flag)
+	{
+	    Z_APDU *apdu = create_Z_PDU(Z_APDU_initResponse);
+	    if (m_client->m_cookie)
+		set_otherInformationString(apdu, VAL_COOKIE, 1,
+					   m_client->m_cookie);
+	    send_Z_PDU(apdu);
+	    return;
+	}
+	m_client->m_init_flag = 1;
+    }
+    apdu = result_set_optimize(apdu);
+    if (!apdu)
+	return;
+
     logf (LOG_LOG, "Yaz_ProxyClient::send_Z_PDU");
     if (m_client->send_Z_PDU(apdu) < 0)
     {
@@ -166,7 +224,7 @@ void Yaz_Proxy::failNotify()
     logf (LOG_LOG, "failNotity server");
     if (m_keepalive)
     {
-	// Tell client (if any) that not server connection is there..
+	// Tell client (if any) that no server connection is there..
 	if (m_client)
 	    m_client->m_server = 0;
     }
@@ -198,6 +256,7 @@ Yaz_ProxyClient::~Yaz_ProxyClient()
 	if (m_next)
 	    m_next->m_prev = m_prev;
     }
+    delete m_last_query;
 }
 
 void Yaz_Proxy::timeoutNotify()
@@ -216,6 +275,9 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_cookie[0] = 0;
     m_next = 0;
     m_prev = 0;
+    m_init_flag = 0;
+    m_last_query = 0;
+    m_last_resultCount = 0;
 }
 
 void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
@@ -223,6 +285,8 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
     logf (LOG_LOG, "Yaz_ProxyClient::recv_Z_PDU");
     if (m_cookie)
 	set_otherInformationString (apdu, VAL_COOKIE, 1, m_cookie);
+    if (apdu->which == Z_APDU_searchResponse)
+	m_last_resultCount = *apdu->u.searchResponse->resultCount;
     if (m_server)
     {
 	logf (LOG_LOG, "Yaz_Proxy::send_Z_PDU");

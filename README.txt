@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ
 
-$Id: README.txt,v 1.3 1999-02-02 14:01:10 adam Exp $
+$Id: README.txt,v 1.4 1999-04-27 07:52:13 adam Exp $
  
 o Introduction
 
@@ -62,5 +62,3 @@ compiler environments.
     yazclient.dsp   -   builds yazclient.exe
     yazserver.dsp   -   builds yazserver.exe
     yazproxy.dsp    -   builds yazproxy.exe
-
-
