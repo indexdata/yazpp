@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.13 2004-11-30 21:10:31 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.14 2004-12-13 20:50:54 adam Exp $
  */
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/options.h>
 #include <yaz++/z-server.h>
 #include <yaz++/pdu-assoc.h>

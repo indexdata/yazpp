@@ -2,10 +2,10 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.10 2004-11-30 21:10:31 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.11 2004-12-13 20:50:54 adam Exp $
  */
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/proto.h>
 #include <yaz++/record-cache.h>
 

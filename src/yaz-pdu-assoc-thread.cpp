@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2001, Index Data.
+ * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.7 2004-11-30 21:10:31 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.8 2004-12-13 20:50:54 adam Exp $
  */
 
 #ifdef WIN32
@@ -23,7 +23,7 @@
 #endif
 
 #include <errno.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/tcpip.h>
 
 #include <yaz++/pdu-assoc.h>

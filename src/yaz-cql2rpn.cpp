@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-cql2rpn.cpp,v 1.5 2004-11-30 21:10:30 adam Exp $
+ * $Id: yaz-cql2rpn.cpp,v 1.6 2004-12-13 20:50:54 adam Exp $
  */
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/pquery.h>
 #include <yaz++/cql2rpn.h>
 

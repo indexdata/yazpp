@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.7 2004-11-30 21:10:31 adam Exp $
+ * $Id: zlint.cpp,v 1.8 2004-12-13 20:50:54 adam Exp $
  */
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include <yaz/options.h>
 #include <yaz/otherinfo.h>
 #include <yaz/charneg.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 
 #include <zlint.h>
 

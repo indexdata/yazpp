@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.34 2004-11-30 21:10:31 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.35 2004-12-13 20:50:54 adam Exp $
  */
 
 #include <assert.h>
 #include <signal.h>
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz++/z-assoc.h>
 #include <yaz/otherinfo.h>
 
