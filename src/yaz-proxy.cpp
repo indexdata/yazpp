@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.58 2003-10-13 22:38:07 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.59 2003-10-14 20:19:43 adam Exp $
  */
 
 #include <assert.h>
@@ -985,7 +985,7 @@ Z_APDU *Yaz_Proxy::handle_syntax_validation(Z_APDU *apdu)
     if (apdu->which == Z_APDU_searchRequest)
     {
 	Z_SearchRequest *sr = apdu->u.searchRequest;
-	if (*sr->smallSetUpperBound > 0 || *sr->largeSetLowerBound > 1)
+	if (*sr->smallSetUpperBound > 0 || *sr->mediumSetPresentNumber > 0)
 	{
 	    int err = 0;
 	    char *addinfo = 0;
