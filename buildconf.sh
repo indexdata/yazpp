@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.7 2002-04-15 09:43:30 adam Exp $
+# $Id: buildconf.sh,v 1.8 2002-09-10 11:58:13 adam Exp $
 dir=`aclocal --print-ac-dir`
 if [ -f $dir/yaz.m4 ]; then
 	aclocal
@@ -8,7 +8,7 @@ else
 fi
 libtoolize --force 
 automake -a 
-autoconf || exit 4
+autoconf
 if [ -f config.cache ]; then
 	rm config.cache
 fi

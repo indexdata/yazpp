@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.h,v 1.5 2002-01-14 12:01:27 adam Exp $
+ * $Id: yaz-proxy.h,v 1.6 2002-09-10 11:58:13 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -35,6 +35,8 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     int m_sr_transform;
     int m_seqno;
     int m_waiting;
+    ODR m_init_odr;
+    Z_APDU *m_initResponse;
 };
 
 /// Information Retrieval Proxy Server.

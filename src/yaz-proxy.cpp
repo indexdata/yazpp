@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.33 2002-09-10 11:30:54 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.34 2002-09-10 11:58:13 adam Exp $
  */
 
 #include <assert.h>
@@ -383,7 +383,8 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     {
 	if (m_client->m_init_flag)
 	{
-	    Z_APDU *apdu = create_Z_PDU(Z_APDU_initResponse);
+	    Z_APDU *apdu = m_client->m_initResponse;
+	    apdu->u.initResponse->otherInfo = 0;
 	    if (m_client->m_cookie)
 		set_otherInformationString(apdu, VAL_COOKIE, 1,
 					   m_client->m_cookie);
@@ -487,6 +488,7 @@ Yaz_ProxyClient::~Yaz_ProxyClient()
     if (m_next)
 	m_next->m_prev = m_prev;
     m_waiting = 2;     // for debugging purposes only.
+    odr_destroy(m_init_odr);
     delete m_last_query;
 }
 
@@ -514,6 +516,8 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_last_ok = 0;
     m_sr_transform = 0;
     m_waiting = 0;
+    m_init_odr = odr_createmem (ODR_DECODE);
+    m_initResponse = 0;
 }
 
 const char *Yaz_Proxy::option(const char *name, const char *value)
@@ -533,6 +537,14 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
     m_waiting = 0;
     yaz_log (LOG_LOG, "Receiving %s from %s", apdu_name(apdu),
 		     get_hostname());
+    if (apdu->which == Z_APDU_initResponse)
+    {
+        NMEM nmem = odr_extract_mem (odr_decode());
+	odr_reset (m_init_odr);
+        nmem_transfer (m_init_odr->mem, nmem);
+        m_initResponse = apdu;
+        nmem_destroy (nmem);
+    }
     if (apdu->which == Z_APDU_searchResponse)
     {
 	m_last_resultCount = *apdu->u.searchResponse->resultCount;
