@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.9 2003-07-07 09:23:16 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.10 2003-09-22 12:30:01 mike Exp $
 
 // Z39.50 Exception classes
 
@@ -23,7 +23,7 @@ namespace ZOOM {
     }
 
     std::string exception::errmsg() const {
-	static char buf[40];
+	char buf[40];
 	sprintf(buf, "error #%d", code);
 	return buf;
     }
@@ -35,15 +35,32 @@ namespace ZOOM {
     }
 
     std::string systemException::errmsg() const {
-	return strerror(code);
+	// For thread safety on linux (and most unix systems), we need
+	// to use the reentrant version of the error translation
+	// function.  Microsoft's strerror() is thread safe, since it
+	// returns a pointer to thread local storage.  Unfortunately
+	// there several different reentrant versions.  Here, we check
+	// for glibc, since we are using gcc.  It appears at least the
+	// current version of gcc has strerror_r() available by
+	// default.
+	#ifdef __GLIBC__
+	    char buf[1024];
+	    // PJD: result not necessarily equal to buf
+	    const char* result = strerror_r(code, buf, sizeof(buf));
+	    if (result != 0)
+		return result;
+	    return exception::errmsg();
+	#else
+	    return strerror(code);
+	#endif
     }
 
 
     
     bib1Exception::bib1Exception(int errcode, const std::string &addinfo) :
 	exception(errcode), info(addinfo) {
-	std::cerr << "WARNING: made bib1Exception(" << errcode << "=" <<
-	    ZOOM_diag_str(errcode) << ", '" << addinfo << "')\n";
+	// std::cerr << "WARNING: made bib1Exception(" << errcode << "=" <<
+	//   ZOOM_diag_str(errcode) << ", '" << addinfo << "')\n";
     }
 
     bib1Exception::~bib1Exception() {
