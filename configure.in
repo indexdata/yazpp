@@ -1,0 +1,27 @@
+AC_INIT(configure.in)
+AM_INIT_AUTOMAKE("yaz++", 0.1)
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_HEADER_STDC
+AM_DISABLE_SHARED
+AM_PROG_LIBTOOL
+
+YAZ_INIT
+
+YAZPP_SRC_ROOT=`pwd`
+AC_SUBST(YAZPP_SRC_ROOT)
+
+if test -f src/yaz++-config.in; then
+        rm src/yaz++-config.in
+fi
+sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz++-config.in >src/yaz++-config.in
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+	include/Makefile
+	include/yaz++/Makefile
+	yaz++-config
+	src/yaz++-config
+],[chmod +x yaz++-config src/yaz++-config])
