@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.92 2004-01-29 20:53:34 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.93 2004-01-30 00:38:28 adam Exp $
  */
 
 #include <assert.h>
@@ -706,7 +706,11 @@ int Yaz_Proxy::send_http_response(int code)
     Z_HTTP_Response *hres = gdu->u.HTTP_Response;
     if (m_http_version)
 	hres->version = odr_strdup(o, m_http_version);
-    m_http_keepalive = 0;
+    if (m_http_keepalive)
+        z_HTTP_header_add(o, &hres->headers, "Connection", "Keep-Alive");
+    else
+	timeout(0);
+    
     if (m_log_mask & PROXY_LOG_REQ_CLIENT)
     {
 	yaz_log (LOG_LOG, "%sSending %s to client", m_session_str,
@@ -729,6 +733,8 @@ int Yaz_Proxy::send_srw_response(Z_SRW_PDU *srw_pdu)
     z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
     if (m_http_keepalive)
         z_HTTP_header_add(o, &hres->headers, "Connection", "Keep-Alive");
+    else
+	timeout(0);
 
     static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XSLT
@@ -1047,18 +1053,6 @@ int Yaz_Proxy::send_to_client(Z_APDU *apdu)
 	delete m_client;
 	m_client = 0;
 	m_parent->pre_init();
-    }
-    if (m_http_version)
-    {
-	if (!m_http_keepalive)
-	{
-#if 1
-	    timeout(1);
-#else
-	    shutdown();
-	    return -1;
-#endif
-	}
     }
     return r;
 }
@@ -1866,8 +1860,8 @@ void Yaz_Proxy::handle_incoming_HTTP(Z_HTTP_Request *hreq)
     }
     int len = 0;
     Z_GDU *p = z_get_HTTP_Response(odr_encode(), 400);
+    timeout(0);
     send_GDU(p, &len);
-    timeout(1);
 }
 
 void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)

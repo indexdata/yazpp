@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.26 2004-01-29 21:33:39 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.27 2004-01-30 00:38:28 adam Exp $
  */
 
 #include <ctype.h>
@@ -735,7 +735,6 @@ char *Yaz_ProxyConfig::get_explain(ODR odr, const char *name, const char *db,
 	    }
     }
 #endif
-    yaz_log(LOG_WARN, "No explain node");
     return 0;
 }
 
