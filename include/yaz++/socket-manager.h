@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-manager.h,v 1.1 2002-10-09 12:50:26 adam Exp $
+ * $Id: socket-manager.h,v 1.2 2002-10-23 21:23:01 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -55,7 +55,7 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
     virtual void timeoutObserver(IYazSocketObserver *observer,
 				 unsigned timeout);
     /// Process one event. return > 0 if event could be processed;
-    int Yaz_SocketManager::processEvent();
+    int processEvent();
     Yaz_SocketManager();
     virtual ~Yaz_SocketManager();
 };
