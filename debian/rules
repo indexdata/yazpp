@@ -111,7 +111,7 @@ binary-arch: build install
 #	dh_python
 	dh_makeshlibs -V 'libyaz++ (>= 0.7.13)'
 	dh_installdeb
-	dh_shlibdeps -L libyaz++ -l debian/libyaz++/usr/lib -L libyazproxy -l debian/libyazproxy/usr/lib
+	dh_shlibdeps -l debian/libyaz++/usr/lib:debian/libyazproxy/usr/lib
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
