@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2004-03-30 08:46:36 adam Exp $
+## $Id: Makefile.am,v 1.10 2004-03-30 22:03:56 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -26,7 +26,7 @@ HTMLFILES = api.html implementations.html installation.html license.html \
  yaz-proxy.html yazpp.html zoom-connection.html zoom-exception.html \
  zoom-query.html zoom-record.html zoom-resultset.html zoom.html
 
-doc_DATA = $(HTMLFILES) yaz++.pdf
+doc_DATA = $(HTMLFILES) yaz++.pdf yaz.css
 
 man_MANS = $(MANFILES)
 
