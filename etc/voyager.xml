@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.7 2004-01-07 14:40:41 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.8 2004-01-07 20:55:13 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
@@ -88,8 +88,9 @@
       <serverInfo>
 	<host>indexdata.dk</host>
 	<port>9000</port>
+	<database>voyager</database>
       </serverInfo>
-
+      
       <databaseInfo>
 	<title>LoC gateway</title>
 	<description lang="en" primary="true">
@@ -104,74 +105,71 @@
 	  name="dc"/>
 	<set identifier="http://www.loc.gov/zing/cql/context-sets/bath/v1.1/"
 	  name="bath"/>
+	
+	<index id="4">
+	  <title>title</title>
+	  <map><name set="dc">title</name></map>
+	</index>
+	<index id="21">
+	  <title>subject</title>
+	  <map><name set="dc">subject</name></map>
+	</index>
+	<index id="1003">
+	  <title>creator</title>
+	  <map><name set="dc">creator</name></map>
+	  <map><name set="dc">author</name></map>
+	</index>
+	
+	<index id="1020">
+	  <title>editor</title>
+	  <map><name set="dc">editor</name></map>
+	</index>
+	
+	<index id="1018">
+	  <title>publisher</title>
+	  <map><name set="dc">publisher</name></map>
+	</index>
+	
+	<index id="62">
+	  <title>description</title>
+	  <map><name set="dc">description</name></map>
+	</index>
+	
+	<index id="30">
+	  <title>date</title>
+	  <map><name set="dc">date</name></map>
+	</index>
+	
+	<index id="1002">
+	  <title>name</title>
+	  <map><name set="bath">name</name></map>
+	</index>
+	
+	<index id="7">
+	  <title>isbn</title>
+	  <map><name set="bath">isbn</name></map>
+	</index>
+	<index id="8">
+	  <title>issn</title>
+	  <map><name set="bath">issn</name></map>
+	</index>
       </indexInfo>
 
-      <index id="4">
-	<title>title</title>
-	<map><name set="dc">title</name></map>
-      </index>
-      <index id="21">
-	<title>subject</title>
-	<map><name set="dc">subject</name></map>
-      </index>
-      <index id="1003">
-	<title>creator</title>
-	<map><name set="dc">creator</name></map>
-	<map><name set="dc">author</name></map>
-      </index>
-
-      <index id="1020">
-	<title>editor</title>
-	<map><name set="dc">editor</name></map>
-      </index>
-
-      <index id="1018">
-	<title>publisher</title>
-	<map><name set="dc">publisher</name></map>
-      </index>
-
-      <index id="62">
-	<title>description</title>
-	<map><name set="dc">description</name></map>
-      </index>
-
-      <index id="30">
-	<title>date</title>
-	<map><name set="dc">date</name></map>
-      </index>
-
-      <index id="30">
-	<title>date</title>
-	<map><name set="dc">date</name></map>
-      </index>
-
-      <index id="1002">
-	<title>name</title>
-	<map><name set="bath">name</name></map>
-      </index>
-
-      <index id="7">
-	<title>isbn</title>
-	<map><name set="bath">isbn</name></map>
-      </index>
-      <index id="8">
-	<title>issn</title>
-	<map><name set="bath">issn</name></map>
-      </index>
-
-      <schemaInfo identifier="http://www.loc.gov/marcxml/"
-	sort="false" name="marcxml">
-	<title>MARCXML</title>
-      </schemaInfo>
-      
-      <schemaInfo identifier="http://www.loc.gov/zing/srw/dcschema/v1.0"
-	sort="false" name="dc">
-	<title>Dublin Core</title>
-      </schemaInfo>
-
-      <schemaInfo identifier="http://www.loc.gov/mods/v3"
-	sort="false" name="mods">
-	<title>MODS</title>
+      <schemaInfo>
+	<schema identifier="http://www.loc.gov/marcxml/"
+	  sort="false" name="marcxml">
+	  <title>MARCXML</title>
+	</schema>
+	
+	<schema identifier="http://www.loc.gov/zing/srw/dcschema/v1.0"
+	  sort="false" name="dc">
+	  <title>Dublin Core</title>
+	</schema>
+	
+	<schema identifier="http://www.loc.gov/mods/v3"
+	  sort="false" name="mods">
+	  <title>MODS</title>
+	</schema>
       </schemaInfo>
       
     </explain>
