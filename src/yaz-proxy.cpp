@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.105 2004-02-27 00:42:58 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.106 2004-03-01 17:01:52 adam Exp $
  */
 
 #include <unistd.h>
@@ -2325,7 +2325,7 @@ void Yaz_Proxy::pre_init()
 			"sparew=%d preinit=%d",m_session_str,
 			name, zurl_in_use[j], in_use, other,
 			spare, spare_waiting, pre_init);
-		if (spare < pre_init)
+		if (spare + spare_waiting < pre_init)
 		{
 		    c = new Yaz_ProxyClient(m_PDU_Observable->clone(), this);
 		    c->m_next = m_clientPool;
