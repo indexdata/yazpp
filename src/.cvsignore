@@ -3,6 +3,7 @@
 Makefile
 Makefile.in
 libyaz++.la
+libyazcpp.la
 yaz++-config
 yaz++-config.in
 yaz-my-client
