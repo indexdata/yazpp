@@ -1,4 +1,6 @@
---- 0.5 2002/10/28 Second release
+--- 0.5 2002/MM/DD Second release
+
+Fix Windows compile.
 
 Remove private extended service (URSULA)
 
