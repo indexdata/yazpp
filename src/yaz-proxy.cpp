@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.91 2004-01-15 23:44:58 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.92 2004-01-29 20:53:34 adam Exp $
  */
 
 #include <assert.h>
@@ -769,8 +769,7 @@ int Yaz_Proxy::send_to_srw_client_error(int srw_error, const char *add)
     srw_res->num_diagnostics = 1;
     srw_res->diagnostics = (Z_SRW_diagnostic *)
 	odr_malloc(o, sizeof(*srw_res->diagnostics));
-    srw_res->diagnostics[0].code =  odr_intdup(o, srw_error);
-    srw_res->diagnostics[0].details = add ? odr_strdup(o, add) : 0;
+    yaz_mk_std_diagnostic(o, srw_res->diagnostics, srw_error, add);
     return send_srw_response(srw_pdu);
 }
 
@@ -783,9 +782,9 @@ int Yaz_Proxy::z_to_srw_diag(ODR o, Z_SRW_searchRetrieveResponse *srw_res,
     srw_res->num_diagnostics = 1;
     srw_res->diagnostics = (Z_SRW_diagnostic *)
 	odr_malloc(o, sizeof(*srw_res->diagnostics));
-    srw_res->diagnostics[0].code = 
-	odr_intdup(o, yaz_diag_bib1_to_srw(*ddf->condition));
-    srw_res->diagnostics[0].details = ddf->u.v2Addinfo;
+    yaz_mk_std_diagnostic(o, srw_res->diagnostics,
+			  yaz_diag_bib1_to_srw(*ddf->condition), 
+			  ddf->u.v2Addinfo);
     return 0;
 }
 

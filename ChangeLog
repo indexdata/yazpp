@@ -1,4 +1,6 @@
 
+Update proxy to work with SRW diagnostic code as a URI/string.
+
 Proxy now throws 'unsupported transfer syntax' / 'unsupported ESN' properly.
 
 Multiple explain records may exist for one target. Proxy checks contents of
