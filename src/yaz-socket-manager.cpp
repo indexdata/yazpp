@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.12  2000-10-24 12:29:57  adam
+ * Revision 1.13  2000-11-20 11:27:33  adam
+ * Fixes for connect operation (timeout and notify fix).
+ *
+ * Revision 1.12  2000/10/24 12:29:57  adam
  * Fixed bug in proxy where a Yaz_ProxyClient could be owned by
  * two Yaz_Proxy's (fatal).
  *
@@ -174,6 +177,8 @@ int Yaz_SocketManager::processEvent()
 	    timeout_this = p->timeout;
 	    if (p->last_activity)
 		timeout_this -= now - p->last_activity;
+	    else
+		p->last_activity = now;
 	    if (timeout_this < 1)
 		timeout_this = 1;
 	    if (!timeout || timeout_this < timeout)
@@ -222,7 +227,7 @@ int Yaz_SocketManager::processEvent()
 		 now >= p->last_activity + (int) (p->timeout))
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
-	    logf (LOG_LOG, "timeout now = %ld last_activity=%ld timeout=%d",
+	    logf (m_log, "timeout, now = %ld last_activity=%ld timeout=%d",
 		  now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.19  2000-11-01 14:22:59  adam
+ * Revision 1.20  2000-11-20 11:27:33  adam
+ * Fixes for connect operation (timeout and notify fix).
+ *
+ * Revision 1.19  2000/11/01 14:22:59  adam
  * Added fd parameter for method IYaz_PDU_Observer::clone.
  *
  * Revision 1.18  2000/10/24 12:29:57  adam
@@ -102,16 +105,9 @@ IYaz_PDU_Observable *Yaz_PDU_Assoc::clone()
 void Yaz_PDU_Assoc::socketNotify(int event)
 {
     logf (m_log, "Yaz_PDU_Assoc::socketNotify p=%p event = %d", this, event);
-    if (0 /* m_state == Connected */)
+    switch (m_state)
     {
-	m_state = Ready;
-	m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
-					 YAZ_SOCKET_OBSERVE_EXCEPT);
-	m_PDU_Observer->connectNotify();
-	flush_PDU();
-    }
-    else if (m_state == Connecting)
-    {
+    case Connecting:
 	if (event & YAZ_SOCKET_OBSERVE_READ)
 	{
 	    close();
@@ -129,9 +125,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    m_PDU_Observer->connectNotify();
 	    flush_PDU();
 	}
-    }
-    else if (m_state == Listen)
-    {
+	break;
+    case Listen:
 	if (event & YAZ_SOCKET_OBSERVE_READ)
 	{
 	    int res;
@@ -158,9 +153,8 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	    cs_close (new_line);
 	    childNotify(fd);
 	}
-    }
-    else if (m_state == Ready)
-    {
+	break;
+    case Ready:
 	if (event & YAZ_SOCKET_OBSERVE_WRITE)
 	{
 	    flush_PDU();
@@ -193,6 +187,16 @@ void Yaz_PDU_Assoc::socketNotify(int event)
 	{
 	    m_PDU_Observer->timeoutNotify();
 	}
+	break;
+    case Closed:
+	logf (m_log, "CLOSING state=%d event was %d", m_state, event);
+	close();
+	m_PDU_Observer->failNotify();
+	break;
+    default:
+	logf (m_log, "Unknown state=%d event was %d", m_state, event);
+	close();
+	m_PDU_Observer->failNotify();
     }
 }
 
@@ -382,9 +386,11 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     logf (m_log, "Yaz_PDU_Assoc::connect fd=%d res=%d", cs_fileno(cs), res);
     m_socketObservable->addObserver(cs_fileno(cs), this);
     m_socketObservable->maskObserver(this, YAZ_SOCKET_OBSERVE_READ|
-					   YAZ_SOCKET_OBSERVE_EXCEPT|
-					   YAZ_SOCKET_OBSERVE_WRITE);
-    m_state = Connecting;
+				     YAZ_SOCKET_OBSERVE_EXCEPT|
+				     YAZ_SOCKET_OBSERVE_WRITE);
+    if (res >= 0)
+	m_state = Connecting;
+    // if res < 0, then cs_connect failed immediately. state is Closed..
 }
 
 void Yaz_PDU_Assoc::socket(IYaz_PDU_Observer *observer, int fd)

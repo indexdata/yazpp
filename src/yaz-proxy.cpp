@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.21  2000-11-01 14:22:59  adam
+ * Revision 1.22  2000-11-20 11:27:33  adam
+ * Fixes for connect operation (timeout and notify fix).
+ *
+ * Revision 1.21  2000/11/01 14:22:59  adam
  * Added fd parameter for method IYaz_PDU_Observer::clone.
  *
  * Revision 1.20  2000/10/24 12:29:57  adam
@@ -301,7 +304,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	c->m_last_resultCount = 0;
 	c->m_sr_transform = 0;
 	c->m_waiting = 0;
-	c->timeout(600);
+	c->timeout(10);
 
 	(parent->m_seqno)++;
     }
@@ -478,7 +481,9 @@ void Yaz_ProxyClient::failNotify()
 
 void Yaz_ProxyClient::connectNotify()
 {
-    logf (LOG_LOG, "Yaz_ProxyClient connection accept by %s", get_hostname());
+    logf (LOG_LOG, "Yaz_ProxyClient connection accepted by %s",
+	  get_hostname());
+    timeout(600);
 }
 
 IYaz_PDU_Observer *Yaz_ProxyClient::clone(IYaz_PDU_Observable
