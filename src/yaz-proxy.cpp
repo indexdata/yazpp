@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.34 2002-09-10 11:58:13 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.35 2002-09-10 13:00:58 adam Exp $
  */
 
 #include <assert.h>
@@ -277,6 +277,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
     
     if (m_client->m_last_ok && m_client->m_last_query &&
 	m_client->m_last_query->match(this_query) &&
+        !strcmp(m_client->m_last_resultSetId, sr->resultSetName) &&
         m_client->m_last_databases.match(this_databases))
     {
 	delete this_query;
@@ -341,6 +342,10 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	delete m_client->m_last_query;
 	m_client->m_last_query = this_query;
         m_client->m_last_ok = 0;
+
+        xfree (m_client->m_last_resultSetId);
+        m_client->m_last_resultSetId = xstrdup (sr->resultSetName);
+
         m_client->m_last_databases.set(sr->num_databaseNames,
                                        (const char **) sr->databaseNames);
     }
@@ -490,6 +495,7 @@ Yaz_ProxyClient::~Yaz_ProxyClient()
     m_waiting = 2;     // for debugging purposes only.
     odr_destroy(m_init_odr);
     delete m_last_query;
+    xfree (m_last_resultSetId);
 }
 
 void Yaz_Proxy::timeoutNotify()
@@ -512,6 +518,7 @@ Yaz_ProxyClient::Yaz_ProxyClient(IYaz_PDU_Observable *the_PDU_Observable) :
     m_prev = 0;
     m_init_flag = 0;
     m_last_query = 0;
+    m_last_resultSetId = 0;
     m_last_resultCount = 0;
     m_last_ok = 0;
     m_sr_transform = 0;

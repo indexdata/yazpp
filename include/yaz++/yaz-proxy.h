@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.h,v 1.6 2002-09-10 11:58:13 adam Exp $
+ * $Id: yaz-proxy.h,v 1.7 2002-09-10 13:01:14 adam Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -30,6 +30,7 @@ class YAZ_EXPORT Yaz_ProxyClient : public Yaz_Z_Assoc {
     int m_init_flag;
     Yaz_Z_Query *m_last_query;
     Yaz_Z_Databases m_last_databases;
+    char *m_last_resultSetId;
     int m_last_ok;
     int m_last_resultCount;
     int m_sr_transform;
