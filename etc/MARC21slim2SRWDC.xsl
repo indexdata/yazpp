@@ -4,8 +4,7 @@
 	xmlns:srw_dc="info:srw/schema/1/dc-schema" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xmlns="http://purl.org/dc/elements/1.1/" 
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-	exclude-result-prefixes="dc">
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:import href="MARC21slimUtils.xsl"/>
 	<xsl:output method="xml" indent="yes"/>
 <!-- modification log 
