@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.44 2003-07-18 13:27:20 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.45 2003-07-25 08:57:01 adam Exp $
  */
 
 #include <assert.h>
@@ -306,10 +306,12 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	int toget = *pr->numberOfRecordsRequested;
 	int start = *pr->resultSetStartPoint;
 
-	if (!strcmp(m_client->m_last_resultSetId, pr->resultSetId))
+	if (m_client->m_last_resultSetId &&
+	    !strcmp(m_client->m_last_resultSetId, pr->resultSetId))
 	{
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, start, toget,
-					  pr->preferredRecordSyntax))
+					  pr->preferredRecordSyntax,
+					  pr->recordComposition))
 	    {
 		yaz_log (LOG_LOG, "Returned cache records for present request");
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_presentResponse);
@@ -352,12 +354,21 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	{
 	    Z_NamePlusRecordList *npr;
 	    int toget = *sr->mediumSetPresentNumber;
+	    Z_RecordComposition *comp = 0;
 
 	    if (toget > m_client->m_last_resultCount)
 		toget = m_client->m_last_resultCount;
+	    
+	    if (sr->mediumSetElementSetNames)
+	    {
+		comp = (Z_RecordComposition *)
+		    odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
+		comp->which = Z_RecordComp_simple;
+		comp->u.simple = sr->mediumSetElementSetNames;
+	    }
  
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, 1, toget,
-					  sr->preferredRecordSyntax))
+					  sr->preferredRecordSyntax, comp))
 	    {
 		yaz_log (LOG_LOG, "Returned cache records for medium set");
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
@@ -367,7 +378,9 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		
 		new_apdu->u.searchResponse->numberOfRecordsReturned
 		    = odr_intdup(odr_encode(), toget);
-								 
+							
+		new_apdu->u.searchResponse->presentStatus =
+		    odr_intdup(odr_encode(), Z_PresentStatus_success);
 		new_apdu->u.searchResponse->records = (Z_Records*)
 		    odr_malloc(odr_encode(), sizeof(Z_Records));
 		new_apdu->u.searchResponse->records->which = Z_Records_DBOSD;
@@ -389,14 +402,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		pr->resultSetId = sr->resultSetName;
 		pr->preferredRecordSyntax = sr->preferredRecordSyntax;
 		*pr->numberOfRecordsRequested = toget;
-		if (sr->mediumSetElementSetNames)
-		{
-		    pr->recordComposition = (Z_RecordComposition *)
-			odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
-		    pr->recordComposition->which = Z_RecordComp_simple;
-		    pr->recordComposition->u.simple =
-			sr->mediumSetElementSetNames;
-		}
+		pr->recordComposition = comp;
 		m_client->m_sr_transform = 1;
 		return new_apdu;
 	    }
@@ -417,11 +423,20 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 	{
 	    Z_NamePlusRecordList *npr;
 	    int toget = m_client->m_last_resultCount;
+	    Z_RecordComposition *comp = 0;
 	    // small set
             // send a present request (small set)
+	    
+	    if (sr->smallSetElementSetNames)
+	    {
+		comp = (Z_RecordComposition *)
+		    odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
+		comp->which = Z_RecordComp_simple;
+		comp->u.simple = sr->smallSetElementSetNames;
+	    }
 
 	    if (m_client->m_cache.lookup (odr_encode(), &npr, 1, toget,
-					  sr->preferredRecordSyntax))
+					  sr->preferredRecordSyntax, comp))
 	    {
 		yaz_log (LOG_LOG, "Returned cache records for small set");
 		Z_APDU *new_apdu = create_Z_PDU(Z_APDU_searchResponse);
@@ -432,6 +447,8 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		new_apdu->u.searchResponse->numberOfRecordsReturned
 		    = odr_intdup(odr_encode(), toget);
 								 
+		new_apdu->u.searchResponse->presentStatus =
+		    odr_intdup(odr_encode(), Z_PresentStatus_success);
 		new_apdu->u.searchResponse->records = (Z_Records*)
 		    odr_malloc(odr_encode(), sizeof(Z_Records));
 		new_apdu->u.searchResponse->records->which = Z_Records_DBOSD;
@@ -450,13 +467,7 @@ Z_APDU *Yaz_Proxy::result_set_optimize(Z_APDU *apdu)
 		pr->resultSetId = sr->resultSetName;
 		pr->preferredRecordSyntax = sr->preferredRecordSyntax;
 		*pr->numberOfRecordsRequested = toget;
-		if (sr->smallSetElementSetNames)
-		{
-		    pr->recordComposition = (Z_RecordComposition *)
-			odr_malloc(odr_encode(), sizeof(Z_RecordComposition));
-		    pr->recordComposition->which = Z_RecordComp_simple;
-		    pr->recordComposition->u.simple = sr->smallSetElementSetNames;
-		}
+		pr->recordComposition = comp;
 		m_client->m_sr_transform = 1;
 		return new_apdu;
 	    }
@@ -561,6 +572,7 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     {
 	Z_PresentRequest *pr = apdu->u.presentRequest;
 	m_client->m_resultSetStartPoint = *pr->resultSetStartPoint;
+	m_client->m_cache.copy_presentRequest(apdu->u.presentRequest);
     } else {
 	m_client->m_resultSetStartPoint = 0;
     }
@@ -718,7 +730,8 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 	    if (sr->records && sr->records->which == Z_Records_DBOSD)
 	    {
 		m_cache.add(odr_decode(),
-			    sr->records->u.databaseOrSurDiagnostics, 1);
+			    sr->records->u.databaseOrSurDiagnostics, 1,
+			    *sr->resultCount);
 	    }
 	}
     }
@@ -741,7 +754,7 @@ void Yaz_ProxyClient::recv_Z_PDU(Z_APDU *apdu)
 	{
 	    m_cache.add(odr_decode(),
 			pr->records->u.databaseOrSurDiagnostics,
-			m_resultSetStartPoint);
+			m_resultSetStartPoint, -1);
 	    m_resultSetStartPoint = 0;
 	}
     }

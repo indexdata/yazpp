@@ -1,3 +1,5 @@
+Proxy caches records.
+
 Various C++ fixes for GCC 3.2.
 
 Proxy now closes socket when Close PDU is received from target.
