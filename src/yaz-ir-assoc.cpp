@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.7  1999-04-21 12:09:01  adam
+ * Revision 1.8  1999-04-28 13:04:03  adam
+ * Fixed setting of proxy otherInfo so that database(s) are removed.
+ *
+ * Revision 1.7  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -369,7 +372,15 @@ int Yaz_IR_Assoc::send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
     if (m_proxy && m_host)
-	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+    {
+	char *rawhost = new char[strlen(m_host)+1];
+	strcpy(rawhost, m_host);
+	char *dbpart = strchr(rawhost, '/');
+	if (dbpart)
+	    *dbpart = '\0';
+	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, rawhost);
+	delete [] rawhost;
+    }
     if (m_cookie)
 	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu);

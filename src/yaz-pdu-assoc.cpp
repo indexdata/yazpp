@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-pdu-assoc.cpp,v $
- * Revision 1.7  1999-04-21 12:09:01  adam
+ * Revision 1.8  1999-04-28 13:04:03  adam
+ * Fixed setting of proxy otherInfo so that database(s) are removed.
+ *
+ * Revision 1.7  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -344,7 +347,7 @@ void Yaz_PDU_Assoc::connect(IYaz_PDU_Observer *observer,
     int res = cs_connect (cs, ap);
     if (res < 0)
     {
-	logf (LOG_LOG, "Yaz_PDU_Assoc::connect failed");
+	logf (LOG_LOG|LOG_ERRNO, "Yaz_PDU_Assoc::connect failed");
 #if 1
 	logf (LOG_LOG, "Yaz_PDU_Assoc::connect fd=%d", cs_fileno(cs));
 	m_socketObservable->addObserver(cs_fileno(cs), this);
