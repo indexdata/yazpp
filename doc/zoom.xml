@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.7 2002-10-11 12:19:09 mike Exp $ -->
+ <!-- $Id: zoom.xml,v 1.8 2002-10-21 13:38:21 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -682,7 +682,7 @@
  sgml-always-quote-attributes:t
  sgml-indent-step:1
  sgml-indent-data:t
- sgml-parent-document: "zebra.xml"
+ sgml-parent-document: "yaz++.xml"
  sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
