@@ -1,13 +1,6 @@
 #!/bin/sh
-#
-# skeleton	example file to build /etc/init.d/ scripts.
-#		This file should be used to construct scripts for /etc/init.d.
-#
-#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#		Modified for Debian GNU/Linux
-#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#
-# Version:	@(#)skeleton  1.8  03-Mar-1998  miquels@cistron.nl
+# $Id: yaz-proxy.sh,v 1.2 2003-10-24 10:33:01 adam Exp $
+# YAZ proxy start/stop init.d script.
 #
 PATH=/usr/local/bin:/bin:/usr/bin
 export PATH
