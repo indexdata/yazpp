@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.1 2002-08-08 13:31:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
 
 // Z39.50 Record class
 
@@ -23,7 +23,7 @@ namespace ZOOM {
 	record *rec = new record(0, 0);
 	if ((rec->r = ZOOM_record_clone(r)) == 0) {
 	    // Presumably an out-of-memory error
-	    throw systemError();
+	    throw systemException();
 	}
 
 	return rec;

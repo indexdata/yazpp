@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.1 2002-08-08 13:31:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
 
 // Z39.50 Query classes
 
@@ -17,7 +17,7 @@ namespace ZOOM {
 	q = ZOOM_query_create();
 	if (ZOOM_query_prefix(q, pqn) == -1) {
 	    ZOOM_query_destroy(q);
-	    throw queryError(queryError::PREFIX, pqn);
+	    throw queryException(queryException::PREFIX, pqn);
 	}
     }
 

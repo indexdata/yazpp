@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.1 2002-08-08 13:31:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.2 2002-08-08 16:06:08 mike Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -34,12 +34,12 @@ namespace ZOOM {
 *   ZOOM_connection c;
   public:
     connection (const char *hostname, int portnum);
-    // ### I would like to add a ``throw (ZOOM::error)'' clause
+    // ### I would like to add a ``throw (ZOOM::exception)'' clause
     // here, but it looks like G++ 2.95.2 doesn't recognise it.
     ~connection ();
     const char *option (const char *key) const;
     const char *option (const char *key, const char *val);
-*   ZOOM_connection _getYazConnection() const { return c; } // package-private
+*   ZOOM_connection _getYazConnection () const { return c; } // package-private
   };
 
   class query {
@@ -48,19 +48,19 @@ namespace ZOOM {
 *   ZOOM_query q;
   public:
     virtual ~query ();
-*   ZOOM_query _getYazQuery() const { return q; } // package-private
+*   ZOOM_query _getYazQuery () const { return q; } // package-private
   };
 
   class prefixQuery : public query {
   public:
     prefixQuery (const char *pqn);
-    ~prefixQuery();
+    ~prefixQuery ();
   };
 
   class CCLQuery : public query {
   public:
     CCLQuery (const char *ccl, void *qualset);
-    ~CCLQuery();
+    ~CCLQuery ();
   };
 
   class resultSet {
@@ -79,8 +79,8 @@ namespace ZOOM {
 *   const resultSet *owner;
 *   ZOOM_record r;
   public:
-*   record::record(const resultSet *rs, ZOOM_record rec):
-*	owner(rs), r(rec) {}
+*   record::record (const resultSet *rs, ZOOM_record rec):
+*	owner (rs), r (rec) {}
     ~record ();
     enum syntax {
       UNKNOWN, GRS1, SUTRS, USMARC, UKMARC, XML
@@ -91,39 +91,39 @@ namespace ZOOM {
     const char *rawdata () const;
   };
 
-  class error {
+  class exception {
 * protected:
 *   int code;
   public:
-    error (int code);
+    exception (int code);
     int errcode () const;
     const char *errmsg () const;
   };
 
-  class systemError: public error {
+  class systemException: public exception {
   public:
-    systemError ();
+    systemException ();
     int errcode () const;
     const char *errmsg () const;
   };
 
-  class bib1Error: public error {
+  class bib1Exception: public exception {
 *   const char *info;
   public:
-*   ~bib1Error();
-    bib1Error (int errcode, const char *addinfo);
+*   ~bib1Exception ();
+    bib1Exception (int errcode, const char *addinfo);
     int errcode () const;
     const char *errmsg () const;
     const char *addinfo () const;
   };
 
-  class queryError: public error {
+  class queryException: public exception {
 *   const char *q;
   public:
-*   ~queryError();
+*   ~queryException ();
     static const int PREFIX = 1;
     static const int CCL = 2;
-    queryError (int qtype, const char *source);
+    queryException (int qtype, const char *source);
     int errcode () const;
     const char *errmsg () const;
     const char *addinfo () const;

@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.1 2002-08-08 13:31:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
 
 // Z39.50 Result Set class
 
@@ -14,7 +14,7 @@ namespace ZOOM {
 	const char *addinfo;
 
 	if ((errcode = ZOOM_connection_error(yazc, &errmsg, &addinfo)) != 0) {
-	    throw bib1Error(errcode, addinfo);
+	    throw bib1Exception(errcode, addinfo);
 	}
     }
 
@@ -44,7 +44,7 @@ namespace ZOOM {
 	    const char *addinfo;
 	    int errcode = ZOOM_connection_error(owner._getYazConnection(),
 						&errmsg, &addinfo);
-	    throw bib1Error(errcode, addinfo);
+	    throw bib1Exception(errcode, addinfo);
 	}
 
 	// Memory management is odd here.  The ZOOM-C record we've

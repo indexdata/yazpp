@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.1 2002-08-08 13:31:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zclient.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
 
 // Trivial sample client
 
@@ -22,12 +22,13 @@ int main(int argc, char **argv)
     ZOOM::connection *conn;
     try {
 	conn = new ZOOM::connection(hostname, port);
-    } catch(ZOOM::bib1Error err) {
-	cerr << argv[0] << ": connect: " <<
+    } catch(ZOOM::bib1Exception err) {
+	cerr << argv[0] << ": connect: bib1Exception " <<
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 2;
-    } catch(ZOOM::error err) {
-	cerr << argv[0] << ": connect: " << err.errmsg() << "\n";
+    } catch(ZOOM::exception err) {
+	cerr << argv[0] << ": connect: exception " <<
+	    err.errmsg() << "\n";
 	return 2;
     }
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
     ZOOM::resultSet *rs;
     try {
 	rs = new ZOOM::resultSet(*conn, pq);
-    } catch(ZOOM::bib1Error err) {
+    } catch(ZOOM::bib1Exception err) {
 	cerr << argv[0] << ": searchSpec: " <<
 	    err.errmsg() << " (" << err.addinfo() << ")\n";
 	return 3;

@@ -7,7 +7,7 @@ expect to become version 1.3a of the official specification.)
 
 Add #include <stddef.h> for size_t
 
-Add comment about G++'s rejection of throw(ZOOM:error) clause
+Add comment about G++'s rejection of throw(ZOOM:exception) clause
 
 Add destructor declaration to connection class.
 
@@ -26,13 +26,17 @@ version 1.3 of the ZOOM AAPI.
 Remove the nfields() and field() methods from the record class --
 again, see v1.3 of the AAPI.
 
-Add some substance to the error base class: it can now be created
+Rename the error class to exception, and its subclasses likewise.  I
+think that's Telling It Like It Is, and it's certainly more in tune
+with the was v1.3 of the AAPI is going.
+
+Add some substance to the exception base class: it can now be created
 (with an error-code specified), and the error-code may be both fetched
 and rendered as a human-readable string.  This is necessary so that
-it's possible to meaningfully catch(error e).
+it's possible to meaningfully catch(exception e).
 
-Add the missing char *errmsg() method to the systemError and bib1Error
-classes.
+Add the missing char *errmsg() method to the systemException and
+bib1Exception classes.
 
-Add a new error subclass, queryError, for reporting malformed query
-strings etc.
+Add a new exception subclass, queryException, for reporting malformed
+query strings etc.
