@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.6 2004-01-07 14:07:00 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.7 2004-01-07 14:40:41 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
@@ -104,15 +104,8 @@
 	  name="dc"/>
 	<set identifier="http://www.loc.gov/zing/cql/context-sets/bath/v1.1/"
 	  name="bath"/>
-	<set identifier="http://srw.o-r-g.org/indexSets/rec/1.0/"
-	  name="rec"/>
       </indexInfo>
 
-      <index id="12">
-	<title>id</title>
-	<map><name set="rec">id</name></map>
-      </index>
-      
       <index id="4">
 	<title>title</title>
 	<map><name set="dc">title</name></map>
