@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-config.cpp,v 1.21 2004-01-07 11:17:05 adam Exp $
+ * $Id: yaz-proxy-config.cpp,v 1.22 2004-01-07 13:24:12 adam Exp $
  */
 
 #include <ctype.h>
@@ -346,12 +346,10 @@ int Yaz_ProxyConfig::check_query(ODR odr, const char *name, Z_Query *query,
 
 #if HAVE_XSLT
 int Yaz_ProxyConfig::check_schema(xmlNodePtr ptr, Z_RecordComposition *comp,
-				  const char **found_schema,
 				  const char *schema_identifier)
 {
     char *esn = 0;
     int default_match = 1;
-    *found_schema = schema_identifier;  // may be NULL
     if (comp && comp->which == Z_RecordComp_simple &&
 	comp->u.simple && comp->u.simple->which == Z_ElementSetNames_generic)
     {
@@ -363,7 +361,6 @@ int Yaz_ProxyConfig::check_schema(xmlNodePtr ptr, Z_RecordComposition *comp,
     // check if schema identifier match
     if (schema_identifier && !strcmp(esn, schema_identifier))
 	return 1;
-    *found_schema = esn;
     // Check each name element
     for (; ptr; ptr = ptr->next)
     {
@@ -459,12 +456,10 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 			match = 1;
 		}
 	    }
-	    const char *match_schema = 0;
 	    if (match)
 	    {
 		syntax_has_matched = 1;
-		match = check_schema(ptr->children, comp, &match_schema,
-				     match_identifier);
+		match = check_schema(ptr->children, comp, match_identifier);
 	    }
 	    if (match)
 	    {
@@ -473,10 +468,10 @@ int Yaz_ProxyConfig::check_syntax(ODR odr, const char *name,
 		    xfree(*stylesheet);
 		    *stylesheet = xstrdup(match_stylesheet);
 		}
-		if (schema && match_schema)
+		if (schema && match_identifier)
 		{
 		    xfree(*schema);
-		    *schema = xstrdup(match_schema);
+		    *schema = xstrdup(match_identifier);
 		}
 		if (match_marcxml)
 		{

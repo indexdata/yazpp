@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: proxy.h,v 1.28 2004-01-07 11:10:55 adam Exp $
+ * $Id: proxy.h,v 1.29 2004-01-07 13:24:12 adam Exp $
  */
 
 #include <sys/time.h>
@@ -67,7 +67,7 @@ private:
     int mycmp(const char *hay, const char *item, size_t len);
 #if HAVE_XSLT
     int check_schema(xmlNodePtr ptr, Z_RecordComposition *comp,
-		     const char **found_schema, const char *schema_identifier);
+		     const char *schema_identifier);
     xmlDocPtr m_docPtr;
     xmlNodePtr m_proxyPtr;
     void return_target_info(xmlNodePtr ptr, const char **url,
