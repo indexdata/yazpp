@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.3  1999-04-21 12:09:01  adam
+ * Revision 1.4  1999-09-13 12:53:44  adam
+ * Proxy removes OtherInfo Proxy Address and Session ID. Other
+ * Otherinfo remains untouched.
+ *
+ * Revision 1.3  1999/04/21 12:09:01  adam
  * Many improvements. Modified to proxy server to work with "sessions"
  * based on cookies.
  *
@@ -237,11 +241,10 @@ void Yaz_Z_Assoc::set_otherInformationString (
 
 void Yaz_Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
-    int *oid, int categoryValue,
-    const char *str)
+    int *oid, int categoryValue, const char *str)
 {
     Z_OtherInformationUnit *oi =
-	update_otherInformation(otherInformation, 1, oid, categoryValue);
+	update_otherInformation(otherInformation, 1, oid, categoryValue, 0);
     if (!oi)
 	return;
     oi->information.characterInfo = odr_strdup (odr_encode(), str);
@@ -249,63 +252,10 @@ void Yaz_Z_Assoc::set_otherInformationString (
 
 Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
-    int *oid, int categoryValue)
+    int *oid, int categoryValue, int deleteFlag)
 {
-    int i;
-    Z_OtherInformation *otherInformation = *otherInformationP;
-    if (!otherInformation)
-    {
-	if (!createFlag)
-	    return 0;
-	otherInformation = *otherInformationP = (Z_OtherInformation *)
-	    odr_malloc (odr_encode(), sizeof(*otherInformation));
-	otherInformation->num_elements = 0;
-	otherInformation->list = (Z_OtherInformationUnit **)
-	    odr_malloc (odr_encode(), 8*sizeof(*otherInformation));
-	for (i = 0; i<8; i++)
-	    otherInformation->list[i] = 0;
-    }
-    logf (LOG_LOG, "Yaz_Z_Assoc::update_otherInformation num=%d",
-	  otherInformation->num_elements);
-    for (i = 0; i<otherInformation->num_elements; i++)
-    {
-	assert (otherInformation->list[i]);
-	if (!oid)
-	{
-	    if (!otherInformation->list[i]->category)
-		return otherInformation->list[i];
-	}
-	else
-	{
-	    if (otherInformation->list[i]->category &&
-		categoryValue ==
-		*otherInformation->list[i]->category->categoryValue &&
-		!oid_oidcmp (oid, otherInformation->list[i]->category->
-			     categoryTypeId))
-		return otherInformation->list[i];
-	}
-    }
-    if (!createFlag)
-	return 0;
-    otherInformation->list[i] = (Z_OtherInformationUnit*)
-	odr_malloc (odr_encode(), sizeof(Z_OtherInformationUnit));
-    if (oid)
-    {
-	otherInformation->list[i]->category = (Z_InfoCategory*)
-	    odr_malloc (odr_encode(), sizeof(Z_InfoCategory));
-	otherInformation->list[i]->category->categoryTypeId = (int*)
-	    odr_oiddup (odr_encode(), oid);
-	otherInformation->list[i]->category->categoryValue = (int*)
-	    odr_malloc (odr_encode(), sizeof(int));
-	*otherInformation->list[i]->category->categoryValue =
-	    categoryValue;
-    }
-    else
-	otherInformation->list[i]->category = 0;
-    otherInformation->list[i]->which = Z_OtherInfo_characterInfo;
-    otherInformation->list[i]->information.characterInfo = 0;
-    
-    otherInformation->num_elements = i+1;
-    return otherInformation->list[i];
+    return yaz_oi_update (otherInformationP,
+			  (createFlag ? odr_encode() : 0),
+			  oid, categoryValue, deleteFlag);
 }
 

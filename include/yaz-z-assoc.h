@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  * 
- * $Id: yaz-z-assoc.h,v 1.3 1999-04-21 12:09:01 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.4 1999-09-13 12:53:44 adam Exp $
  */
 
 #include <proto.h>
@@ -55,7 +55,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
     Z_OtherInformationUnit *update_otherInformation (
 	Z_OtherInformation **otherInformationP, int createFlag,
-	int *oid, int categoryValue);
+	int *oid, int categoryValue, int deleteFlag);
     void set_otherInformationString (
 	Z_OtherInformation **otherInformationP,
 	int *oid, int categoryValue,

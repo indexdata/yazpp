@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.8  1999-05-04 10:53:00  adam
+ * Revision 1.9  1999-09-13 12:53:44  adam
+ * Proxy removes OtherInfo Proxy Address and Session ID. Other
+ * Otherinfo remains untouched.
+ *
+ * Revision 1.8  1999/05/04 10:53:00  adam
  * Changed the way the PROXY behaves when lost cookie is received.
  *
  * Revision 1.7  1999/04/28 13:31:17  adam
@@ -74,7 +78,7 @@ char *Yaz_Proxy::get_cookie(Z_OtherInformation **otherInfo)
     assert (oid_ent_to_oid (&ent, oid));
 
     if (oid_ent_to_oid (&ent, oid) && 
-	(oi = update_otherInformation(otherInfo, 0, oid, 1)) &&
+	(oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
 	oi->which == Z_OtherInfo_characterInfo)
 	return oi->information.characterInfo;
     return 0;
@@ -89,7 +93,7 @@ char *Yaz_Proxy::get_proxy(Z_OtherInformation **otherInfo)
     ent.oclass = CLASS_USERINFO;
     ent.value = (oid_value) VAL_PROXY;
     if (oid_ent_to_oid (&ent, oid) &&
-	(oi = update_otherInformation(otherInfo, 0, oid, 1)) &&
+	(oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
 	oi->which == Z_OtherInfo_characterInfo)
 	return oi->information.characterInfo;
     return 0;
@@ -233,9 +237,12 @@ void Yaz_Proxy::recv_Z_PDU(Z_APDU *apdu)
     }
     m_client->m_server = this;
 
+#if 0
     Z_OtherInformation **oi;
     get_otherInfoAPDU(apdu, &oi);
     *oi = 0;
+#endif
+
     if (apdu->which == Z_APDU_initRequest)
     {
 	if (m_client->m_init_flag)
