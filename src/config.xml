@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- $Id -->
+<proxy>
+  <target default="1" name="voyager">
+    <!-- default target -->
+    <url>z3950.loc.gov:7090/voyager</url>
+    <keepalive>1</keepalive>
+    <limit><!-- limits .. -->
+      <bandwidth>200000</bandwidth>
+      <pdu>31</pdu>
+      <retrieve>20</retrieve>
+    </limit>
+    <query type="1" value="10" error="114"/>
+    <target-timeout>120</target-timeout>
+    <client-timeout>20</client-timeout>
+  </target>
+  <target name="localhost">
+    <url>localhost:9999</url>
+    <keepalive>0</keepalive>
+    <limit><!-- limits .. -->
+      <bandwidth>50000</bandwidth>
+      <pdu>11</pdu>
+      <retrieve>10</retrieve>
+    </limit>
+    <query type="1" value="10" error="114"/>
+  </target>
+  <target name="*">
+    <!-- everything else -->
+  </target>
+  <max-clients>1</max-clients>
+</proxy>
