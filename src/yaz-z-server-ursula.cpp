@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ursula.cpp,v $
- * Revision 1.4  2001-04-25 19:40:18  adam
+ * Revision 1.5  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.4  2001/04/25 19:40:18  adam
  * Added refernceId handling for other services.
  *
  * Revision 1.3  2001/04/11 12:33:42  heikki
@@ -47,7 +50,7 @@ int Yaz_Facility_Ursula::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 
     if (r->which != ODR_EXTERNAL_octet)
     {
-	logf (LOG_LOG, "ursula::recv not octet alighed");
+	yaz_log (LOG_LOG, "ursula::recv not octet alighed");
         return 0;
     }
     odr_setbuf (s->odr_decode(), (char*) r->u.octet_aligned->buf,
@@ -55,7 +58,7 @@ int Yaz_Facility_Ursula::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     Z_UrsPDU *pdu = 0;
     if (!z_UrsPDU (s->odr_decode(), &pdu, 0, ""))
     {
-	logf (LOG_LOG, "ursula::decode failed");
+	yaz_log (LOG_LOG, "ursula::decode failed");
 	return 0;
     }
     yaz_log (LOG_LOG, "got ursula packet");

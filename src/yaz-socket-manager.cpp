@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-socket-manager.cpp,v $
- * Revision 1.15  2001-03-26 14:43:49  adam
+ * Revision 1.16  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.15  2001/03/26 14:43:49  adam
  * New threaded PDU association.
  *
  * Revision 1.14  2000/11/20 14:17:36  adam
@@ -146,7 +149,7 @@ int Yaz_SocketManager::processEvent()
     YazSocketEntry *p;
     YazSocketEvent *event = getEvent();
     unsigned timeout = 0;
-    logf (m_log, "Yaz_SocketManager::processEvent manager=%p", this);
+    yaz_log (m_log, "Yaz_SocketManager::processEvent manager=%p", this);
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -202,9 +205,9 @@ int Yaz_SocketManager::processEvent()
     }
     if (!no)
     {
-	logf (m_log, "no pending events return 0");
+	yaz_log (m_log, "no pending events return 0");
 	if (!m_observers)
-	    logf (m_log, "no observers");
+	    yaz_log (m_log, "no observers");
 	return 0;
     }
 
@@ -212,7 +215,7 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = timeout;
     to.tv_usec = 0;
     
-    logf (m_log, "Yaz_SocketManager::select no=%d timeout=%d", no, timeout);
+    yaz_log (m_log, "Yaz_SocketManager::select no=%d timeout=%d", no, timeout);
     while ((res = select(max + 1, &in, &out, &except, timeout ? &to : 0)) < 0)
 	if (errno != EINTR)
 	    return -1;
@@ -242,7 +245,7 @@ int Yaz_SocketManager::processEvent()
 		 now >= p->last_activity + (int) (p->timeout))
 	{
 	    YazSocketEvent *event = new YazSocketEvent;
-	    logf (m_log, "timeout, now = %ld last_activity=%ld timeout=%d",
+	    yaz_log (m_log, "timeout, now = %ld last_activity=%ld timeout=%d",
 		  now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;

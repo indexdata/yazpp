@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-assoc.cpp,v $
- * Revision 1.20  2001-04-25 18:59:30  adam
+ * Revision 1.21  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.20  2001/04/25 18:59:30  adam
  * Added referenceId handling for server.
  *
  * Revision 1.19  2001/03/27 14:47:45  adam
@@ -144,7 +147,7 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
 
 void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
 {
-    logf (m_log, "recv_PDU len=%d", len);
+    yaz_log (m_log, "recv_PDU len=%d", len);
     Z_APDU *apdu = decode_Z_PDU (buf, len);
     if (apdu)
     {
@@ -257,10 +260,10 @@ Z_APDU *Yaz_Z_Assoc::decode_Z_PDU(const char *buf, int len)
 
     if (!z_APDU(m_odr_in, &apdu, 0, 0))
     {
-        logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
+        yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
              odr_errmsg(odr_geterror(m_odr_in)),
              odr_offset(m_odr_in));
-        logf(LOG_LOG, "PDU dump:");
+        yaz_log(LOG_LOG, "PDU dump:");
         odr_dumpBER(yaz_log_file(), buf, len);
         return 0;
     }
@@ -278,7 +281,7 @@ int Yaz_Z_Assoc::encode_Z_PDU(Z_APDU *apdu, char **buf, int *len)
 	z_APDU(m_odr_print, &apdu, 0, "encode");
     if (!z_APDU(m_odr_out, &apdu, 0, 0))
     {
-	logf (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
+	yaz_log (LOG_LOG, "yaz_Z_Assoc::encode_Z_PDU failed");
         return -1;
     }
     *buf = odr_getbuf (m_odr_out, len, 0);

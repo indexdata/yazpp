@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-pdu-assoc-thread.cpp,v $
- * Revision 1.2  2001-03-27 14:47:45  adam
+ * Revision 1.3  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.2  2001/03/27 14:47:45  adam
  * New server facility scheme.
  *
  * Revision 1.1  2001/03/26 14:43:49  adam
@@ -44,10 +47,10 @@ events(void *p)
 {
     Yaz_SocketManager *s = (Yaz_SocketManager *) p;
     
-    logf (LOG_LOG, "thread started");
+    yaz_log (LOG_LOG, "thread started");
     while (s->processEvent() > 0)
 	;
-    logf (LOG_LOG, "thread finished");
+    yaz_log (LOG_LOG, "thread finished");
 #ifdef WIN32
 #else
     return 0;
@@ -58,7 +61,11 @@ void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
 {
     Yaz_SocketManager *socket_observable = new Yaz_SocketManager;
     Yaz_PDU_Assoc *new_observable = new Yaz_PDU_Assoc (socket_observable, cs);
-    
+
+    new_observable->m_next = m_children;
+    m_children = new_observable;
+    new_observable->m_parent = this;
+
     /// Clone PDU Observer
     new_observable->m_PDU_Observer =
 	m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-ir-assoc.cpp,v $
- * Revision 1.15  2001-04-26 12:17:49  heikki
+ * Revision 1.16  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.15  2001/04/26 12:17:49  heikki
  * Ursula stuff, mostly in the test client
  *
  * Revision 1.14  2000/10/11 11:58:16  adam
@@ -86,7 +89,7 @@ typedef char *charp;
 void Yaz_IR_Assoc::set_databaseNames (int num, const char **list)
 {
     int i;
-    logf (m_log, "Yaz_IR_Assoc::set_databaseNames num=%d", num);
+    yaz_log (m_log, "Yaz_IR_Assoc::set_databaseNames num=%d", num);
     for (i = 0; i<m_num_databaseNames; i++)
 	delete [] m_databaseNames[i];
     delete [] m_databaseNames;
@@ -191,36 +194,36 @@ void Yaz_IR_Assoc::get_elementSetName (const char **elementSetName)
 
 void Yaz_IR_Assoc::recv_Z_PDU(Z_APDU *apdu)
 {
-    logf (m_log, "recv_Z_PDU");
+    yaz_log (m_log, "recv_Z_PDU");
     m_lastReceived = apdu->which;
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
-	    logf (m_log, "recv InitResponse");
-	    recv_initResponse(apdu->u.initResponse);
-	    break;
+	yaz_log (m_log, "recv InitResponse");
+	recv_initResponse(apdu->u.initResponse);
+	break;
     case Z_APDU_initRequest:
-        logf (m_log, "recv InitRequest");
-	    recv_initRequest(apdu->u.initRequest);
+        yaz_log (m_log, "recv InitRequest");
+	recv_initRequest(apdu->u.initRequest);
         break;
     case Z_APDU_searchRequest:
-        logf (m_log, "recv searchRequest");
-	    recv_searchRequest(apdu->u.searchRequest);
+        yaz_log (m_log, "recv searchRequest");
+	recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-	    logf (m_log, "recv searchResponse"); 
-	    recv_searchResponse(apdu->u.searchResponse);
-	    break;
+	yaz_log (m_log, "recv searchResponse"); 
+	recv_searchResponse(apdu->u.searchResponse);
+	break;
     case Z_APDU_presentRequest:
-        logf (m_log, "recv presentRequest");
-	    recv_presentRequest(apdu->u.presentRequest);
+        yaz_log (m_log, "recv presentRequest");
+	recv_presentRequest(apdu->u.presentRequest);
         break;
     case Z_APDU_presentResponse:
-        logf (m_log, "recv presentResponse");
-	    recv_presentResponse(apdu->u.presentResponse);
+        yaz_log (m_log, "recv presentResponse");
+	recv_presentResponse(apdu->u.presentResponse);
         break;
     case Z_APDU_extendedServicesResponse:
-        logf (m_log, "recv extendedServiceResponse");
+        yaz_log (m_log, "recv extendedServiceResponse");
         recv_extendedServicesResponse(apdu->u.extendedServicesResponse);
         break;
     }
@@ -249,7 +252,7 @@ int Yaz_IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
 	oid_ent_to_oid(&prefsyn, oid_syntax);
 	req->preferredRecordSyntax = oid_syntax;
     }
-    logf (m_log, "send_searchRequest");
+    yaz_log (m_log, "send_searchRequest");
     assert (req->otherInfo == 0);
     if (m_cookie)
     {

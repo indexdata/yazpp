@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-my-server.cpp,v $
- * Revision 1.6  2001-05-17 14:18:03  adam
+ * Revision 1.7  2001-08-13 16:39:12  adam
+ * PDU_Assoc keeps track of children. Using yaz_log instead of logf.
+ *
+ * Revision 1.6  2001/05/17 14:18:03  adam
  * New handler for old version item update for server:
  *  void update_service0 (Z_ExtendedServicesRequest *req,
  *                        Z_IU0Update *io, Z_ExtendedServicesResponse *res)
@@ -164,7 +167,6 @@ void MyUpdate::update_service0 (Z_ExtendedServicesRequest *req,
     yaz_log (LOG_LOG, "MyServer::update_service (v1.0)");
 }
 
-
 #if HAVE_YAZ_URSULA_H
 void MyUrsula::ursula_service (Z_ExtendedServicesRequest *req,
 			       Z_UrsPDU *u,
@@ -285,7 +287,6 @@ void MyServer::failNotify()
 void MyServer::connectNotify()
 {
 }
-
 
 void usage(char *prog)
 {
