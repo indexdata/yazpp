@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.2 2004-02-19 15:25:46 adam Exp $
+ * $Id: zlint.cpp,v 1.3 2004-02-26 23:41:58 adam Exp $
  */
 
 #include <yaz/pquery.h>
@@ -20,20 +20,19 @@
 #define REFID_BUF2 "zlint\000check2"
 #define REFID_LEN2 12
 
-enum test_code {
+enum Zlint_code {
     TEST_FINISHED,
     TEST_CONTINUE,
 };
 
-#if 0
 class Zlint;
+    
 class Zlint_test {
 public:
-    virtual void init_send(Zlint *z) = 0;
-    virtual test_code init_recv(Zlint *z, Z_InitResponse *ir) = 0;
-    virtual test_code other_recv(Zlint *z, Z_APDU *ir, Z_InitResponse *ir) = 0;
+    virtual Zlint_code init(Zlint *z) = 0;
+    virtual Zlint_code recv_gdu(Zlint *z, Z_GDU *gdu) = 0;
+    virtual Zlint_code recv_fail(Zlint *z, int reason) = 0;
 };
-#endif
 
 const char *try_syntax [] = {
     "usmarc",
@@ -102,8 +101,8 @@ class Zlint : public Yaz_Z_Assoc {
     int m_timeout_connect;
     int m_protocol_version;
     char m_session_str[20];
-    int initResponseGetVersion(Z_InitResponse *init);
 public:
+    int initResponseGetVersion(Z_InitResponse *init);
     void prepare();
     void recv_GDU(Z_GDU *apdu, int len);
     Zlint(IYaz_PDU_Observable *the_PDU_Observable);
@@ -923,11 +922,15 @@ void Zlint::args(int argc, char **argv)
 {
     char *arg;
     int ret;
-    while ((ret = options("v", argv, argc, &arg)) != -2)
+    while ((ret = options("a:v:", argv, argc, &arg)) != -2)
     {
         switch (ret)
 	{
 	case 'v':
+            yaz_log_init(yaz_log_mask_str(arg), "", 0);	
+	    break;
+	case 'a':
+	    set_APDU_log(arg);
 	    break;
 	case 0:
 	    if (arg)
@@ -956,4 +959,59 @@ int main(int argc, char **argv)
     while (mySocketManager.processEvent() > 0)
 	;
     exit (0);
+}
+
+class Zlint_test_01 : public Zlint_test {
+public:
+    Zlint_test_01();
+    ~Zlint_test_01();
+    Zlint_code init(Zlint *z);
+    Zlint_code recv_gdu(Zlint *z, Z_GDU *gdu);
+    Zlint_code recv_fail(Zlint *z, int reason);
+};
+    
+Zlint_test_01::Zlint_test_01()
+{
+}
+
+Zlint_test_01::~Zlint_test_01()
+{
+}
+
+Zlint_code Zlint_test_01::init(Zlint *z)
+{
+    int len;
+    Z_APDU *apdu = z->create_Z_PDU(Z_APDU_initRequest);
+    Z_InitRequest *init = apdu->u.initRequest;
+
+    ODR_MASK_ZERO(init->protocolVersion);
+    ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_1);
+    ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_2);
+    ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
+    
+    int r = z->send_Z_PDU(apdu, &len);
+    if (r < 0)
+	return TEST_FINISHED;
+    return TEST_CONTINUE;
+}
+
+Zlint_code Zlint_test_01::recv_gdu(Zlint *z, Z_GDU *gdu)
+{
+    if (gdu->which == Z_GDU_Z3950 &&
+	gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
+    {
+	Z_InitResponse *init = gdu->u.z3950->u.initResponse;
+	int ver = z->initResponseGetVersion(init);
+	int result = init->result ? *init->result : 0;
+	if (ver > 3 || ver < 2)
+	    yaz_log(LOG_WARN, "got version %d, expected 2 or 3", ver);
+	if (!result)
+	    return TEST_FINISHED;
+    }
+    return TEST_FINISHED;
+}
+
+Zlint_code Zlint_test_01::recv_fail(Zlint *z, int reason)
+{
+    return TEST_FINISHED;
 }
