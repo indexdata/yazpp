@@ -1,3 +1,4 @@
+*.log
 Makefile
 Makefile.in
 yaz++.xml

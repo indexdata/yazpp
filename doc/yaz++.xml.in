@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                     "@DTD_DIR@/docbookx.dtd" [
-
+     <!ENTITY chap-introduction SYSTEM "introduction.xml">
      <!ENTITY chap-installation SYSTEM "installation.xml">
      <!ENTITY chap-zoom SYSTEM "zoom.xml">
      <!ENTITY chap-proxy SYSTEM "proxy.xml">
@@ -9,7 +9,7 @@
      <!ENTITY yaz-proxy-ref SYSTEM "yaz-proxy-ref.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.11 2004-02-23 11:03:43 adam Exp $ -->
+<!-- $Id: yaz++.xml.in,v 1.12 2004-03-31 18:28:06 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -28,7 +28,7 @@
   </copyright>
   <abstract>
    <simpara>
-    <ulink url="http://www.indexdata.dk/yaz++/">YAZ++</ulink>
+    <ulink url="http://www.indexdata.dk/yazplusplus/">YAZ++</ulink>
     is a set of libraries and header files that make it easier
     to use the popular C-language
     <ulink url="http://www.indexdata.dk/yaz/">YAZ toolkit</ulink>
@@ -41,11 +41,19 @@
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yaz++.xml.in,v 1.11 2004-02-23 11:03:43 adam Exp $
+    CVS ID: $Id: yaz++.xml.in,v 1.12 2004-03-31 18:28:06 adam Exp $
+   </simpara>
+   <simpara>
+    <inlinemediaobject>
+     <imageobject>
+      <imagedata fileref="id.png" format="PNG"/>
+     </imageobject>
+    </inlinemediaobject>
    </simpara>
   </abstract>
  </bookinfo>
  
+ &chap-introduction;
  &chap-installation;
  &chap-zoom;
  &chap-proxy;

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.12 2004-03-30 22:26:16 adam Exp $
+## $Id: Makefile.am,v 1.13 2004-03-31 18:28:05 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -8,6 +8,7 @@ SUPPORTFILES = \
  tkl.xsl.in \
  xml.dcl
 XMLFILES = \
+ introduction.xml \
  installation.xml \
  zoom.xml \
  proxy.xml \
@@ -23,6 +24,7 @@ HTMLFILES = \
  api.html \
  implementations.html \
  installation.html \
+ introduction.html \
  license.html \
  other-optimizations.html \
  otherinfo-encoding.html \
@@ -37,6 +39,7 @@ HTMLFILES = \
  record-validation.html \
  windows.html \
  yaz-proxy.html \
+ yaz.license.html \
  yazpp.html \
  zoom-connection.html \
  zoom-exception.html \
@@ -45,7 +48,7 @@ HTMLFILES = \
  zoom-resultset.html \
  zoom.html
 
-doc_DATA = $(HTMLFILES) yaz++.pdf yaz.css
+doc_DATA = $(HTMLFILES) yaz++.pdf id.png yaz.css
 
 man_MANS = $(MANFILES)
 
@@ -61,10 +64,11 @@ yazpp.php: $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
 
 yaz++.pdf: $(XMLFILES)
+	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
 	jade -E14 -D $(srcdir) -d yazprint.dsl -t tex $(srcdir)/xml.dcl $(TOP)
-	pdfjadetex yaz++.tex
-	pdfjadetex yaz++.tex
-	pdfjadetex yaz++.tex
+	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
+	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
+	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
 
 index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl $(TOP)

@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.9 2004-01-07 11:49:03 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.10 2004-03-31 18:28:05 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -79,20 +79,37 @@
     This is what you have after successful compilation:
     <variablelist>
      <varlistentry>
-      <term><literal>src/yaz-proxy</literal></term> 
+      <term><literal>proxy/yaz-proxy</literal></term> 
       <listitem><para>
-        The YAZ <link linkend="proxy">Z39.50 Proxy</link> utility.
+        The YAZ <link linkend="proxy">Z39.50 Proxy</link>.
 	This program gets installed in your binaries directory
 	(<parameter>prefix</parameter><literal>/bin</literal>).
        </para></listitem>
      </varlistentry>
 
      <varlistentry>
-      <term><literal>lib/libyaz++.la</literal></term> 
+      <term><literal>src/libyazcpp.la</literal></term> 
       <listitem><para>
-        The YAZ++ library, including the
-	<link linkend="zoom">ZOOM-C++</link> classes.
+        The YAZ++ library.
 	This library gets installed in your libraries directory
+	(<parameter>prefix</parameter><literal>/lib</literal>).
+       </para></listitem>
+     </varlistentry>
+     
+     <varlistentry>
+      <term><literal>src/libzoomcpp.la</literal></term> 
+      <listitem><para>
+        The <link linkend="zoom">ZOOM-C++</link> library.
+	This library gets installed in your libraries directory
+	(<parameter>prefix</parameter><literal>/lib</literal>).
+       </para></listitem>
+     </varlistentry>
+     
+     <varlistentry>
+      <term><literal>proxy/libyazproxy.la</literal></term> 
+      <listitem><para>
+        The YAZ proxy library. This library gets installed in
+	your libraries directory
 	(<parameter>prefix</parameter><literal>/lib</literal>).
        </para></listitem>
      </varlistentry>
@@ -100,7 +117,7 @@
      <varlistentry>
       <term><literal>include/yaz++/*.h</literal></term> 
       <listitem><para>
-        Various C++ header files, which you'll need for YAZ
+        Various C++ header files, which you'll need for YAZ++
 	development. All these are installed in your header files area
 	(<parameter>prefix</parameter><literal>/include/yaz++</literal>).
        </para></listitem>
@@ -121,8 +138,8 @@
      <varlistentry>
       <term><literal>zoom/zclient</literal></term> 
       <listitem><para>
-        ZOOM C++ demonstration client. This client does not
-        get installed in the system directories.
+        ZOOM C++ demonstration client that uses the ZOOM C++ classes.
+	This client does not get installed in the system directories.
        </para></listitem>
      </varlistentry>
 
@@ -147,54 +164,154 @@
   <section id="windows">
    <title>Building on Windows</title>
    <para>
-    You'll find Visual Studio project files in sub directory
-    <filename>win</filename>. Open workspace <filename>yazxx.dsw</filename>
-    which includes the following projects:
+    YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
+    with <ulink url="http://msdn.microsoft.com/vstudio/">
+     Microsoft Visual Studio</ulink>.
+    Version 6 and .NET has been tested. We expect that YAZ++ compiles
+    with version 5 as well.
+   </para>
+    <para>
+    Start a command prompt and switch the sub directory
+    <filename>WIN</filename> where the file <filename>makefile</filename>
+    is located. Customize the installation by editing the
+    <filename>makefile</filename> file (for example by using notepad).
+    
+    The following summarizes the most important settings in that file:
+    
     <variablelist>
-     <varlistentry>
-      <term><literal>yazxx.dsp</literal></term>
-       <listitem><para>
-        Builds the <filename>yazxx.dll</filename>.
+     <varlistentry><term><literal>DEBUG</literal></term>
+      <listitem><para>
+	If set to 1, the software is
+	compiled with debugging libraries (code generation is
+	multi-threaded debug DLL).
+	If set to 0, the software is compiled with release libraries
+	(code generation is multi-threaded DLL).
        </para></listitem>
      </varlistentry>
+
      <varlistentry>
-      <term><literal>yazclient.dsp</literal></term>
-       <listitem><para>
-        Builds the sample client <filename>yazmyclient.exe</filename>.
+      <term><literal>HAVE_XSLT</literal>,
+       <literal>LIBXSLT_DIR</literal></term>
+      <listitem>
+       <para>
+	If <literal>HAVE_LIBXSLT</literal> is set to 1, the proxy is compiled
+	with XSLT and XML support. In this configuration, set 
+	<literal>LIBXSLT_DIR</literal> to the 
+	<ulink url="http://www.xmlsoft.org/">libxslt</ulink> source
+	directory.
+       </para>
+       
+       <note>
+	<para>
+	 If you enable libXSLT you have to enable libxml2 and its
+	 sub components zlib and iconv as well.
+	</para>
+       </note>
+       
+       <para>
+	Windows versions of libxslt, libxml2, zlib and iconv can be found
+	<ulink url="http://www.zlatkovic.com/libxml.en.html">
+	 here</ulink>.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term><literal>HAVE_ICONV</literal>,
+       <literal>ICONV_DIR</literal></term>
+      <listitem><para>
+	If <literal>HAVE_ICONV</literal> is set to 1, the proxy is
+	compiled with iconv support. In this configuration, set 
+	<literal>ICONV_DIR</literal> to the iconv source directory.
        </para></listitem>
      </varlistentry>
+     
      <varlistentry>
-      <term><literal>yazserver.dsp</literal></term>
-       <listitem><para>
-        Builds the sample server <filename>yazmyserver.exe</filename>.
-       </para></listitem>
+      <term><literal>HAVE_LIBXML2</literal>,
+       <literal>LIBXML2_DIR</literal></term>
+      <listitem>
+       <para>
+	If <literal>HAVE_LIBXML2</literal> is set to 1, the proxy is compiled
+	with XML support. In this configuration, set 
+	<literal>LIBXML2_DIR</literal> to the 
+	<ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory
+	and
+	<literal>ZLIB_DIR</literal> to the zlib directory.
+       </para>
+       
+       <note>
+	<para>
+	 YAZ++ is not using ZLIB. But libxml2 is.
+	</para>
+       </note>
+      </listitem>
      </varlistentry>
-     <varlistentry>
-      <term><literal>yazserver.dsp</literal></term>
-       <listitem><para>
-        Builds the proxy <filename>yazproxy.exe</filename>.
-       </para></listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>zoomxxclient.dsp</literal></term>
-       <listitem><para>
-        Builds the ZOOM C++ demo client <filename>zoomxxclient.exe</filename>.
-       </para></listitem>
-     </varlistentry>
+     
     </variablelist>
    </para>
    <para>
-    By default, the include path and library path for the projects assumes
-    that YAZ is located in <filename>..\yaz</filename> 
-    (i.e. same prefix as the YAZ++ source).
-    If YAZ is in a different directory you'll have to modify
-    the include path in 
-    <literal>Project | Settings | C/C++ | Preprocessor | Additional include
-     directories</literal>
-    and library path in
-    <literal>Project | Settings | Link | Input | Additional library
-     path</literal>.
+    When satisfied with the settings in the makefile, type
+    <screen>
+     nmake
+    </screen>
    </para>
+   <tip>
+    <para>
+     If the <filename>nmake</filename> command is not found on your system
+     you probably haven't defined the environment variables required to
+     use that tool. To fix that, find and run the batch file
+     <filename>vcvars32.bat</filename>. You need to run it from within
+     the command prompt or set the environment variables "globally";
+     otherwise it doesn't work.
+    </para>
+   </tip>
+   <para>
+    If you wish to recompile YAZ++ - for example if you modify
+    settings in the <filename>makefile</filename> you can delete
+    object files, etc by running.
+    <screen>
+     nmake clean
+    </screen>
+   </para>
+   <para>
+    The following files are generated upon successful compilation:
+    
+    <variablelist>
+     <varlistentry><term><filename>bin/yazpp.dll</filename></term>
+      <listitem><para>
+	YAZ++ DLL . Includes ZOOM C++ as well.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><filename>lib/yaz.lib</filename></term>
+      <listitem><para>
+	Import library for <filename>yazpp.dll</filename>.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><filename>bin/yazproxy.dll</filename></term>
+      <listitem><para>
+	YAZ proxy DLL.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><filename>lib/yazproxy.lib</filename></term>
+      <listitem><para>
+	Import library for <filename>yazproxy.dll</filename>.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><filename>bin/yaz-proxy.exe</filename></term>
+      <listitem><para>
+	YAZ proxy. It's a WIN32 console application.
+	See <xref linkend="proxy"/> for more information.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><filename>bin/zclient.exe</filename></term>
+      <listitem><para>
+	ZOOM C++ demo client. A simple WIN32 console application.
+       </para></listitem></varlistentry>
+     
+    </variablelist>
+    
+   </para>
+   
   </section>
  </chapter>
  <!-- Keep this comment at the end of the file
