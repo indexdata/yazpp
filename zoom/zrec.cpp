@@ -1,9 +1,9 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.2 2002-08-08 16:06:08 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zrec.cpp,v 1.3 2002-08-08 16:14:26 mike Exp $
 
 // Z39.50 Record class
 
 #include "zoom++.h"
-#include <string.h>		// for strcasecmp()
+#include <yaz/yaz-util.h>	// for yaz_matchstr()
 
 
 namespace ZOOM {
@@ -39,19 +39,19 @@ namespace ZOOM {
 	const char *syn = ZOOM_record_get(r, "syntax", 0);
 
 	// These string constants are from yaz/util/oid.c
-	if (!strcasecmp(syn, "xml"))
+	if (!yaz_matchstr(syn, "xml"))
 	    return XML;
-	else if (!strcasecmp(syn, "GRS-1"))
+	else if (!yaz_matchstr(syn, "GRS-1"))
 	    return GRS1;
-	else if (!strcasecmp(syn, "SUTRS"))
+	else if (!yaz_matchstr(syn, "SUTRS"))
 	    return SUTRS;
-	else if (!strcasecmp(syn, "USmarc"))
+	else if (!yaz_matchstr(syn, "USmarc"))
 	    return USMARC;
-	else if (!strcasecmp(syn, "UKmarc"))
+	else if (!yaz_matchstr(syn, "UKmarc"))
 	    return UKMARC;
-	else if (!strcasecmp(syn, "XML") ||
-		 !strcasecmp(syn, "text-XML") ||
-		 !strcasecmp(syn, "application-XML"))
+	else if (!yaz_matchstr(syn, "XML") ||
+		 !yaz_matchstr(syn, "text-XML") ||
+		 !yaz_matchstr(syn, "application-XML"))
 	    return XML;
 
 	return UNKNOWN;

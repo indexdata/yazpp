@@ -1,8 +1,8 @@
-# $Header: /home/cvsroot/yaz++/zoom/Attic/Makefile,v 1.2 2002-08-08 16:06:50 mike Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Attic/Makefile,v 1.3 2002-08-08 16:14:26 mike Exp $
 
 CCC = g++	# ... until I figure out what the standard
 		# Make macro name is for the C++ compiler.
-CPPFLAGS := -Wall -g
+CPPFLAGS := -Wall -g -ansi
 L = libzoom.a
 OBJ = $L(zexcept.o) $L(zconn.o) $L(zquery.o) $L(zrs.o) $L(zrec.o)
 
