@@ -1,21 +1,21 @@
-# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.7 2002-11-04 23:08:49 mike Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.8 2003-06-10 07:16:38 adam Exp $
 
 AM_CXXFLAGS= $(YAZINC) 
 
+if ZOOM
 noinst_LTLIBRARIES = libzoomcpp.la
+noinst_PROGRAMS = zclient
+endif
+
 LDADD=libzoomcpp.la $(YAZLALIB)
 
 mirk_XXX_SOURCES = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
 libzoomcpp_la_SOURCES = $(mirk_XXX_SOURCES) interface.h
 pkginclude_HEADERS=zoom.h
 
-noinst_PROGRAMS = zclient
-
 zclient_SOURCES=zclient.cpp
 
 EXTRA_DIST=master-header Changes README
-
-all: interface.h zclient
 
 test: zclient
 	./zclient bagel.indexdata.dk 210 gils '@and mineral epicenter'
