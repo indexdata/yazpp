@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy.cpp,v 1.101 2004-02-15 16:41:14 adam Exp $
+ * $Id: yaz-proxy.cpp,v 1.102 2004-02-16 10:47:37 adam Exp $
  */
 
 #include <assert.h>
@@ -1983,6 +1983,8 @@ void Yaz_Proxy::handle_incoming_Z_PDU(Z_APDU *apdu)
 		ODR_MASK_SET(apdu->u.initRequest->options, i);
 	    ODR_MASK_CLEAR(apdu->u.initRequest->options,
 			   Z_Options_negotiationModel);
+	    ODR_MASK_CLEAR(apdu->u.initRequest->options,
+			   Z_Options_concurrentOperations);
 
 	    // make new version
 	    m_initRequest_version = apdu->u.initRequest->protocolVersion;
@@ -2182,6 +2184,8 @@ void Yaz_ProxyClient::pre_init_client()
 	ODR_MASK_SET(req->options, i);
     ODR_MASK_CLEAR(apdu->u.initRequest->options,
 		   Z_Options_negotiationModel);
+    ODR_MASK_CLEAR(apdu->u.initRequest->options,
+		   Z_Options_concurrentOperations);
     for (i = 0; i<= 10; i++)
 	ODR_MASK_SET(req->protocolVersion, i);
 

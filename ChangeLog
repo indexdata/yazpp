@@ -1,27 +1,30 @@
-Fixed SEGV bug that occured when duplicate init requests was received and
-no cached init response was available.
+For yaz-proxy, allow maximum number of files to be specified (setrlimit) with
+option -n for yaz-proxy. Log the number of max files with getrlimit always.
 
-Add MODS version 3 conversion, MARC21slim2MODS3.xsl. Update voyager.xml,
-config.xml to use it. Default "mods" is still MODS v2.
+For yaz-proxy, fixed SEGV bug that occured when duplicate init requests was received and no cached init response was available.
+
+For yaz-proxy, added MODS version 3 conversion, MARC21slim2MODS3.xsl.
+Updated voyager.xml, config.xml to use it. Default "mods" is still MODS v2.
 
 --- 0.7.7 2004/02/10 Internal release.
 
 Make proxy perform keepalive when receiving SIGBUS.
 
-Fix problem with fixup of referenceId's. 
+For yaz-proxy, fixed problem with fixup of referenceId's. 
 
 --- 0.7.6 2004/02/05 Internal release.
 
-Force correct referenceID's.
+For yaz-proxy, force correct referenceID's.
 
-Log libxml2/libxslt errors in yaz log.
+For yaz-proxy, log libxml2/libxslt errors in yaz log.
 
-Update proxy to work with SRW diagnostic code as a URI/string.
+Update yaz-proxy to work with SRW diagnostic code as a URI/string.
 
 Proxy now throws 'unsupported transfer syntax' / 'unsupported ESN' properly.
 
-Multiple explain records may exist for one target. Proxy checks contents of
-database element in explain record to validate database.
+For yaz-proxy, multiple explain records may exist for one target.
+Proxy checks contents of database element in explain record to
+validate database.
 
 --- 0.7.5 2004/01/15 Internal release.
 

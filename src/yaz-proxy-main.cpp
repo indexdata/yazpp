@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.33 2004-02-12 17:17:31 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.34 2004-02-16 10:47:37 adam Exp $
  */
 
 #include <signal.h>
@@ -34,6 +34,7 @@ static char *pid_fname = 0;
 static char *uid = 0;
 static char *log_file = 0;
 static int debug = 0;
+static int no_limit_files = 0;
 
 int args(Yaz_Proxy *proxy, int argc, char **argv)
 {
@@ -42,7 +43,7 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
     char *prog = argv[0];
     int ret;
 
-    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:U:X",
+    while ((ret = options("o:a:t:v:c:u:i:m:l:T:p:U:n:X",
 			  argv, argc, &arg)) != -2)
     {
 	int err;
@@ -96,6 +97,9 @@ int args(Yaz_Proxy *proxy, int argc, char **argv)
 	    break;
         case 'T':
 	    proxy->set_target_idletime(atoi(arg));
+	    break;
+	case 'n':
+	    no_limit_files = atoi(arg);
 	    break;
 	case 'X':
 	    debug = 1;
@@ -161,6 +165,22 @@ static void child_run(Yaz_SocketManager *m, int run)
     xmlSetGenericErrorFunc(0, proxy_xml_error_handler);
 #endif
     yaz_log(LOG_LOG, "0 proxy run=%d pid=%ld", run, (long) getpid());
+
+    if (no_limit_files)
+    {
+#if HAVE_SETRLIMIT
+	struct rlimit limit_data;
+	limit_data.rlim_cur = no_limit_files;
+	limit_data.rlim_max = no_limit_files;
+	
+	yaz_log(LOG_LOG, "0 setrlimit NOFILE cur=%d max=%d",
+		limit_data.rlim_cur, limit_data.rlim_max);
+	if (setrlimit(RLIMIT_NOFILE, &limit_data))
+	    yaz_log(LOG_ERRNO|LOG_WARN, "setrlimit");
+#else
+	yaz_log(LOG_WARN, "setrlimit unavablable. Option -n ignored");
+#endif
+    }
     if (pid_fname)
     {
 	FILE *f = fopen(pid_fname, "w");
@@ -195,12 +215,12 @@ static void child_run(Yaz_SocketManager *m, int run)
 	xfree(uid);
     }
 #if HAVE_GETRLIMIT
-	struct rlimit limit_data;
-	getrlimit(RLIMIT_NOFILE, &limit_data);
-	yaz_log(LOG_LOG, "0 get limit NOFILE cur=%d max=%d",
-		limit_data.rlim_cur, limit_data.rlim_max);
+    struct rlimit limit_data;
+    getrlimit(RLIMIT_NOFILE, &limit_data);
+    yaz_log(LOG_LOG, "0 getrlimit NOFILE cur=%d max=%d",
+	    limit_data.rlim_cur, limit_data.rlim_max);
 #endif
-
+    
     while (m->processEvent() > 0)
 	;
 
