@@ -1,6 +1,6 @@
 # Copyright (C) 1993-2004, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.2 2004-03-30 18:14:14 adam Exp $
+# $Id: makefile,v 1.3 2004-03-30 18:58:40 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -31,7 +31,7 @@ ZLIB_DIR = c:\zlib-1.1.4.win32
 
 default: all
 
-all: dirs dll proxy iconv libxml2 libxslt yaz
+all: dirs generated dll zclient proxy iconv libxml2 libxslt yaz
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -70,10 +70,12 @@ YAZPP_IMPLIB=$(LIBDIR)\yazpp.lib
 YAZPROXY_IMPLIB=$(LIBDIR)\yazproxy.lib
 
 YAZPROXY=$(BINDIR)\yaz-proxy.exe
+ZCLIENT=$(BINDIR)\zclient.exe
 
 # shortcut names defined here
 dll: $(YAZPP_DLL) $(YAZPROXY_DLL)
 proxy: $(YAZPROXY)
+zclient: $(ZCLIENT)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -239,12 +241,20 @@ YAZPP_DLL_OBJS = \
    "$(OBJDIR)\yaz-z-server-update.obj" \
    "$(OBJDIR)\yaz-z-databases.obj" \
    "$(OBJDIR)\yaz-z-cache.obj" \
-   "$(OBJDIR)\yaz-cql2rpn.obj"
+   "$(OBJDIR)\yaz-cql2rpn.obj" \
+   "$(OBJDIR)\zexcept.obj" \
+   "$(OBJDIR)\zconn.obj" \
+   "$(OBJDIR)\zquery.obj" \
+   "$(OBJDIR)\zrs.obj" \
+   "$(OBJDIR)\zrec.obj"
 
 YAZPROXY_DLL_OBJS = \
    "$(OBJDIR)\yaz-proxy.obj" \
    "$(OBJDIR)\yaz-proxy-config.obj" \
    "$(OBJDIR)\yaz-bw.obj"
+
+ZCLIENT_OBJS = \
+   "$(OBJDIR)\zclient.obj"
 
 ###########################################################
 ############### Compiling 
@@ -253,11 +263,9 @@ YAZPROXY_DLL_OBJS = \
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
 
-# yaz proxy
 {$(PROXYDIR)}.cpp{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $<
 
-# Various YAZ source directories
 {$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
@@ -329,12 +337,29 @@ $(YAZPROXY) : "$(BINDIR)" $(YAZPROXY_OBJS) $(YAZPP_IMPLIB) $(YAZPROXY_IMPLIB)
 		/map:"$(LIBDIR)\yaz-proxy.map"
 		/out:$(YAZPROXY)
 <<
-# note that this links a lib, so it uses completely different options.
+
+$(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
+	@echo Linking $(ZCLIENT)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CLIENT_LINK_OPTIONS)
+		$(LINK_LIBS) 
+            $(YAZPP_IMPLIB)
+		$(IMPLIB)
+		$(ZCLIENT_OBJS)
+		/map:"$(LIBDIR)\zclient.map"
+		/out:$(ZCLIENT)
+<<
+
 
 ###########################################################
-############### Special operations
+############### Generated SOurce files
 ###########################################################
 
+generated: $(ZOOMDIR)\zoom.h
+
+"$(ZOOMDIR)\zoom.h": "$(ZOOMDIR)\master-header"
+	sed "s/^*	/	/; s/^*/ /" "$(ZOOMDIR)\master-header" >"$(ZOOMDIR)\zoom.h"
 
 ############## clean
 clean:
@@ -346,6 +371,8 @@ clean:
 	-del $(OBJDIR)\*.OBJ
 
 realclean: clean
+	-del $(ZOOMDIR)\zoom.h
+
 # Because DOS del will only accept one file name to delete,
 # the _H_ files work only on sets that have just one file.
 # Z3950_H_FILES had to be spelled out. One more point for MS!
