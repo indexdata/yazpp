@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server.cpp,v $
- * Revision 1.10  2001-04-04 14:02:49  adam
+ * Revision 1.11  2001-04-12 15:12:10  heikki
+ * minor ursula stuff
+ *
+ * Revision 1.10  2001/04/04 14:02:49  adam
  * URSULA / Z-ruth service.
  *
  * Revision 1.9  2001/03/29 15:14:26  adam
@@ -154,7 +157,7 @@ void Yaz_Z_ServerUtility::create_surrogateDiagnostics(
     oident bib1;
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (odr, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
-	odr_malloc (odr, sizeof(*dr));
+    	odr_malloc (odr, sizeof(*dr));
     
     bib1.proto = PROTO_Z3950;
     bib1.oclass = CLASS_DIAGSET;
