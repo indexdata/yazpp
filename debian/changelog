@@ -1,8 +1,14 @@
+yaz++ (0.7.9-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 25 Feb 2004 09:19:09 +0100
+
 yaz++ (0.7.8-2) unstable; urgency=low
 
   * Added zlint.
 
- -- Adam Dickmeiss <adam@peanut.index>  Wed, 18 Feb 2004 23:13:54 +0100
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 18 Feb 2004 23:13:54 +0100
 
 yaz++ (0.7.8-1) unstable; urgency=low
 
