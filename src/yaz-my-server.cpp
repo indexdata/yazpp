@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.11 2002-10-28 12:16:09 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.12 2003-10-16 11:43:37 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -171,7 +171,7 @@ void MyServer::connectNotify()
 {
 }
 
-void usage(char *prog)
+void usage(const char *prog)
 {
     fprintf (stderr, "%s: [-a log] [-v level] [-T] @:port\n", prog);
     exit (1);
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     int thread_flag = 0;
     char *arg;
     char *prog = *argv;
-    char *addr = "tcp:@:9999";
+    const char *addr = "tcp:@:9999";
     char *apdu_log = 0;
     
     Yaz_SocketManager mySocketManager;
