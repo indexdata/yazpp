@@ -289,7 +289,6 @@
     </para>
     <screen>
      &lt;?xml version="1.0"?>
-     &lt;!-- $Id -->
      &lt;proxy>
       &lt;!-- content here .. -->
      &lt;/proxy>
@@ -347,15 +346,25 @@
      <literal>bandwidth</literal> and <literal>pdu</literal>.
      The <literal>bandwidth</literal> is the maximum total bytes
      transferred to/from the target. If a target session exceeds this
-     amount it is shut down (and no longer kept alive). 
+     limit, it is shut down (and no longer kept alive). 
      The <literal>pdu</literal> is the maximum number of requests sent
-     to the target. If a target session exceeds this amount it is
+     to the target. If a target session exceeds this limit, it is
      shut down. The idea of these two limits is that avoid very long
-     sessions that eat resources in a backend (that leaks!).
+     sessions that use resources in a backend (that leaks!).
+    </para>
+    <para>
+     The following sets maximum number of bytes transferred in a
+     target session to 1 MB and maxinum of requests to 400.
+     <screen>
+      &lt;keepalive>
+       &lt;bandwidth>1048576&lt;/bandwidth>
+       &lt;retrieve>400&lt;/retrieve>
+      &lt;/keepalive>
+     </screen>
     </para>
    </section>
    <section id="proxy-config-limit">
-    <title>Configuration:limit</title>
+    <title>Configuration: limit</title>
     <para>
      The <literal>limit</literal> section specifies bandwidth/pdu requests
      limits for an active session.
@@ -374,6 +383,22 @@
      limit is to ensure that clients that downloads hundreds or thousands of
      records do not hurt other users.
     </para>
+    <para>
+     The following sets maximum number of bytes transferred per minute to
+     500Kbytes and maximum number of requests to 40.
+     <screen>
+      &lt;limit>
+       &lt;bandwidth>524288&lt;/bandwidth>
+       &lt;retrieve>40&lt;/retrieve>
+      &lt;/limit>
+     </screen>
+    </para>
+    <note>
+     <para>
+      Typically the limits for keepalive are much higher than
+      those for session minute average.
+     </para>
+    </note>
    </section>
    
    <section id="proxy-config-attribute">
@@ -381,11 +406,28 @@
     <para>
      The <literal>attribute</literal> element specifies accept or reject
      or a particular attribute type, value pair.
+     Well-behaving targets will reject unsupported attributes on their
+     own. This feature is useful for targets that do not gracefully
+     handle unsupported attributes.
     </para>
     <para>
-     The <literal>attribute</literal> has two required attributes:
+     Attribute elements may be repeated. The proxy inspects the attribute
+     specifications in the order as specified in the configuration file.
+     When a given attribute specification matches a given attribute list
+     in a query, the proxy takes appropriate action (reject, accept).
+    </para>
+    <para>
+     If no attribute specifications matches the attribute list in a query,
+     it is accepted.
+    </para>
+    <para>
+     The <literal>attribute</literal> element has two required attributes:
      <literal>type</literal> which is the Attribute Type-1 type, and
      <literal>value</literal> which is the Attribute Type-1 value.
+     The special value/type <literal>*</literal> matches any attribute
+     type/value. A value may also be specified as a list with each
+     value separated by comma, a value may also be specified as a
+     list: low value - dash - high value.
     </para>
     <para>
      If attribute <literal>error</literal> is given, that holds a 
@@ -395,6 +437,14 @@
     <para>
      If attribute <literal>error</literal> is not given, the attribute
      type, value is accepted and passed to the backend target.
+    </para>
+    <para>
+     A target that supports use attributes 1,4, 1000 through 1003 and
+     no other use attributes, could use the following rules:
+     <screen>
+      &lt;attribute type="1" value="1,4,1000-1003">
+      &lt;attribute type="1" value="*" error="114"/>
+     </screen>
     </para>
    </section>
 
@@ -444,6 +494,10 @@
      <literal>target</literal> and specifies the amount in seconds before
      a target session is shut down.
     </para>
+    <para>
+     This can also be specified on the command line bt using option
+     <literal>-T</literal>. Refer to <xref linkend="proxy-usage"/>.
+    </para>
    </section>
 
    <section id="proxy-config-client-timeout">
@@ -452,6 +506,10 @@
      The element <literal>client-timeout</literal> is the child of element
      <literal>target</literal> and specifies the amount in seconds before
      a client session is shut down.
+     </para>
+    <para>
+     This can also be specified on the command line by using option
+     <literal>-i</literal>. Refer to <xref linkend="proxy-usage"/>.
     </para>
    </section>
    
@@ -477,6 +535,22 @@
      allowed connections to targets (all targets). If this limit
      is reached the proxy will close the least recently used connection.
     </para>
+    <para>
+     Note, that many Unix systems impose a system on the number of
+     open files allowed in a single process, typically in the 
+     range 256 (Solaris) to 1024 (Linux).
+     The proxy uses 2 sockets per session + a few files
+     for logging. As a rule of thumb, ensure that 2*max-clients + 5
+     can be opened by the proxy process.
+    </para>
+    <tip>
+     <para>
+      Using the <ulink url="http://www.gnu.org/software/bash/bash.html">
+       bash</ulink> shell, you can set the limit with
+      <literal>ulimit -n</literal><replaceable>no</replaceable>. 
+       Use <literal>ulimit -a</literal> to display limits.
+     </para>
+     </tip>
    </section>
    
   </section>
