@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  * 
  * $Log: yaz-proxy.cpp,v $
- * Revision 1.7  1999-04-28 13:31:17  adam
+ * Revision 1.8  1999-05-04 10:53:00  adam
+ * Changed the way the PROXY behaves when lost cookie is received.
+ *
+ * Revision 1.7  1999/04/28 13:31:17  adam
  * Better result set optimisation for proxy.
  *
  * Revision 1.6  1999/04/27 07:52:13  adam
@@ -102,7 +105,7 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
     get_otherInfoAPDU(apdu, &oi);
     char *cookie = get_cookie(oi);
     logf (LOG_LOG, "Yaz_Proxy::get_client cookie=%s", cookie ? cookie :
-	  "<null>");
+	  "null");
     if (cookie)
     {
 	for (c = parent->m_clientPool; c; c = c->m_next)
@@ -112,11 +115,12 @@ Yaz_ProxyClient *Yaz_Proxy::get_client(Z_APDU *apdu)
 	    if (!strcmp(cookie,c->m_cookie))
 	    {
 		logf (LOG_LOG, "Yaz_Proxy::get_client cached");
-		break;
+		return c;
 	    }
 	}
+	
     }
-    else if (!m_client)
+    if (!m_client)
     {
 	logf (LOG_LOG, "Yaz_Proxy::get_client creating new");
 	c = new Yaz_ProxyClient(m_PDU_Observable->clone());
