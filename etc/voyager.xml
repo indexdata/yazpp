@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: voyager.xml,v 1.5 2004-01-07 11:10:55 adam Exp $ -->
+<!-- $Id: voyager.xml,v 1.6 2004-01-07 14:07:00 adam Exp $ -->
 <proxy>
   <!-- define default target and name it voyager -->
   <target default="1" name="voyager">
@@ -89,6 +89,98 @@
 	<host>indexdata.dk</host>
 	<port>9000</port>
       </serverInfo>
+
+      <databaseInfo>
+	<title>LoC gateway</title>
+	<description lang="en" primary="true">
+	  SRW/SRU/Z39.50 Gateway to Library of Congress' Z39.50 server
+	</description>
+      </databaseInfo>
+      
+      <indexInfo>
+	<set identifier="http://www.loc.gov/zing/cql/context-sets/cql/v1.1/"
+	  name="cql"/>
+	<set identifier="http://www.loc.gov/zing/cql/dc-indexes/v1.0/"
+	  name="dc"/>
+	<set identifier="http://www.loc.gov/zing/cql/context-sets/bath/v1.1/"
+	  name="bath"/>
+	<set identifier="http://srw.o-r-g.org/indexSets/rec/1.0/"
+	  name="rec"/>
+      </indexInfo>
+
+      <index id="12">
+	<title>id</title>
+	<map><name set="rec">id</name></map>
+      </index>
+      
+      <index id="4">
+	<title>title</title>
+	<map><name set="dc">title</name></map>
+      </index>
+      <index id="21">
+	<title>subject</title>
+	<map><name set="dc">subject</name></map>
+      </index>
+      <index id="1003">
+	<title>creator</title>
+	<map><name set="dc">creator</name></map>
+	<map><name set="dc">author</name></map>
+      </index>
+
+      <index id="1020">
+	<title>editor</title>
+	<map><name set="dc">editor</name></map>
+      </index>
+
+      <index id="1018">
+	<title>publisher</title>
+	<map><name set="dc">publisher</name></map>
+      </index>
+
+      <index id="62">
+	<title>description</title>
+	<map><name set="dc">description</name></map>
+      </index>
+
+      <index id="30">
+	<title>date</title>
+	<map><name set="dc">date</name></map>
+      </index>
+
+      <index id="30">
+	<title>date</title>
+	<map><name set="dc">date</name></map>
+      </index>
+
+      <index id="1002">
+	<title>name</title>
+	<map><name set="bath">name</name></map>
+      </index>
+
+      <index id="7">
+	<title>isbn</title>
+	<map><name set="bath">isbn</name></map>
+      </index>
+      <index id="8">
+	<title>issn</title>
+	<map><name set="bath">issn</name></map>
+      </index>
+
+      <schemaInfo identifier="http://www.loc.gov/marcxml/"
+	sort="false" name="marcxml">
+	<title>MARCXML</title>
+      </schemaInfo>
+      
+      <schemaInfo identifier="http://www.loc.gov/zing/srw/dcschema/v1.0"
+	sort="false" name="dc">
+	<title>Dublin Core</title>
+      </schemaInfo>
+
+      <schemaInfo identifier="http://www.loc.gov/mods/v3"
+	sort="false" name="mods">
+	<title>MODS</title>
+      </schemaInfo>
+      
     </explain>
    <cql2rpn>pqf.properties</cql2rpn>
   </target>
