@@ -1,6 +1,4 @@
 
-SUBDIRS = proxy
-
 pkginclude_HEADERS = \
 	ir-assoc.h \
 	pdu-assoc.h \

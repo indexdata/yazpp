@@ -100,8 +100,6 @@ AC_OUTPUT([
 	src/Makefile
 	include/Makefile
 	include/yaz++/Makefile
-	include/yaz++/proxy/Makefile
-	proxy/Makefile
 	zlint/Makefile
 	yaz++-config
 	zoom/Makefile
@@ -109,5 +107,4 @@ AC_OUTPUT([
 	doc/yaz++.xml
 	doc/yazprint.dsl doc/yazphp.dsl doc/yazhtml.dsl
         doc/tkl.xsl
-	etc/Makefile
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz++-config >src/yaz++-config && chmod +x yaz++-config src/yaz++-config])

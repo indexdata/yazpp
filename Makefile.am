@@ -1,11 +1,11 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src include proxy zlint zoom etc doc 
+SUBDIRS = src include zlint zoom doc 
 
 aclocaldir=$(datadir)/aclocal
 aclocal_DATA = yazpp.m4
 
-EXTRA_DIST= LICENSE LICENSE.proxy TODO yaz++-config.in yazpp.m4
+EXTRA_DIST= LICENSE TODO yaz++-config.in yazpp.m4
 
 dist-hook:
 	mkdir $(distdir)/win
