@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.5 2002-10-30 09:13:31 adam Exp $
+// $Header: /home/cvsroot/yaz++/zoom/master-header,v 1.6 2002-10-30 10:03:52 adam Exp $
 //
 // ZOOM C++ Binding.
 // The ZOOM homepage is at http://zoom.z3950.org/
@@ -18,11 +18,12 @@
 * */
 *#include <yaz/zoom.h>
 *
+
 namespace ZOOM {
   // Forward declarations for type names.
-  class query;
-  class resultSet;
-  class record;
+  class YAZ_EXPORT query;
+  class YAZ_EXPORT resultSet;
+  class YAZ_EXPORT record;
 
   const char *option (const char *key);
   const char *option (const char *key, const char *val);
@@ -30,7 +31,7 @@ namespace ZOOM {
   char *errmsg ();
   char *addinfo ();
 
-  class connection {
+  class YAZ_EXPORT connection {
 *   ZOOM_connection c;
 *   friend class resultSet; // so it can use _getYazConnection()
 *   ZOOM_connection _getYazConnection () const { return c; }
@@ -51,19 +52,19 @@ namespace ZOOM {
     virtual ~query ();
   };
 
-  class prefixQuery : public query {
+  class YAZ_EXPORT prefixQuery : public query {
   public:
     prefixQuery (const char *pqn);
     ~prefixQuery ();
   };
 
-  class CCLQuery : public query {
+  class YAZ_EXPORT CCLQuery : public query {
   public:
     CCLQuery (const char *ccl, void *qualset);
     ~CCLQuery ();
   };
 
-  class resultSet {
+  class YAZ_EXPORT resultSet {
 *   connection &owner;
 *   ZOOM_resultset rs;
   public:
@@ -75,7 +76,7 @@ namespace ZOOM {
     const record *getRecord (size_t i) const;
   };
 
-  class record {
+  class YAZ_EXPORT record {
 *   const resultSet *owner;
 *   ZOOM_record r;
 *   friend class resultSet; // so it can use this constructor
@@ -92,7 +93,7 @@ namespace ZOOM {
     const char *rawdata () const;
   };
 
-  class exception {
+  class YAZ_EXPORT exception {
 * protected:
 *   int code;
   public:
@@ -101,14 +102,14 @@ namespace ZOOM {
     const char *errmsg () const;
   };
 
-  class systemException: public exception {
+  class YAZ_EXPORT systemException: public exception {
   public:
     systemException ();
     int errcode () const;
     const char *errmsg () const;
   };
 
-  class bib1Exception: public exception {
+  class YAZ_EXPORT bib1Exception: public exception {
 *   const char *info;
   public:
 *   ~bib1Exception ();
@@ -118,7 +119,7 @@ namespace ZOOM {
     const char *addinfo () const;
   };
 
-  class queryException: public exception {
+  class YAZ_EXPORT queryException: public exception {
 *   const char *q;
   public:
 *   ~queryException ();

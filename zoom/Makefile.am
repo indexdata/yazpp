@@ -1,4 +1,4 @@
-# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.5 2002-10-09 16:17:26 adam Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.6 2002-10-30 10:03:52 adam Exp $
 
 AM_CXXFLAGS= $(YAZINC) 
 
@@ -29,5 +29,5 @@ zoom.h: master-header
 
 interface.h: master-header
 	rm -f $@
-	grep -v '^*' $< > $@
+	grep -v '^*' $< | sed 's/YAZ_EXPORT//g' > $@
 	chmod -w $@
