@@ -7,7 +7,7 @@ pkginclude_HEADERS = \
 	query.h \
 	socket-manager.h \
 	socket-observer.h \
-	assoc.h \
+	z-assoc.h \
 	z-query.h \
 	z-server.h \
 	z-databases.h
