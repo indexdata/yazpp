@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.5 2002-10-23 21:23:29 adam Exp $
+## $Id: Makefile.am,v 1.6 2002-10-24 07:20:24 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -36,7 +36,7 @@ $(HTMLFILES): $(XMLFILES)
 yaz-proxy.8: yaz-proxy-man.sgml yaz-proxy-ref.xml
 	docbook2man $(srcdir)/yaz-proxy-man.sgml
 
-yaz++.php: $(XMLFILES)
+yazpp.php: $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
 
 yaz++.pdf: $(XMLFILES)
