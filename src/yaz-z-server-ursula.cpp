@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  * 
  * $Log: yaz-z-server-ursula.cpp,v $
- * Revision 1.2  2001-04-05 15:12:24  adam
+ * Revision 1.3  2001-04-11 12:33:42  heikki
+ * Working on ursula things
+ *
+ * Revision 1.2  2001/04/05 15:12:24  adam
  * WIN32 updates.
  *
  * Revision 1.1  2001/04/04 14:02:49  adam
@@ -54,7 +57,8 @@ int Yaz_Facility_Ursula::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
     }
     yaz_log (LOG_LOG, "got ursula packet");
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
-    ursula_service(req, pdu, apdu_response->u.extendedServicesResponse);
+    ursula_service(req, pdu, apdu_response->u.extendedServicesResponse, NULL);
+      // FIXME: Initialize the response pdu...   ADAM!!!
     s->send_Z_PDU(apdu_response);
     return 1;
 }

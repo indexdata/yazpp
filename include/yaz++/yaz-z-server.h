@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.h,v 1.7 2001-04-05 13:09:44 adam Exp $
+ * $Id: yaz-z-server.h,v 1.8 2001-04-11 12:33:42 heikki Exp $
  */
 
 #include <yaz++/yaz-z-assoc.h>
@@ -37,9 +37,13 @@ class YAZ_EXPORT IYaz_Server_Facility {
 #if HAVE_YAZ_URSULA_H
 class YAZ_EXPORT Yaz_Facility_Ursula : public IYaz_Server_Facility {
  public:
+//    virtual void ursula_service (Z_ExtendedServicesRequest *req,
+//				 Z_UrsPDU *u,
+//				 Z_ExtendedServicesResponse *res) = 0;
     virtual void ursula_service (Z_ExtendedServicesRequest *req,
-				 Z_UrsPDU *u,
-				 Z_ExtendedServicesResponse *res) = 0;
+			 Z_UrsPDU *u_req,
+			 Z_ExtendedServicesResponse *res,
+			 Z_UrsPDU *u_res) =0;
 
     int init(Yaz_Z_Server *server,
 	     Z_InitRequest *initRequest,
