@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-proxy-main.cpp,v 1.25 2003-10-23 13:49:58 adam Exp $
+ * $Id: yaz-proxy-main.cpp,v 1.26 2003-10-24 12:19:23 adam Exp $
  */
 
 #include <signal.h>
@@ -19,8 +19,8 @@
 
 void usage(char *prog)
 {
-    fprintf (stderr, "%s: [-c config] [-a log] [-m num] [-v level] [-t target] [-i sec] "
-             "[-u uid] [-p pidfile] [-o optlevel] @:port\n", prog);
+    fprintf (stderr, "%s: [-c config] [-l log] [-a log] [-v level] [-t target] "
+             "[-u uid] [-p pidfile] @:port\n", prog);
     exit (1);
 }
 
