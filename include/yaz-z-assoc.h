@@ -2,8 +2,11 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.h,v 1.8 2000-09-08 10:23:42 adam Exp $
+ * $Id: yaz-z-assoc.h,v 1.9 2000-09-08 12:50:24 heikki Exp $
  */
+
+#ifndef YAZ_Z_ASSOC_INCLUDED
+#define YAZ_Z_ASSOC_INCLUDED
 
 #include <yaz/proto.h>
 #include <yaz/odr.h>
@@ -87,3 +90,5 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     char *m_APDU_fname;
     char *m_hostname;
 };
+
+#endif
