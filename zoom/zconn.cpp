@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.6 2003-09-22 12:25:20 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.7 2005-05-03 16:21:16 mike Exp $
 
 // Z39.50 Connection class
 
@@ -23,7 +23,8 @@ namespace ZOOM {
     }
 
     std::string connection::option(const std::string &key) const {
-	return ZOOM_connection_option_get(c, key.c_str());
+	const char* val = ZOOM_connection_option_get(c, key.c_str());
+	return (val) ? val : std::string();
     }
 
     bool connection::option(const std::string &key, const std::string &val) {
