@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.7 2005-05-03 16:21:16 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.8 2005-05-03 16:29:52 mike Exp $
 
 // Z39.50 Connection class
 
@@ -6,20 +6,30 @@
 
 
 namespace ZOOM {
-    connection::connection(const std::string &hostname, int portnum) {
+    connection::connection() {
+	ZOOM_options o = ZOOM_options_create();
+	c = ZOOM_connection_create(o);
+    }
+
+    void connection::connect(const std::string &hostname, int portnum) {
 	const char *line_printer_size_hostname = hostname.c_str();
 	//###cerr << "opening " << hostname << ":" << portnum << "\n";
-	c = ZOOM_connection_new(line_printer_size_hostname, portnum);
-	//###cerr << "opened, got " << c << "\n";
+	ZOOM_connection_connect(c, line_printer_size_hostname, portnum);
+	//###cerr << "opened\n";
 
 	int errcode;
 	const char *errmsg;	// unused: carries same info as `errcode'
 	const char *addinfo;
 	if ((errcode = ZOOM_connection_error(c, &errmsg, &addinfo)) != 0) {
 	    //###cerr << "oops: no connect, errcode=" << errcode << "\n";
-	    ZOOM_connection_destroy(c);
 	    throw bib1Exception(errcode, addinfo);
 	}
+    }
+
+    connection::connection(const std::string &hostname, int portnum) {
+	ZOOM_options o = ZOOM_options_create();
+	c = ZOOM_connection_create(o);
+	connect(hostname, portnum);
     }
 
     std::string connection::option(const std::string &key) const {
