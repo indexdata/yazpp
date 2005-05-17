@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-update.cpp,v 1.7 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-z-server-update.cpp,v 1.8 2005-05-17 12:59:50 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -34,6 +34,7 @@ int Yaz_Facility_Update::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 		       apdu_response->u.extendedServicesResponse);
 	s->transfer_referenceId(apdu_request, apdu_response);
 	s->send_Z_PDU(apdu_response, 0);
+	return 1;
     }
     else if (req->taskSpecificParameters &&
 	     req->taskSpecificParameters->which == Z_External_update0)
@@ -43,6 +44,7 @@ int Yaz_Facility_Update::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
 			 apdu_response->u.extendedServicesResponse);
 	s->transfer_referenceId(apdu_request, apdu_response);
 	s->send_Z_PDU(apdu_response, 0);
+	return 1;
     }
-    return 1;
+    return 0;
 }
