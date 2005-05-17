@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.6 2005-05-17 13:00:56 adam Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.7 2005-05-17 20:34:36 adam Exp $
  */
 
 #include <yaz++/z-server.h>
@@ -1478,7 +1478,7 @@ static const char *marc_records[] = {
   "\x77\x6F\x72\x6B\x2C\x20\x4E\x44\x4E\x2E\x1E\x1D"
 };
 
-const char *Yaz_USMARC::get_record(int position)
+const char *Yaz_USMARC::get_record(size_t position)
 {
     if (position >= 1 && position <= (
 	    sizeof(marc_records) / sizeof(*marc_records)))
