@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.5 2003-10-16 10:26:58 adam Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.6 2005-05-17 13:00:56 adam Exp $
  */
 
 #include <yaz++/z-server.h>
@@ -1480,7 +1480,8 @@ static const char *marc_records[] = {
 
 const char *Yaz_USMARC::get_record(int position)
 {
-    int max = sizeof(marc_records) / sizeof(*marc_records);
-    int eff_pos = (position-1) % max;
-    return marc_records[eff_pos];
+    if (position >= 1 && position <= (
+	    sizeof(marc_records) / sizeof(*marc_records)))
+	return marc_records[position-1];
+    return 0;
 }

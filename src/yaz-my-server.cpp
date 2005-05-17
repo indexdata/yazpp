@@ -2,11 +2,12 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.15 2005-01-17 09:55:58 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.16 2005-05-17 13:00:56 adam Exp $
  */
 
 #include <stdlib.h>
 #include <yaz/log.h>
+#include <yaz/diagbib1.h>
 #include <yaz/options.h>
 #include <yaz++/z-server.h>
 #include <yaz++/pdu-assoc.h>
@@ -127,8 +128,12 @@ void MyRetrieval::sr_record (const char *resultSetName,
 {
     yaz_log (YLOG_LOG, "MyServer::recv_Z_record");
     const char *rec = get_record(position);
-    create_databaseRecord (odr_encode(), namePlusRecord, 0, VAL_USMARC, rec,
-			   strlen(rec));
+    if (rec)
+	create_databaseRecord (odr_encode(), namePlusRecord, 0,
+			       VAL_USMARC, rec, strlen(rec));
+    else
+	create_surrogateDiagnostics(odr_encode(), namePlusRecord, 0,
+				    YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
 }
 
 MyServer::~MyServer()
