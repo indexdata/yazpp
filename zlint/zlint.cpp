@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.8 2004-12-13 20:50:54 adam Exp $
+ * $Id: zlint.cpp,v 1.9 2005-05-17 20:33:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -160,8 +160,6 @@ int Zlint::initResponseGetVersion(Z_InitResponse *init)
 	if (ODR_MASK_GET(init->protocolVersion, no))
 	{
 	    no = i+1;
-	    if (off)
-		yaz_log(YLOG_WARN, "%sbad formatted version");
 	}
 	else
 	    off = 1;
