@@ -2,13 +2,14 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: record-cache.h,v 1.1 2004-03-29 22:46:50 adam Exp $
+ * $Id: record-cache.h,v 1.2 2005-06-02 06:40:21 adam Exp $
  */
 
 
 #include <yaz/nmem.h>
 #include <yaz/z-core.h>
 
+namespace yazpp_1 {
 class Yaz_RecordCache_Entry;
 
 class YAZ_EXPORT Yaz_RecordCache {
@@ -33,4 +34,5 @@ class YAZ_EXPORT Yaz_RecordCache {
 	       Odr_oid *syntax, int offset,
 	       Z_RecordComposition *comp);
     int m_max_size;
+};
 };

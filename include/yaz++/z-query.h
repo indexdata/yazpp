@@ -2,12 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.3 2003-10-03 13:01:42 adam Exp $
+ * $Id: z-query.h,v 1.4 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <yaz/proto.h>
 #include <yaz++/query.h>
 
+namespace yazpp_1 {
 /** Z39.50 Query
     RPN, etc.
 */
@@ -37,4 +38,5 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     int rpn2pquery(Z_RPNStructure *s, WRBUF buf);
     WRBUF zquery2pquery(Z_Query *q);
     void pr_term(WRBUF wbuf, char *buf, int len);
+};
 };

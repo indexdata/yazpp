@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.39 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.40 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <assert.h>
@@ -12,6 +12,7 @@
 
 #include <yaz++/pdu-assoc.h>
 
+using namespace yazpp_1;
 
 void Yaz_PDU_Assoc::init(IYazSocketObservable *socketObservable)
 {

@@ -2,12 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: ir-assoc.h,v 1.3 2003-12-16 14:17:01 adam Exp $
+ * $Id: ir-assoc.h,v 1.4 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
 #include <yaz++/z-query.h>
 
+namespace yazpp_1 {
 /** Information Retrieval Assocation.
     This object implements the client - and server role of a generic
     Z39.50 Association.
@@ -77,4 +78,5 @@ class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
     Z_ElementSetNames *m_elementSetNames;
     int m_lastReceived;
     int m_log;
+};
 };

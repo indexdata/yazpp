@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.31 2005-01-14 10:13:50 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.32 2005-06-02 06:40:21 adam Exp $
  */
 #ifdef WIN32
 #include <winsock.h>
@@ -24,6 +24,8 @@
 
 #include <yaz/log.h>
 #include <yaz++/socket-manager.h>
+
+using namespace yazpp_1;
 
 Yaz_SocketManager::YazSocketEntry **Yaz_SocketManager::lookupObserver(
     IYazSocketObserver *observer)

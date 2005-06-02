@@ -2,12 +2,14 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-databases.cpp,v 1.4 2002-10-09 12:50:26 adam Exp $
+ * $Id: yaz-z-databases.cpp,v 1.5 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <string.h>
 
 #include <yaz++/z-databases.h>
+
+using namespace yazpp_1;
 
 Yaz_Z_Databases::Yaz_Z_Databases()
 {

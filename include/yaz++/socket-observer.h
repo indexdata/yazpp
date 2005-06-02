@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-observer.h,v 1.3 2005-05-20 21:28:55 adam Exp $
+ * $Id: socket-observer.h,v 1.4 2005-06-02 06:40:21 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_OBSERVER_H
@@ -14,6 +14,9 @@
 #define YAZ_SOCKET_OBSERVE_TIMEOUT 8
 
 #include <yaz/yconfig.h>
+
+namespace yazpp_1 {
+
 /**
    Forward reference
  */
@@ -62,4 +65,5 @@ class YAZ_EXPORT IYazSocketObserver {
     virtual void socketNotify(int event) = 0;
 };
 
+};
 #endif

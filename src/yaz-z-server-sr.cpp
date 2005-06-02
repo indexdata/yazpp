@@ -2,12 +2,14 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.8 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.9 2005-06-02 06:40:21 adam Exp $
  *
  */
 
 #include <yaz/log.h>
 #include <yaz++/z-server.h>
+
+using namespace yazpp_1;
 
 Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
 						 const char *resultSetName,

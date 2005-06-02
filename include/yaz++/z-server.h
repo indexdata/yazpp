@@ -2,10 +2,12 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.5 2005-05-17 20:34:36 adam Exp $
+ * $Id: z-server.h,v 1.6 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
+
+namespace yazpp_1 {
 
 class Yaz_Z_Server;
 
@@ -132,4 +134,5 @@ public:
 class YAZ_EXPORT Yaz_USMARC {
  public:
     const char *get_record(size_t position);
+};
 };

@@ -2,11 +2,13 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.4 2003-10-23 11:45:08 adam Exp $
+ * $Id: pdu-observer.h,v 1.5 2005-06-02 06:40:21 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
 #define YAZ_PDU_OBSERVER_H
+
+namespace yazpp_1 {
 
 class IYaz_PDU_Observer;
 
@@ -53,6 +55,7 @@ class YAZ_EXPORT IYaz_PDU_Observer {
     /// Make clone of observer using IYaz_PDU_Observable interface
     virtual IYaz_PDU_Observer *sessionNotify(
 	IYaz_PDU_Observable *the_PDU_Observable, int fd) = 0;
+};
 };
 
 #endif

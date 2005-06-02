@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.18 2005-01-17 09:55:58 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.19 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <stdlib.h>
@@ -22,6 +22,8 @@ extern "C" {
 #include <readline/history.h>
 #endif
 }
+
+using namespace yazpp_1;
 
 class YAZ_EXPORT MyClient : public Yaz_IR_Assoc {
 private:

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-manager.h,v 1.3 2004-01-05 11:31:04 adam Exp $
+ * $Id: socket-manager.h,v 1.4 2005-06-02 06:40:21 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -10,6 +10,8 @@
 
 #include <yaz++/socket-observer.h>
 #include <time.h>
+
+namespace yazpp_1 {
 
 /** Simple Socket Manager.
     Implements a stand-alone simple model that uses select(2) to
@@ -60,5 +62,6 @@ class YAZ_EXPORT Yaz_SocketManager : public IYazSocketObservable {
     virtual ~Yaz_SocketManager();
 };
 
+};
 
 #endif

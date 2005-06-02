@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.6 2003-12-16 14:17:01 adam Exp $
+ * $Id: z-assoc.h,v 1.7 2005-06-02 06:40:21 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -13,6 +13,7 @@
 #include <yaz/odr.h>
 #include <yaz++/pdu-observer.h>
 
+namespace yazpp_1 {
 /** Z39.50 Assocation.
     This object implements the client - and server role of a generic
     Z39.50 Association.
@@ -96,6 +97,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
     char *m_APDU_fname;
     char *m_hostname;
     int m_APDU_yazlog;
+};
 };
 
 #endif

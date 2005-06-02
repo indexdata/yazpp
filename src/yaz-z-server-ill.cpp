@@ -2,11 +2,13 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-ill.cpp,v 1.11 2004-12-13 20:50:54 adam Exp $
+ * $Id: yaz-z-server-ill.cpp,v 1.12 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <yaz/log.h>
 #include <yaz++/z-server.h>
+
+using namespace yazpp_1;
 
 int Yaz_Facility_ILL::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
 			   Z_InitResponse *initResponse)

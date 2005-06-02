@@ -2,10 +2,12 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.h,v 1.1 2004-03-25 23:14:07 adam Exp $
+ * $Id: zlint.h,v 1.2 2005-06-02 06:40:21 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
+
+using namespace yazpp_1;
 
 enum Zlint_code {
     TEST_FINISHED,
