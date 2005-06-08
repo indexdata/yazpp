@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.10 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.11 2005-06-08 13:28:06 adam Exp $
  */
 
 #ifdef WIN32
@@ -35,9 +35,9 @@
 
 using namespace yazpp_1;
 
-Yaz_PDU_AssocThread::Yaz_PDU_AssocThread(
-    IYazSocketObservable *socketObservable)
-    : Yaz_PDU_Assoc(socketObservable)
+PDU_AssocThread::PDU_AssocThread(
+    ISocketObservable *socketObservable)
+    : PDU_Assoc(socketObservable)
 {
     
 }
@@ -49,7 +49,7 @@ void *
 #endif 
 events(void *p)
 {
-    Yaz_SocketManager *s = (Yaz_SocketManager *) p;
+    SocketManager *s = (SocketManager *) p;
     
     yaz_log (YLOG_LOG, "thread started");
     while (s->processEvent() > 0)
@@ -61,10 +61,10 @@ events(void *p)
 #endif
 }
 
-void Yaz_PDU_AssocThread::childNotify(COMSTACK cs)
+void PDU_AssocThread::childNotify(COMSTACK cs)
 {
-    Yaz_SocketManager *socket_observable = new Yaz_SocketManager;
-    Yaz_PDU_Assoc *new_observable = new Yaz_PDU_Assoc (socket_observable, cs);
+    SocketManager *socket_observable = new SocketManager;
+    PDU_Assoc *new_observable = new PDU_Assoc (socket_observable, cs);
 
     new_observable->m_next = m_children;
     m_children = new_observable;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.19 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.20 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <stdlib.h>
@@ -25,20 +25,20 @@ extern "C" {
 
 using namespace yazpp_1;
 
-class YAZ_EXPORT MyClient : public Yaz_IR_Assoc {
+class YAZ_EXPORT MyClient : public IR_Assoc {
 private:
     int m_interactive_flag;
     char m_thisCommand[1024];
     char m_lastCommand[1024];
     int m_setOffset;
-    Yaz_SocketManager *m_socketManager;
+    SocketManager *m_socketManager;
 public:
-    MyClient(IYaz_PDU_Observable *the_PDU_Observable,
-	     Yaz_SocketManager *the_SocketManager);
-    IYaz_PDU_Observer *sessionNotify(
-	IYaz_PDU_Observable *the_PDU_Observable, int fd);
-    int args(Yaz_SocketManager *socketManager, int argc, char **argv);
-    int interactive(Yaz_SocketManager *socketManager);
+    MyClient(IPDU_Observable *the_PDU_Observable,
+	     SocketManager *the_SocketManager);
+    IPDU_Observer *sessionNotify(
+	IPDU_Observable *the_PDU_Observable, int fd);
+    int args(SocketManager *socketManager, int argc, char **argv);
+    int interactive(SocketManager *socketManager);
     int wait();
     void recv_initResponse(Z_InitResponse *initResponse);
     void recv_searchResponse(Z_SearchResponse *searchResponse);
@@ -89,15 +89,15 @@ void MyClient::failNotify()
     set_lastReceived(-1);
 }
 
-IYaz_PDU_Observer *MyClient::sessionNotify(
-    IYaz_PDU_Observable *the_PDU_Observable, int fd)
+IPDU_Observer *MyClient::sessionNotify(IPDU_Observable *the_PDU_Observable,
+				       int fd)
 { 
     return new MyClient(the_PDU_Observable, m_socketManager);
 }
 
-MyClient::MyClient(IYaz_PDU_Observable *the_PDU_Observable,
-		   Yaz_SocketManager *the_socketManager) :
-    Yaz_IR_Assoc (the_PDU_Observable)
+MyClient::MyClient(IPDU_Observable *the_PDU_Observable,
+		   SocketManager *the_socketManager) :
+    IR_Assoc (the_PDU_Observable)
 {
     m_setOffset = 1;
     m_interactive_flag = 1;
@@ -619,7 +619,7 @@ const char *MyClient::getCommand()
     return m_lastCommand;
 }
 
-int MyClient::interactive(Yaz_SocketManager *socketManager)
+int MyClient::interactive(SocketManager *socketManager)
 {
     const char *cmd;
     if (!m_interactive_flag)
@@ -632,7 +632,7 @@ int MyClient::interactive(Yaz_SocketManager *socketManager)
     return 0;
 }
 
-int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
+int MyClient::args(SocketManager *socketManager, int argc, char **argv)
 {
     char *host = 0;
     char *proxy = 0;
@@ -688,8 +688,8 @@ int MyClient::args(Yaz_SocketManager *socketManager, int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    Yaz_SocketManager mySocketManager;
-    Yaz_PDU_Assoc *some = new Yaz_PDU_Assoc(&mySocketManager);
+    SocketManager mySocketManager;
+    PDU_Assoc *some = new PDU_Assoc(&mySocketManager);
 
     MyClient z(some, &mySocketManager);
 

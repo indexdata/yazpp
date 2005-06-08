@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-update.cpp,v 1.9 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-server-update.cpp,v 1.10 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -10,7 +10,7 @@
 
 using namespace yazpp_1;
 
-int Yaz_Facility_Update::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
+int Yaz_Facility_Update::init(Z_Server *s, Z_InitRequest *initRequest,
 			   Z_InitResponse *initResponse)
 {
     Z_Options *req = initRequest->options;
@@ -21,7 +21,7 @@ int Yaz_Facility_Update::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
     return 1;
 }
 
-int Yaz_Facility_Update::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
+int Yaz_Facility_Update::recv(Z_Server *s, Z_APDU *apdu_request)
 {   
     Z_APDU *apdu_response;
 

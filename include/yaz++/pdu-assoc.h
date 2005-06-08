@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.6 2005-06-02 06:40:21 adam Exp $
+ * $Id: pdu-assoc.h,v 1.7 2005-06-08 13:28:05 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -19,8 +19,8 @@ namespace yazpp_1 {
     the method connect. The server role is initiated by using the
     listen method.
  */
-class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, yazpp_1::IYazSocketObserver {
-    friend class Yaz_PDU_AssocThread;
+class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
+    friend class PDU_AssocThread;
  private:
     enum { 
 	Connecting,
@@ -38,38 +38,38 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, yazpp_1::IYazSocket
 	int m_len;
 	PDU_Queue *m_next;
     };
-    Yaz_PDU_Assoc *m_parent;
-    Yaz_PDU_Assoc *m_children;
-    Yaz_PDU_Assoc *m_next;
+    PDU_Assoc *m_parent;
+    PDU_Assoc *m_children;
+    PDU_Assoc *m_next;
     COMSTACK m_cs;
-    yazpp_1::IYazSocketObservable *m_socketObservable;
-    IYaz_PDU_Observer *m_PDU_Observer;
+    yazpp_1::ISocketObservable *m_socketObservable;
+    IPDU_Observer *m_PDU_Observer;
     char *m_input_buf;
     int m_input_len;
     PDU_Queue *m_queue_out;
     PDU_Queue *m_queue_in;
-    int Yaz_PDU_Assoc::flush_PDU();
+    int PDU_Assoc::flush_PDU();
     int *m_destroyed;
     int m_idleTime;
     int m_log;
-    void init(yazpp_1::IYazSocketObservable *socketObservable);
+    void init(yazpp_1::ISocketObservable *socketObservable);
  public:
     COMSTACK comstack(const char *type_and_host, void **vp);
     /// Create object using specified socketObservable
-    Yaz_PDU_Assoc(yazpp_1::IYazSocketObservable *socketObservable);
+    PDU_Assoc(yazpp_1::ISocketObservable *socketObservable);
     /// Create Object using existing comstack
-    Yaz_PDU_Assoc(yazpp_1::IYazSocketObservable *socketObservable,
+    PDU_Assoc(yazpp_1::ISocketObservable *socketObservable,
 		  COMSTACK cs);
     /// Close socket and destroy object.
-    /// virtual ~Yaz_PDU_Assoc();
+    /// virtual ~PDU_Assoc();
     /// Clone the object
-    IYaz_PDU_Observable *clone();
+    IPDU_Observable *clone();
     /// Send PDU
     int send_PDU(const char *buf, int len);
     /// connect to server (client role)
-    int connect(IYaz_PDU_Observer *observer, const char *addr);
+    int connect(IPDU_Observer *observer, const char *addr);
     /// listen for clients (server role)
-    int listen(IYaz_PDU_Observer *observer, const char *addr);
+    int listen(IPDU_Observer *observer, const char *addr);
     /// Socket notification
     void socketNotify(int event);
     /// Close socket
@@ -83,9 +83,9 @@ class YAZ_EXPORT Yaz_PDU_Assoc : public IYaz_PDU_Observable, yazpp_1::IYazSocket
     const char *getpeername();
 };
 
-class YAZ_EXPORT Yaz_PDU_AssocThread : public Yaz_PDU_Assoc {
+class YAZ_EXPORT PDU_AssocThread : public PDU_Assoc {
  public:
-    Yaz_PDU_AssocThread(yazpp_1::IYazSocketObservable *socketObservable);
+    PDU_AssocThread(yazpp_1::ISocketObservable *socketObservable);
  private:
     void childNotify(COMSTACK cs);
 

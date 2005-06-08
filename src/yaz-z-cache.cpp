@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.12 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.13 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -11,14 +11,14 @@
 
 using namespace yazpp_1;
 
-struct yazpp_1::Yaz_RecordCache_Entry {
+struct yazpp_1::RecordCache_Entry {
     int m_offset;
     Z_NamePlusRecord *m_record;
     Z_RecordComposition *m_comp;
-    Yaz_RecordCache_Entry *m_next;
+    RecordCache_Entry *m_next;
 };
 
-Yaz_RecordCache::Yaz_RecordCache ()
+RecordCache::RecordCache ()
 {
     m_mem = nmem_create();
     m_entries = 0;
@@ -27,17 +27,17 @@ Yaz_RecordCache::Yaz_RecordCache ()
     m_max_size = 200000;
 }
 
-Yaz_RecordCache::~Yaz_RecordCache ()
+RecordCache::~RecordCache ()
 {
     nmem_destroy(m_mem);
 }
 
-void Yaz_RecordCache::set_max_size(int sz)
+void RecordCache::set_max_size(int sz)
 {
     m_max_size = sz;
 }
 
-void Yaz_RecordCache::clear ()
+void RecordCache::clear ()
 {
     nmem_destroy(m_mem);
     m_mem = nmem_create();
@@ -46,7 +46,7 @@ void Yaz_RecordCache::clear ()
     m_searchRequest = 0;
 }
 
-void Yaz_RecordCache::copy_searchRequest(Z_SearchRequest *sr)
+void RecordCache::copy_searchRequest(Z_SearchRequest *sr)
 {
     ODR encode = odr_createmem(ODR_ENCODE);
     ODR decode = odr_createmem(ODR_DECODE);
@@ -66,7 +66,7 @@ void Yaz_RecordCache::copy_searchRequest(Z_SearchRequest *sr)
     odr_destroy(decode);
 }
 
-void Yaz_RecordCache::copy_presentRequest(Z_PresentRequest *pr)
+void RecordCache::copy_presentRequest(Z_PresentRequest *pr)
 {
     ODR encode = odr_createmem(ODR_ENCODE);
     ODR decode = odr_createmem(ODR_DECODE);
@@ -86,7 +86,7 @@ void Yaz_RecordCache::copy_presentRequest(Z_PresentRequest *pr)
     odr_destroy(decode);
 }
 
-void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
+void RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
 			   int hits)
 {
     if (nmem_total(m_mem) > m_max_size)
@@ -117,7 +117,7 @@ void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
     int i;
     for (i = 0; i<npr->num_records; i++)
     {
-	Yaz_RecordCache_Entry *entry = (Yaz_RecordCache_Entry *)
+	RecordCache_Entry *entry = (RecordCache_Entry *)
 	    nmem_malloc(m_mem, sizeof(*entry));
 	entry->m_record = (Z_NamePlusRecord *)
 	    nmem_malloc(m_mem, sizeof(*entry->m_record));
@@ -131,7 +131,7 @@ void Yaz_RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
     }
 }
 
-int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
+int RecordCache::match (RecordCache_Entry *entry,
 			    Odr_oid *syntax, int offset,
 			    Z_RecordComposition *comp)
 {
@@ -176,7 +176,7 @@ int Yaz_RecordCache::match (Yaz_RecordCache_Entry *entry,
     return 0;
 }
 
-int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
+int RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 			     int start, int num,
 			     Odr_oid *syntax,
 			     Z_RecordComposition *comp)
@@ -186,7 +186,7 @@ int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 
     for (i = 0; i<num; i++)
     {
-	Yaz_RecordCache_Entry *entry = m_entries;
+	RecordCache_Entry *entry = m_entries;
 	for(; entry; entry = entry->m_next)
 	    if (match(entry, syntax, start+i, comp))
 		break;
@@ -199,7 +199,7 @@ int Yaz_RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
 	odr_malloc(o, num * sizeof(Z_NamePlusRecord *));
     for (i = 0; i<num; i++)
     {
-	Yaz_RecordCache_Entry *entry = m_entries;
+	RecordCache_Entry *entry = m_entries;
 	for(; entry; entry = entry->m_next)
 	    if (match(entry, syntax, start+i, comp))
 		break;

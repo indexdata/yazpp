@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.7 2005-06-02 06:40:21 adam Exp $
+ * $Id: z-assoc.h,v 1.8 2005-06-08 13:28:05 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -18,12 +18,12 @@ namespace yazpp_1 {
     This object implements the client - and server role of a generic
     Z39.50 Association.
 */
-class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
+class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
  public:
     /// Create object using the PDU Observer specified
-    Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
+    Z_Assoc(IPDU_Observable *the_PDU_Observable);
     /// Destroy assocation and close PDU Observer
-    virtual ~Yaz_Z_Assoc();
+    virtual ~Z_Assoc();
     /// Receive PDU
     void recv_PDU(const char *buf, int len);
     /// Connect notification
@@ -88,7 +88,7 @@ class YAZ_EXPORT Yaz_Z_Assoc : public IYaz_PDU_Observer {
  private:
     static int yaz_init_flag;
     static int yaz_init_func();
-    IYaz_PDU_Observable *m_PDU_Observable;
+    IPDU_Observable *m_PDU_Observable;
     ODR m_odr_in;
     ODR m_odr_out;
     ODR m_odr_print;

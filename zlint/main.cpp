@@ -7,8 +7,8 @@
 
 int main(int argc, char **argv)
 {
-    Yaz_SocketManager mySocketManager;
-    Zlint z(new Yaz_PDU_Assoc(&mySocketManager));
+    SocketManager mySocketManager;
+    Zlint z(new PDU_Assoc(&mySocketManager));
  
     if (argc > 1)
 	z.set_host(argv[1]);

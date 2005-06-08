@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.21 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.22 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -10,23 +10,23 @@
 
 using namespace yazpp_1;
 
-Yaz_Z_Server::Yaz_Z_Server(IYaz_PDU_Observable *the_PDU_Observable)
-    : Yaz_Z_Assoc(the_PDU_Observable)
+Z_Server::Z_Server(IPDU_Observable *the_PDU_Observable)
+    : Z_Assoc(the_PDU_Observable)
 {
     m_facilities = 0;
 }
 
-Yaz_Z_Server::~Yaz_Z_Server()
+Z_Server::~Z_Server()
 {
     facility_reset();
 }
 
-void Yaz_Z_Server::facility_reset ()
+void Z_Server::facility_reset ()
 {
-    Yaz_Z_Server_Facility_Info *p = m_facilities;
+    Z_Server_Facility_Info *p = m_facilities;
     while (p)
     {
-	Yaz_Z_Server_Facility_Info *p_next = p->m_next;
+	Z_Server_Facility_Info *p_next = p->m_next;
 
 	delete [] p->m_name;
 	delete p;
@@ -35,14 +35,14 @@ void Yaz_Z_Server::facility_reset ()
     m_facilities = 0;
 }
 
-void Yaz_Z_Server::facility_add(IYaz_Server_Facility *facility,
-				const char *name)
+void Z_Server::facility_add(IServer_Facility *facility,
+			    const char *name)
 {
-    Yaz_Z_Server_Facility_Info **p = &m_facilities;
+    Z_Server_Facility_Info **p = &m_facilities;
     while (*p)
 	p = &(*p)->m_next;
 
-    *p = new Yaz_Z_Server_Facility_Info;
+    *p = new Z_Server_Facility_Info;
 
     (*p)->m_next = 0;
     (*p)->m_name = new char [strlen(name)+1];
@@ -50,7 +50,7 @@ void Yaz_Z_Server::facility_add(IYaz_Server_Facility *facility,
     (*p)->m_facility = facility;
 }
 
-void Yaz_Z_Server::recv_GDU (Z_GDU *apdu, int len)
+void Z_Server::recv_GDU (Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
 	recv_Z_PDU(apdu->u.z3950, len);
@@ -58,9 +58,9 @@ void Yaz_Z_Server::recv_GDU (Z_GDU *apdu, int len)
 	delete this;
 }
 
-void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
+void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
 {   
-    Yaz_Z_Server_Facility_Info *f = m_facilities;
+    Z_Server_Facility_Info *f = m_facilities;
     
     if (apdu_request->which == Z_APDU_initRequest)
     {
@@ -111,7 +111,7 @@ void Yaz_Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
 /*
  * database record.
  */
-void Yaz_Z_ServerUtility::create_databaseRecord (
+void Z_ServerUtility::create_databaseRecord (
     ODR odr, Z_NamePlusRecord *rec, const char *dbname, int format,
     const void *buf, int len)
 {
@@ -124,7 +124,7 @@ void Yaz_Z_ServerUtility::create_databaseRecord (
 /*
  * surrogate diagnostic.
  */
-void Yaz_Z_ServerUtility::create_surrogateDiagnostics(
+void Z_ServerUtility::create_surrogateDiagnostics(
     ODR odr, Z_NamePlusRecord *rec, const char *dbname,
     int error, char *const addinfo)
 {
@@ -148,7 +148,7 @@ void Yaz_Z_ServerUtility::create_surrogateDiagnostics(
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
 }
 
-Z_Records *Yaz_Z_ServerUtility::create_nonSurrogateDiagnostics (
+Z_Records *Z_ServerUtility::create_nonSurrogateDiagnostics (
     ODR odr, int error, const char *addinfo)
 {
     Z_Records *rec = (Z_Records *)
@@ -172,7 +172,7 @@ Z_Records *Yaz_Z_ServerUtility::create_nonSurrogateDiagnostics (
     return rec;
 }
 
-void Yaz_Z_ServerUtility::create_diagnostics (
+void Z_ServerUtility::create_diagnostics (
     ODR odr, int error, const char *addinfo,
     Z_DiagRec ***dreca, int *num)
 {

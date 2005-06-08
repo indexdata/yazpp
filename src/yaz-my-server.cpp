@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.17 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.18 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <stdlib.h>
@@ -49,12 +49,12 @@ public:
 		    Z_Records *records);
 };
 
-class MyServer : public Yaz_Z_Server {
+class MyServer : public Z_Server {
 public:
     ~MyServer();
-    MyServer(IYaz_PDU_Observable *the_PDU_Observable);
-    IYaz_PDU_Observer* sessionNotify(IYaz_PDU_Observable *the_PDU_Observable,
-				     int fd);
+    MyServer(IPDU_Observable *the_PDU_Observable);
+    IPDU_Observer* sessionNotify(IPDU_Observable *the_PDU_Observable,
+				 int fd);
     void failNotify();
     void timeoutNotify();
     void connectNotify();
@@ -142,8 +142,8 @@ MyServer::~MyServer()
 {
 }
 
-IYaz_PDU_Observer *MyServer::sessionNotify(
-    IYaz_PDU_Observable *the_PDU_Observable, int fd)
+IPDU_Observer *MyServer::sessionNotify(
+    IPDU_Observable *the_PDU_Observable, int fd)
 {
     MyServer *new_server;
     m_no++;
@@ -157,8 +157,8 @@ IYaz_PDU_Observer *MyServer::sessionNotify(
     return new_server;
 }
 
-MyServer::MyServer(IYaz_PDU_Observable *the_PDU_Observable) :
-    Yaz_Z_Server (the_PDU_Observable)
+MyServer::MyServer(IPDU_Observable *the_PDU_Observable) :
+    Z_Server (the_PDU_Observable)
 {
     m_no = 0;
 }
@@ -193,9 +193,9 @@ int main(int argc, char **argv)
     const char *addr = "tcp:@:9999";
     char *apdu_log = 0;
     
-    Yaz_SocketManager mySocketManager;
+    SocketManager mySocketManager;
     
-    Yaz_PDU_Assoc *my_PDU_Assoc = 0;
+    PDU_Assoc *my_PDU_Assoc = 0;
     
     MyServer *z = 0;
     int ret;
@@ -223,11 +223,11 @@ int main(int argc, char **argv)
     }
 #if YAZ_POSIX_THREADS
     if (thread_flag)
-	my_PDU_Assoc = new Yaz_PDU_AssocThread(&mySocketManager);
+	my_PDU_Assoc = new PDU_AssocThread(&mySocketManager);
     else
-	my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
+	my_PDU_Assoc = new PDU_Assoc(&mySocketManager);
 #else
-    my_PDU_Assoc = new Yaz_PDU_Assoc(&mySocketManager);
+    my_PDU_Assoc = new PDU_Assoc(&mySocketManager);
 #endif
     
     z = new MyServer(my_PDU_Assoc);

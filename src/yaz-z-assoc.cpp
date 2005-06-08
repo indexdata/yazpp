@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.36 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.37 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <assert.h>
@@ -14,7 +14,7 @@
 
 using namespace yazpp_1;
 
-int Yaz_Z_Assoc::yaz_init_func()
+int Z_Assoc::yaz_init_func()
 {
 #ifndef WIN32
     signal (SIGPIPE, SIG_IGN);
@@ -22,9 +22,9 @@ int Yaz_Z_Assoc::yaz_init_func()
     return 1;
 }
 
-int Yaz_Z_Assoc::yaz_init_flag =  Yaz_Z_Assoc::yaz_init_func();  
+int Z_Assoc::yaz_init_flag =  Z_Assoc::yaz_init_func();  
 
-Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
+Z_Assoc::Z_Assoc(IPDU_Observable *the_PDU_Observable)
 {
     m_PDU_Observable = the_PDU_Observable;
     m_odr_in = odr_createmem (ODR_DECODE);
@@ -37,7 +37,7 @@ Yaz_Z_Assoc::Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable)
     m_APDU_yazlog = 0;
 }
 
-void Yaz_Z_Assoc::set_APDU_log(const char *fname)
+void Z_Assoc::set_APDU_log(const char *fname)
 {
     if (m_APDU_file && m_APDU_file != stderr)
     {
@@ -61,19 +61,19 @@ void Yaz_Z_Assoc::set_APDU_log(const char *fname)
     }
 }
 
-int Yaz_Z_Assoc::set_APDU_yazlog(int v)
+int Z_Assoc::set_APDU_yazlog(int v)
 {
     int old = m_APDU_yazlog;
     m_APDU_yazlog = v;
     return old;
 }
 
-const char *Yaz_Z_Assoc::get_APDU_log()
+const char *Z_Assoc::get_APDU_log()
 {
     return m_APDU_fname;
 }
 
-Yaz_Z_Assoc::~Yaz_Z_Assoc()
+Z_Assoc::~Z_Assoc()
 {
     m_PDU_Observable->destroy();  
     delete m_PDU_Observable;
@@ -84,7 +84,7 @@ Yaz_Z_Assoc::~Yaz_Z_Assoc()
     delete [] m_hostname;
 }
 
-void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
+void Z_Assoc::recv_PDU(const char *buf, int len)
 {
     yaz_log (m_log, "recv_PDU len=%d", len);
     Z_GDU *apdu = decode_GDU (buf, len);
@@ -99,7 +99,7 @@ void Yaz_Z_Assoc::recv_PDU(const char *buf, int len)
     }
 }
 
-Z_APDU *Yaz_Z_Assoc::create_Z_PDU(int type)
+Z_APDU *Z_Assoc::create_Z_PDU(int type)
 {
     Z_APDU *apdu = zget_APDU(m_odr_out, type);
     if (apdu->which == Z_APDU_initRequest)
@@ -113,7 +113,7 @@ Z_APDU *Yaz_Z_Assoc::create_Z_PDU(int type)
     return apdu;
 }
 
-Z_ReferenceId **Yaz_Z_Assoc::get_referenceIdP(Z_APDU *apdu)
+Z_ReferenceId **Z_Assoc::get_referenceIdP(Z_APDU *apdu)
 {
     switch (apdu->which)
     {
@@ -167,7 +167,7 @@ Z_ReferenceId **Yaz_Z_Assoc::get_referenceIdP(Z_APDU *apdu)
     return 0;
 }
 
-void Yaz_Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
+void Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
 {
     Z_ReferenceId **id_from = get_referenceIdP(from);
     Z_ReferenceId **id_to = get_referenceIdP(to);
@@ -182,7 +182,7 @@ void Yaz_Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
 	*id_to = 0;
 }
 
-int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
+int Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
 {
     Z_GDU *gdu = (Z_GDU*) odr_malloc(odr_encode(), sizeof(*gdu));
     gdu->which = Z_GDU_Z3950;
@@ -190,7 +190,7 @@ int Yaz_Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
     return send_GDU(gdu, plen);
 }
 
-int Yaz_Z_Assoc::send_GDU(Z_GDU *apdu, int *plen)
+int Z_Assoc::send_GDU(Z_GDU *apdu, int *plen)
 {
     char *buf;
     int len;
@@ -203,7 +203,7 @@ int Yaz_Z_Assoc::send_GDU(Z_GDU *apdu, int *plen)
     return -1;
 }
 
-Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
+Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
 {
     Z_GDU *apdu;
 
@@ -241,7 +241,7 @@ Z_GDU *Yaz_Z_Assoc::decode_GDU(const char *buf, int len)
     }
 }
 
-int Yaz_Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
+int Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
 {
     const char *element = 0;
     int r = z_GDU(m_odr_out, &apdu, 0, 0);
@@ -276,12 +276,12 @@ int Yaz_Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
     return *len;
 }
 
-const char *Yaz_Z_Assoc::get_hostname()
+const char *Z_Assoc::get_hostname()
 {
     return m_hostname;
 }
 
-int Yaz_Z_Assoc::client(const char *addr)
+int Z_Assoc::client(const char *addr)
 {
     delete [] m_hostname;
     m_hostname = new char[strlen(addr)+1];
@@ -289,12 +289,12 @@ int Yaz_Z_Assoc::client(const char *addr)
     return m_PDU_Observable->connect (this, addr);
 }
 
-void Yaz_Z_Assoc::close()
+void Z_Assoc::close()
 {
     m_PDU_Observable->close ();
 }
 
-int Yaz_Z_Assoc::server(const char *addr)
+int Z_Assoc::server(const char *addr)
 {
     delete [] m_hostname;
     m_hostname = new char[strlen(addr)+1];
@@ -302,26 +302,26 @@ int Yaz_Z_Assoc::server(const char *addr)
     return m_PDU_Observable->listen (this, addr);
 }
 
-ODR Yaz_Z_Assoc::odr_encode()
+ODR Z_Assoc::odr_encode()
 {
     return m_odr_out;
 }
 
-ODR Yaz_Z_Assoc::odr_decode()
+ODR Z_Assoc::odr_decode()
 {
     return m_odr_in;
 }
-ODR Yaz_Z_Assoc::odr_print()
+ODR Z_Assoc::odr_print()
 {
     return m_odr_print;
 }
 
-void Yaz_Z_Assoc::timeout(int timeout)
+void Z_Assoc::timeout(int timeout)
 {
     m_PDU_Observable->idleTime(timeout);
 }
 
-void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
+void Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 {
     switch (apdu->which)
     {
@@ -373,7 +373,7 @@ void Yaz_Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     }
 }
 
-void Yaz_Z_Assoc::set_otherInformationString (
+void Z_Assoc::set_otherInformationString (
     Z_APDU *apdu,
     int oidval, int categoryValue,
     const char *str)
@@ -385,7 +385,7 @@ void Yaz_Z_Assoc::set_otherInformationString (
     set_otherInformationString(otherInformation, oidval, categoryValue, str);
 }
 
-void Yaz_Z_Assoc::set_otherInformationString (
+void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
     int oidval, int categoryValue,
     const char *str)
@@ -400,7 +400,7 @@ void Yaz_Z_Assoc::set_otherInformationString (
     set_otherInformationString(otherInformation, oid, categoryValue, str);
 }
 
-void Yaz_Z_Assoc::set_otherInformationString (
+void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
     int *oid, int categoryValue, const char *str)
 {
@@ -411,7 +411,7 @@ void Yaz_Z_Assoc::set_otherInformationString (
     oi->information.characterInfo = odr_strdup (odr_encode(), str);
 }
 
-Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
+Z_OtherInformationUnit *Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
     int *oid, int categoryValue, int deleteFlag)
 {
@@ -420,7 +420,7 @@ Z_OtherInformationUnit *Yaz_Z_Assoc::update_otherInformation (
 			  oid, categoryValue, deleteFlag);
 }
 
-Z_ReferenceId* Yaz_Z_Assoc::getRefID(char* str)
+Z_ReferenceId* Z_Assoc::getRefID(char* str)
 {
     Z_ReferenceId* id = NULL;
 

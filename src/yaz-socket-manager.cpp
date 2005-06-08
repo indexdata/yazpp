@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.32 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.33 2005-06-08 13:28:06 adam Exp $
  */
 #ifdef WIN32
 #include <winsock.h>
@@ -27,10 +27,10 @@
 
 using namespace yazpp_1;
 
-Yaz_SocketManager::YazSocketEntry **Yaz_SocketManager::lookupObserver(
-    IYazSocketObserver *observer)
+SocketManager::SocketEntry **SocketManager::lookupObserver(
+    ISocketObserver *observer)
 {
-    YazSocketEntry **se;
+    SocketEntry **se;
     
     for (se = &m_observers; *se; se = &(*se)->next)
 	if ((*se)->observer == observer)
@@ -38,14 +38,14 @@ Yaz_SocketManager::YazSocketEntry **Yaz_SocketManager::lookupObserver(
     return se;
 }
 
-void Yaz_SocketManager::addObserver(int fd, IYazSocketObserver *observer)
+void SocketManager::addObserver(int fd, ISocketObserver *observer)
 {
-    YazSocketEntry *se;
+    SocketEntry *se;
 
     se = *lookupObserver(observer);
     if (!se)
     {
-	se = new YazSocketEntry;
+	se = new SocketEntry;
 	se->next= m_observers;
 	m_observers = se;
 	se->observer = observer;
@@ -56,61 +56,61 @@ void Yaz_SocketManager::addObserver(int fd, IYazSocketObserver *observer)
     se->timeout = -1;
 }
 
-void Yaz_SocketManager::deleteObserver(IYazSocketObserver *observer)
+void SocketManager::deleteObserver(ISocketObserver *observer)
 {
-    YazSocketEntry **se = lookupObserver(observer);
+    SocketEntry **se = lookupObserver(observer);
     if (*se)
     {
 	removeEvent (observer);
-	YazSocketEntry *se_tmp = *se;
+	SocketEntry *se_tmp = *se;
 	*se = (*se)->next;
 	delete se_tmp;
     }
 }
 
-void Yaz_SocketManager::deleteObservers()
+void SocketManager::deleteObservers()
 {
-    YazSocketEntry *se = m_observers;
+    SocketEntry *se = m_observers;
     
     while (se)
     {
-	YazSocketEntry *se_next = se->next;
+	SocketEntry *se_next = se->next;
 	delete se;
 	se = se_next;
     }
     m_observers = 0;
 }
 
-void Yaz_SocketManager::maskObserver(IYazSocketObserver *observer, int mask)
+void SocketManager::maskObserver(ISocketObserver *observer, int mask)
 {
-    YazSocketEntry *se;
+    SocketEntry *se;
 
     yaz_log(m_log, "obs=%p read=%d write=%d except=%d", observer,
-	            mask & YAZ_SOCKET_OBSERVE_READ,
-	            mask & YAZ_SOCKET_OBSERVE_WRITE,
-	            mask & YAZ_SOCKET_OBSERVE_EXCEPT);
+	            mask & SOCKET_OBSERVE_READ,
+	            mask & SOCKET_OBSERVE_WRITE,
+	            mask & SOCKET_OBSERVE_EXCEPT);
 
     se = *lookupObserver(observer);
     if (se)
 	se->mask = mask;
 }
 
-void Yaz_SocketManager::timeoutObserver(IYazSocketObserver *observer,
+void SocketManager::timeoutObserver(ISocketObserver *observer,
 					int timeout)
 {
-    YazSocketEntry *se;
+    SocketEntry *se;
 
     se = *lookupObserver(observer);
     if (se)
 	se->timeout = timeout;
 }
 
-int Yaz_SocketManager::processEvent()
+int SocketManager::processEvent()
 {
-    YazSocketEntry *p;
-    YazSocketEvent *event = getEvent();
+    SocketEntry *p;
+    SocketEvent *event = getEvent();
     int timeout = -1;
-    yaz_log (m_log, "Yaz_SocketManager::processEvent manager=%p", this);
+    yaz_log (m_log, "SocketManager::processEvent manager=%p", this);
     if (event)
     {
 	event->observer->socketNotify(event->event);
@@ -133,25 +133,25 @@ int Yaz_SocketManager::processEvent()
 	int fd = p->fd;
 	if (p->mask)
 	    no++;
-	if (p->mask & YAZ_SOCKET_OBSERVE_READ)
+	if (p->mask & SOCKET_OBSERVE_READ)
         {
-            yaz_log (m_log, "Yaz_SocketManager::select fd=%d read", fd);
+            yaz_log (m_log, "SocketManager::select fd=%d read", fd);
 	    FD_SET(fd, &in);
         }
-	if (p->mask & YAZ_SOCKET_OBSERVE_WRITE)
+	if (p->mask & SOCKET_OBSERVE_WRITE)
         {
-            yaz_log (m_log, "Yaz_SocketManager::select fd=%d write", fd);
+            yaz_log (m_log, "SocketManager::select fd=%d write", fd);
 	    FD_SET(fd, &out);
         }
-	if (p->mask & YAZ_SOCKET_OBSERVE_EXCEPT)
+	if (p->mask & SOCKET_OBSERVE_EXCEPT)
         {
-            yaz_log (m_log, "Yaz_SocketManager::select fd=%d except", fd);
+            yaz_log (m_log, "SocketManager::select fd=%d except", fd);
 	    FD_SET(fd, &except);
         }
 	if (fd > max)
 	    max = fd;
 	if (p->timeout > 0 ||
-	    (p->timeout == 0 && (p->mask & YAZ_SOCKET_OBSERVE_WRITE) == 0))
+	    (p->timeout == 0 && (p->mask & SOCKET_OBSERVE_WRITE) == 0))
 	{
 	    int timeout_this;
 	    timeout_this = p->timeout;
@@ -164,7 +164,7 @@ int Yaz_SocketManager::processEvent()
 	    if (timeout == -1 || timeout_this < timeout)
 		timeout = timeout_this;
             p->timeout_this = timeout_this;
-            yaz_log (m_log, "Yaz_SocketManager::select timeout_this=%d", 
+            yaz_log (m_log, "SocketManager::select timeout_this=%d", 
                      p->timeout_this);
 	}
     }
@@ -180,7 +180,7 @@ int Yaz_SocketManager::processEvent()
     to.tv_sec = timeout;
     to.tv_usec = 0;
     
-    yaz_log (m_log, "Yaz_SocketManager::select begin no=%d timeout=%d",
+    yaz_log (m_log, "SocketManager::select begin no=%d timeout=%d",
              no, timeout);
     int pass = 0;
     while ((res = select(max + 1, &in, &out, &except,
@@ -200,17 +200,17 @@ int Yaz_SocketManager::processEvent()
 	int fd = p->fd;
 	int mask = 0;
 	if (FD_ISSET(fd, &in))
-	    mask |= YAZ_SOCKET_OBSERVE_READ;
+	    mask |= SOCKET_OBSERVE_READ;
 
 	if (FD_ISSET(fd, &out))
-	    mask |= YAZ_SOCKET_OBSERVE_WRITE;
+	    mask |= SOCKET_OBSERVE_WRITE;
 
 	if (FD_ISSET(fd, &except))
-	    mask |= YAZ_SOCKET_OBSERVE_EXCEPT;
+	    mask |= SOCKET_OBSERVE_EXCEPT;
 	
 	if (mask)
 	{
-	    YazSocketEvent *event = new YazSocketEvent;
+	    SocketEvent *event = new SocketEvent;
 	    p->last_activity = now;
 	    event->observer = p->observer;
 	    event->event = mask;
@@ -220,13 +220,13 @@ int Yaz_SocketManager::processEvent()
 	}
 	else if (res == 0 && p->timeout_this == timeout)
 	{
-	    YazSocketEvent *event = new YazSocketEvent;
+	    SocketEvent *event = new SocketEvent;
             assert (p->last_activity);
 	    yaz_log (m_log, "putEvent timeout fd=%d, now = %ld last_activity=%ld timeout=%d",
                      p->fd, now, p->last_activity, p->timeout);
 	    p->last_activity = now;
 	    event->observer = p->observer;
-	    event->event = YAZ_SOCKET_OBSERVE_TIMEOUT;
+	    event->event = SOCKET_OBSERVE_TIMEOUT;
 	    putEvent (event);
 	}
     }
@@ -244,7 +244,7 @@ int Yaz_SocketManager::processEvent()
 //    n p    n p  ......   n p    n p
 //   front                        back
 
-void Yaz_SocketManager::putEvent(YazSocketEvent *event)
+void SocketManager::putEvent(SocketEvent *event)
 {
     // put in back of queue
     if (m_queue_back)
@@ -262,10 +262,10 @@ void Yaz_SocketManager::putEvent(YazSocketEvent *event)
     m_queue_back = event;
 }
 
-Yaz_SocketManager::YazSocketEvent *Yaz_SocketManager::getEvent()
+SocketManager::SocketEvent *SocketManager::getEvent()
 {
     // get from front of queue
-    YazSocketEvent *event = m_queue_front;
+    SocketEvent *event = m_queue_front;
     if (!event)
 	return 0;
     assert (m_queue_back);
@@ -280,12 +280,12 @@ Yaz_SocketManager::YazSocketEvent *Yaz_SocketManager::getEvent()
     return event;
 }
 
-void Yaz_SocketManager::removeEvent(IYazSocketObserver *observer)
+void SocketManager::removeEvent(ISocketObserver *observer)
 {
-    YazSocketEvent *ev = m_queue_back;
+    SocketEvent *ev = m_queue_back;
     while (ev)
     {
-	YazSocketEvent *ev_next = ev->next;
+	SocketEvent *ev_next = ev->next;
 	if (observer == ev->observer)
 	{
 	    if (ev->prev)
@@ -302,7 +302,7 @@ void Yaz_SocketManager::removeEvent(IYazSocketObserver *observer)
     }
 }
 
-Yaz_SocketManager::Yaz_SocketManager()
+SocketManager::SocketManager()
 {
     m_observers = 0;
     m_queue_front = 0;
@@ -310,7 +310,7 @@ Yaz_SocketManager::Yaz_SocketManager()
     m_log = YLOG_DEBUG;
 }
 
-Yaz_SocketManager::~Yaz_SocketManager()
+SocketManager::~SocketManager()
 {
     deleteObservers();
 }

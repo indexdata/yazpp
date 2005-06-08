@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.h,v 1.2 2005-06-02 06:40:21 adam Exp $
+ * $Id: zlint.h,v 1.3 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -18,9 +18,9 @@ enum Zlint_code {
 class Zlint_test;
 class Zlint_t;
 
-class Zlint : public Yaz_Z_Assoc {
+class Zlint : public Z_Assoc {
 public:
-    Zlint(IYaz_PDU_Observable *the_PDU_Observable);
+    Zlint(IPDU_Observable *the_PDU_Observable);
     ~Zlint();
     void add_test(Zlint_test *i);
     void set_host(const char *cp);
@@ -37,9 +37,8 @@ private:
     void timeoutNotify();
     void failNotify();
     void recv_GDU(Z_GDU *apdu, int len);
-    IYaz_PDU_Observable *m_PDU_Observable;
-    IYaz_PDU_Observer *sessionNotify(
-	IYaz_PDU_Observable *the_PDU_Observable, int fd);
+    IPDU_Observable *m_PDU_Observable;
+    IPDU_Observer *sessionNotify(IPDU_Observable *the_PDU_Observable, int fd);
     Zlint_t *m_tests;
     Zlint_t *m_cur_test;
     char *m_host;

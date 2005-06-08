@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: ir-assoc.h,v 1.4 2005-06-02 06:40:21 adam Exp $
+ * $Id: ir-assoc.h,v 1.5 2005-06-08 13:28:05 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -13,12 +13,12 @@ namespace yazpp_1 {
     This object implements the client - and server role of a generic
     Z39.50 Association.
 */
-class YAZ_EXPORT Yaz_IR_Assoc: public Yaz_Z_Assoc {
+class YAZ_EXPORT IR_Assoc: public Z_Assoc {
  public:
     /// Create object using the PDU Observer specified
-    Yaz_IR_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
+    IR_Assoc(IPDU_Observable *the_PDU_Observable);
     /// Destroy assocation and close PDU Observer
-    virtual ~Yaz_IR_Assoc();
+    virtual ~IR_Assoc();
     /// Receive Z39.50 PDU
     void recv_Z_PDU(Z_APDU *apdu, int len);
     void recv_GDU(Z_GDU *apdu, int len);

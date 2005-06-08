@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.9 2005-05-17 20:33:57 adam Exp $
+ * $Id: zlint.cpp,v 1.10 2005-06-08 13:28:06 adam Exp $
  */
 
 #include <stdio.h>
@@ -29,8 +29,8 @@ private:
     int m_test_reported;
 };
 
-Zlint::Zlint(IYaz_PDU_Observable *the_PDU_Observable) : 
-    Yaz_Z_Assoc(the_PDU_Observable)
+Zlint::Zlint(IPDU_Observable *the_PDU_Observable) : 
+    Z_Assoc(the_PDU_Observable)
     
 {
     m_PDU_Observable = the_PDU_Observable;
@@ -135,8 +135,8 @@ void Zlint::close_goto_next()
     timeout(30);
 }
 
-IYaz_PDU_Observer *Zlint::sessionNotify(
-    IYaz_PDU_Observable *the_PDU_Observable, int fd)
+IPDU_Observer *Zlint::sessionNotify(
+    IPDU_Observable *the_PDU_Observable, int fd)
 {
     return 0;
 }

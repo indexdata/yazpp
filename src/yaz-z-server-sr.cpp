@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.9 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.10 2005-06-08 13:28:06 adam Exp $
  *
  */
 
@@ -11,7 +11,7 @@
 
 using namespace yazpp_1;
 
-Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
+Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
 						 const char *resultSetName,
 						 int start, int xnum,
 						 Z_RecordComposition *comp,
@@ -105,7 +105,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Yaz_Z_Server *s,
     return records;
 }
 
-void Yaz_Facility_Retrieval::fetch_via_piggyback (Yaz_Z_Server *s,
+void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
 						  Z_SearchRequest *req,
 						  Z_SearchResponse *res)
 {
@@ -165,7 +165,7 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Yaz_Z_Server *s,
     }
 }
 
-void Yaz_Facility_Retrieval::fetch_via_present (Yaz_Z_Server *s,
+void Yaz_Facility_Retrieval::fetch_via_present (Z_Server *s,
 						Z_PresentRequest *req,
 						Z_PresentResponse *res)
 {
@@ -181,7 +181,7 @@ void Yaz_Facility_Retrieval::fetch_via_present (Yaz_Z_Server *s,
 	    res->records->u.databaseOrSurDiagnostics->num_records;
 }
 
-int Yaz_Facility_Retrieval::init(Yaz_Z_Server *s, Z_InitRequest *initRequest,
+int Yaz_Facility_Retrieval::init(Z_Server *s, Z_InitRequest *initRequest,
 				 Z_InitResponse *initResponse)
 {
     Z_Options *req = initRequest->options;
@@ -206,7 +206,7 @@ ODR Yaz_Facility_Retrieval::odr_decode()
     return m_odr_decode;
 }
 
-int Yaz_Facility_Retrieval::recv(Yaz_Z_Server *s, Z_APDU *apdu_request)
+int Yaz_Facility_Retrieval::recv(Z_Server *s, Z_APDU *apdu_request)
 {   
     Z_APDU *apdu_response;
     m_odr_encode = s->odr_encode();
