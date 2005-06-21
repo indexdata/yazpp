@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.8 2005-06-08 13:28:05 adam Exp $
+ * $Id: z-assoc.h,v 1.9 2005-06-21 17:37:15 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
