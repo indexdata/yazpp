@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.41 2005-06-08 13:28:06 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.42 2005-06-21 21:30:24 adam Exp $
  */
 
 #include <assert.h>
@@ -489,5 +489,7 @@ void PDU_Assoc::childNotify(COMSTACK cs)
 
 const char*PDU_Assoc::getpeername()
 {
+    if (!m_cs)
+	return 0;
     return cs_addrstr(m_cs);
 }
