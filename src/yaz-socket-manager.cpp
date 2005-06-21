@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.33 2005-06-08 13:28:06 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.34 2005-06-21 17:36:46 adam Exp $
  */
 #ifdef WIN32
 #include <winsock.h>
@@ -167,6 +167,8 @@ int SocketManager::processEvent()
             yaz_log (m_log, "SocketManager::select timeout_this=%d", 
                      p->timeout_this);
 	}
+	else
+	    p->timeout_this = -1;
     }
     if (!no)
     {
