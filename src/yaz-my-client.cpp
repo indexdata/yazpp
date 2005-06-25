@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.20 2005-06-08 13:28:06 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.21 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <stdlib.h>
@@ -34,9 +34,9 @@ private:
     SocketManager *m_socketManager;
 public:
     MyClient(IPDU_Observable *the_PDU_Observable,
-	     SocketManager *the_SocketManager);
+             SocketManager *the_SocketManager);
     IPDU_Observer *sessionNotify(
-	IPDU_Observable *the_PDU_Observable, int fd);
+        IPDU_Observable *the_PDU_Observable, int fd);
     int args(SocketManager *socketManager, int argc, char **argv);
     int interactive(SocketManager *socketManager);
     int wait();
@@ -47,7 +47,7 @@ public:
     void recv_diagrecs(Z_DiagRec **pp, int num);
     void recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset);
     void recv_record(Z_DatabaseRecord *record, int offset,
-		     const char *databaseName);
+                     const char *databaseName);
     void recv_textRecord(int type, const char *buf, size_t len);
     void recv_genericRecord(Z_GenericRecord *r);
     void display_genericRecord(Z_GenericRecord *r, int level);
@@ -90,13 +90,13 @@ void MyClient::failNotify()
 }
 
 IPDU_Observer *MyClient::sessionNotify(IPDU_Observable *the_PDU_Observable,
-				       int fd)
+                                       int fd)
 { 
     return new MyClient(the_PDU_Observable, m_socketManager);
 }
 
 MyClient::MyClient(IPDU_Observable *the_PDU_Observable,
-		   SocketManager *the_socketManager) :
+                   SocketManager *the_socketManager) :
     IR_Assoc (the_PDU_Observable)
 {
     m_setOffset = 1;
@@ -122,9 +122,9 @@ char *MyClient::get_cookie(Z_OtherInformation **otherInfo)
     ent.value = (oid_value) VAL_COOKIE;
 
     if (oid_ent_to_oid (&ent, oid) && 
-	(oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
-	oi->which == Z_OtherInfo_characterInfo)
-	return oi->information.characterInfo;
+        (oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
+        oi->which == Z_OtherInfo_characterInfo)
+        return oi->information.characterInfo;
     return 0;
 }
 
@@ -133,17 +133,17 @@ void MyClient::recv_initResponse(Z_InitResponse *initResponse)
     printf ("Got InitResponse. Status ");
     if (*initResponse->result)
     {
-	printf ("Ok\n");
+        printf ("Ok\n");
 
-	const char *p = get_cookie (&initResponse->otherInfo);
-	if (p)
-	{
-	    printf ("cookie = %s\n", p);
-	    set_cookie(p);
-	}
+        const char *p = get_cookie (&initResponse->otherInfo);
+        if (p)
+        {
+            printf ("cookie = %s\n", p);
+            set_cookie(p);
+        }
     }
     else
-	printf ("Fail\n");
+        printf ("Fail\n");
 }
 
 void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
@@ -155,33 +155,33 @@ void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
     printf("Diagnostic message(s) from database:\n");
     for (i = 0; i<num; i++)
     {
-	Z_DiagRec *p = pp[i];
-	if (p->which != Z_DiagRec_defaultFormat)
-	{
-	    printf("Diagnostic record not in default format.\n");
-	    return;
-	}
-	else
-	    r = p->u.defaultFormat;
-	if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
-	    ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
-	    printf("Missing or unknown diagset\n");
-	printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+        Z_DiagRec *p = pp[i];
+        if (p->which != Z_DiagRec_defaultFormat)
+        {
+            printf("Diagnostic record not in default format.\n");
+            return;
+        }
+        else
+            r = p->u.defaultFormat;
+        if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
+            ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
+            printf("Missing or unknown diagset\n");
+        printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
 #ifdef ASN_COMPILED
-	switch (r->which)
-	{
-	case Z_DefaultDiagFormat_v2Addinfo:
-	    printf (" -- v2 addinfo '%s'\n", r->u.v2Addinfo);
-	    break;
-	case Z_DefaultDiagFormat_v3Addinfo:
-	    printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
-	    break;
-	}
+        switch (r->which)
+        {
+        case Z_DefaultDiagFormat_v2Addinfo:
+            printf (" -- v2 addinfo '%s'\n", r->u.v2Addinfo);
+            break;
+        case Z_DefaultDiagFormat_v3Addinfo:
+            printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
+            break;
+        }
 #else
-	if (r->addinfo && *r->addinfo)
-	    printf(" -- '%s'\n", r->addinfo);
-	else
-	    printf("\n");
+        if (r->addinfo && *r->addinfo)
+            printf(" -- '%s'\n", r->addinfo);
+        else
+            printf("\n");
 #endif
     }
 }
@@ -198,12 +198,12 @@ void MyClient::display_variant(Z_Variant *v, int level)
 
     for (i = 0; i < v->num_triples; i++)
     {
-	printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
-	    *v->triples[i]->type);
-	if (v->triples[i]->which == Z_Triple_internationalString)
-	    printf(",value=%s\n", v->triples[i]->value.internationalString);
-	else
-	    printf("\n");
+        printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
+            *v->triples[i]->type);
+        if (v->triples[i]->which == Z_Triple_internationalString)
+            printf(",value=%s\n", v->triples[i]->value.internationalString);
+        else
+            printf("\n");
     }
 }
 
@@ -236,43 +236,43 @@ void MyClient::display_genericRecord(Z_GenericRecord *r, int level)
         else if (t->content->which == Z_ElementData_string)
             printf("%s\n", t->content->u.string);
         else if (t->content->which == Z_ElementData_numeric)
-	    printf("%d\n", *t->content->u.numeric);
-	else if (t->content->which == Z_ElementData_oid)
-	{
-	    int *ip = t->content->u.oid;
-	    oident *oent;
+            printf("%d\n", *t->content->u.numeric);
+        else if (t->content->which == Z_ElementData_oid)
+        {
+            int *ip = t->content->u.oid;
+            oident *oent;
 
-	    if ((oent = oid_getentbyoid(t->content->u.oid)))
-		printf("OID: %s\n", oent->desc);
-	    else
-	    {
-		printf("{");
-		while (ip && *ip >= 0)
-		    printf(" %d", *(ip++));
-		printf(" }\n");
-	    }
-	}
-	else if (t->content->which == Z_ElementData_noDataRequested)
-	    printf("[No data requested]\n");
-	else if (t->content->which == Z_ElementData_elementEmpty)
-	    printf("[Element empty]\n");
-	else if (t->content->which == Z_ElementData_elementNotThere)
-	    printf("[Element not there]\n");
-	else
+            if ((oent = oid_getentbyoid(t->content->u.oid)))
+                printf("OID: %s\n", oent->desc);
+            else
+            {
+                printf("{");
+                while (ip && *ip >= 0)
+                    printf(" %d", *(ip++));
+                printf(" }\n");
+            }
+        }
+        else if (t->content->which == Z_ElementData_noDataRequested)
+            printf("[No data requested]\n");
+        else if (t->content->which == Z_ElementData_elementEmpty)
+            printf("[Element empty]\n");
+        else if (t->content->which == Z_ElementData_elementNotThere)
+            printf("[Element not there]\n");
+        else
             printf("??????\n");
-	if (t->appliedVariant)
-	    display_variant(t->appliedVariant, level+1);
-	if (t->metaData && t->metaData->supportedVariants)
-	{
-	    int c;
+        if (t->appliedVariant)
+            display_variant(t->appliedVariant, level+1);
+        if (t->metaData && t->metaData->supportedVariants)
+        {
+            int c;
 
-	    printf("%*s---- variant list\n", (level+1)*4, "");
-	    for (c = 0; c < t->metaData->num_supportedVariants; c++)
-	    {
-		printf("%*svariant #%d\n", (level+1)*4, "", c);
-		display_variant(t->metaData->supportedVariants[c], level + 2);
-	    }
-	}
+            printf("%*s---- variant list\n", (level+1)*4, "");
+            for (c = 0; c < t->metaData->num_supportedVariants; c++)
+            {
+                printf("%*svariant #%d\n", (level+1)*4, "", c);
+                display_variant(t->metaData->supportedVariants[c], level + 2);
+            }
+        }
     }
 }
 
@@ -282,7 +282,7 @@ void MyClient::recv_genericRecord(Z_GenericRecord *r)
 }
 
 void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
-			   const char *databaseName)
+                           const char *databaseName)
 {
     Z_External *r = (Z_External*) record;
     oident *ent = oid_getentbyoid(r->direct_reference);
@@ -292,76 +292,76 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
      */
     if (r->direct_reference)
     {
-	printf("Record type: ");
+        printf("Record type: ");
         if (ent)
             printf("%s\n", ent->desc);
     }
     /* Check if this is a known, ASN.1 type tucked away in an octet string */
     Z_ext_typeent *etype = z_ext_getentbyref(ent->value);
     if (ent && (r->which == Z_External_octet || r->which == Z_External_single)
-	&& (etype = z_ext_getentbyref(ent->value)))
+        && (etype = z_ext_getentbyref(ent->value)))
 
     {
-	void *rr;
-	/*
-	 * Call the given decoder to process the record.
-	 */
-	odr_setbuf(odr_decode(), (char*)record->u.octet_aligned->buf,
-		   record->u.octet_aligned->len, 0);
-	if (!(*etype->fun)(odr_decode(), (char **)&rr, 0, 0))
-	{
-	    odr_perror(odr_decode(), "Decoding constructed record.");
-	    fprintf(stderr, "[Near %d]\n", odr_offset(odr_decode()));
-	    fprintf(stderr, "Packet dump:\n---------\n");
-	    odr_dumpBER(stderr, (char*)record->u.octet_aligned->buf,
-			record->u.octet_aligned->len);
-	    fprintf(stderr, "---------\n");
-	}
-	if (etype->what == Z_External_sutrs)
-	{
-	    Z_SUTRS *sutrs = (Z_SUTRS *) rr;
-	    recv_textRecord ((int) VAL_SUTRS, (const char *) sutrs->buf,
-			     (size_t) sutrs->len);
-	}
-	return;
+        void *rr;
+        /*
+         * Call the given decoder to process the record.
+         */
+        odr_setbuf(odr_decode(), (char*)record->u.octet_aligned->buf,
+                   record->u.octet_aligned->len, 0);
+        if (!(*etype->fun)(odr_decode(), (char **)&rr, 0, 0))
+        {
+            odr_perror(odr_decode(), "Decoding constructed record.");
+            fprintf(stderr, "[Near %d]\n", odr_offset(odr_decode()));
+            fprintf(stderr, "Packet dump:\n---------\n");
+            odr_dumpBER(stderr, (char*)record->u.octet_aligned->buf,
+                        record->u.octet_aligned->len);
+            fprintf(stderr, "---------\n");
+        }
+        if (etype->what == Z_External_sutrs)
+        {
+            Z_SUTRS *sutrs = (Z_SUTRS *) rr;
+            recv_textRecord ((int) VAL_SUTRS, (const char *) sutrs->buf,
+                             (size_t) sutrs->len);
+        }
+        return;
     }
     if (r->which == Z_External_octet && record->u.octet_aligned->len)
     {
-	switch (ent->value)
-	{
-	case VAL_ISO2709:
-	case VAL_UNIMARC:
-	case VAL_INTERMARC:
-	case VAL_USMARC:
-	case VAL_UKMARC:
-	case VAL_NORMARC:
-	case VAL_LIBRISMARC:
-	case VAL_DANMARC:
-	case VAL_FINMARC:
-	case VAL_MAB:
-	case VAL_CANMARC:
-	case VAL_SBN:
-	case VAL_PICAMARC:
-	case VAL_AUSMARC:
-	case VAL_IBERMARC:
-	case VAL_CATMARC:
-	case VAL_MALMARC:
-	case VAL_JPMARC:
-	case VAL_SWEMARC:
-	case VAL_SIGLEMARC:
-	case VAL_ISDSMARC:
-	case VAL_RUSMARC:
-	    marc_display((char*) record->u.octet_aligned->buf,0);
-	    break;
-	default:
-	    recv_textRecord((int) ent->value,
-			    (const char *) record->u.octet_aligned->buf,
-			    (size_t) record->u.octet_aligned->len);
-	}
+        switch (ent->value)
+        {
+        case VAL_ISO2709:
+        case VAL_UNIMARC:
+        case VAL_INTERMARC:
+        case VAL_USMARC:
+        case VAL_UKMARC:
+        case VAL_NORMARC:
+        case VAL_LIBRISMARC:
+        case VAL_DANMARC:
+        case VAL_FINMARC:
+        case VAL_MAB:
+        case VAL_CANMARC:
+        case VAL_SBN:
+        case VAL_PICAMARC:
+        case VAL_AUSMARC:
+        case VAL_IBERMARC:
+        case VAL_CATMARC:
+        case VAL_MALMARC:
+        case VAL_JPMARC:
+        case VAL_SWEMARC:
+        case VAL_SIGLEMARC:
+        case VAL_ISDSMARC:
+        case VAL_RUSMARC:
+            marc_display((char*) record->u.octet_aligned->buf,0);
+            break;
+        default:
+            recv_textRecord((int) ent->value,
+                            (const char *) record->u.octet_aligned->buf,
+                            (size_t) record->u.octet_aligned->len);
+        }
     }
     else if (ent && ent->value == VAL_SUTRS && r->which == Z_External_sutrs)
-	recv_textRecord((int) VAL_SUTRS, (const char *) r->u.sutrs->buf,
-			(size_t) r->u.sutrs->len);
+        recv_textRecord((int) VAL_SUTRS, (const char *) r->u.sutrs->buf,
+                        (size_t) r->u.sutrs->len);
     else if (ent && ent->value == VAL_GRS1 && r->which == Z_External_grs1)
         recv_genericRecord(r->u.grs1);
     else 
@@ -378,7 +378,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
 void MyClient::recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset)
 {
     if (zpr->databaseName)
-	printf("[%s]", zpr->databaseName);
+        printf("[%s]", zpr->databaseName);
     if (zpr->which == Z_NamePlusRecord_surrogateDiagnostic)
         recv_diagrecs(&zpr->u.surrogateDiagnostic, 1);
     else
@@ -391,29 +391,29 @@ void MyClient::recv_records (Z_Records *records)
     Z_DiagRec dr, *dr_p = &dr;
 #endif
     if (!records)
-	return;
+        return;
     int i;
     switch (records->which)
     {
     case Z_Records_DBOSD:
         for (i = 0; i < records->u.databaseOrSurDiagnostics->num_records; i++)
             recv_namePlusRecord(records->u.databaseOrSurDiagnostics->
-				records[i], i + m_setOffset);
-	m_setOffset += records->u.databaseOrSurDiagnostics->num_records;
-	break;
+                                records[i], i + m_setOffset);
+        m_setOffset += records->u.databaseOrSurDiagnostics->num_records;
+        break;
     case Z_Records_NSD:
 #ifdef ASN_COMPILED
-	dr.which = Z_DiagRec_defaultFormat;
-	dr.u.defaultFormat = records->u.nonSurrogateDiagnostic;
-	recv_diagrecs (&dr_p, 1);
+        dr.which = Z_DiagRec_defaultFormat;
+        dr.u.defaultFormat = records->u.nonSurrogateDiagnostic;
+        recv_diagrecs (&dr_p, 1);
 #else
-	recv_diagrecs (&records->u.nonSurrogateDiagnostic, 1);
+        recv_diagrecs (&records->u.nonSurrogateDiagnostic, 1);
 #endif
-	break;
+        break;
     case Z_Records_multipleNSD:
-	recv_diagrecs (records->u.multipleNonSurDiagnostics->diagRecs,
-		       records->u.multipleNonSurDiagnostics->num_diagRecs);
-	break;
+        recv_diagrecs (records->u.multipleNonSurDiagnostics->diagRecs,
+                       records->u.multipleNonSurDiagnostics->num_diagRecs);
+        break;
     }
 }
 
@@ -422,12 +422,12 @@ void MyClient::recv_searchResponse(Z_SearchResponse *searchResponse)
     printf ("Got SearchResponse. Status ");
     if (!*searchResponse->searchStatus)
     {
-	printf ("Fail\n");
+        printf ("Fail\n");
     }
     else
     {
-	printf ("Ok\n");
-	printf ("Hits: %d\n", *searchResponse->resultCount);
+        printf ("Ok\n");
+        printf ("Hits: %d\n", *searchResponse->resultCount);
     }
     recv_records (searchResponse->records);
 }
@@ -443,8 +443,8 @@ int MyClient::wait()
     set_lastReceived(0);
     while (m_socketManager->processEvent() > 0)
     {
-	if (get_lastReceived())
-	    return 1;
+        if (get_lastReceived())
+            return 1;
     }
     return 0;
 }
@@ -475,9 +475,9 @@ int MyClient::cmd_open(char *host)
 int MyClient::cmd_init(char *args)
 {
     if (send_initRequest() >= 0)
-	wait();
+        wait();
     else
-	close();
+        close();
     return 1;
 }
 
@@ -498,13 +498,13 @@ int MyClient::cmd_find(char *args)
 
     if (query.set_rpn(args) <= 0)
     {
-	printf ("Bad RPN query\n");
-	return 1;
+        printf ("Bad RPN query\n");
+        return 1;
     }
     if (send_searchRequest(&query) >= 0)
-	wait();
+        wait();
     else
-	printf ("Not connected\n");
+        printf ("Not connected\n");
     return 1;
 }
 
@@ -515,9 +515,9 @@ int MyClient::cmd_show(char *args)
     sscanf (args, "%d %d", &start, &number);
     m_setOffset = start;
     if (send_presentRequest(start, number) >= 0)
-	wait();
+        wait();
     else
-	printf ("Not connected\n");
+        printf ("Not connected\n");
     return 1;
 }
 
@@ -549,35 +549,35 @@ int MyClient::processCommand(const char *commandLine)
         int (MyClient::*fun)(char *arg);
         const char *ad;
     } cmd[] = {
-	{"open", &MyClient::cmd_open, "<host>[':'<port>][/<database>]"},
-	{"connect", &MyClient::cmd_connect, "<host>[':'<port>][/<database>]"},
-	{"quit", &MyClient::cmd_quit, ""},
-	{"close", &MyClient::cmd_close, ""},
-	{"find", &MyClient::cmd_find, "<query>"},
-	{"show", &MyClient::cmd_show, "[<start> [<number>]]"},
-	{"cookie", &MyClient::cmd_cookie, "<cookie>"},
-	{"init", &MyClient::cmd_init, ""},
-	{"format", &MyClient::cmd_format, "<record-syntax>"},
-	{"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
-	{0,0,0}
+        {"open", &MyClient::cmd_open, "<host>[':'<port>][/<database>]"},
+        {"connect", &MyClient::cmd_connect, "<host>[':'<port>][/<database>]"},
+        {"quit", &MyClient::cmd_quit, ""},
+        {"close", &MyClient::cmd_close, ""},
+        {"find", &MyClient::cmd_find, "<query>"},
+        {"show", &MyClient::cmd_show, "[<start> [<number>]]"},
+        {"cookie", &MyClient::cmd_cookie, "<cookie>"},
+        {"init", &MyClient::cmd_init, ""},
+        {"format", &MyClient::cmd_format, "<record-syntax>"},
+        {"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
+        {0,0,0}
     };
     
     if (sscanf(commandLine, "%s %[^;]", cmdStr, cmdArgs) < 1)
-	return 1;
+        return 1;
     int i;
     for (i = 0; cmd[i].cmd; i++)
-	if (!strncmp(cmd[i].cmd, cmdStr, strlen(cmdStr)))
-	    break;
+        if (!strncmp(cmd[i].cmd, cmdStr, strlen(cmdStr)))
+            break;
     
     int res = 1;
     if (cmd[i].cmd) // Invoke command handler
-	res = (this->*cmd[i].fun)(cmdArgs);
+        res = (this->*cmd[i].fun)(cmdArgs);
     else            // Dump help screen
     {
-	printf("Unknown command: %s.\n", cmdStr);
-	printf("Currently recognized commands:\n");
-	for (i = 0; cmd[i].cmd; i++)
-	    printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+        printf("Unknown command: %s.\n", cmdStr);
+        printf("Currently recognized commands:\n");
+        for (i = 0; cmd[i].cmd; i++)
+            printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
     }
     return res;
 }
@@ -589,10 +589,10 @@ const char *MyClient::getCommand()
     char *line_in;
     line_in=readline(C_PROMPT);
     if (!line_in)
-	return 0;
+        return 0;
 #if HAVE_READLINE_HISTORY_H
     if (*line_in)
-	add_history(line_in);
+        add_history(line_in);
 #endif
     strncpy(m_thisCommand,line_in, 1023);
     m_thisCommand[1023] = '\0';
@@ -602,20 +602,20 @@ const char *MyClient::getCommand()
     printf (C_PROMPT);
     fflush(stdout);
     if (!fgets(m_thisCommand, 1023, stdin))
-	return 0;
+        return 0;
 #endif
     // Remove trailing whitespace
     char *cp = m_thisCommand + strlen(m_thisCommand);
     while (cp != m_thisCommand && strchr("\t \n", cp[-1]))
-	cp--;
+        cp--;
     *cp = '\0';
     cp = m_thisCommand;
     // Remove leading spaces...
     while (*cp && strchr ("\t \n", *cp))
-	cp++;
+        cp++;
     // Save command if non-empty
     if (*cp != '\0')
-	strcpy (m_lastCommand, cp);
+        strcpy (m_lastCommand, cp);
     return m_lastCommand;
 }
 
@@ -623,11 +623,11 @@ int MyClient::interactive(SocketManager *socketManager)
 {
     const char *cmd;
     if (!m_interactive_flag)
-	return 0;
+        return 0;
     while ((cmd = getCommand()))
     {
-	if (!processCommand(cmd))
-	    break;
+        if (!processCommand(cmd))
+            break;
     }
     return 0;
 }
@@ -646,42 +646,42 @@ int MyClient::args(SocketManager *socketManager, int argc, char **argv)
         {
         case 0:
             if (host)
-	    {
-		usage(prog);
-		return 1;
-	    }
-	    host = arg;
+            {
+                usage(prog);
+                return 1;
+            }
+            host = arg;
             break;
         case 'p':
-	    if (proxy)
-	    {
-		usage(prog);
-		return 1;
-	    }
-	    set_proxy(arg);
-	    break;
-	case 'c':
-	    set_cookie(arg);
-	    break;
-	case 'v':
-	    yaz_log_init_level (yaz_log_mask_str(arg));
-	    break;
-	case 'q':
-	    m_interactive_flag = 0;
-	    break;
+            if (proxy)
+            {
+                usage(prog);
+                return 1;
+            }
+            set_proxy(arg);
+            break;
+        case 'c':
+            set_cookie(arg);
+            break;
+        case 'v':
+            yaz_log_init_level (yaz_log_mask_str(arg));
+            break;
+        case 'q':
+            m_interactive_flag = 0;
+            break;
         default:
-	    usage(prog);
-	    return 1;
+            usage(prog);
+            return 1;
         }
     }
     if (host)
     {
-	client (host);
+        client (host);
         timeout (10);
-	wait ();
+        wait ();
         timeout (-1);
-	send_initRequest();
-	wait ();
+        send_initRequest();
+        wait ();
     }
     return 0;
 }
@@ -694,8 +694,16 @@ int main(int argc, char **argv)
     MyClient z(some, &mySocketManager);
 
     if (z.args(&mySocketManager, argc, argv))
-	exit (1);
+        exit (1);
     if (z.interactive(&mySocketManager))
-	exit (1);
+        exit (1);
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

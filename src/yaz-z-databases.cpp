@@ -2,7 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-databases.cpp,v 1.5 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-z-databases.cpp,v 1.6 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <string.h>
@@ -65,3 +65,11 @@ int Yaz_Z_Databases::match (int num, const char **db)
             return 0;
     return 1;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

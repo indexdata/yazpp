@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.8 2005-06-02 06:40:21 adam Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.9 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz++/z-server.h>
@@ -1483,7 +1483,15 @@ static const char *marc_records[] = {
 const char *Yaz_USMARC::get_record(size_t position)
 {
     if (position >= 1 && position <= (
-	    sizeof(marc_records) / sizeof(*marc_records)))
-	return marc_records[position-1];
+            sizeof(marc_records) / sizeof(*marc_records)))
+        return marc_records[position-1];
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

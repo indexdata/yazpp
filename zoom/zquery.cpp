@@ -1,4 +1,4 @@
-// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.6 2003-09-22 13:01:54 mike Exp $
+// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.7 2005-06-25 15:53:21 adam Exp $
 
 // Z39.50 Query classes
 
@@ -9,13 +9,13 @@ namespace ZOOM {
     query::query() : q(ZOOM_query_create()) {
     }
     query::~query() {
-	ZOOM_query_destroy(q);
+        ZOOM_query_destroy(q);
     }
 
     prefixQuery::prefixQuery(const std::string &pqn) {
-	if (ZOOM_query_prefix(q, pqn.c_str()) == -1) {
-	    throw queryException(queryException::PREFIX, pqn);
-	}
+        if (ZOOM_query_prefix(q, pqn.c_str()) == -1) {
+            throw queryException(queryException::PREFIX, pqn);
+        }
     }
 
     // The binding specification says we have to have destructors for
@@ -39,9 +39,17 @@ namespace ZOOM {
 
 
     CCLQuery::CCLQuery(const std::string &, void *) {
-	throw "Oops.  No CCL support in ZOOM-C yet.  Sorry.";
+        throw "Oops.  No CCL support in ZOOM-C yet.  Sorry.";
     }
 
     CCLQuery::~CCLQuery() {
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

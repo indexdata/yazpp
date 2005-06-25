@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gdu.h,v 1.1 2005-06-21 17:37:15 adam Exp $
+ * $Id: gdu.h,v 1.2 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZPP_GDU_INCLUDED
@@ -15,35 +15,43 @@ namespace yazpp_1 {
 
     class YAZ_EXPORT GDU {
     public:
-	GDU(Z_GDU *gdu);
-	GDU(Z_APDU *apdu);
-	~GDU();
-	Z_GDU *get();
-	void extract_odr_to(ODR dst);
+        GDU(Z_GDU *gdu);
+        GDU(Z_APDU *apdu);
+        ~GDU();
+        Z_GDU *get();
+        void extract_odr_to(ODR dst);
     private:
-	void base(Z_GDU *gdu, ODR o);
-	Z_GDU *m_gdu;
-	ODR m_decode;
+        void base(Z_GDU *gdu, ODR o);
+        Z_GDU *m_gdu;
+        ODR m_decode;
     };
 
     class GDUQueue_List {
-	friend class GDUQueue;
+        friend class GDUQueue;
     private:
-	GDU *m_item;
-	GDUQueue_List *m_next;
+        GDU *m_item;
+        GDUQueue_List *m_next;
     };
 
     class GDUQueue {
     public:
-	GDUQueue();
-	~GDUQueue();
-	void clear();
-	void enqueue(GDU *gdu);
-	GDU *dequeue();
-	int size();
+        GDUQueue();
+        ~GDUQueue();
+        void clear();
+        void enqueue(GDU *gdu);
+        GDU *dequeue();
+        int size();
     private:
-	GDUQueue_List *m_list;
+        GDUQueue_List *m_list;
     };
 };
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

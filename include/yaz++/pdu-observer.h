@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.6 2005-06-08 13:28:05 adam Exp $
+ * $Id: pdu-observer.h,v 1.7 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -54,8 +54,16 @@ class YAZ_EXPORT IPDU_Observer {
     virtual void timeoutNotify() = 0;
     /// Make clone of observer using IPDU_Observable interface
     virtual IPDU_Observer *sessionNotify(
-	IPDU_Observable *the_PDU_Observable, int fd) = 0;
+        IPDU_Observable *the_PDU_Observable, int fd) = 0;
 };
 };
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

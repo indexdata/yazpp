@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-observer.h,v 1.5 2005-06-08 13:28:05 adam Exp $
+ * $Id: socket-observer.h,v 1.6 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_OBSERVER_H
@@ -13,10 +13,10 @@
 namespace yazpp_1 {
     
     enum SocketObserve {
-	SOCKET_OBSERVE_READ=1,
-	SOCKET_OBSERVE_WRITE=2,
-	SOCKET_OBSERVE_EXCEPT=4,
-	SOCKET_OBSERVE_TIMEOUT=8
+        SOCKET_OBSERVE_READ=1,
+        SOCKET_OBSERVE_WRITE=2,
+        SOCKET_OBSERVE_EXCEPT=4,
+        SOCKET_OBSERVE_TIMEOUT=8
     };
 
 /**
@@ -53,7 +53,7 @@ class YAZ_EXPORT ISocketObservable {
     virtual void maskObserver(ISocketObserver *observer, int mask) = 0;
     /// Specify timeout
     virtual void timeoutObserver(ISocketObserver *observer,
-				 int timeout)=0;
+                                 int timeout)=0;
 };
 
 /** Socket Observer.
@@ -69,3 +69,11 @@ class YAZ_EXPORT ISocketObserver {
 
 };
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

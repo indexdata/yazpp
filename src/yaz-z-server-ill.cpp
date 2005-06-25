@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-ill.cpp,v 1.13 2005-06-08 13:28:06 adam Exp $
+ * $Id: yaz-z-server-ill.cpp,v 1.14 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -11,13 +11,13 @@
 using namespace yazpp_1;
 
 int Yaz_Facility_ILL::init(Z_Server *s, Z_InitRequest *initRequest,
-			   Z_InitResponse *initResponse)
+                           Z_InitResponse *initResponse)
 {
     Z_Options *req = initRequest->options;
     Z_Options *res = initResponse->options;
     
     if (ODR_MASK_GET(req, Z_Options_extendedServices))
-	ODR_MASK_SET(res, Z_Options_extendedServices);
+        ODR_MASK_SET(res, Z_Options_extendedServices);
     return 1;
 }
 
@@ -26,7 +26,7 @@ int Yaz_Facility_ILL::recv(Z_Server *s, Z_APDU *apdu_request)
     Z_APDU *apdu_response;
 
     if (apdu_request->which != Z_APDU_extendedServicesRequest)
-	return 0;
+        return 0;
     Z_ExtendedServicesRequest *req = apdu_request->u.extendedServicesRequest;
     if (!req->taskSpecificParameters || req->taskSpecificParameters->which !=
         Z_External_itemOrder)
@@ -39,3 +39,11 @@ int Yaz_Facility_ILL::recv(Z_Server *s, Z_APDU *apdu_request)
     s->send_Z_PDU(apdu_response, 0);
     return 1;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

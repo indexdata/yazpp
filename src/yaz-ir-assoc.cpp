@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.25 2005-06-08 13:28:05 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.26 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <assert.h>
@@ -31,7 +31,7 @@ IR_Assoc::IR_Assoc(IPDU_Observable *the_PDU_Observable)
 IR_Assoc::~IR_Assoc()
 {
     if (m_elementSetNames)
-	delete [] m_elementSetNames->u.generic;
+        delete [] m_elementSetNames->u.generic;
     delete [] m_elementSetNames;
     delete [] m_host;
     delete [] m_proxy;
@@ -50,15 +50,15 @@ void IR_Assoc::set_databaseNames (int num, const char **list)
     int i;
     yaz_log (m_log, "IR_Assoc::set_databaseNames num=%d", num);
     for (i = 0; i<m_num_databaseNames; i++)
-	delete [] m_databaseNames[i];
+        delete [] m_databaseNames[i];
     delete [] m_databaseNames;
     m_num_databaseNames = num;
 
     m_databaseNames = new char *[num];
     for (i = 0; i<m_num_databaseNames; i++)
     {
-	m_databaseNames[i] = new char[strlen(list[i])+1];
-	strcpy(m_databaseNames[i], list[i]);
+        m_databaseNames[i] = new char[strlen(list[i])+1];
+        strcpy(m_databaseNames[i], list[i]);
     }
 }
 
@@ -70,20 +70,20 @@ void IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
     int num = 0;
     int len = 0;
     for (char *cp = dbtmp; ; cp++)
-	if (*cp && !strchr(sep, *cp))
-	    len++;
-	else
-	{
-	    if (len)
-	    {
-		list[num] = cp - len;
-		num++;
-	    }
-	    if (!*cp)
-		break;
-	    *cp = '\0';
-	    len = 0;
-	}
+        if (*cp && !strchr(sep, *cp))
+            len++;
+        else
+        {
+            if (len)
+            {
+                list[num] = cp - len;
+                num++;
+            }
+            if (!*cp)
+                break;
+            *cp = '\0';
+            len = 0;
+        }
     set_databaseNames (num, list);
     delete [] dbtmp;
     delete [] list;
@@ -98,7 +98,7 @@ void IR_Assoc::set_preferredRecordSyntax (const char *syntax)
 {
     m_preferredRecordSyntax = VAL_NONE;
     if (syntax && *syntax)
-	m_preferredRecordSyntax = oid_getvalbyname (syntax);
+        m_preferredRecordSyntax = oid_getvalbyname (syntax);
 }
 
 void IR_Assoc::get_preferredRecordSyntax (int *value)
@@ -123,15 +123,15 @@ void IR_Assoc::get_preferredRecordSyntax (const char **dst)
 void IR_Assoc::set_elementSetName (const char *elementSetName)
 {
     if (m_elementSetNames)
-	delete [] m_elementSetNames->u.generic;
+        delete [] m_elementSetNames->u.generic;
     delete m_elementSetNames;
     m_elementSetNames = 0;
     if (elementSetName && *elementSetName)
     {
-	m_elementSetNames = new Z_ElementSetNames;
-	m_elementSetNames->which = Z_ElementSetNames_generic;
-	m_elementSetNames->u.generic = new char[strlen(elementSetName)+1];
-	strcpy (m_elementSetNames->u.generic, elementSetName);
+        m_elementSetNames = new Z_ElementSetNames;
+        m_elementSetNames->which = Z_ElementSetNames_generic;
+        m_elementSetNames->u.generic = new char[strlen(elementSetName)+1];
+        strcpy (m_elementSetNames->u.generic, elementSetName);
     }
 }
 
@@ -143,10 +143,10 @@ void IR_Assoc::get_elementSetName (Z_ElementSetNames **elementSetNames)
 void IR_Assoc::get_elementSetName (const char **elementSetName)
 {
     if (!m_elementSetNames ||
-	m_elementSetNames->which != Z_ElementSetNames_generic)
+        m_elementSetNames->which != Z_ElementSetNames_generic)
     {
-	*elementSetName = 0;
-	return;
+        *elementSetName = 0;
+        return;
     }
     *elementSetName = m_elementSetNames->u.generic;
 }
@@ -155,7 +155,7 @@ void IR_Assoc::get_elementSetName (const char **elementSetName)
 void IR_Assoc::recv_GDU(Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
-	    recv_Z_PDU(apdu->u.z3950, len);
+            recv_Z_PDU(apdu->u.z3950, len);
 }
 
 void IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
@@ -165,28 +165,28 @@ void IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
-	yaz_log (m_log, "recv InitResponse");
-	recv_initResponse(apdu->u.initResponse);
-	break;
+        yaz_log (m_log, "recv InitResponse");
+        recv_initResponse(apdu->u.initResponse);
+        break;
     case Z_APDU_initRequest:
         yaz_log (m_log, "recv InitRequest");
-	recv_initRequest(apdu->u.initRequest);
+        recv_initRequest(apdu->u.initRequest);
         break;
     case Z_APDU_searchRequest:
         yaz_log (m_log, "recv searchRequest");
-	recv_searchRequest(apdu->u.searchRequest);
+        recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-	yaz_log (m_log, "recv searchResponse"); 
-	recv_searchResponse(apdu->u.searchResponse);
-	break;
+        yaz_log (m_log, "recv searchResponse"); 
+        recv_searchResponse(apdu->u.searchResponse);
+        break;
     case Z_APDU_presentRequest:
         yaz_log (m_log, "recv presentRequest");
-	recv_presentRequest(apdu->u.presentRequest);
+        recv_presentRequest(apdu->u.presentRequest);
         break;
     case Z_APDU_presentResponse:
         yaz_log (m_log, "recv presentResponse");
-	recv_presentResponse(apdu->u.presentResponse);
+        recv_presentResponse(apdu->u.presentResponse);
         break;
     case Z_APDU_extendedServicesResponse:
         yaz_log (m_log, "recv extendedServiceResponse");
@@ -205,25 +205,25 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
 
     req->query = query->get_Z_Query();
     if (!req->query)
-	return -1;
+        return -1;
     get_databaseNames (&req->num_databaseNames, &req->databaseNames);
     int oid_syntax[OID_SIZE];
     oident prefsyn;
     get_preferredRecordSyntax(&recordSyntax);
     if (recordSyntax != VAL_NONE)
     {
-	prefsyn.proto = PROTO_Z3950;
-	prefsyn.oclass = CLASS_RECSYN;
-	prefsyn.value = (enum oid_value) recordSyntax;
-	oid_ent_to_oid(&prefsyn, oid_syntax);
-	req->preferredRecordSyntax = oid_syntax;
+        prefsyn.proto = PROTO_Z3950;
+        prefsyn.oclass = CLASS_RECSYN;
+        prefsyn.value = (enum oid_value) recordSyntax;
+        oid_ent_to_oid(&prefsyn, oid_syntax);
+        req->preferredRecordSyntax = oid_syntax;
     }
     yaz_log (m_log, "send_searchRequest");
     assert (req->otherInfo == 0);
     if (m_cookie)
     {
-	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
-	assert (req->otherInfo);
+        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        assert (req->otherInfo);
     }
 
     if ( pRefId )
@@ -256,24 +256,24 @@ int IR_Assoc::send_presentRequest(int start,
     get_preferredRecordSyntax (&recordSyntax);
     if (recordSyntax != VAL_NONE)
     {
-	prefsyn.proto = PROTO_Z3950;
-	prefsyn.oclass = CLASS_RECSYN;
-	prefsyn.value = (enum oid_value) recordSyntax;
-	oid_ent_to_oid(&prefsyn, oid_syntax);
-	req->preferredRecordSyntax = oid_syntax;
+        prefsyn.proto = PROTO_Z3950;
+        prefsyn.oclass = CLASS_RECSYN;
+        prefsyn.value = (enum oid_value) recordSyntax;
+        oid_ent_to_oid(&prefsyn, oid_syntax);
+        req->preferredRecordSyntax = oid_syntax;
     }
     Z_RecordComposition compo;
     Z_ElementSetNames *elementSetNames;
     get_elementSetName (&elementSetNames);
     if (elementSetNames)
     {
-	req->recordComposition = &compo;
+        req->recordComposition = &compo;
         compo.which = Z_RecordComp_simple;
         compo.u.simple = elementSetNames;
     }
 
     if (m_cookie)
-	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
 
     if ( pRefId )
     {
@@ -294,8 +294,8 @@ void IR_Assoc::set_proxy(const char *str)
     m_proxy = 0;
     if (str)
     {
-	m_proxy = new char[strlen(str)+1];
-	strcpy (m_proxy, str);
+        m_proxy = new char[strlen(str)+1];
+        strcpy (m_proxy, str);
     }
 }
 
@@ -305,8 +305,8 @@ void IR_Assoc::set_cookie(const char *str)
     m_cookie = 0;
     if (str)
     {
-	m_cookie = new char[strlen(str)+1];
-	strcpy(m_cookie, str);
+        m_cookie = new char[strlen(str)+1];
+        strcpy(m_cookie, str);
     }
 }
 
@@ -322,7 +322,7 @@ void IR_Assoc::client(const char *addr)
     strcpy(m_host, addr);
     const char *dbpart = strchr(m_host, '/');
     if (dbpart)
-	set_databaseNames (dbpart+1, "+ ");
+        set_databaseNames (dbpart+1, "+ ");
     Z_Assoc::client(m_proxy ? m_proxy : m_host);
 }
 
@@ -404,9 +404,9 @@ int IR_Assoc::send_initRequest(char* pRefId)
     }
 
     if (m_proxy && m_host)
-	set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+        set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
     if (m_cookie)
-	set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu, 0);
 }
 
@@ -442,4 +442,12 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     return send_Z_PDU(apdu, 0);
 }
 
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-init-06.cpp,v 1.3 2004-12-13 20:50:54 adam Exp $
+ * $Id: test-init-06.cpp,v 1.4 2005-06-25 15:53:21 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -30,13 +30,13 @@ Zlint_code Zlint_test_init_06::init(Zlint *z)
     ODR_MASK_ZERO(init->options);
     int i;
     for (i = 0; i <= 24; i++)
-	ODR_MASK_SET(init->options, i);
+        ODR_MASK_SET(init->options, i);
 
     int r = z->send_Z_PDU(apdu, &len);
     if (r < 0)
     {
-	z->msg_check_fail("unable to send init request");
-	return TEST_FINISHED;
+        z->msg_check_fail("unable to send init request");
+        return TEST_FINISHED;
     }
     return TEST_CONTINUE;
 }
@@ -44,38 +44,46 @@ Zlint_code Zlint_test_init_06::init(Zlint *z)
 Zlint_code Zlint_test_init_06::recv_gdu(Zlint *z, Z_GDU *gdu)
 {
     if (gdu->which == Z_GDU_Z3950 &&
-	gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
+        gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
     {
-	Z_InitResponse *init = gdu->u.z3950->u.initResponse;
-	int ver = z->initResponseGetVersion(init);
-	int result = init->result ? *init->result : 0;
-	
-	if (init->options)
-	{
-	    int i;
-	    int no_set = 0;
-	    int no_reset = 0;
-	    for (i = 0; i <= 24; i++)
-		if (ODR_MASK_GET(init->options, i))
-		    no_set++;
-		else
-		    no_reset++;
-	    if (no_set < 2)
-	    {
-		z->msg_check_fail("suspicuously few option bits set");
-		return TEST_FINISHED;
-	    }
-	    if (no_reset == 0)
-	    {
-		z->msg_check_fail("suspicuously many option bits set");
-		return TEST_FINISHED;
-	    }
-	}
-	z->msg_check_ok();
+        Z_InitResponse *init = gdu->u.z3950->u.initResponse;
+        int ver = z->initResponseGetVersion(init);
+        int result = init->result ? *init->result : 0;
+        
+        if (init->options)
+        {
+            int i;
+            int no_set = 0;
+            int no_reset = 0;
+            for (i = 0; i <= 24; i++)
+                if (ODR_MASK_GET(init->options, i))
+                    no_set++;
+                else
+                    no_reset++;
+            if (no_set < 2)
+            {
+                z->msg_check_fail("suspicuously few option bits set");
+                return TEST_FINISHED;
+            }
+            if (no_reset == 0)
+            {
+                z->msg_check_fail("suspicuously many option bits set");
+                return TEST_FINISHED;
+            }
+        }
+        z->msg_check_ok();
     }
     else
-	z->msg_check_fail("did not receive init response as expected");
+        z->msg_check_fail("did not receive init response as expected");
     return TEST_FINISHED;
 }
 
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.4 2005-06-02 06:40:21 adam Exp $
+ * $Id: z-query.h,v 1.5 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -40,3 +40,11 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     void pr_term(WRBUF wbuf, char *buf, int len);
 };
 };
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

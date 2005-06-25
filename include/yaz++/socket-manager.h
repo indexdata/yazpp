@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-manager.h,v 1.5 2005-06-08 13:28:05 adam Exp $
+ * $Id: socket-manager.h,v 1.6 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -20,26 +20,26 @@ namespace yazpp_1 {
 class YAZ_EXPORT SocketManager : public ISocketObservable {
  private:
     struct SocketEntry {
-	ISocketObserver *observer;
-	int fd;
-	unsigned mask;
-	int timeout;
+        ISocketObserver *observer;
+        int fd;
+        unsigned mask;
+        int timeout;
         int timeout_this;
-	time_t last_activity;
-	SocketEntry *next;
+        time_t last_activity;
+        SocketEntry *next;
     };
     SocketEntry *m_observers;       // all registered observers
     struct SocketEvent {
-	ISocketObserver *observer;
-	int event;
-	SocketEvent *next;          // front in queue
-	SocketEvent *prev;          // back in queue
+        ISocketObserver *observer;
+        int event;
+        SocketEvent *next;          // front in queue
+        SocketEvent *prev;          // back in queue
     };
     SocketEvent *m_queue_front;
     SocketEvent *m_queue_back;
     
     SocketEntry **SocketManager::lookupObserver
-	(ISocketObserver *observer);
+        (ISocketObserver *observer);
     SocketEvent *SocketManager::getEvent();
     void putEvent(SocketEvent *event);
     void removeEvent(ISocketObserver *observer);
@@ -55,7 +55,7 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     virtual void maskObserver(ISocketObserver *observer, int mask);
     /// Set timeout
     virtual void timeoutObserver(ISocketObserver *observer,
-				 int timeout);
+                                 int timeout);
     /// Process one event. return > 0 if event could be processed;
     int processEvent();
     SocketManager();
@@ -65,3 +65,11 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
 };
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -11,9 +11,9 @@ int main(int argc, char **argv)
     Zlint z(new PDU_Assoc(&mySocketManager));
  
     if (argc > 1)
-	z.set_host(argv[1]);
+        z.set_host(argv[1]);
     else
-	z.set_host("localhost:9999");
+        z.set_host("localhost:9999");
 
     Zlint_test_init_01 t01;
     z.add_test(&t01);
@@ -46,7 +46,15 @@ int main(int argc, char **argv)
     z.add_test(&scan01);
 
     while (mySocketManager.processEvent() > 0)
-	;
+        ;
     exit (0);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

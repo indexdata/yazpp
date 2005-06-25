@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.h,v 1.3 2005-06-08 13:28:06 adam Exp $
+ * $Id: zlint.h,v 1.4 2005-06-25 15:53:21 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -151,3 +151,11 @@ public:
     Zlint_code recv_gdu(Zlint *z, Z_GDU *gdu);
     Zlint_code recv_fail(Zlint *z, int reason);
 };
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

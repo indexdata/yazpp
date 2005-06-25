@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.10 2005-06-08 13:28:06 adam Exp $
+ * $Id: zlint.cpp,v 1.11 2005-06-25 15:53:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -44,9 +44,9 @@ Zlint::~Zlint()
 {
     while (m_tests)
     {
-	Zlint_t *t = m_tests;
-	m_tests = t->m_next;
-	delete t;
+        Zlint_t *t = m_tests;
+        m_tests = t->m_next;
+        delete t;
     }
     xfree(m_host);
     xfree(m_database);
@@ -62,7 +62,7 @@ void Zlint::set_host(const char *cp)
     const char *basep;
     cs_get_host_args(m_host, &basep);
     if (!basep || !*basep)
-	basep = "Default";
+        basep = "Default";
     xfree(m_database);
     m_database = xstrdup(basep);
 }
@@ -71,13 +71,13 @@ void Zlint::timeoutNotify()
 {
     if (m_cur_test)
     {
-	if (m_cur_test->m_t->recv_fail(this, 2) != TEST_FINISHED)
-	{
-	    close();
-	    client(m_host);
-	    timeout(30);
-	    return;
-	}
+        if (m_cur_test->m_t->recv_fail(this, 2) != TEST_FINISHED)
+        {
+            close();
+            client(m_host);
+            timeout(30);
+            return;
+        }
     }
     close_goto_next();
 }
@@ -86,13 +86,13 @@ void Zlint::failNotify()
 {
     if (m_cur_test)
     {
-	if (m_cur_test->m_t->recv_fail(this, 1) != TEST_FINISHED)
-	{
-	    close();
-	    client(m_host);
-	    timeout(30);
-	    return;
-	}
+        if (m_cur_test->m_t->recv_fail(this, 1) != TEST_FINISHED)
+        {
+            close();
+            client(m_host);
+            timeout(30);
+            return;
+        }
     }
     close_goto_next();
 }
@@ -101,8 +101,8 @@ void Zlint::connectNotify()
 {
     if (m_cur_test)
     {
-	if (m_cur_test->m_t->init(this) != TEST_FINISHED)
-	    return;
+        if (m_cur_test->m_t->init(this) != TEST_FINISHED)
+            return;
     }
     close_goto_next();
 }
@@ -111,16 +111,16 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
 {
     if (m_cur_test)
     {
-	int r = m_cur_test->m_t->recv_gdu(this, gdu);
-	if (r == TEST_CONTINUE)
-	    return;
-	if (r == TEST_REOPEN)
-	{
-	    close();
-	    client(m_host);
-	    timeout(30);
-	    return;
-	}
+        int r = m_cur_test->m_t->recv_gdu(this, gdu);
+        if (r == TEST_CONTINUE)
+            return;
+        if (r == TEST_REOPEN)
+        {
+            close();
+            client(m_host);
+            timeout(30);
+            return;
+        }
     }
     close_goto_next();
 }
@@ -129,9 +129,9 @@ void Zlint::close_goto_next()
 {
     close();
     if (m_cur_test)
-	m_cur_test = m_cur_test->m_next;
+        m_cur_test = m_cur_test->m_next;
     if (m_cur_test)
-	client(m_host);
+        client(m_host);
     timeout(30);
 }
 
@@ -144,7 +144,7 @@ IPDU_Observer *Zlint::sessionNotify(
 Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 {
     Z_ReferenceId *id = 
-	(Z_ReferenceId *) odr_malloc(odr_encode(), sizeof(*id));
+        (Z_ReferenceId *) odr_malloc(odr_encode(), sizeof(*id));
     id->size = id->len = len;
     id->buf = (unsigned char*) odr_malloc(odr_encode(), len);
     memcpy(id->buf, buf, len);
@@ -157,12 +157,12 @@ int Zlint::initResponseGetVersion(Z_InitResponse *init)
     int off = 0;
     int i;
     for (i = 0; i<12; i++)
-	if (ODR_MASK_GET(init->protocolVersion, no))
-	{
-	    no = i+1;
-	}
-	else
-	    off = 1;
+        if (ODR_MASK_GET(init->protocolVersion, no))
+        {
+            no = i+1;
+        }
+        else
+            off = 1;
     return no;
 }
 
@@ -170,10 +170,10 @@ void Zlint::add_test(Zlint_test *t)
 {
     Zlint_t **d = &m_tests;
     while (*d)
-	d = &(*d)->m_next;
+        d = &(*d)->m_next;
     *d = new Zlint_t(t);
     if (!m_cur_test)
-	m_cur_test = m_tests;
+        m_cur_test = m_tests;
 }
 
 void Zlint::msg_check_for(const char *fmt, ...)
@@ -204,9 +204,9 @@ void Zlint::msg_check_ok()
 {
     if (!m_cur_test->m_test_reported)
     {
-	m_cur_test->m_test_ok = 1;
-	m_cur_test->m_test_reported = 1;
-	printf ("OK\n");
+        m_cur_test->m_test_ok = 1;
+        m_cur_test->m_test_reported = 1;
+        printf ("OK\n");
     }
 }
 
@@ -214,9 +214,9 @@ void Zlint::msg_check_fail(const char *fmt, ...)
 {
     if (!m_cur_test->m_test_reported)
     {
-	m_cur_test->m_test_ok = 0;
-	m_cur_test->m_test_reported = 1;
-	printf ("Fail\n");
+        m_cur_test->m_test_ok = 0;
+        m_cur_test->m_test_reported = 1;
+        printf ("Fail\n");
     }
     va_list ap;
     va_start(ap, fmt);
@@ -230,9 +230,9 @@ void Zlint::msg_check_notapp()
 {
     if (!m_cur_test->m_test_reported)
     {
-	m_cur_test->m_test_ok = 2;
-	m_cur_test->m_test_reported = 1;
-	printf ("Unsupported\n");
+        m_cur_test->m_test_ok = 2;
+        m_cur_test->m_test_reported = 1;
+        printf ("Unsupported\n");
     }
 }
 
@@ -263,3 +263,11 @@ Zlint_code Zlint_test_simple::recv_fail(Zlint *z, int reason)
     z->msg_check_fail("target closed connection");
     return TEST_FINISHED;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

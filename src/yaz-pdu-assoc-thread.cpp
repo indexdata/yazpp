@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.11 2005-06-08 13:28:06 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.12 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifdef WIN32
@@ -53,7 +53,7 @@ events(void *p)
     
     yaz_log (YLOG_LOG, "thread started");
     while (s->processEvent() > 0)
-	;
+        ;
     yaz_log (YLOG_LOG, "thread finished");
 #ifdef WIN32
 #else
@@ -72,7 +72,7 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
 
     /// Clone PDU Observer
     new_observable->m_PDU_Observer =
-	m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));
+        m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));
 #ifdef WIN32
     long t_id;
     t_id = _beginthread (events, 0, socket_observable);
@@ -86,9 +86,17 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
 
     int id = pthread_create (&tid, 0, events, socket_observable);
     if (id)
-	yaz_log (YLOG_ERRNO|YLOG_FATAL, "pthread_create returned id=%d", id);
+        yaz_log (YLOG_ERRNO|YLOG_FATAL, "pthread_create returned id=%d", id);
     else
-	pthread_detach (tid);
+        pthread_detach (tid);
 #endif
 }
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-databases.h,v 1.2 2005-06-02 06:40:21 adam Exp $
+ * $Id: z-databases.h,v 1.3 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -26,3 +26,11 @@ public:
     NMEM nmem;
 };
 };
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

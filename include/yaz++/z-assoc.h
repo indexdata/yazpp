@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.9 2005-06-21 17:37:15 adam Exp $
+ * $Id: z-assoc.h,v 1.10 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -62,20 +62,20 @@ class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
     /// OtherInformation
     void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
     Z_OtherInformationUnit *update_otherInformation (
-	Z_OtherInformation **otherInformationP, int createFlag,
-	int *oid, int categoryValue, int deleteFlag);
+        Z_OtherInformation **otherInformationP, int createFlag,
+        int *oid, int categoryValue, int deleteFlag);
     void set_otherInformationString (
-	Z_OtherInformation **otherInformationP,
-	int *oid, int categoryValue,
-	const char *str);
+        Z_OtherInformation **otherInformationP,
+        int *oid, int categoryValue,
+        const char *str);
     void set_otherInformationString (
-	Z_OtherInformation **otherInformation,
-	int oidval, int categoryValue,
-	const char *str);
+        Z_OtherInformation **otherInformation,
+        int oidval, int categoryValue,
+        const char *str);
     void set_otherInformationString (
-	Z_APDU *apdu,
-	int oidval, int categoryValue,
-	const char *str);
+        Z_APDU *apdu,
+        int oidval, int categoryValue,
+        const char *str);
 
     Z_ReferenceId *getRefID(char* str);
     Z_ReferenceId **get_referenceIdP(Z_APDU *apdu);
@@ -101,3 +101,11 @@ class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
 };
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

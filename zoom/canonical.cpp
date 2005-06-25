@@ -14,3 +14,11 @@ int main(int argc, char **argv)
     const record rec(rs, 0);
     std::cout << rec.render() << std::endl;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

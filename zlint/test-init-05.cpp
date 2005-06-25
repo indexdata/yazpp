@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-init-05.cpp,v 1.3 2004-12-13 20:50:54 adam Exp $
+ * $Id: test-init-05.cpp,v 1.4 2005-06-25 15:53:21 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -39,10 +39,10 @@ Zlint_code Zlint_test_init_05::init(Zlint *z)
     int r = z->send_Z_PDU(apdu, &len);
     if (r < 0)
     {
-	z->msg_check_fail("unable to send init request");
-	return TEST_FINISHED;
+        z->msg_check_fail("unable to send init request");
+        return TEST_FINISHED;
     }
-	
+        
     apdu = z->create_Z_PDU(Z_APDU_initRequest);
     init = apdu->u.initRequest;
     
@@ -54,8 +54,8 @@ Zlint_code Zlint_test_init_05::init(Zlint *z)
     r = z->send_Z_PDU(apdu, &len);
     if (r < 0)
     {
-	z->msg_check_fail("unable to send init request");
-	return TEST_FINISHED;
+        z->msg_check_fail("unable to send init request");
+        return TEST_FINISHED;
     }
     return TEST_CONTINUE;
 }
@@ -63,58 +63,66 @@ Zlint_code Zlint_test_init_05::init(Zlint *z)
 Zlint_code Zlint_test_init_05::recv_gdu(Zlint *z, Z_GDU *gdu)
 {
     if (gdu->which == Z_GDU_Z3950 &&
-	gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
+        gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
     {
-	Z_InitResponse *init = gdu->u.z3950->u.initResponse;
-	int ver = z->initResponseGetVersion(init);
-	int result = init->result ? *init->result : 0;
-	
-	if (m_init_response_no == 0)
-	{
-	    if (!init->referenceId)
-	    {
-		z->msg_check_fail("missing referenceID from "
-				  "first init response");
-		return TEST_FINISHED;
-	    }
-	    else if (init->referenceId->len != REFID_LEN1
-		     || memcmp(init->referenceId->buf, REFID_BUF1, REFID_LEN1))
-	    {
-		z->msg_check_fail("reference ID does not match from "
-				  "first init response");
-		return TEST_FINISHED;
-	    }
-	}
-	else
-	{
-	    if (!init->referenceId)
-		z->msg_check_fail("missing referenceID from "
-				  "second init response");
-	    else if (init->referenceId->len != REFID_LEN2
-		     || memcmp(init->referenceId->buf, REFID_BUF2, REFID_LEN2))
-		z->msg_check_fail("reference ID does not match from "
-				  "second init response");
-	}
-	
-	if (!result)
-	{
-	    z->msg_check_fail("init rejected (result false)");
-	    return TEST_FINISHED;
-	}
-	else
-	{
-	    if (m_init_response_no == 0)
-	    {
-		m_init_response_no++;
-		return TEST_CONTINUE;
-	    }
-	    else
-		z->msg_check_ok();
-	}
+        Z_InitResponse *init = gdu->u.z3950->u.initResponse;
+        int ver = z->initResponseGetVersion(init);
+        int result = init->result ? *init->result : 0;
+        
+        if (m_init_response_no == 0)
+        {
+            if (!init->referenceId)
+            {
+                z->msg_check_fail("missing referenceID from "
+                                  "first init response");
+                return TEST_FINISHED;
+            }
+            else if (init->referenceId->len != REFID_LEN1
+                     || memcmp(init->referenceId->buf, REFID_BUF1, REFID_LEN1))
+            {
+                z->msg_check_fail("reference ID does not match from "
+                                  "first init response");
+                return TEST_FINISHED;
+            }
+        }
+        else
+        {
+            if (!init->referenceId)
+                z->msg_check_fail("missing referenceID from "
+                                  "second init response");
+            else if (init->referenceId->len != REFID_LEN2
+                     || memcmp(init->referenceId->buf, REFID_BUF2, REFID_LEN2))
+                z->msg_check_fail("reference ID does not match from "
+                                  "second init response");
+        }
+        
+        if (!result)
+        {
+            z->msg_check_fail("init rejected (result false)");
+            return TEST_FINISHED;
+        }
+        else
+        {
+            if (m_init_response_no == 0)
+            {
+                m_init_response_no++;
+                return TEST_CONTINUE;
+            }
+            else
+                z->msg_check_ok();
+        }
     }
     else
-	z->msg_check_fail("did not receive init response as expected");
+        z->msg_check_fail("did not receive init response as expected");
     return TEST_FINISHED;
 }
 
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

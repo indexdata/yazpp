@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.42 2005-06-21 21:30:24 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.43 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <assert.h>
@@ -38,31 +38,31 @@ PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable)
 }
 
 PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable,
-			     COMSTACK cs)
+                             COMSTACK cs)
 {
     init(socketObservable);
     m_cs = cs;
     unsigned mask = 0;
     if (cs->io_pending & CS_WANT_WRITE)
-	mask |= SOCKET_OBSERVE_WRITE;
+        mask |= SOCKET_OBSERVE_WRITE;
     if (cs->io_pending & CS_WANT_READ)
-	mask |= SOCKET_OBSERVE_READ;
+        mask |= SOCKET_OBSERVE_READ;
     m_socketObservable->addObserver(cs_fileno(cs), this);
     if (!mask)
     {
-	yaz_log (m_log, "new PDU_Assoc. Ready");
-	m_state = Ready;
-	flush_PDU();
+        yaz_log (m_log, "new PDU_Assoc. Ready");
+        m_state = Ready;
+        flush_PDU();
     }
     else
     {
-	yaz_log (m_log, "new PDU_Assoc. Accepting");
-	// assume comstack is accepting...
-	m_state = Accepting;
-	m_socketObservable->addObserver(cs_fileno(cs), this);
-	yaz_log(m_log, "maskObserver 1");
-	m_socketObservable->maskObserver(this,
-					 mask |SOCKET_OBSERVE_EXCEPT);
+        yaz_log (m_log, "new PDU_Assoc. Accepting");
+        // assume comstack is accepting...
+        m_state = Accepting;
+        m_socketObservable->addObserver(cs_fileno(cs), this);
+        yaz_log(m_log, "maskObserver 1");
+        m_socketObservable->maskObserver(this,
+                                         mask |SOCKET_OBSERVE_EXCEPT);
     }
 }
 
@@ -76,7 +76,7 @@ IPDU_Observable *PDU_Assoc::clone()
 void PDU_Assoc::socketNotify(int event)
 {
     yaz_log (m_log, "PDU_Assoc::socketNotify p=%p state=%d event = %d",
-	  this, m_state, event);
+          this, m_state, event);
     if (event & SOCKET_OBSERVE_EXCEPT)
     {
         close();
@@ -91,156 +91,156 @@ void PDU_Assoc::socketNotify(int event)
     switch (m_state)
     {
     case Accepting:
-	if (!cs_accept (m_cs))
-	{
-	    yaz_log (m_log, "PDU_Assoc::cs_accept failed");
-	    m_cs = 0;
-	    close();
-	    m_PDU_Observer->failNotify();
-	}
-	else
-	{
-	    unsigned mask = 0;
-	    if (m_cs->io_pending & CS_WANT_WRITE)
-		mask |= SOCKET_OBSERVE_WRITE;
-	    if (m_cs->io_pending & CS_WANT_READ)
-		mask |= SOCKET_OBSERVE_READ;
-	    if (!mask)
-	    {   // accept is complete. turn to ready state and write if needed
-		m_state = Ready;
-		flush_PDU();
-	    }
-	    else  
-	    {   // accept still incomplete.
-	        yaz_log(m_log, "maskObserver 2");
-		m_socketObservable->maskObserver(this,
-					     mask|SOCKET_OBSERVE_EXCEPT);
-	    }
-	}
-	break;
+        if (!cs_accept (m_cs))
+        {
+            yaz_log (m_log, "PDU_Assoc::cs_accept failed");
+            m_cs = 0;
+            close();
+            m_PDU_Observer->failNotify();
+        }
+        else
+        {
+            unsigned mask = 0;
+            if (m_cs->io_pending & CS_WANT_WRITE)
+                mask |= SOCKET_OBSERVE_WRITE;
+            if (m_cs->io_pending & CS_WANT_READ)
+                mask |= SOCKET_OBSERVE_READ;
+            if (!mask)
+            {   // accept is complete. turn to ready state and write if needed
+                m_state = Ready;
+                flush_PDU();
+            }
+            else  
+            {   // accept still incomplete.
+                yaz_log(m_log, "maskObserver 2");
+                m_socketObservable->maskObserver(this,
+                                             mask|SOCKET_OBSERVE_EXCEPT);
+            }
+        }
+        break;
     case Connecting:
-	if (event & SOCKET_OBSERVE_READ && 
-	    event & SOCKET_OBSERVE_WRITE)
-	{
-	    // For Unix: if both read and write is set, then connect failed.
-	    close();
-	    m_PDU_Observer->failNotify();
-	}
-	else
-	{
-	    yaz_log (m_log, "cs_rcvconnect");
-	    int res = cs_rcvconnect (m_cs);
-	    if (res == 1)
-	    {
-		unsigned mask = SOCKET_OBSERVE_EXCEPT;
-		if (m_cs->io_pending & CS_WANT_WRITE)
-		    mask |= SOCKET_OBSERVE_WRITE;
-		if (m_cs->io_pending & CS_WANT_READ)
-		    mask |= SOCKET_OBSERVE_READ;
-	        yaz_log(m_log, "maskObserver 3");
-		m_socketObservable->maskObserver(this, mask);
-	    }
-	    else
-	    {
-		m_state = Ready;
-		if (m_PDU_Observer)
-		    m_PDU_Observer->connectNotify();
-		flush_PDU();
-	    }
-	}
-	break;
+        if (event & SOCKET_OBSERVE_READ && 
+            event & SOCKET_OBSERVE_WRITE)
+        {
+            // For Unix: if both read and write is set, then connect failed.
+            close();
+            m_PDU_Observer->failNotify();
+        }
+        else
+        {
+            yaz_log (m_log, "cs_rcvconnect");
+            int res = cs_rcvconnect (m_cs);
+            if (res == 1)
+            {
+                unsigned mask = SOCKET_OBSERVE_EXCEPT;
+                if (m_cs->io_pending & CS_WANT_WRITE)
+                    mask |= SOCKET_OBSERVE_WRITE;
+                if (m_cs->io_pending & CS_WANT_READ)
+                    mask |= SOCKET_OBSERVE_READ;
+                yaz_log(m_log, "maskObserver 3");
+                m_socketObservable->maskObserver(this, mask);
+            }
+            else
+            {
+                m_state = Ready;
+                if (m_PDU_Observer)
+                    m_PDU_Observer->connectNotify();
+                flush_PDU();
+            }
+        }
+        break;
     case Listen:
-	if (event & SOCKET_OBSERVE_READ)
-	{
-	    int res;
-	    COMSTACK new_line;
-	    
-	    if ((res = cs_listen(m_cs, 0, 0)) == 1)
-		return;
-	    if (res < 0)
-	    {
-		yaz_log(YLOG_FATAL|YLOG_ERRNO, "cs_listen failed");
-		return;
-	    }
-	    if (!(new_line = cs_accept(m_cs)))
-		return;
-	    /* 1. create socket-manager 
+        if (event & SOCKET_OBSERVE_READ)
+        {
+            int res;
+            COMSTACK new_line;
+            
+            if ((res = cs_listen(m_cs, 0, 0)) == 1)
+                return;
+            if (res < 0)
+            {
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "cs_listen failed");
+                return;
+            }
+            if (!(new_line = cs_accept(m_cs)))
+                return;
+            /* 1. create socket-manager 
                2. create pdu-assoc
                3. create top-level object
                     setup observer for child fileid in pdu-assoc
                4. start thread
-	    */
-	    yaz_log (m_log, "new session: parent fd=%d child fd=%d",
-		     cs_fileno(m_cs), cs_fileno(new_line));
-	    childNotify (new_line);
-	}
-	break;
+            */
+            yaz_log (m_log, "new session: parent fd=%d child fd=%d",
+                     cs_fileno(m_cs), cs_fileno(new_line));
+            childNotify (new_line);
+        }
+        break;
     case Writing:
         if (event & (SOCKET_OBSERVE_READ|SOCKET_OBSERVE_WRITE))
             flush_PDU();
         break;
     case Ready:
-	if (event & (SOCKET_OBSERVE_READ|SOCKET_OBSERVE_WRITE))
-	{
-	    do
-	    {
-		int res = cs_get (m_cs, &m_input_buf, &m_input_len);
-		if (res == 1)
+        if (event & (SOCKET_OBSERVE_READ|SOCKET_OBSERVE_WRITE))
+        {
+            do
+            {
+                int res = cs_get (m_cs, &m_input_buf, &m_input_len);
+                if (res == 1)
                 {
                     unsigned mask = SOCKET_OBSERVE_EXCEPT;
                     if (m_cs->io_pending & CS_WANT_WRITE)
                         mask |= SOCKET_OBSERVE_WRITE;
                     if (m_cs->io_pending & CS_WANT_READ)
                         mask |= SOCKET_OBSERVE_READ;
-	            yaz_log(m_log, "maskObserver 4");
-		    m_socketObservable->maskObserver(this, mask);
-		    return;
+                    yaz_log(m_log, "maskObserver 4");
+                    m_socketObservable->maskObserver(this, mask);
+                    return;
                 }
-		else if (res <= 0)
-		{
-		    yaz_log (m_log, "PDU_Assoc::Connection closed by peer");
-		    close();
-		    if (m_PDU_Observer)
-			m_PDU_Observer->failNotify(); // problem here..
-		    return;
-		}
-		// lock it, so we know if recv_PDU deletes it.
-		int destroyed = 0;
-		m_destroyed = &destroyed;
+                else if (res <= 0)
+                {
+                    yaz_log (m_log, "PDU_Assoc::Connection closed by peer");
+                    close();
+                    if (m_PDU_Observer)
+                        m_PDU_Observer->failNotify(); // problem here..
+                    return;
+                }
+                // lock it, so we know if recv_PDU deletes it.
+                int destroyed = 0;
+                m_destroyed = &destroyed;
 
-		if (!m_PDU_Observer)
-		    return;
+                if (!m_PDU_Observer)
+                    return;
 #if 0
-		PDU_Queue **pq = &m_queue_in;
-		while (*pq)
-		    pq = &(*pq)->m_next;
-		
-		*pq = new PDU_Queue(m_input_buf, res);
+                PDU_Queue **pq = &m_queue_in;
+                while (*pq)
+                    pq = &(*pq)->m_next;
+                
+                *pq = new PDU_Queue(m_input_buf, res);
 #else
-		m_PDU_Observer->recv_PDU(m_input_buf, res);
+                m_PDU_Observer->recv_PDU(m_input_buf, res);
 #endif
-		if (destroyed)   // it really was destroyed, return now.
-		    return;
+                if (destroyed)   // it really was destroyed, return now.
+                    return;
                 m_destroyed = 0;
-	    } while (m_cs && cs_more (m_cs));
-	    if (m_cs && m_state == Ready)
+            } while (m_cs && cs_more (m_cs));
+            if (m_cs && m_state == Ready)
             {
-	        yaz_log(m_log, "maskObserver 5");
-		m_socketObservable->maskObserver(this,
-						 SOCKET_OBSERVE_EXCEPT|
-						 SOCKET_OBSERVE_READ);
-	    }
-	}
-	break;
+                yaz_log(m_log, "maskObserver 5");
+                m_socketObservable->maskObserver(this,
+                                                 SOCKET_OBSERVE_EXCEPT|
+                                                 SOCKET_OBSERVE_READ);
+            }
+        }
+        break;
     case Closed:
-	yaz_log (m_log, "CLOSING state=%d event was %d", m_state, event);
-	close();
-	m_PDU_Observer->failNotify();
-	break;
+        yaz_log (m_log, "CLOSING state=%d event was %d", m_state, event);
+        close();
+        m_PDU_Observer->failNotify();
+        break;
     default:
-	yaz_log (m_log, "Unknown state=%d event was %d", m_state, event);
-	close();
-	m_PDU_Observer->failNotify();
+        yaz_log (m_log, "Unknown state=%d event was %d", m_state, event);
+        close();
+        m_PDU_Observer->failNotify();
     }
 }
 
@@ -248,21 +248,21 @@ void PDU_Assoc::close()
 {
     PDU_Assoc *ch;
     for (ch = m_children; ch; ch = ch->m_next)
-	ch->close();
+        ch->close();
 
     m_socketObservable->deleteObserver(this);
     m_state = Closed;
     if (m_cs)
     {
-	yaz_log (m_log, "PDU_Assoc::close fd=%d", cs_fileno(m_cs));
-	cs_close (m_cs);
+        yaz_log (m_log, "PDU_Assoc::close fd=%d", cs_fileno(m_cs));
+        cs_close (m_cs);
     }
     m_cs = 0;
     while (m_queue_out)
     {
-	PDU_Queue *q_this = m_queue_out;
-	m_queue_out = m_queue_out->m_next;
-	delete q_this;
+        PDU_Queue *q_this = m_queue_out;
+        m_queue_out = m_queue_out->m_next;
+        delete q_this;
     }
     xfree (m_input_buf);
     m_input_buf = 0;
@@ -274,28 +274,28 @@ void PDU_Assoc::destroy()
     close();
 
     if (m_destroyed)
-	*m_destroyed = 1;
+        *m_destroyed = 1;
     PDU_Assoc **c;
 
     // delete from parent's child list (if any)
     if (m_parent)
     {
-	c = &m_parent->m_children;
-	while (*c != this)
-	{
-	    assert (*c);
-	    c = &(*c)->m_next;
-	}
-	*c = (*c)->m_next;
+        c = &m_parent->m_children;
+        while (*c != this)
+        {
+            assert (*c);
+            c = &(*c)->m_next;
+        }
+        *c = (*c)->m_next;
     }
     // delete all children ...
     c = &m_children;
     while (*c)
     {
-	PDU_Assoc *here = *c;
-	*c = (*c)->m_next;
-	here->m_parent = 0;
-	delete here;
+        PDU_Assoc *here = *c;
+        *c = (*c)->m_next;
+        here->m_parent = 0;
+        delete here;
     }
     yaz_log (m_log, "PDU_Assoc::destroy this=%p", this);
 }
@@ -320,17 +320,17 @@ int PDU_Assoc::flush_PDU()
     if (m_state != Ready && m_state != Writing)
     {
         yaz_log (m_log, "YAZ_PDU_Assoc::flush_PDU, not ready");
-	return 1;
+        return 1;
     }
     PDU_Queue *q = m_queue_out;
     if (!q)
     {
-	m_state = Ready;
-	yaz_log (m_log, "YAZ_PDU_Assoc::flush_PDU queue empty");
-	yaz_log(m_log, "maskObserver 6");
-	m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
-					 SOCKET_OBSERVE_WRITE|
-					 SOCKET_OBSERVE_EXCEPT);
+        m_state = Ready;
+        yaz_log (m_log, "YAZ_PDU_Assoc::flush_PDU queue empty");
+        yaz_log(m_log, "maskObserver 6");
+        m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
+                                         SOCKET_OBSERVE_WRITE|
+                                         SOCKET_OBSERVE_EXCEPT);
         return 0;
     }
     r = cs_put (m_cs, q->m_buf, q->m_len);
@@ -338,7 +338,7 @@ int PDU_Assoc::flush_PDU()
     {
         yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put failed");
         close();
-	m_PDU_Observer->failNotify();
+        m_PDU_Observer->failNotify();
         return r;
     }
     if (r == 1)
@@ -350,11 +350,11 @@ int PDU_Assoc::flush_PDU()
         if (m_cs->io_pending & CS_WANT_READ)
             mask |= SOCKET_OBSERVE_READ;
 
-	mask |= SOCKET_OBSERVE_WRITE;
-	yaz_log(m_log, "maskObserver 7");
-	m_socketObservable->maskObserver(this, mask);
+        mask |= SOCKET_OBSERVE_WRITE;
+        yaz_log(m_log, "maskObserver 7");
+        m_socketObservable->maskObserver(this, mask);
         yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put %d bytes fd=%d (inc)",
-		 q->m_len, cs_fileno(m_cs));
+                 q->m_len, cs_fileno(m_cs));
         return r;
     } 
     yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put %d bytes", q->m_len);
@@ -365,9 +365,9 @@ int PDU_Assoc::flush_PDU()
     if (!m_queue_out)
     {
         m_state = Ready;
-	yaz_log(m_log, "maskObserver 8");
-	m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
-					 SOCKET_OBSERVE_EXCEPT);
+        yaz_log(m_log, "maskObserver 8");
+        m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
+                                         SOCKET_OBSERVE_EXCEPT);
     }
     return r;
 }
@@ -380,7 +380,7 @@ int PDU_Assoc::send_PDU(const char *buf, int len)
     
     if (!m_cs)
     {
-	yaz_log (m_log, "PDU_Assoc::send_PDU failed, m_cs == 0");
+        yaz_log (m_log, "PDU_Assoc::send_PDU failed, m_cs == 0");
         return -1;
     }
     while (*pq)
@@ -389,8 +389,8 @@ int PDU_Assoc::send_PDU(const char *buf, int len)
     if (is_idle)
         return flush_PDU ();
     else
-	yaz_log (m_log, "PDU_Assoc::cannot send_PDU fd=%d",
-		 cs_fileno(m_cs));
+        yaz_log (m_log, "PDU_Assoc::cannot send_PDU fd=%d",
+                 cs_fileno(m_cs));
     return 0;
 }
 
@@ -414,7 +414,7 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
     yaz_log(m_log, "maskObserver 9");
     m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
-				     SOCKET_OBSERVE_EXCEPT);
+                                     SOCKET_OBSERVE_EXCEPT);
     yaz_log (m_log, "PDU_Assoc::listen ok fd=%d", cs_fileno(m_cs));
     m_state = Listen;
     return 0;
@@ -435,39 +435,39 @@ int PDU_Assoc::connect(IPDU_Observer *observer, const char *addr)
     void *ap;
     m_cs = comstack(addr, &ap);
     if (!m_cs)
-	return -1;
+        return -1;
     int res = cs_connect (m_cs, ap);
     yaz_log (m_log, "PDU_Assoc::connect fd=%d res=%d", cs_fileno(m_cs),
-	     res);
+             res);
     m_socketObservable->addObserver(cs_fileno(m_cs), this);
 
     if (res == 0)
     {   // Connect complete
-	m_state = Connecting;
-	unsigned mask = SOCKET_OBSERVE_EXCEPT;
-	mask |= SOCKET_OBSERVE_WRITE;
-	mask |= SOCKET_OBSERVE_READ;
-	yaz_log(m_log, "maskObserver 11");
-	m_socketObservable->maskObserver(this, mask);
+        m_state = Connecting;
+        unsigned mask = SOCKET_OBSERVE_EXCEPT;
+        mask |= SOCKET_OBSERVE_WRITE;
+        mask |= SOCKET_OBSERVE_READ;
+        yaz_log(m_log, "maskObserver 11");
+        m_socketObservable->maskObserver(this, mask);
     }
     else if (res > 0)
     {   // Connect pending
-	m_state = Connecting;
-	unsigned mask = SOCKET_OBSERVE_EXCEPT;
-	if (m_cs->io_pending & CS_WANT_WRITE)
-	    mask |= SOCKET_OBSERVE_WRITE;
-	if (m_cs->io_pending & CS_WANT_READ)
-	    mask |= SOCKET_OBSERVE_READ;
-	yaz_log(m_log, "maskObserver 11");
-	m_socketObservable->maskObserver(this, mask);
+        m_state = Connecting;
+        unsigned mask = SOCKET_OBSERVE_EXCEPT;
+        if (m_cs->io_pending & CS_WANT_WRITE)
+            mask |= SOCKET_OBSERVE_WRITE;
+        if (m_cs->io_pending & CS_WANT_READ)
+            mask |= SOCKET_OBSERVE_READ;
+        yaz_log(m_log, "maskObserver 11");
+        m_socketObservable->maskObserver(this, mask);
     }
     else
     {   // Connect failed immediately
-	// Since m_state is Closed we can distinguish this case from
+        // Since m_state is Closed we can distinguish this case from
         // normal connect in socketNotify handler
-	yaz_log(m_log, "maskObserver 12");
-	m_socketObservable->maskObserver(this, SOCKET_OBSERVE_WRITE|
-					 SOCKET_OBSERVE_EXCEPT);
+        yaz_log(m_log, "maskObserver 12");
+        m_socketObservable->maskObserver(this, SOCKET_OBSERVE_WRITE|
+                                         SOCKET_OBSERVE_EXCEPT);
     }
     return 0;
 }
@@ -476,7 +476,7 @@ int PDU_Assoc::connect(IPDU_Observer *observer, const char *addr)
 void PDU_Assoc::childNotify(COMSTACK cs)
 {
     PDU_Assoc *new_observable =
-	new PDU_Assoc (m_socketObservable, cs);
+        new PDU_Assoc (m_socketObservable, cs);
     
     new_observable->m_next = m_children;
     m_children = new_observable;
@@ -484,12 +484,20 @@ void PDU_Assoc::childNotify(COMSTACK cs)
 
     // Clone PDU Observer
     new_observable->m_PDU_Observer = m_PDU_Observer->sessionNotify
-	(new_observable, cs_fileno(cs));
+        (new_observable, cs_fileno(cs));
 }
 
 const char*PDU_Assoc::getpeername()
 {
     if (!m_cs)
-	return 0;
+        return 0;
     return cs_addrstr(m_cs);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

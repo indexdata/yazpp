@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gdu.cpp,v 1.1 2005-06-21 17:37:15 adam Exp $
+ * $Id: gdu.cpp,v 1.2 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz++/gdu.h>
@@ -29,11 +29,11 @@ void GDU::base(Z_GDU *gdu, ODR encode)
     m_gdu = 0;
     if (z_GDU(encode, &gdu, 0, "encode"))
     {
-	int len;
-	char *buf = odr_getbuf(encode, &len, 0);
-	
-	odr_setbuf(m_decode, buf, len, 0);
-	z_GDU(m_decode, &m_gdu, 0, 0);
+        int len;
+        char *buf = odr_getbuf(encode, &len, 0);
+        
+        odr_setbuf(m_decode, buf, len, 0);
+        z_GDU(m_decode, &m_gdu, 0, 0);
     }
     odr_destroy(encode);
 }
@@ -52,7 +52,7 @@ void GDU::extract_odr_to(ODR dst)
 {
     NMEM nmem = odr_extract_mem(m_decode);
     if (!dst->mem)
-	dst->mem = nmem_create();
+        dst->mem = nmem_create();
     nmem_transfer(dst->mem, nmem);
     nmem_destroy(nmem);
 }
@@ -86,7 +86,7 @@ GDU *GDUQueue::dequeue()
     if (!*l)
         return 0;
     while ((*l)->m_next)
-	l = &(*l)->m_next;
+        l = &(*l)->m_next;
     GDU *m = (*l)->m_item;
     delete *l;
     *l = 0;
@@ -97,10 +97,18 @@ void GDUQueue::clear()
 {
     GDU *g;
     while ((g = dequeue()))
-	delete g;
+        delete g;
 }
 
 GDUQueue::~GDUQueue()
 {
     clear();
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

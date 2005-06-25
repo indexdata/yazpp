@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.7 2005-06-08 13:28:05 adam Exp $
+ * $Id: z-server.h,v 1.8 2005-06-25 15:53:19 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -14,14 +14,14 @@ class Z_Server;
 class YAZ_EXPORT Z_ServerUtility {
  public:
     void create_databaseRecord (ODR odr, Z_NamePlusRecord *rec,
-				const char *dbname, int format,
-				const void *buf, int len);
+                                const char *dbname, int format,
+                                const void *buf, int len);
     void create_surrogateDiagnostics(ODR odr, Z_NamePlusRecord *rec,
-				     const char *dbname, int error,
-				     char *const addinfo);
+                                     const char *dbname, int error,
+                                     char *const addinfo);
     
     Z_Records *create_nonSurrogateDiagnostics (ODR odr, int error,
-    					       const char *addinfo);
+                                               const char *addinfo);
 
     void Z_ServerUtility::create_diagnostics (
         ODR odr, int error, const char *addinfo,
@@ -31,36 +31,36 @@ class YAZ_EXPORT Z_ServerUtility {
 class YAZ_EXPORT IServer_Facility {
  public:
     virtual int init(Z_Server *server,
-		     Z_InitRequest *initRequest,
-		     Z_InitResponse *initResponse) = 0;
+                     Z_InitRequest *initRequest,
+                     Z_InitResponse *initResponse) = 0;
     virtual int recv(Z_Server *server, Z_APDU *apdu) = 0;
 };
 
 class YAZ_EXPORT Yaz_Facility_ILL : public IServer_Facility {
  public:
     virtual void ill_service (Z_ExtendedServicesRequest *req,
-			      Z_ItemOrder *io,
-			      Z_ExtendedServicesResponse *res) = 0;
+                              Z_ItemOrder *io,
+                              Z_ExtendedServicesResponse *res) = 0;
 
     int init(Z_Server *server,
-	     Z_InitRequest *initRequest,
-	     Z_InitResponse *initResponse);
+             Z_InitRequest *initRequest,
+             Z_InitResponse *initResponse);
     int recv(Z_Server *server, Z_APDU *apdu);
 };
 
 class YAZ_EXPORT Yaz_Facility_Update : public IServer_Facility {
  public:
     virtual void update_service (Z_ExtendedServicesRequest *req,
-				 Z_IUUpdate *io,
-				 Z_ExtendedServicesResponse *res) = 0;
+                                 Z_IUUpdate *io,
+                                 Z_ExtendedServicesResponse *res) = 0;
 
     virtual void update_service0 (Z_ExtendedServicesRequest *req,
-				 Z_IU0Update *io,
-				 Z_ExtendedServicesResponse *res) = 0;
+                                 Z_IU0Update *io,
+                                 Z_ExtendedServicesResponse *res) = 0;
 
     int init(Z_Server *server,
-	     Z_InitRequest *initRequest,
-	     Z_InitResponse *initResponse);
+             Z_InitRequest *initRequest,
+             Z_InitResponse *initResponse);
     int recv(Z_Server *server, Z_APDU *apdu);
 };
 
@@ -70,37 +70,37 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IServer_Facility,
  public:
 
     virtual int sr_init (Z_InitRequest *initRequest,
-			 Z_InitResponse *initResponse) = 0;
+                         Z_InitResponse *initResponse) = 0;
     virtual void sr_search (Z_SearchRequest *searchRequest,
-			    Z_SearchResponse *searchResponse) = 0;
+                            Z_SearchResponse *searchResponse) = 0;
     virtual void sr_present (Z_PresentRequest *presentRequest,
-			     Z_PresentResponse *presentResponse) = 0;
+                             Z_PresentResponse *presentResponse) = 0;
     virtual void sr_record (const char *resultSetName,
-			    int position,
-			    int *format,
-				Z_RecordComposition *comp,
-				Z_NamePlusRecord *namePlusRecord,
-				Z_Records *diagnostics) = 0;
+                            int position,
+                            int *format,
+                                Z_RecordComposition *comp,
+                                Z_NamePlusRecord *namePlusRecord,
+                                Z_Records *diagnostics) = 0;
     int init(Z_Server *server,
-	     Z_InitRequest *initRequest,
-	     Z_InitResponse *initResponse);
+             Z_InitRequest *initRequest,
+             Z_InitResponse *initResponse);
     int recv(Z_Server *server, Z_APDU *apdu);
 
     ODR odr_encode();
     ODR odr_decode();
  private:
     Z_Records *pack_records (Z_Server *s,
-			     const char *resultSetName,
-			     int start, int num,
-			     Z_RecordComposition *comp,
-			     int *next, int *pres,
-			     int *oid);
+                             const char *resultSetName,
+                             int start, int num,
+                             Z_RecordComposition *comp,
+                             int *next, int *pres,
+                             int *oid);
 
     void fetch_via_piggyback (Z_Server *s,
-			      Z_SearchRequest *searchRequest,
-			      Z_SearchResponse *searchResponse);
+                              Z_SearchRequest *searchRequest,
+                              Z_SearchResponse *searchResponse);
     void fetch_via_present (Z_Server *s,
-			    Z_PresentRequest *req, Z_PresentResponse *res);
+                            Z_PresentRequest *req, Z_PresentResponse *res);
 
     int m_preferredMessageSize;
     int m_maximumRecordSize;
@@ -136,3 +136,11 @@ class YAZ_EXPORT Yaz_USMARC {
     const char *get_record(size_t position);
 };
 };
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

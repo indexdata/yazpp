@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.7 2005-06-08 13:28:05 adam Exp $
+ * $Id: pdu-assoc.h,v 1.8 2005-06-25 15:53:19 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -23,20 +23,20 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     friend class PDU_AssocThread;
  private:
     enum { 
-	Connecting,
-	Listen,
-	Ready,
-	Closed,
-	Writing,
-	Accepting
+        Connecting,
+        Listen,
+        Ready,
+        Closed,
+        Writing,
+        Accepting
     } m_state;
     class PDU_Queue {
     public:
-	PDU_Queue(const char *buf, int len);
-	PDU_Queue::~PDU_Queue();
-	char *m_buf;
-	int m_len;
-	PDU_Queue *m_next;
+        PDU_Queue(const char *buf, int len);
+        PDU_Queue::~PDU_Queue();
+        char *m_buf;
+        int m_len;
+        PDU_Queue *m_next;
     };
     PDU_Assoc *m_parent;
     PDU_Assoc *m_children;
@@ -59,7 +59,7 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable);
     /// Create Object using existing comstack
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable,
-		  COMSTACK cs);
+                  COMSTACK cs);
     /// Close socket and destroy object.
     /// virtual ~PDU_Assoc();
     /// Clone the object
@@ -93,4 +93,12 @@ class YAZ_EXPORT PDU_AssocThread : public PDU_Assoc {
 };
 
 #endif
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

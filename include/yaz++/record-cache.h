@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: record-cache.h,v 1.3 2005-06-08 13:28:05 adam Exp $
+ * $Id: record-cache.h,v 1.4 2005-06-25 15:53:19 adam Exp $
  */
 
 
@@ -19,7 +19,7 @@ class YAZ_EXPORT RecordCache {
     void add (ODR o, Z_NamePlusRecordList *npr, int start, int hits);
     
     int lookup (ODR o, Z_NamePlusRecordList **npr, int start, int num,
-		Odr_oid *syntax, Z_RecordComposition *comp);
+                Odr_oid *syntax, Z_RecordComposition *comp);
     void clear();
 
     void copy_searchRequest(Z_SearchRequest *sr);
@@ -31,8 +31,16 @@ class YAZ_EXPORT RecordCache {
     Z_SearchRequest *m_searchRequest;
     Z_PresentRequest *m_presentRequest;
     int match (RecordCache_Entry *entry,
-	       Odr_oid *syntax, int offset,
-	       Z_RecordComposition *comp);
+               Odr_oid *syntax, int offset,
+               Z_RecordComposition *comp);
     int m_max_size;
 };
 };
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+
