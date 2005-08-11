@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-init-02.cpp,v 1.4 2005-06-25 15:53:21 adam Exp $
+ * $Id: test-init-02.cpp,v 1.5 2005-08-11 18:53:01 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -45,7 +45,6 @@ Zlint_code Zlint_test_init_02::recv_gdu(Zlint *z, Z_GDU *gdu)
     {
         Z_InitResponse *init = gdu->u.z3950->u.initResponse;
         int ver = z->initResponseGetVersion(init);
-        int result = init->result ? *init->result : 0;
         if (ver != 2)
             z->msg_check_fail("got version %d, expected 2", ver);
         z->msg_check_ok();
