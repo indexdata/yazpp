@@ -2,11 +2,13 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.7 2005-06-25 15:53:19 adam Exp $
+ * $Id: pdu-observer.h,v 1.8 2005-09-22 12:40:45 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
 #define YAZ_PDU_OBSERVER_H
+
+#include <yaz/yconfig.h>
 
 namespace yazpp_1 {
 
@@ -36,6 +38,8 @@ class YAZ_EXPORT IPDU_Observable {
     virtual void idleTime (int timeout) = 0;
     /// Get peername
     virtual const char *getpeername() = 0;
+
+    virtual ~IPDU_Observable() = 0;
 };
 
 /** Protocol Data Unit Observer.
@@ -55,6 +59,8 @@ class YAZ_EXPORT IPDU_Observer {
     /// Make clone of observer using IPDU_Observable interface
     virtual IPDU_Observer *sessionNotify(
         IPDU_Observable *the_PDU_Observable, int fd) = 0;
+
+    virtual ~IPDU_Observer() = 0;
 };
 };
 

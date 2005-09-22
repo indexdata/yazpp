@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-observer.h,v 1.6 2005-06-25 15:53:19 adam Exp $
+ * $Id: socket-observer.h,v 1.7 2005-09-22 12:40:45 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_OBSERVER_H
@@ -54,6 +54,7 @@ class YAZ_EXPORT ISocketObservable {
     /// Specify timeout
     virtual void timeoutObserver(ISocketObserver *observer,
                                  int timeout)=0;
+    virtual ~ISocketObservable() = 0;
 };
 
 /** Socket Observer.
@@ -65,6 +66,7 @@ class YAZ_EXPORT ISocketObserver {
  public:
     /// Notify the observer that something happened to socket
     virtual void socketNotify(int event) = 0;
+    virtual ~ISocketObserver() = 0;
 };
 
 };

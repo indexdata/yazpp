@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2004, Index Data.
+ * Copyright (c) 2004-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.h,v 1.4 2005-06-25 15:53:21 adam Exp $
+ * $Id: zlint.h,v 1.5 2005-09-22 12:40:45 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -51,6 +51,7 @@ public:
     virtual Zlint_code init(Zlint *z) = 0;
     virtual Zlint_code recv_gdu(Zlint *z, Z_GDU *gdu) = 0;
     virtual Zlint_code recv_fail(Zlint *z, int reason) = 0;
+    virtual ~Zlint_test() = 0;
 };
 
 class Zlint_test_simple : public Zlint_test {

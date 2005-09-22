@@ -2,7 +2,7 @@
  * Copyright (c) 2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.cpp,v 1.11 2005-06-25 15:53:21 adam Exp $
+ * $Id: zlint.cpp,v 1.12 2005-09-22 12:40:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -15,6 +15,11 @@
 #include <yaz/log.h>
 
 #include <zlint.h>
+
+Zlint_test::~Zlint_test()
+{
+
+}
 
 class Zlint_t {
 public:

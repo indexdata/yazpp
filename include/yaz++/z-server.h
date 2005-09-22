@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.8 2005-06-25 15:53:19 adam Exp $
+ * $Id: z-server.h,v 1.9 2005-09-22 12:40:45 adam Exp $
  */
 
 #include <yaz++/z-assoc.h>
@@ -26,6 +26,8 @@ class YAZ_EXPORT Z_ServerUtility {
     void Z_ServerUtility::create_diagnostics (
         ODR odr, int error, const char *addinfo,
         Z_DiagRec ***dreca, int *num);
+
+    virtual ~Z_ServerUtility() = 0;
 };
 
 class YAZ_EXPORT IServer_Facility {
@@ -34,6 +36,8 @@ class YAZ_EXPORT IServer_Facility {
                      Z_InitRequest *initRequest,
                      Z_InitResponse *initResponse) = 0;
     virtual int recv(Z_Server *server, Z_APDU *apdu) = 0;
+
+    virtual ~IServer_Facility() = 0;
 };
 
 class YAZ_EXPORT Yaz_Facility_ILL : public IServer_Facility {
