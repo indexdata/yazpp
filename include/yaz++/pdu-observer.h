@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.8 2005-09-22 12:40:45 adam Exp $
+ * $Id: pdu-observer.h,v 1.9 2005-09-23 13:11:04 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -39,7 +39,7 @@ class YAZ_EXPORT IPDU_Observable {
     /// Get peername
     virtual const char *getpeername() = 0;
 
-    virtual ~IPDU_Observable() = 0;
+    virtual ~IPDU_Observable();
 };
 
 /** Protocol Data Unit Observer.
@@ -60,7 +60,7 @@ class YAZ_EXPORT IPDU_Observer {
     virtual IPDU_Observer *sessionNotify(
         IPDU_Observable *the_PDU_Observable, int fd) = 0;
 
-    virtual ~IPDU_Observer() = 0;
+    virtual ~IPDU_Observer();
 };
 };
 

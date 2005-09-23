@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: query.h,v 1.4 2005-09-22 12:40:45 adam Exp $
+ * $Id: query.h,v 1.5 2005-09-23 13:11:04 adam Exp $
  */
 
 #ifndef YAZ_PP_QUERY_H
@@ -18,7 +18,7 @@ class YAZ_EXPORT Yaz_Query {
  public:
     /// Print query in buffer described by str and len
     virtual void print (char *str, int len) = 0;
-    virtual ~Yaz_Query() = 0;
+    virtual ~Yaz_Query();
 };
 };
 

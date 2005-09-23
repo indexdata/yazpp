@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.43 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.44 2005-09-23 13:11:04 adam Exp $
  */
 
 #include <assert.h>
@@ -38,7 +38,7 @@ PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable)
 }
 
 PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable,
-                             COMSTACK cs)
+                     COMSTACK cs)
 {
     init(socketObservable);
     m_cs = cs;

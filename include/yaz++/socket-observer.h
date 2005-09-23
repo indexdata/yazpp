@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-observer.h,v 1.7 2005-09-22 12:40:45 adam Exp $
+ * $Id: socket-observer.h,v 1.8 2005-09-23 13:11:04 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_OBSERVER_H
@@ -41,34 +41,34 @@ namespace yazpp_1 {
     The maskObserver method specifies which of these events the
     observer is intertested in.
 */
-class YAZ_EXPORT ISocketObservable {
- public:
-    /// Add an observer interested in socket fd
-    virtual void addObserver(int fd, ISocketObserver *observer) = 0;
-    /// Delete an observer
-    virtual void deleteObserver(ISocketObserver *observer) = 0;
-    /// Delete all observers
-    virtual void deleteObservers() = 0;
-    /// Specify the events that the observer is intersted in.
-    virtual void maskObserver(ISocketObserver *observer, int mask) = 0;
-    /// Specify timeout
-    virtual void timeoutObserver(ISocketObserver *observer,
-                                 int timeout)=0;
-    virtual ~ISocketObservable() = 0;
-};
-
+    class YAZ_EXPORT ISocketObservable {
+    public:
+        /// Add an observer interested in socket fd
+        virtual void addObserver(int fd, ISocketObserver *observer) = 0;
+        /// Delete an observer
+        virtual void deleteObserver(ISocketObserver *observer) = 0;
+        /// Delete all observers
+        virtual void deleteObservers() = 0;
+        /// Specify the events that the observer is intersted in.
+        virtual void maskObserver(ISocketObserver *observer, int mask) = 0;
+        /// Specify timeout
+        virtual void timeoutObserver(ISocketObserver *observer,
+                                     int timeout)=0;
+        virtual ~ISocketObservable();
+    };
+    
 /** Socket Observer.
-   The ISocketObserver interface implements a module interested
-   socket events. Look for objects that implements the
-   ISocketObservable interface!
+    The ISocketObserver interface implements a module interested
+    socket events. Look for objects that implements the
+    ISocketObservable interface!
 */
-class YAZ_EXPORT ISocketObserver {
- public:
-    /// Notify the observer that something happened to socket
-    virtual void socketNotify(int event) = 0;
-    virtual ~ISocketObserver() = 0;
-};
-
+    class YAZ_EXPORT ISocketObserver {
+    public:
+        /// Notify the observer that something happened to socket
+        virtual void socketNotify(int event) = 0;
+        virtual ~ISocketObserver();
+    };
+    
 };
 #endif
 /*
