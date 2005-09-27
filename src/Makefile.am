@@ -1,4 +1,10 @@
-## $Id: Makefile.am,v 1.27 2005-09-22 12:40:45 adam Exp $
+## $Id: Makefile.am,v 1.28 2005-09-27 17:57:51 adam Exp $
+
+check_PROGRAMS = tstquery
+noinst_PROGRAMS = yaz-my-server yaz-my-client
+bin_SCRIPTS = yaz++-config
+
+TESTS = $(check_PROGRAMS)
 
 AM_CXXFLAGS = -I$(srcdir)/../include $(YAZINC)
 
@@ -15,11 +21,11 @@ libyazcpp_la_SOURCES=socket-observer.cpp pdu-observer.cpp query.cpp \
 	yaz-z-server-ill.cpp yaz-z-server-update.cpp yaz-z-databases.cpp \
 	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp
 
-noinst_PROGRAMS = yaz-my-server yaz-my-client
-bin_SCRIPTS = yaz++-config
 
 yaz_my_client_SOURCES=yaz-my-client.cpp
 
 yaz_my_server_SOURCES=yaz-my-server.cpp yaz-marc-sample.cpp
+
+tstquery_SOURCES=tstquery.cpp
 
 LDADD=libyazcpp.la $(YAZLALIB)

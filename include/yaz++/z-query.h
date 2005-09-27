@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2000, Index Data.
+ * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.5 2005-06-25 15:53:19 adam Exp $
+ * $Id: z-query.h,v 1.6 2005-09-27 17:57:50 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -28,16 +28,17 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     void print(char *str, int len);
     /// match query
     int match(Yaz_Z_Query *other);
+    /// Copy
+    Yaz_Z_Query &operator=(const Yaz_Z_Query &);
+    /// Assign RPN string to it
+    Yaz_Z_Query& Yaz_Z_Query::operator=(const char *rpn);
  private:
     char *m_buf;
     int m_len;
     ODR odr_decode;
     ODR odr_encode;
     ODR odr_print;
-    void oid2str(Odr_oid *o, WRBUF buf);
-    int rpn2pquery(Z_RPNStructure *s, WRBUF buf);
     WRBUF zquery2pquery(Z_Query *q);
-    void pr_term(WRBUF wbuf, char *buf, int len);
 };
 };
 /*
