@@ -1,6 +1,6 @@
 # Copyright (C) 1993-2004, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.6 2005-09-22 12:47:33 adam Exp $
+# $Id: makefile,v 1.7 2005-09-27 12:15:09 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -13,7 +13,7 @@ YAZ_DIR=..\..\yaz
 
 default: all
 
-all: dirs generated dll zclient yaz
+all: dirs generated dll myclient zclient yaz
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -49,10 +49,12 @@ TMP=$(TMPDIR)
 YAZPP_DLL=$(BINDIR)\yazpp.dll
 YAZPP_IMPLIB=$(LIBDIR)\yazpp.lib
 ZCLIENT=$(BINDIR)\zclient.exe
+MY_CLIENT=$(BINDIR)\yaz-my-client.exe
 
 # shortcut names defined here
 dll: $(YAZPP_DLL)
 zclient: $(ZCLIENT)
+myclient: $(MY_CLIENT)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -168,6 +170,9 @@ YAZPP_DLL_OBJS = \
    "$(OBJDIR)\zrs.obj" \
    "$(OBJDIR)\zrec.obj"
 
+MY_CLIENT_OBJS = \
+   "$(OBJDIR)\yaz-my-client.obj"
+
 ZCLIENT_OBJS = \
    "$(OBJDIR)\zclient.obj"
 
@@ -220,6 +225,18 @@ $(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
 		/out:"$(YAZPP_DLL)"
 		/implib:"$(YAZPP_IMPLIB)"
 		/map:"$(LIBDIR)\yazpp.map"  
+<<
+
+$(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
+	@echo Linking $(MY_CLIENT)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CLIENT_LINK_OPTIONS)
+		$(LINK_LIBS) 
+            	$(YAZPP_IMPLIB)
+		$(MY_CLIENT_OBJS)
+		/map:"$(LIBDIR)\yaz-my-client.map"
+		/out:$(MY_CLIENT)
 <<
 
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
