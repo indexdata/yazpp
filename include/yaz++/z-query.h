@@ -2,8 +2,11 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.6 2005-09-27 17:57:50 adam Exp $
+ * $Id: z-query.h,v 1.7 2005-10-05 12:06:45 adam Exp $
  */
+
+#ifndef YAZPP_Z_QUERY_INCLUDED
+#define YAZPP_Z_QUERY_INCLUDED
 
 #include <yaz/proto.h>
 #include <yaz++/query.h>
@@ -41,6 +44,7 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     WRBUF zquery2pquery(Z_Query *q);
 };
 };
+#endif
 /*
  * Local variables:
  * c-basic-offset: 4
