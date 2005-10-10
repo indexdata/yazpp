@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.12 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.13 2005-10-10 15:59:43 adam Exp $
  */
 
 #ifdef WIN32
@@ -35,11 +35,28 @@
 
 using namespace yazpp_1;
 
+class worker {
+public:
+    SocketManager *m_mgr;
+    PDU_Assoc *m_assoc;
+    void run();
+};
+
 PDU_AssocThread::PDU_AssocThread(
     ISocketObservable *socketObservable)
     : PDU_Assoc(socketObservable)
 {
     
+}
+
+void worker::run()
+{
+    yaz_log (YLOG_LOG, "thread started");
+    while (this->m_mgr->processEvent() > 0)
+        ;
+    yaz_log (YLOG_LOG, "thread finished");
+    delete this->m_mgr;
+    delete this;
 }
 
 #ifdef WIN32
@@ -49,12 +66,8 @@ void *
 #endif 
 events(void *p)
 {
-    SocketManager *s = (SocketManager *) p;
-    
-    yaz_log (YLOG_LOG, "thread started");
-    while (s->processEvent() > 0)
-        ;
-    yaz_log (YLOG_LOG, "thread finished");
+    worker *w = (worker *) p;
+    w->run();
 #ifdef WIN32
 #else
     return 0;
@@ -66,16 +79,17 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
     SocketManager *socket_observable = new SocketManager;
     PDU_Assoc *new_observable = new PDU_Assoc (socket_observable, cs);
 
-    new_observable->m_next = m_children;
-    m_children = new_observable;
-    new_observable->m_parent = this;
-
     /// Clone PDU Observer
     new_observable->m_PDU_Observer =
         m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));
+
+    worker *w = new worker;
+    w->m_assoc = new_observable;
+    w->m_mgr = socket_observable;
+
 #ifdef WIN32
     long t_id;
-    t_id = _beginthread (events, 0, socket_observable);
+    t_id = _beginthread (events, 0, w);
     if (t_id == -1)
     {
         yaz_log (YLOG_FATAL|YLOG_ERRNO, "_beginthread failed");
@@ -84,7 +98,7 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
 #else
     pthread_t tid;
 
-    int id = pthread_create (&tid, 0, events, socket_observable);
+    int id = pthread_create (&tid, 0, events, w);
     if (id)
         yaz_log (YLOG_ERRNO|YLOG_FATAL, "pthread_create returned id=%d", id);
     else
