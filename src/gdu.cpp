@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gdu.cpp,v 1.2 2005-06-25 15:53:19 adam Exp $
+ * $Id: gdu.cpp,v 1.3 2005-10-13 09:56:38 adam Exp $
  */
 
 #include <yaz++/gdu.h>
@@ -23,11 +23,21 @@ GDU::GDU(Z_GDU *gdu)
     base(gdu, odr_createmem(ODR_ENCODE));
 }
 
+GDU::GDU()
+{
+    base(0, odr_createmem(ODR_ENCODE));
+}
+
+GDU::GDU(const GDU &g)
+{
+    base(g.get(), odr_createmem(ODR_ENCODE));
+}
+
 void GDU::base(Z_GDU *gdu, ODR encode)
 {
     m_decode = odr_createmem(ODR_DECODE);
     m_gdu = 0;
-    if (z_GDU(encode, &gdu, 0, "encode"))
+    if (gdu && z_GDU(encode, &gdu, 0, "encode"))
     {
         int len;
         char *buf = odr_getbuf(encode, &len, 0);
@@ -38,18 +48,32 @@ void GDU::base(Z_GDU *gdu, ODR encode)
     odr_destroy(encode);
 }
 
+
+GDU &GDU::operator=(const GDU &g)
+{
+    if (this != &g)
+    {
+        odr_destroy(m_decode);
+
+        base(g.get(), odr_createmem(ODR_ENCODE));
+    }
+    return *this;
+}
+
 GDU::~GDU()
 {
     odr_destroy(m_decode);
 }
 
-Z_GDU *GDU::get()
+Z_GDU *GDU::get() const
 {
     return m_gdu;
 }
 
-void GDU::extract_odr_to(ODR dst)
+void GDU::move_away_gdu(ODR dst, Z_GDU **gdu)
 {
+    *gdu = m_gdu;
+    m_gdu = 0;
     NMEM nmem = odr_extract_mem(m_decode);
     if (!dst->mem)
         dst->mem = nmem_create();
@@ -57,53 +81,6 @@ void GDU::extract_odr_to(ODR dst)
     nmem_destroy(nmem);
 }
 
-
-GDUQueue::GDUQueue()
-{
-    m_list = 0;
-}
-
-int GDUQueue::size()
-{
-    int no = 0;
-    GDUQueue_List *l;
-    for (l = m_list; l; l = l->m_next)
-        no++;
-    return no;
-}
-
-void GDUQueue::enqueue(GDU *gdu)
-{
-    GDUQueue_List *l = new GDUQueue_List;
-    l->m_next = m_list;
-    l->m_item = gdu;
-    m_list = l;
-}
-
-GDU *GDUQueue::dequeue()
-{
-    GDUQueue_List **l = &m_list;
-    if (!*l)
-        return 0;
-    while ((*l)->m_next)
-        l = &(*l)->m_next;
-    GDU *m = (*l)->m_item;
-    delete *l;
-    *l = 0;
-    return m;
-}
-
-void GDUQueue::clear()
-{
-    GDU *g;
-    while ((g = dequeue()))
-        delete g;
-}
-
-GDUQueue::~GDUQueue()
-{
-    clear();
-}
 /*
  * Local variables:
  * c-basic-offset: 4

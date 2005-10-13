@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.28 2005-09-27 17:57:51 adam Exp $
+## $Id: Makefile.am,v 1.29 2005-10-13 09:56:38 adam Exp $
 
 check_PROGRAMS = tstquery
 noinst_PROGRAMS = yaz-my-server yaz-my-client
@@ -19,7 +19,7 @@ libyazcpp_la_SOURCES=socket-observer.cpp pdu-observer.cpp query.cpp \
 	yaz-z-assoc.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
 	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp yaz-z-server-sr.cpp \
 	yaz-z-server-ill.cpp yaz-z-server-update.cpp yaz-z-databases.cpp \
-	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp
+	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp gduqueue.cpp
 
 
 yaz_my_client_SOURCES=yaz-my-client.cpp

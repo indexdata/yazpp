@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gdu.h,v 1.2 2005-06-25 15:53:19 adam Exp $
+ * $Id: gdu.h,v 1.3 2005-10-13 09:56:38 adam Exp $
  */
 
 #ifndef YAZPP_GDU_INCLUDED
@@ -12,37 +12,20 @@
 #include <yaz/proto.h>
 
 namespace yazpp_1 {
-
     class YAZ_EXPORT GDU {
     public:
+        GDU(const GDU &);
         GDU(Z_GDU *gdu);
         GDU(Z_APDU *apdu);
+        GDU();
         ~GDU();
-        Z_GDU *get();
-        void extract_odr_to(ODR dst);
+        GDU &operator=(const GDU &);
+        Z_GDU *get() const;
+        void move_away_gdu(ODR dst, Z_GDU **gdu);
     private:
         void base(Z_GDU *gdu, ODR o);
         Z_GDU *m_gdu;
         ODR m_decode;
-    };
-
-    class GDUQueue_List {
-        friend class GDUQueue;
-    private:
-        GDU *m_item;
-        GDUQueue_List *m_next;
-    };
-
-    class GDUQueue {
-    public:
-        GDUQueue();
-        ~GDUQueue();
-        void clear();
-        void enqueue(GDU *gdu);
-        GDU *dequeue();
-        int size();
-    private:
-        GDUQueue_List *m_list;
     };
 };
 

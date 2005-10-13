@@ -1,6 +1,7 @@
 
 pkginclude_HEADERS = \
 	gdu.h \
+	gduqueue.h \
 	ir-assoc.h \
 	pdu-assoc.h \
 	pdu-observer.h \
