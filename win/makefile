@@ -1,6 +1,6 @@
 # Copyright (C) 1993-2004, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.7 2005-09-27 12:15:09 adam Exp $
+# $Id: makefile,v 1.8 2005-11-03 14:46:34 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -147,9 +147,11 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 ###########################################################
 
 YAZPP_DLL_OBJS = \
-   "$(OBJDIR)\socket-observer.obj" \
+   "$(OBJDIR)\gdu.obj" \
+   "$(OBJDIR)\gduqueue.obj" \
    "$(OBJDIR)\pdu-observer.obj" \
    "$(OBJDIR)\query.obj" \
+   "$(OBJDIR)\socket-observer.obj" \
    "$(OBJDIR)\z-server.obj" \
    "$(OBJDIR)\yaz-socket-manager.obj" \
    "$(OBJDIR)\yaz-pdu-assoc.obj" \
