@@ -1,6 +1,6 @@
-# Copyright (C) 1993-2004, Index Data ApS
+# Copyright (C) 1995-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.8 2005-11-03 14:46:34 adam Exp $
+# $Id: makefile,v 1.9 2005-11-03 14:48:06 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -36,7 +36,6 @@ BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
 OBJDIR=$(WINDIR)\obj        # where we store intermediate files
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
-PROXYDIR=$(ROOTDIR)\proxy
 ZOOMDIR=$(ROOTDIR)\zoom
 
 TMPDIR=$(ROOTDIR)\win\tmp
@@ -129,17 +128,13 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 # Final opt variables
 !if $(DEBUG)
 COPT=   $(COMMON_C_OPTIONS)   $(DEBUG_C_OPTIONS)     $(COMMON_C_INCLUDES)
-MTLOPT= $(COMMON_MTL_OPTIONS) $(DEBUG_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(DEBUG_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
-TCLOPT= $(COMMON_TCL_OPTIONS)
 
 !else
 COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
-MTLOPT= $(COMMON_MTL_OPTIONS) $(RELEASE_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
-TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
 
 ###########################################################
@@ -275,11 +270,6 @@ clean:
 realclean: clean
 	-del $(ZOOMDIR)\zoom.h
 
-# Because DOS del will only accept one file name to delete,
-# the _H_ files work only on sets that have just one file.
-# Z3950_H_FILES had to be spelled out. One more point for MS!
-
-########### check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
 
 $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
