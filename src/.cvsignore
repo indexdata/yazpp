@@ -10,3 +10,4 @@ yaz-my-client
 yaz-my-server
 yaz-proxy
 *.lo
+tstquery
