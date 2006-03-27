@@ -1,4 +1,4 @@
-# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.11 2004-02-11 10:01:54 adam Exp $
+# $Header: /home/cvsroot/yaz++/zoom/Makefile.am,v 1.12 2006-03-27 15:10:42 adam Exp $
 
 AM_CXXFLAGS= $(YAZINC) 
 
@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libzoomcpp.la
 noinst_PROGRAMS = zclient
 endif
 
-libzoomcpp_la_LDFLAGS=-version-info 1:0:0
+libzoomcpp_la_LDFLAGS=-version-info 2:0:0
 LDADD=libzoomcpp.la $(YAZLALIB)
 
 mirk_sources = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
