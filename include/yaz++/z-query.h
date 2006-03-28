@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.7 2005-10-05 12:06:45 adam Exp $
+ * $Id: z-query.h,v 1.8 2006-03-28 19:51:38 adam Exp $
  */
 
 #ifndef YAZPP_Z_QUERY_INCLUDED
@@ -34,7 +34,7 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     /// Copy
     Yaz_Z_Query &operator=(const Yaz_Z_Query &);
     /// Assign RPN string to it
-    Yaz_Z_Query& Yaz_Z_Query::operator=(const char *rpn);
+    Yaz_Z_Query& operator=(const char *rpn);
  private:
     char *m_buf;
     int m_len;

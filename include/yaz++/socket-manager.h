@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-manager.h,v 1.6 2005-06-25 15:53:19 adam Exp $
+ * $Id: socket-manager.h,v 1.7 2006-03-28 19:51:38 adam Exp $
  */
 
 #ifndef YAZ_SOCKET_MANAGER_INCLUDED
@@ -38,9 +38,9 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     SocketEvent *m_queue_front;
     SocketEvent *m_queue_back;
     
-    SocketEntry **SocketManager::lookupObserver
+    SocketEntry **lookupObserver
         (ISocketObserver *observer);
-    SocketEvent *SocketManager::getEvent();
+    SocketEvent *getEvent();
     void putEvent(SocketEvent *event);
     void removeEvent(ISocketObserver *observer);
     int m_log;

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.21 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.22 2006-03-28 19:51:38 adam Exp $
  */
 
 #include <stdlib.h>
@@ -57,7 +57,7 @@ public:
     void timeoutNotify();
     char *get_cookie (Z_OtherInformation **oi);
     int processCommand(const char *cmd);
-    const char *MyClient::getCommand();
+    const char *getCommand();
     int cmd_open(char *host);
     int cmd_connect(char *host);
     int cmd_quit(char *args);
