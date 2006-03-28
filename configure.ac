@@ -1,5 +1,11 @@
-AC_INIT(configure.in)
-AM_INIT_AUTOMAKE("yaz++",1.0.0)
+dnl YAZ++ Toolkit, Index Data 1994-2006
+dnl See the file LICENSE for details.
+dnl $Id: configure.ac,v 1.1 2006-03-28 19:56:04 adam Exp $
+AC_PREREQ(2.59)
+AC_INIT([yaz++],[1.0.0],[adam@indexdata.dk])
+AC_CONFIG_SRCDIR(configure.ac)
+AC_CONFIG_AUX_DIR([config])
+AM_INIT_AUTOMAKE([1.8])
 
 AC_PROG_CC
 AC_PROG_CPP
