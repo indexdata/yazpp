@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.12 2004-04-11 11:16:39 adam Exp $ -->
+ <!-- $Id: zoom.xml,v 1.13 2006-03-29 13:19:41 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -30,7 +30,7 @@
   </para>
   <programlisting>
     #include &lt;iostream&gt;
-    #include &lt;yaz++/zoom.h&gt;
+    #include &lt;yazpp/zoom.h&gt;
 
     using namespace ZOOM;
 
@@ -594,10 +594,10 @@
     to catch exceptions and report any errors:
    </para>
    <programlisting>
-    /* g++ -o zoom-c++-hw zoom-c++-hw.cpp -lyaz++ -lyaz */
+    /* g++ -o zoom-c++-hw zoom-c++-hw.cpp -lzoompp -lyaz */
 
     #include &lt;iostream&gt;
-    #include &lt;yaz++/zoom.h&gt;
+    #include &lt;yazpp/zoom.h&gt;
 
     using namespace ZOOM;
 
@@ -684,7 +684,7 @@
  sgml-always-quote-attributes:t
  sgml-indent-step:1
  sgml-indent-data:t
- sgml-parent-document: "yaz++.xml"
+ sgml-parent-document: "yazpp.xml"
  sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:

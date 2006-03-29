@@ -34,7 +34,7 @@
      interface.
     </para>
     <synopsis>
-     #include &lt;yaz++/socket-observer.h>
+     #include &lt;yazpp/socket-observer.h>
         
      class my_socketobservable : public IYazSocketObservable {
         // Add an observer interested in socket fd
@@ -59,7 +59,7 @@
      interface.
     </para>
     <synopsis>
-     #include &lt;yaz++/socket-observer.h>
+     #include &lt;yazpp/socket-observer.h>
 
      class my_socketobserver : public IYazSocketObserver {
          public:
@@ -76,7 +76,7 @@
      is notified.
     </para>
     <synopsis>
-     #include &lt;yaz++/pdu-observer.h>
+     #include &lt;yazpp/pdu-observer.h>
 
      class my_pduobservable : public IYaz_PDU_Observable {
        public:
@@ -104,7 +104,7 @@
      <link linkend="IYaz_PDU_Observable">IYaz_PDU_Observable</link>.
     </para>
     <synopsis>
-     #include &lt;yaz++/pdu-observer.h>
+     #include &lt;yazpp/pdu-observer.h>
 
      class my_pduobserver : public IYaz_PDU_Observer {
        public:
@@ -127,7 +127,7 @@
      Abstract query.
      </para>
     <synopsis>
-     #include &lt;yaz++/query.h>
+     #include &lt;yazpp/query.h>
      class my_query : public Yaz_Query {
        public:
          // Print query in buffer described by str and len
@@ -147,7 +147,7 @@
      command line clients, etc.
     </para>
     <synopsis>
-     #include &lt;yaz++/socket-manager.h>
+     #include &lt;yazpp/socket-manager.h>
 
      class Yaz_SocketManager : public IYazSocketObservable {
        public:
@@ -179,7 +179,7 @@
      that transmits BER encoded PDUs (or those offered by YAZ COMSTACK).
     </para>
     <synopsis>
-     #include &lt;yaz++/pdu-assoc.h>
+     #include &lt;yazpp/pdu-assoc.h>
 
      class Yaz_PDU_Assoc : public IYaz_PDU_Observable,
                                  IYazSocketObserver {
@@ -223,7 +223,7 @@
      Z-Association.
     </para>
     <synopsis>
-     #include &lt;yaz++/z-assoc.h>
+     #include &lt;yazpp/z-assoc.h>
      
      class Yaz_Z_Assoc : public IYaz_PDU_Observer {
        public:
@@ -298,7 +298,7 @@
      more facilities for the Z39.50 client role.
     </para>
     <synopsis>
-     #include &lt;yaz++/ir-assoc.h>
+     #include &lt;yazpp/ir-assoc.h>
 
      class Yaz_IR_Assoc : public Yaz_Z_Assoc {
        ...
@@ -316,7 +316,7 @@
      more facilities for the Z39.50 server role.
     </para>
     <synopsis>
-     #include &lt;yaz++/z-server.h>
+     #include &lt;yazpp/z-server.h>
 
      class Yaz_Z_Server : public Yaz_Z_Server {
        ...
@@ -338,7 +338,7 @@
  sgml-always-quote-attributes:t
  sgml-indent-step:1
  sgml-indent-data:t
- sgml-parent-document: "yaz++.xml"
+ sgml-parent-document: "yazpp.xml"
  sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:

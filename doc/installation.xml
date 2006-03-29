@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.14 2004-09-11 20:54:02 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.15 2006-03-29 13:19:41 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -70,7 +70,7 @@
     This is what you have after successful compilation:
     <variablelist>
      <varlistentry>
-      <term><literal>src/libyazcpp.la</literal></term> 
+      <term><literal>src/libyazpp.la</literal></term> 
       <listitem><para>
         The YAZ++ library.
 	This library gets installed in your libraries directory
@@ -79,7 +79,7 @@
      </varlistentry>
      
      <varlistentry>
-      <term><literal>src/libzoomcpp.la</literal></term> 
+      <term><literal>src/libzoompp.la</literal></term> 
       <listitem><para>
         The <link linkend="zoom">ZOOM-C++</link> library.
 	This library gets installed in your libraries directory
@@ -88,16 +88,16 @@
      </varlistentry>
      
      <varlistentry>
-      <term><literal>include/yaz++/*.h</literal></term> 
+      <term><literal>include/yazpp/*.h</literal></term> 
       <listitem><para>
         Various C++ header files, which you'll need for YAZ++
 	development. All these are installed in your header files area
-	(<parameter>prefix</parameter><literal>/include/yaz++</literal>).
+	(<parameter>prefix</parameter><literal>/include/yazpp</literal>).
        </para></listitem>
      </varlistentry>
      
      <varlistentry>
-      <term><literal>yaz++-config</literal></term> 
+      <term><literal>yazpp-config</literal></term> 
       <listitem><para>
         A Bourne shell-script utility that returns the values of the
 	<envar>CFLAGS</envar> and <envar>LIBS</envar>
@@ -226,7 +226,7 @@
  sgml-always-quote-attributes:t
  sgml-indent-step:1
  sgml-indent-data:t
- sgml-parent-document: "yaz++.xml"
+ sgml-parent-document: "yazpp.xml"
  sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
