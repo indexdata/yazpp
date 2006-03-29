@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.10 2005-06-25 15:53:19 adam Exp $
+ * $Id: z-assoc.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -11,7 +11,7 @@
 #include <yaz/srw.h>
 #include <yaz/proto.h>
 #include <yaz/odr.h>
-#include <yaz++/pdu-observer.h>
+#include <yazpp/pdu-observer.h>
 
 namespace yazpp_1 {
 /** Z39.50 Assocation.

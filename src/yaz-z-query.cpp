@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.18 2005-09-27 17:57:51 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.19 2006-03-29 13:14:18 adam Exp $
  */
 
 #include <yaz/logrpn.h>
-#include <yaz++/z-query.h>
+#include <yazpp/z-query.h>
 #include <yaz/pquery.h>
 
 using namespace yazpp_1;

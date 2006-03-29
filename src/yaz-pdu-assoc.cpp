@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.44 2005-09-23 13:11:04 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.45 2006-03-29 13:14:17 adam Exp $
  */
 
 #include <assert.h>
@@ -10,7 +10,7 @@
 #include <yaz/log.h>
 #include <yaz/tcpip.h>
 
-#include <yaz++/pdu-assoc.h>
+#include <yazpp/pdu-assoc.h>
 
 using namespace yazpp_1;
 

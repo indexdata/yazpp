@@ -2,7 +2,7 @@
  * Copyright (c) 2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-databases.h,v 1.3 2005-06-25 15:53:19 adam Exp $
+ * $Id: z-databases.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
 #include <yaz/proto.h>

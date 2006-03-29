@@ -1,42 +1,6 @@
-yaz++ (1.0.0-1) unstable; urgency=low
+yazpp (1.0.0-1) unstable; urgency=low
 
   * Upstream.
 
  -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 27 Mar 2006 16:50:06 +0200
-
-yaz++ (0.9-1) unstable; urgency=low
-
-  * Upstream.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon,  7 Feb 2005 10:08:13 +0100
-
-yaz++ (0.8-1) unstable; urgency=low
-
-  * Separate YAZ proxy.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Fri, 23 Apr 2004 21:05:04 +0200
-
-yaz++ (0.7.13-1) unstable; urgency=low
-
-  * Upstream.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 29 Mar 2004 23:39:01 +0200
-
-yaz++ (0.7.9-1) unstable; urgency=low
-
-  * Upstream.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 25 Feb 2004 09:19:09 +0100
-
-yaz++ (0.7.8-2) unstable; urgency=low
-
-  * Added zlint.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 18 Feb 2004 23:13:54 +0100
-
-yaz++ (0.7.8-1) unstable; urgency=low
-
-  * Initial Release.
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 11 Feb 2004 11:33:51 +0100
 

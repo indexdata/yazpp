@@ -2,14 +2,14 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.8 2006-03-28 19:51:38 adam Exp $
+ * $Id: z-query.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
 #ifndef YAZPP_Z_QUERY_INCLUDED
 #define YAZPP_Z_QUERY_INCLUDED
 
 #include <yaz/proto.h>
-#include <yaz++/query.h>
+#include <yazpp/query.h>
 
 namespace yazpp_1 {
 /** Z39.50 Query

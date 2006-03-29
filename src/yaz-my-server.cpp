@@ -2,16 +2,16 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.19 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.20 2006-03-29 13:14:16 adam Exp $
  */
 
 #include <stdlib.h>
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 #include <yaz/options.h>
-#include <yaz++/z-server.h>
-#include <yaz++/pdu-assoc.h>
-#include <yaz++/socket-manager.h>
+#include <yazpp/z-server.h>
+#include <yazpp/pdu-assoc.h>
+#include <yazpp/socket-manager.h>
 
 using namespace yazpp_1;
 

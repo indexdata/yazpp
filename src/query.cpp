@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2000, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: query.cpp,v 1.1 2005-09-22 12:40:45 adam Exp $
+ * $Id: query.cpp,v 1.2 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/query.h>
+#include <yazpp/query.h>
 
 using namespace yazpp_1;
 

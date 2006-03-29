@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gduqueue.h,v 1.1 2005-10-13 09:56:38 adam Exp $
+ * $Id: gduqueue.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
 #ifndef YAZPP_GDUQUEUE_INCLUDED

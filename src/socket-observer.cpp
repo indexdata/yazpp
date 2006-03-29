@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: socket-observer.cpp,v 1.1 2005-09-22 12:40:45 adam Exp $
+ * $Id: socket-observer.cpp,v 1.2 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/socket-observer.h>
+#include <yazpp/socket-observer.h>
 
 using namespace yazpp_1;
 

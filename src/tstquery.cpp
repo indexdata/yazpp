@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstquery.cpp,v 1.1 2005-09-27 17:57:51 adam Exp $
+ * $Id: tstquery.cpp,v 1.2 2006-03-29 13:14:15 adam Exp $
  */
 
 #include <stdlib.h>
-#include <yaz++/z-query.h>
+#include <yazpp/z-query.h>
 
 using namespace yazpp_1;
 

@@ -2,13 +2,13 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.26 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.27 2006-03-29 13:14:15 adam Exp $
  */
 
 #include <assert.h>
 
 #include <yaz/log.h>
-#include <yaz++/ir-assoc.h>
+#include <yazpp/ir-assoc.h>
 
 using namespace yazpp_1;
 

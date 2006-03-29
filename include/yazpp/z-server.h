@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.10 2006-03-28 19:51:38 adam Exp $
+ * $Id: z-server.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/z-assoc.h>
+#include <yazpp/z-assoc.h>
 
 namespace yazpp_1 {
 

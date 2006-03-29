@@ -5,7 +5,7 @@ SUBDIRS = src include zlint zoom doc
 aclocaldir=$(datadir)/aclocal
 aclocal_DATA = yazpp.m4
 
-EXTRA_DIST= LICENSE TODO yaz++-config.in yazpp.m4 buildconf.sh
+EXTRA_DIST= LICENSE TODO yazpp-config.in yazpp.m4 buildconf.sh
 
 dist-hook:
 	mkdir $(distdir)/win

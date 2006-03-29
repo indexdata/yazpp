@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include <yaz++/pdu-assoc.h>
-#include <yaz++/socket-manager.h>
+#include <yazpp/pdu-assoc.h>
+#include <yazpp/socket-manager.h>
 
 #include <zlint.h>
 

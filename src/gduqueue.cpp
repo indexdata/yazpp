@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gduqueue.cpp,v 1.1 2005-10-13 09:56:38 adam Exp $
+ * $Id: gduqueue.cpp,v 1.2 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/gdu.h>
-#include <yaz++/gduqueue.h>
+#include <yazpp/gdu.h>
+#include <yazpp/gduqueue.h>
 
 using namespace yazpp_1;
 

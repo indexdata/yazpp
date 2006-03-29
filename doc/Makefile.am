@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.15 2004-04-22 18:44:33 adam Exp $
+## $Id: Makefile.am,v 1.16 2006-03-29 13:14:14 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUPPORTFILES = \
@@ -13,9 +13,9 @@ XMLFILES = \
  zoom.xml \
  api.xml \
  license.xml \
- yaz++.xml.in
+ yazpp.xml.in
  
-TOP=yaz++.xml
+TOP=yazpp.xml
 MANFILES=
 HTMLFILES = \
  api.html \
@@ -32,7 +32,7 @@ HTMLFILES = \
  zoom-resultset.html \
  zoom.html
 
-doc_DATA = $(HTMLFILES) yaz++.pdf id.png yaz.css
+doc_DATA = $(HTMLFILES) yazpp.pdf id.png yaz.css
 
 man_MANS = $(MANFILES)
 
@@ -44,12 +44,12 @@ $(HTMLFILES): $(XMLFILES)
 yazpp.php: $(XMLFILES)
 	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
 
-yaz++.pdf: $(XMLFILES)
+yazpp.pdf: $(XMLFILES)
 	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
 	jade -E14 -D $(srcdir) -d yazprint.dsl -t tex $(srcdir)/xml.dcl $(TOP)
-	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
-	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
-	pdfjadetex yaz++.tex >pdfjadetex.log 2>&1
+	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
+	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
+	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 
 index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl $(TOP)

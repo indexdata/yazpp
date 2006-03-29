@@ -2,12 +2,12 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.11 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.12 2006-03-29 13:14:18 adam Exp $
  *
  */
 
 #include <yaz/log.h>
-#include <yaz++/z-server.h>
+#include <yazpp/z-server.h>
 
 using namespace yazpp_1;
 

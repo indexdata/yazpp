@@ -2,12 +2,12 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-cache.cpp,v 1.14 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-z-cache.cpp,v 1.15 2006-03-29 13:14:18 adam Exp $
  */
 
 #include <yaz/log.h>
 #include <yaz/proto.h>
-#include <yaz++/record-cache.h>
+#include <yazpp/record-cache.h>
 
 using namespace yazpp_1;
 

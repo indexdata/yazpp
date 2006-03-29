@@ -7,7 +7,7 @@
      <!ENTITY chap-api SYSTEM "api.xml">
      <!ENTITY app-license SYSTEM "license.xml">
 ]>
-<!-- $Id: yaz++.xml.in,v 1.14 2005-08-10 09:14:02 adam Exp $ -->
+<!-- $Id: yazpp.xml.in,v 1.1 2006-03-29 13:14:14 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -38,7 +38,7 @@
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yaz++.xml.in,v 1.14 2005-08-10 09:14:02 adam Exp $
+    CVS ID: $Id: yazpp.xml.in,v 1.1 2006-03-29 13:14:14 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>

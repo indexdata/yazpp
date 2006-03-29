@@ -2,10 +2,10 @@
  * Copyright (c) 2000-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-marc-sample.cpp,v 1.9 2005-06-25 15:53:19 adam Exp $
+ * $Id: yaz-marc-sample.cpp,v 1.10 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/z-server.h>
+#include <yazpp/z-server.h>
 
 using namespace yazpp_1;
 

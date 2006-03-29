@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.22 2006-03-28 19:51:38 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.23 2006-03-29 13:14:16 adam Exp $
  */
 
 #include <stdlib.h>
@@ -10,9 +10,9 @@
 #include <yaz/options.h>
 #include <yaz/diagbib1.h>
 #include <yaz/marcdisp.h>
-#include <yaz++/ir-assoc.h>
-#include <yaz++/pdu-assoc.h>
-#include <yaz++/socket-manager.h>
+#include <yazpp/ir-assoc.h>
+#include <yazpp/pdu-assoc.h>
+#include <yazpp/socket-manager.h>
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H

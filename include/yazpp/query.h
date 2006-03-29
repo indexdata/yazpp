@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: query.h,v 1.5 2005-09-23 13:11:04 adam Exp $
+ * $Id: query.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
 #ifndef YAZ_PP_QUERY_H

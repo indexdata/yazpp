@@ -2,10 +2,10 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gdu.cpp,v 1.3 2005-10-13 09:56:38 adam Exp $
+ * $Id: gdu.cpp,v 1.4 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/gdu.h>
+#include <yazpp/gdu.h>
 
 using namespace yazpp_1;
 

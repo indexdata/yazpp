@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.9 2005-11-03 14:48:06 adam Exp $
+# $Id: makefile,v 1.10 2006-03-29 13:14:19 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -28,7 +28,7 @@ nsishelp:
 ###########################################################
 # The current directory is supposed to be something like
 # ..../yaz/win, everything is relative to that
-ROOTDIR=..   # The home of yaz++
+ROOTDIR=..   # The home of yazpp
 
 INCLDIR=$(ROOTDIR)\include  # our includes
 LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there

@@ -2,10 +2,10 @@
  * Copyright (c) 2004-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: zlint.h,v 1.6 2005-09-23 13:11:04 adam Exp $
+ * $Id: zlint.h,v 1.7 2006-03-29 13:14:20 adam Exp $
  */
 
-#include <yaz++/z-assoc.h>
+#include <yazpp/z-assoc.h>
 
 using namespace yazpp_1;
 

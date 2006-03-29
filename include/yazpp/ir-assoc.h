@@ -2,11 +2,11 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: ir-assoc.h,v 1.6 2005-06-25 15:53:19 adam Exp $
+ * $Id: ir-assoc.h,v 1.1 2006-03-29 13:14:15 adam Exp $
  */
 
-#include <yaz++/z-assoc.h>
-#include <yaz++/z-query.h>
+#include <yazpp/z-assoc.h>
+#include <yazpp/z-query.h>
 
 namespace yazpp_1 {
 /** Information Retrieval Assocation.
