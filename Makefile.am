@@ -2,10 +2,12 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = src include zlint zoom doc 
 
-aclocaldir=$(datadir)/aclocal
-aclocal_DATA = yazpp.m4
+ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST= LICENSE TODO yazpp-config.in yazpp.m4 buildconf.sh
+aclocaldir=$(datadir)/aclocal
+aclocal_DATA = m4/yazpp.m4
+
+EXTRA_DIST= LICENSE TODO yazpp-config.in m4/yaz.m4 m4/yazpp.m4 buildconf.sh
 
 dist-hook:
 	mkdir $(distdir)/win
