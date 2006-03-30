@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc-thread.cpp,v 1.14 2006-03-29 13:14:17 adam Exp $
+ * $Id: yaz-pdu-assoc-thread.cpp,v 1.15 2006-03-30 11:58:00 adam Exp $
  */
 
 #ifdef WIN32
@@ -82,6 +82,14 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
     /// Clone PDU Observer
     new_observable->m_PDU_Observer =
         m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));
+    
+    if (!new_observable->m_PDU_Observer)
+    {
+        new_observable->close();
+        delete new_observable;
+        delete socket_observable;
+        return;
+    }
 
     worker *w = new worker;
     w->m_assoc = new_observable;

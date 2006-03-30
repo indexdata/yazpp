@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.45 2006-03-29 13:14:17 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.46 2006-03-30 11:58:00 adam Exp $
  */
 
 #include <assert.h>
@@ -478,13 +478,19 @@ void PDU_Assoc::childNotify(COMSTACK cs)
     PDU_Assoc *new_observable =
         new PDU_Assoc (m_socketObservable, cs);
     
-    new_observable->m_next = m_children;
-    m_children = new_observable;
-    new_observable->m_parent = this;
-
     // Clone PDU Observer
     new_observable->m_PDU_Observer = m_PDU_Observer->sessionNotify
         (new_observable, cs_fileno(cs));
+
+    if (!new_observable->m_PDU_Observer)
+    {
+        new_observable->close();
+        delete new_observable;
+        return;
+    }
+    new_observable->m_next = m_children;
+    m_children = new_observable;
+    new_observable->m_parent = this;
 }
 
 const char*PDU_Assoc::getpeername()
