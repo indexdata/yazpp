@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: record-cache.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: record-cache.h,v 1.2 2006-03-30 14:15:58 adam Exp $
  */
 
 
@@ -10,7 +10,7 @@
 #include <yaz/z-core.h>
 
 namespace yazpp_1 {
-class RecordCache_Entry;
+struct RecordCache_Entry;
 
 class YAZ_EXPORT RecordCache {
  public:

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: gduqueue.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: gduqueue.h,v 1.2 2006-03-30 14:15:58 adam Exp $
  */
 
 #ifndef YAZPP_GDUQUEUE_INCLUDED
@@ -12,14 +12,14 @@
 
 namespace yazpp_1 {
     class GDU;
-    class GDUQueue_List {
+    class YAZ_EXPORT GDUQueue_List {
         friend class GDUQueue;
     private:
         GDU *m_item;
         GDUQueue_List *m_next;
     };
 
-    class GDUQueue {
+    class YAZ_EXPORT GDUQueue {
     public:
         GDUQueue();
         ~GDUQueue();
