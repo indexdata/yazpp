@@ -2,10 +2,10 @@
 .libs
 Makefile
 Makefile.in
-libyaz++.la
+libyazpp.la
 libyazcpp.la
-yaz++-config
-yaz++-config.in
+yazpp-config
+yazpp-config.in
 yaz-my-client
 yaz-my-server
 yaz-proxy

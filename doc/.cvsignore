@@ -1,7 +1,7 @@
 *.log
 Makefile
 Makefile.in
-yaz++.xml
+yazpp.xml
 yazhtml.dsl
 yazphp.dsl
 yazprint.dsl
@@ -9,11 +9,11 @@ yazprint.dsl
 *.php
 *.tkl
 yaz-proxy.8
-yaz++.tex
-yaz++.log
-yaz++.aux
-yaz++.out
-yaz++.pdf
+yazpp.tex
+yazpp.log
+yazpp.aux
+yazpp.out
+yazpp.pdf
 manpage.links
 manpage.refs
 tkl.xsl
