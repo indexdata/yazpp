@@ -4,6 +4,6 @@ Makefile
 Makefile.in
 interface.h
 zoom.h
-libzoomcpp.la
+libzoompp.la
 zclient
 *.lo
