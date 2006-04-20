@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.17 2006-04-20 11:18:29 adam Exp $
+## $Id: Makefile.am,v 1.18 2006-04-20 11:36:40 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
@@ -38,7 +38,7 @@ $(HTMLFILES): $(XMLFILES)
 	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl $(TOP)
 
 yazpp.pdf: $(XMLFILES)
-	if test ! -f common/id.png ; then ln -s $(srcdir)/common/id.png common; fi
+	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common/; fi
 	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(TOP)
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
