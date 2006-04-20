@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.31 2006-03-29 13:14:15 adam Exp $
+## $Id: Makefile.am,v 1.32 2006-04-20 11:26:34 adam Exp $
 
 check_PROGRAMS = tstquery
 noinst_PROGRAMS = yaz-my-server yaz-my-client
@@ -11,7 +11,7 @@ AM_CXXFLAGS = -I$(srcdir)/../include $(YAZINC)
 lib_LTLIBRARIES = libyazpp.la
 libyazpp_la_LDFLAGS=-version-info 1:0:0
 
-DISTCLEANFILES = yaz++-config
+DISTCLEANFILES = yazpp-config
 
 libyazpp_la_SOURCES=socket-observer.cpp pdu-observer.cpp query.cpp \
 	z-server.cpp \
