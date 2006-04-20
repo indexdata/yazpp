@@ -1,12 +1,8 @@
-## $Id: Makefile.am,v 1.16 2006-03-29 13:14:14 adam Exp $
+## $Id: Makefile.am,v 1.17 2006-04-20 11:18:29 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
-SUPPORTFILES = \
- yazhtml.dsl.in \
- yazphp.dsl.in \
- yazprint.dsl.in \
- tkl.xsl.in \
- xml.dcl
+SUBDIRS = common
+
 XMLFILES = \
  introduction.xml \
  installation.xml \
@@ -32,27 +28,24 @@ HTMLFILES = \
  zoom-resultset.html \
  zoom.html
 
-doc_DATA = $(HTMLFILES) yazpp.pdf id.png yaz.css
+doc_DATA = $(HTMLFILES) yazpp.pdf 
 
 man_MANS = $(MANFILES)
 
-EXTRA_DIST = $(SUPPORTFILES) $(XMLFILES) $(doc_DATA) $(man_MANS)
+EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS)
 
 $(HTMLFILES): $(XMLFILES)
-	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
-
-yazpp.php: $(XMLFILES)
-	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl $(TOP)
+	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl $(TOP)
 
 yazpp.pdf: $(XMLFILES)
-	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
-	jade -E14 -D $(srcdir) -d yazprint.dsl -t tex $(srcdir)/xml.dcl $(TOP)
+	if test ! -f common/id.png ; then ln -s $(srcdir)/common/id.png common; fi
+	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(TOP)
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 
-index.tkl: $(XMLFILES) tkl.xsl
-	xsltproc tkl.xsl $(TOP)
+index.tkl: $(XMLFILES) common/tkl.xsl
+	xsltproc common/tkl.xsl $(TOP)
 
 clean-data-hook:
 	rm -f [0-9]* *.bak
