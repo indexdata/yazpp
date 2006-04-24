@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.18 2006-04-20 11:36:40 adam Exp $
+## $Id: Makefile.am,v 1.19 2006-04-24 08:55:28 marc Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
@@ -10,9 +10,13 @@ XMLFILES = \
  api.xml \
  license.xml \
  yazpp.xml.in
- 
+
 TOP=yazpp.xml
-MANFILES=
+
+MANFILES = yazpp-config.8
+
+REFFILES = yazpp-config-man.xml
+
 HTMLFILES = \
  api.html \
  implementations.html \
@@ -32,7 +36,7 @@ doc_DATA = $(HTMLFILES) yazpp.pdf
 
 man_MANS = $(MANFILES)
 
-EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS)
+EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS)  $(REFFILES) 
 
 $(HTMLFILES): $(XMLFILES)
 	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl $(TOP)
@@ -46,6 +50,11 @@ yazpp.pdf: $(XMLFILES)
 
 index.tkl: $(XMLFILES) common/tkl.xsl
 	xsltproc common/tkl.xsl $(TOP)
+
+
+yazpp-config.8: yazpp-config-man.xml
+	docbook2man $(srcdir)/yazpp-config-man.xml
+
 
 clean-data-hook:
 	rm -f [0-9]* *.bak
