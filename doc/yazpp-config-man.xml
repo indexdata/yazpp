@@ -1,5 +1,5 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yazpp-config-man.xml,v 1.1 2006-04-24 08:55:28 marc Exp $ -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" "">
+<!-- $Id: yazpp-config-man.xml,v 1.2 2006-04-24 10:10:13 marc Exp $ -->
 <refentry id="yazpp-config">
  <refmeta>
   <refentrytitle>yazpp-config</refentrytitle>
@@ -8,7 +8,7 @@
  
  <refnamediv>
   <refname>yazpp-config</refname>
-  <refpurpose>Script to get information about YAZ.</refpurpose>
+  <refpurpose>Script to get information about YAZ++.</refpurpose>
  </refnamediv>
  
  <refsynopsisdiv>
@@ -19,17 +19,18 @@
    <arg choice="opt"><option>--libs</option></arg>
    <arg choice="opt"><option>--lalibs</option></arg>
    <arg choice="opt"><option>--cflags</option></arg>
-   <arg choice="opt"><option>--comp</option></arg>
-   <arg choice="opt" rep="repeat">libraries</arg>
+   <!-- <arg choice="opt"><option>- -comp</option></arg> -->
+   <!-- <arg choice="opt" rep="repeat">libraries</arg> -->
   </cmdsynopsis>
  </refsynopsisdiv>
  
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yazpp-config</command> is a script that returns information
-   that your own software should use to build software that uses YAZ.
+   that your own software should use to build software that uses YAZ++.
   </para>
 
+  <!--
   <para>
    The following libraries are supported:
   </para>
@@ -42,7 +43,7 @@
      </para></listitem>
    </varlistentry>
   </variablelist>
-  
+  -->
  </refsect1>
  
  <refsect1><title>OPTIONS</title>
@@ -51,7 +52,7 @@
    <varlistentry>
     <term>--prefix[=<replaceable>DIR</replaceable>]</term>
     <listitem><para>
-      Returns prefix of YAZ or assume a different one if DIR is
+      Returns prefix of YAZ++ or assume a different one if DIR is
       specified.
      </para></listitem>
    </varlistentry>
@@ -59,14 +60,14 @@
    <varlistentry>
     <term>--version</term>
     <listitem><para>
-      Returns version of YAZ.
+      Returns version of YAZ++.
      </para></listitem>
    </varlistentry>
 
    <varlistentry>
     <term>--libs</term>
     <listitem><para>
-      Library specification be used when using YAZ.
+      Library specification be used when using YAZ++.
      </para></listitem>
    </varlistentry>
 
@@ -83,13 +84,14 @@
       Return C Compiler flags.
      </para></listitem>
    </varlistentry>
+   
 
-   <varlistentry>
-    <term>--comp</term>
+   <!--<varlistentry>
+    <term>- -comp</term>
     <listitem><para>
       Returns full path to YAZ' ASN.1 compiler: yaz-asncomp.
      </para></listitem>
-   </varlistentry>
+   </varlistentry>-->
 
   </variablelist>
  </refsect1>
