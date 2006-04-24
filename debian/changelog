@@ -1,6 +1,7 @@
 yazpp (1.0.0-1) unstable; urgency=low
 
-  * Upstream.
+  * Upstream
+  * Renaming from package name yaz++ to yazpp
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 27 Mar 2006 16:50:06 +0200
+ -- Marc Cromme <marc@indexdata.dk>  Mon, 24 Apr 2006 09:55:07 +0200
 

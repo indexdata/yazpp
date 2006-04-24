@@ -1,28 +1,27 @@
 Source: yazpp
+Section: devel
 Priority: optional
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
-Standards-Version: 3.6.0
+Standards-Version: 3.6.2
 Build-Depends: debhelper (>= 4.0.0), docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex, libxml2-dev, libyaz-dev (>= 2.1.14)
 
 Package: libyazpp1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, libyaz (>= 2.1.14)
-Description: YAZ++ and ZOOM library.
+Description: YAZ++ and ZOOM library
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
-Package: libyazpp1-dev
+Package: libyazpp-dev
 Section: devel
 Architecture: any
-Depends: libyazpp (= ${Source-Version}), libyaz-dev
-Conflicts: libyaz++-dev
-Description: Development libraries for YAZ++ and ZOOM.
+Depends: libyazpp1 (= ${Source-Version}), libyaz-dev
+Description: Development libraries for YAZ++ and ZOOM
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
-Package: yazpp1-doc
+Package: yazpp-doc
 Section: doc
 Architecture: all
-Conflicts: yaz++-doc
-Description: Documentation for YAZ++.
+Description: Documentation for YAZ++
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 

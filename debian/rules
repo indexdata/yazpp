@@ -6,6 +6,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# Force compat level four
+export DH_COMPAT=4
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -25,8 +27,8 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 # shared library versions, option 1
-version=2.0.5
-major=2
+version=1.0.0
+major=1
 # option 2, assuming the library is created as src/.libs/libfoo.so.2.0.5 or so
 #version=`ls src/.libs/lib*.so.* | \
 # awk '{if (match($$0,/[0-9]+\.[0-9]+\.[0-9]+$$/)) print substr($$0,RSTART)}'`
@@ -88,7 +90,7 @@ binary-arch: build install
 	dh_installchangelogs NEWS
 	dh_installdocs
 	dh_installexamples
-	mv debian/tmp/usr/share/doc/yazpp debian/tmp/usr/share/doc/yazpp1-doc
+	mv debian/tmp/usr/share/doc/yazpp debian/tmp/usr/share/doc/yazpp-doc
 	dh_install
 #	dh_installmenu
 #	dh_installdebconf	

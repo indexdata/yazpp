@@ -7,3 +7,4 @@ debian/tmp/usr/lib/libyazpp.la
 debian/tmp/usr/lib/libzoompp.la
 debian/tmp/usr/bin/yazpp-config
 debian/tmp/usr/share/aclocal/yazpp.m4
+debian/tmp/usr/share/man/man8/yazpp-config.8
