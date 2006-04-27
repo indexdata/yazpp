@@ -8,6 +8,10 @@
    and servers.
   </para>
   <para>
+   All definitions from YAZ++ are part of namespace
+   <literal>yazpp_1</literal>.
+  </para>
+  <para>
    The following sections include a short description of the
    interfaces and implementations (concrete classes).
   </para>
@@ -26,87 +30,91 @@
    </para>
   </note>
   <section id="interfaces"><title>Interfaces</title>
-   <section id="IYazSocketObservable"><title>IYazSocketObservable</title>
+   <section id="ISocketObservable"><title>ISocketObservable</title>
     <para>
      This interface is capable of observing sockets.
      When a socket even occurs it invokes an object implementing the
-     <link linkend="IYazSocketObserver">IYazSocketObserver</link>
+     <link linkend="ISocketObserver">ISocketObserver</link>
      interface.
     </para>
     <synopsis>
      #include &lt;yazpp/socket-observer.h>
         
-     class my_socketobservable : public IYazSocketObservable {
+     class my_socketobservable : public ISocketObservable {
         // Add an observer interested in socket fd
-        virtual void addObserver(int fd, IYazSocketObserver *observer) = 0;
+        virtual void addObserver(int fd, ISocketObserver *observer) = 0;
         // Delete an observer
-        virtual void deleteObserver(IYazSocketObserver *observer) = 0;
+        virtual void deleteObserver(ISocketObserver *observer) = 0;
         // Delete all observers
         virtual void deleteObservers() = 0;
         // Specify the events that the observer is interested in.
-        virtual void maskObserver(IYazSocketObserver *observer,
+        virtual void maskObserver(ISocketObserver *observer,
                                   int mask) = 0;
         // Specify timeout
-        virtual void timeoutObserver(IYazSocketObserver *observer,
-                                     unsigned timeout)=0;
+        virtual void timeoutObserver(ISocketObserver *observer,
+                                     int timeout)=0;
      };
     </synopsis>
    </section>
-   <section id="IYazSocketObserver"><title>IYazSocketObserver</title>
+   <section id="ISocketObserver"><title>ISocketObserver</title>
     <para>
      This interface is interested in socket events supporting
-     the <link linkend="IYazSocketObservable">IYazSocketObservable</link>
+     the <link linkend="ISocketObservable">ISocketObservable</link>
      interface.
     </para>
     <synopsis>
      #include &lt;yazpp/socket-observer.h>
 
-     class my_socketobserver : public IYazSocketObserver {
+     class my_socketobserver : public ISocketObserver {
          public:
           // Notify the observer that something happened to socket
           virtual void socketNotify(int event) = 0;
      }
     </synopsis>
    </section>
-   <section id="IYaz_PDU_Observable"><title>IYaz_PDU_Observable</title>
+   <section id="IPDU_Observable"><title>IPDU_Observable</title>
     <para>
      This interface is is responsible for sending - and receiving PDUs over
      the network (YAZ COMSTACK). When events occur, an instance
-     implementing <link linkend="IYaz_PDU_Observer">IYaz_PDU_Observer</link>
+     implementing <link linkend="IPDU_Observer">IPDU_Observer</link>
      is notified.
     </para>
     <synopsis>
      #include &lt;yazpp/pdu-observer.h>
 
-     class my_pduobservable : public IYaz_PDU_Observable {
+     class my_pduobservable : public IPDU_Observable {
        public:
          // Send encoded PDU buffer of specified length
          virtual int send_PDU(const char *buf, int len) = 0;
          // Connect with server specified by addr.
-         virtual void connect(IYaz_PDU_Observer *observer,
+         virtual void connect(IPDU_Observer *observer,
                      const char *addr) = 0;
          // Listen on address addr.
-         virtual void listen(IYaz_PDU_Observer *observer, const char *addr)=0;
+         virtual void listen(IPDU_Observer *observer, const char *addr)=0;
          // Close connection
          virtual void close() = 0;
          // Make clone of this object using this interface
-         virtual IYaz_PDU_Observable *clone() = 0;
+         virtual IPDU_Observable *clone() = 0;
          // Destroy completely
          virtual void destroy() = 0;
          // Set Idle Time
          virtual void idleTime (int timeout) = 0;
+         // Get peername
+         virtual const char *getpeername() = 0;
+
+         virtual ~IPDU_Observable();
      };
     </synopsis>
    </section>
-   <section id="IYaz_PDU_Observer"><title>IYaz_PDU_Observer</title>
+   <section id="IPDU_Observer"><title>IPDU_Observer</title>
     <para>
      This interface is interested in PDUs and using an object implementing
-     <link linkend="IYaz_PDU_Observable">IYaz_PDU_Observable</link>.
+     <link linkend="IPDU_Observable">IPDU_Observable</link>.
     </para>
     <synopsis>
      #include &lt;yazpp/pdu-observer.h>
 
-     class my_pduobserver : public IYaz_PDU_Observer {
+     class my_pduobserver : public IPDU_Observer {
        public:
          // A PDU has been received
          virtual void recv_PDU(const char *buf, int len) = 0;
@@ -116,9 +124,9 @@
          virtual void failNotify() = 0;
          // Called whenever there is a timeout
          virtual void timeoutNotify() = 0;
-         // Make clone of observer using IYaz_PDU_Observable interface
-         virtual IYaz_PDU_Observer *sessionNotify(
-         IYaz_PDU_Observable *the_PDU_Observable, int fd) = 0;
+         // Make clone of observer using IPDU_Observable interface
+         virtual IPDU_Observer *sessionNotify(
+         IPDU_Observable *the_PDU_Observable, int fd) = 0;
      };
     </synopsis>
    </section>
@@ -140,8 +148,8 @@
   <section id="implementations"><title>Implementations</title>
    <section><title>Yaz_SocketManager</title>
     <para>
-     This class implements the <link linkend="IYazSocketObservable">
-      IYazSocketObservable</link> interface and is a portable 
+     This class implements the <link linkend="ISocketObservable">
+      ISocketObservable</link> interface and is a portable 
      socket wrapper around the select call.
      This implementation is useful for daemons,
      command line clients, etc.
@@ -149,58 +157,58 @@
     <synopsis>
      #include &lt;yazpp/socket-manager.h>
 
-     class Yaz_SocketManager : public IYazSocketObservable {
+     class SocketManager : public ISocketObservable {
        public:
          // Add an observer
-         virtual void addObserver(int fd, IYazSocketObserver *observer);
+         virtual void addObserver(int fd, ISocketObserver *observer);
          // Delete an observer
-         virtual void deleteObserver(IYazSocketObserver *observer);
+         virtual void deleteObserver(ISocketObserver *observer);
          // Delete all observers
          virtual void deleteObservers();
          // Set event mask for observer
-         virtual void maskObserver(IYazSocketObserver *observer, int mask);
+         virtual void maskObserver(ISocketObserver *observer, int mask);
          // Set timeout
-         virtual void timeoutObserver(IYazSocketObserver *observer,
+         virtual void timeoutObserver(ISocketObserver *observer,
                                   unsigned timeout);
          // Process one event. return > 0 if event could be processed;
          int processEvent();
-         Yaz_SocketManager();
-         virtual ~Yaz_SocketManager();
+         SocketManager();
+         virtual ~SocketManager();
      };
     </synopsis>
    </section>
-   <section><title>Yaz_PDU_Assoc</title>
+   <section><title>PDU_Assoc</title>
     <para>
      This class implements the interfaces
-     <link linkend="IYaz_PDU_Observable">IYaz_PDU_Observable</link>
+     <link linkend="IPDU_Observable">IPDU_Observable</link>
      and
-     <link linkend="IYazSocketObserver">IYazSocketObserver</link>.
+     <link linkend="ISocketObserver">ISocketObserver</link>.
      This object implements a non-blocking client/server channel
      that transmits BER encoded PDUs (or those offered by YAZ COMSTACK).
     </para>
     <synopsis>
      #include &lt;yazpp/pdu-assoc.h>
 
-     class Yaz_PDU_Assoc : public IYaz_PDU_Observable,
-                                 IYazSocketObserver {
+     class PDU_Assoc : public IPDU_Observable,
+                                 ISocketObserver {
      
        public:
          COMSTACK comstack(const char *type_and_host, void **vp);
          // Create object using specified socketObservable
-         Yaz_PDU_Assoc(IYazSocketObservable *socketObservable);
+         PDU_Assoc(ISocketObservable *socketObservable);
          // Create Object using existing comstack
-         Yaz_PDU_Assoc(IYazSocketObservable *socketObservable,
+         PDU_Assoc(ISocketObservable *socketObservable,
                   COMSTACK cs);
          // Close socket and destroy object.
-         virtual ~Yaz_PDU_Assoc();
+         virtual ~PDU_Assoc();
          // Clone the object
-         IYaz_PDU_Observable *clone();
+         IPDU_Observable *clone();
          // Send PDU
          int send_PDU(const char *buf, int len);
          // connect to server (client role)
-         void connect(IYaz_PDU_Observer *observer, const char *addr);
+         void connect(IPDU_Observer *observer, const char *addr);
          // listen for clients (server role)
-         void listen(IYaz_PDU_Observer *observer, const char *addr);
+         void listen(IPDU_Observer *observer, const char *addr);
          // Socket notification
          void socketNotify(int event);
          // Close socket
@@ -215,22 +223,22 @@
     </synopsis>
    </section>
 
-   <section id="Yaz_Z_Assoc"><title>Yaz_Z_Assoc</title>
+   <section id="Z_Assoc"><title>Z_Assoc</title>
     <para>
      This class implements the interface
-     <link linkend="IYaz_PDU_Observer">IYaz_PDU_Obserer</link>.
+     <link linkend="IPDU_Observer">IPDU_Obserer</link>.
      This object implements a Z39.50 client/server channel AKA
      Z-Association.
     </para>
     <synopsis>
      #include &lt;yazpp/z-assoc.h>
      
-     class Yaz_Z_Assoc : public IYaz_PDU_Observer {
+     class Z_Assoc : public IPDU_Observer {
        public:
          // Create object using the PDU Observer specified
-         Yaz_Z_Assoc(IYaz_PDU_Observable *the_PDU_Observable);
+         Z_Assoc(IPDU_Observable *the_PDU_Observable);
          // Destroy association and close PDU Observer
-         virtual ~Yaz_Z_Assoc();
+         virtual ~Z_Assoc();
          // Receive PDU
          void recv_PDU(const char *buf, int len);
          // Connect notification
@@ -291,16 +299,16 @@
      };
     </synopsis>
    </section>
-   <section id="Yaz_IR_Assoc"><title>Yaz_IR_Assoc</title>
+   <section id="IR_Assoc"><title>IR_Assoc</title>
     <para>
      This object is just a specialization of 
-     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and provides
+     <link linkend="Z_Assoc">Z_Assoc</link> and provides
      more facilities for the Z39.50 client role.
     </para>
     <synopsis>
      #include &lt;yazpp/ir-assoc.h>
 
-     class Yaz_IR_Assoc : public Yaz_Z_Assoc {
+     class IR_Assoc : public Z_Assoc {
        ...
      };
     </synopsis>
@@ -309,16 +317,16 @@
      uses this class.
     </para>
    </section>
-   <section id="Yaz_Z_Server"><title>Yaz_Z_Server</title>
+   <section id="Z_Server"><title>Z_Server</title>
     <para>
      This object is just a specialization of 
-     <link linkend="Yaz_Z_Assoc">Yaz_Z_Assoc</link> and provides
+     <link linkend="Z_Assoc">Z_Assoc</link> and provides
      more facilities for the Z39.50 server role.
     </para>
     <synopsis>
      #include &lt;yazpp/z-server.h>
 
-     class Yaz_Z_Server : public Yaz_Z_Server {
+     class My_Server : public Z_Server {
        ...
      };
     </synopsis>
