@@ -2,13 +2,9 @@
 Makefile
 Makefile.in
 yazpp.xml
-yazhtml.dsl
-yazphp.dsl
-yazprint.dsl
 *.html
-*.php
 *.tkl
-yaz-proxy.8
+yazpp-config.8
 yazpp.tex
 yazpp.log
 yazpp.aux
@@ -16,5 +12,4 @@ yazpp.out
 yazpp.pdf
 manpage.links
 manpage.refs
-tkl.xsl
 html
