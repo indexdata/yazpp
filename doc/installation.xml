@@ -1,17 +1,17 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.17 2006-04-25 12:37:05 marc Exp $ -->
+  <!-- $Id: installation.xml,v 1.18 2006-04-27 13:04:39 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
-   The software was implemented using GCC so we know that works
-   well with YAZ++. From time to time the software has been
-   compiled on Windows using Visual C++. Other compilers should
-   work too. Let us know of portability problems, etc. with
-   your system.
+   The software was implemented using <ulink url="&url.gcc;">GCC</ulink>
+   so we know that works well with YAZ++. From time to time the
+   software is compiled on Windows using Visual C++.
+   Other compilers should work too. Let us know of portability
+   problems, etc. with your system.
   </para>
   <para>
    YAZ++ is built on top of the 
-   <ulink url="http://indexdata.dk/yaz/">YAZ</ulink>
+   <ulink url="&url.yaz;">YAZ</ulink>
    toolkit.
    You need to install that first.
    For some platforms there are binary packages for YAZ.
@@ -138,9 +138,8 @@
    <title>Building on Windows</title>
    <para>
     YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
-    with <ulink url="http://msdn.microsoft.com/vstudio/">
-     Microsoft Visual Studio</ulink>.
-    Version 6 and .NET has been tested. We expect that YAZ++ compiles
+    with <ulink url="&url.vstudio;">Microsoft Visual Studio</ulink>.
+    Version 6 and .NET 2003 has been tested. We expect that YAZ++ compiles
     with version 5 as well.
    </para>
     <para>

@@ -1,15 +1,14 @@
-<!-- $Id: introduction.xml,v 1.7 2006-04-25 12:37:05 marc Exp $ -->
+<!-- $Id: introduction.xml,v 1.8 2006-04-27 13:04:39 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
-   <ulink url="http://www.indexdata.dk/yazplusplus/">YAZ++</ulink> 
-   is a C++ layer for YAZ and implements the ANSI Z39.50
-   protocol for information retrieval (client and server side).
-   While YAZ itself can be used from both C and C++ it is limited by the
-   common denominator C.
+   <ulink url="&url.yazplusplus;">YAZ++</ulink> 
+   is a C++ layer for YAZ and implements the ANSI
+   <ulink url="&url.z39.50;">Z39.50</ulink> protocol for information
+   retrieval (client and server side).
   </para>
   <para>
    The YAZ++ packages also features a ZOOM interface for C++ (
-   <ulink url="http://zoom.z3950.org/bind/cplusplus/">ZOOM C++</ulink>).
+   <ulink url="&url.zoom.bind.cplusplus;">ZOOM C++</ulink>).
   </para>
   <para>
    Later versions (0.7+) of YAZ++ also supports SRW/SRU.
