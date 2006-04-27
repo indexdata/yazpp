@@ -1,3 +1,16 @@
+--- 1.0.0 [in progress]
+
+Fixes for GCC 4.1 being a little more strict.
+
+Changed product filename from yaz++ to yazpp. Moved header files
+from include/yaz++ to include/yazpp. This means that all yaz++
+header files must now be referenced as <yazpp/header.h>.
+
+All public definitions are in namespace yazpp_1. Many object types were
+renamed from Yaz_name to just Name.
+
+Moved to build system to automake 1.8/1.9.
+
 --- 0.9 2005/02/07
 
 Fixed bug #188: unhandled event in processEvent. The error was seen in
