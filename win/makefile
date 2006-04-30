@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.14 2006-04-30 09:07:43 adam Exp $
+# $Id: makefile,v 1.15 2006-04-30 13:04:03 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -46,12 +46,12 @@ TMP=$(TMPDIR)
 ###########################################################
 
 !if $(DEBUG)
-YAZPP_DLL=$(BINDIR)\yazppd.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazppd.lib
+YAZPP_DLL=$(BINDIR)\yazpp_1_d.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp_1_d.lib
 YAZD=yazd
 !else
-YAZPP_DLL=$(BINDIR)\yazpp.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp.lib
+YAZPP_DLL=$(BINDIR)\yazpp_1.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp_1.lib
 YAZD=yaz
 !endif
 
@@ -116,15 +116,11 @@ RELEASE_C_OPTIONS=  \
 ### Linker options
 LINK=link.exe
 
-LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
-           advapi32.lib uuid.lib \
+LINK_LIBS= kernel32.lib user32.lib gdi32.lib advapi32.lib uuid.lib \
            wsock32.lib  advapi32.lib \
            $(YAZ_LIB)
 
-COMMON_LNK_OPTIONS= /nologo \
-                    /subsystem:windows \
-                    /machine:i386 \
-			  /incremental:no
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
 DEBUG_LNK_OPTIONS= /debug 
 
