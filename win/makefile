@@ -1,12 +1,10 @@
-# Copyright (C) 1995-2006, Index Data ApS
+# Copyright (C) 1999-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.15 2006-04-30 13:04:03 adam Exp $
+# $Id: makefile,v 1.16 2006-04-30 14:00:07 adam Exp $
 
-###########################################################
-############### Parameters 
-###########################################################
+# Parameters 
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 # YAZ
 YAZ_DIR=..\..\yaz
@@ -23,9 +21,7 @@ nsis: all
 nsishelp:
 	$(NSIS)
 
-###########################################################
-############### Directories
-###########################################################
+# Directories
 # The current directory is supposed to be something like
 # ..../yaz/win, everything is relative to that
 ROOTDIR=..   # The home of yazpp
@@ -34,16 +30,19 @@ INCLDIR=$(ROOTDIR)\include  # our includes
 LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
 BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
-OBJDIR=$(WINDIR)\obj        # where we store intermediate files
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
 ZOOMDIR=$(ROOTDIR)\zoom
+
+!if $(DEBUG)
+OBJDIR=$(WINDIR)\dobj       # where we store intermediate files
+!else
+OBJDIR=$(WINDIR)\obj        # where we store intermediate files
+!endif
 
 TMPDIR=$(ROOTDIR)\win\tmp
 TMP=$(TMPDIR)
 
-###########################################################
-############### Targets - what to make
-###########################################################
+# Targets - what to make
 
 !if $(DEBUG)
 YAZPP_DLL=$(BINDIR)\yazpp_1_d.dll
@@ -63,9 +62,7 @@ dll: $(YAZPP_DLL)
 zclient: $(ZCLIENT)
 myclient: $(MY_CLIENT)
 
-###########################################################
-############### Compiler and linker options 
-###########################################################
+# Compiler and linker options 
 
 # YAZ includes & libs
 YAZ_LIB="$(YAZ_DIR)\lib\$(YAZD).lib"
@@ -141,9 +138,7 @@ RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 !endif
 
-###########################################################
-###############  Source and object modules
-###########################################################
+# Source and object modules
 
 YAZPP_DLL_OBJS = \
    "$(OBJDIR)\gdu.obj" \
@@ -177,10 +172,6 @@ MY_CLIENT_OBJS = \
 ZCLIENT_OBJS = \
    "$(OBJDIR)\zclient.obj"
 
-###########################################################
-############### Compiling 
-###########################################################
-
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
 
@@ -190,18 +181,11 @@ ZCLIENT_OBJS = \
 {$(ZOOMDIR)}.cpp{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
-###########################################################
-############### Resources
-###########################################################
-
 ### The RC compiler (resource files)
 RSC=rc.exe
 COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
 DEBUG_RC_OPTIONS=/d "_DEBUG"
 RELEASE_RC_OPTIONS=/d "NDEBUG"
-
-YAZ_RES=$(OBJDIR)\yaz.res
-YAZ_RC=$(WINDIR)\yaz.rc
 
 !if $(DEBUG)
 RSOPT=/d_DEBUG
@@ -209,64 +193,42 @@ RSOPT=/d_DEBUG
 RSOPT=/d_NDEBUG
 !endif
 
-$(YAZ_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /fo"$(YAZ_RES)" $(YAZ_RC) 
-
-###########################################################
-############### Linking
-###########################################################
-
 $(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
-	@echo Linking $(YAZPP_DLL)
-	$(LINK) @<<
-		$(LNKOPT) 
-		$(LINK_LIBS) 
-		$(DLL_LINK_OPTIONS)
-		$(YAZPP_DLL_OBJS)
-		/out:"$(YAZPP_DLL)"
-		/implib:"$(YAZPP_IMPLIB)"
-<<
+	$(LINK) \
+		$(LNKOPT) \
+		$(LINK_LIBS) \
+		$(DLL_LINK_OPTIONS) \
+		$(YAZPP_DLL_OBJS) \
+		/out:"$(YAZPP_DLL)" \
+		/implib:"$(YAZPP_IMPLIB)" 
 
 $(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
-	@echo Linking $(MY_CLIENT)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-            	$(YAZPP_IMPLIB)
-		$(MY_CLIENT_OBJS)
-		/map:"$(LIBDIR)\yaz-my-client.map"
+	$(LINK) \
+		$(LNKOPT) \
+		$(CLIENT_LINK_OPTIONS) \
+		$(LINK_LIBS)  \
+            	$(YAZPP_IMPLIB) \
+		$(MY_CLIENT_OBJS) \
 		/out:$(MY_CLIENT)
-<<
 
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
-	@echo Linking $(ZCLIENT)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-            $(YAZPP_IMPLIB)
-		$(ZCLIENT_OBJS)
-		/map:"$(LIBDIR)\zclient.map"
+	$(LINK) \
+        	$(LNKOPT) \
+		$(CLIENT_LINK_OPTIONS) \
+		$(LINK_LIBS) \
+		$(YAZPP_IMPLIB) \
+		$(ZCLIENT_OBJS) \
 		/out:$(ZCLIENT)
-<<
-
-
-###########################################################
-############### Generated Source files
-###########################################################
 
 generated: $(ZOOMDIR)\zoom.h
 
 "$(ZOOMDIR)\zoom.h": "$(ZOOMDIR)\master-header"
 	sed "s/^*	/	/; s/^*/ /" "$(ZOOMDIR)\master-header" >"$(ZOOMDIR)\zoom.h"
 
-############## clean
 clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(TMPDIR)\*.
-	-del $(LIBDIR)\*.MAP
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
 
