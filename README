@@ -1,6 +1,6 @@
 YAZ++ - A C++ library for YAZ and a ZOOM C++ API.
 
-$Id: README,v 1.7 2004-04-11 17:31:46 adam Exp $
+$Id: README,v 1.8 2006-04-30 12:21:37 adam Exp $
 
 Introduction
 ------------
@@ -17,7 +17,7 @@ Documentation
 -------------
 
 The "doc" directory contains documentation in HTML and PDF.
-You can also read it online at http://www.indexdata.dk/yaz++/
+You can also read it online at http://www.indexdata.dk/yazplusplus/
 
 Overview
 --------
