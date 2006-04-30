@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.19 2006-04-30 12:53:14 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.20 2006-04-30 13:11:01 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -195,17 +195,17 @@
     The following files are generated upon successful compilation:
     
     <variablelist>
-     <varlistentry><term><filename>bin/yazpp.dll</filename></term>
+     <varlistentry><term><filename>bin/yazpp_1.dll</filename></term>
       <listitem><para>
 	YAZ++ DLL . Includes ZOOM C++ as well.
-	For the debug version <filename>lib/yazppd.dll</filename>
+	For the debug version <filename>lib/yazpp_1_d.dll</filename>
 	is created instead.
        </para></listitem></varlistentry>
      
-     <varlistentry><term><filename>lib/yazpp.lib</filename></term>
+     <varlistentry><term><filename>lib/yazpp_1.lib</filename></term>
       <listitem><para>
-	Import library for <filename>yazpp.dll</filename>.
-	For the debug version <filename>lib/yazppd.lib</filename>
+	Import library for <filename>yazpp_1.dll</filename>.
+	For the debug version <filename>lib/yazpp_1_d.lib</filename>
 	is created instead.
        </para></listitem></varlistentry>
      
