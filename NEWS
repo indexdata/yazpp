@@ -1,5 +1,8 @@
 --- 1.0.0 [in progress]
 
+On Windows, DEBUG=1 produces yazppd.{lib,dll}. DEBUG=0 producess
+yazpp.{lib,dll} as usual.
+
 Fixes for GCC 4.1 being a little more strict.
 
 Changed product filename from yaz++ to yazpp. Moved header files
