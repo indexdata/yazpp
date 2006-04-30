@@ -9,7 +9,7 @@
      <!ENTITY % common  SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yazpp.xml.in,v 1.4 2006-04-27 13:04:39 adam Exp $ -->
+<!-- $Id: yazpp.xml.in,v 1.5 2006-04-30 12:51:45 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -42,7 +42,7 @@
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yazpp.xml.in,v 1.4 2006-04-27 13:04:39 adam Exp $
+    CVS ID: $Id: yazpp.xml.in,v 1.5 2006-04-30 12:51:45 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>
@@ -63,7 +63,16 @@
 
 <!-- Keep this Emacs mode comment at the end of the file
 Local variables:
-mode: nxml
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-local-catalogs: nil
+sgml-namecase-general:t
 End:
 -->
 
