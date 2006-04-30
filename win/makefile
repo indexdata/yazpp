@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.11 2006-04-30 05:52:06 adam Exp $
+# $Id: makefile,v 1.12 2006-04-30 07:21:42 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -68,7 +68,7 @@ $(BINDIR)\yaz.dll: $(YAZ_DIR)\bin\yaz.dll
   copy "$(YAZ_DIR)\bin\yaz.dll" $(BINDIR)
 
 COMMON_C_OPTIONS=          \
-  /nologo /W3 /EHsc /FD /c   \
+  /nologo /W3 /EHsc /FD /c \
   /D "_CRT_SECURE_NO_DEPRECATE" \
   $(YAZ_DEF)               \
   /D "_WINDOWS"            \
@@ -83,7 +83,7 @@ COMMON_C_INCLUDES= \
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
-  /MDd  /Od /YX /Zi /Gm
+  /MDd  /Od /Zi /Gm
 
 RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
@@ -100,7 +100,6 @@ RELEASE_C_OPTIONS=  \
 # /MDd = Runtime library: Multithread DLL (debug)
 # /Od  = Disable optimising (debug)
 # /O2  = Optimize for speed
-# /YX  = Automatic use of precomipled headers
 # /Gm  = Minimal rebuild (some cpp class stuff)
 # /Zi  = Program database for debuggers
 # /ZI  = Pgm database with special "edit&continue" stuff - not available in C5
