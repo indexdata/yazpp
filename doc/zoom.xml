@@ -1,25 +1,24 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.15 2006-04-25 12:37:05 marc Exp $ -->
+ <!-- $Id: zoom.xml,v 1.16 2006-04-30 12:53:14 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
  <sect1 id="zoom-introduction">
   <title>Introduction</title>
   <para>
-   <ulink url="http://zoom.z3950.org/">ZOOM</ulink>
+   <ulink url="&url.zoom;">ZOOM</ulink>
    is the emerging standard API for information retrieval programming
    using the Z39.50 protocol.  ZOOM's
-   <ulink url="http://zoom.z3950.org/api/">Abstract API</ulink>
+   <ulink url="&url.zoom.api;">Abstract API</ulink>
    specifies semantics for classes representing key IR concepts such as
    connections, queries, result sets and records; and there are various
-   <ulink url="http://zoom.z3950.org/bind/">bindings</ulink>
+   <ulink url="&url.zoom.bind;">bindings</ulink>
    specifying how those concepts should be represented in various
    programming languages.
   </para>
   <para>
    The YAZ++ library includes an implementation of the <ulink
-   url="http://zoom.z3950.org/bind/cplusplus/"
-	>C++ binding</ulink>
+   url="&url.zoom.bind.cplusplus;">C++ binding</ulink>
    for ZOOM, enabling quick, easy development of client applications.
   </para>
   <para>
@@ -56,7 +55,7 @@
    implementation of the C binding.  For information on the supported
    options and other such details, see the ZOOM-C documentation, which
    can be found on-line at
-   <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl"/>
+   <ulink url="&url.yaz.zoom;"/>
   </para>
   <para>
    All of the classes defined by ZOOM-C++ are in the
@@ -153,17 +152,17 @@
      <para>
       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.2"
 	>Section 3.2 (Connection) of the ZOOM Abstract API</ulink>
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl#zoom.connections"
-	>The Connections section of the ZOOM-C documentation</ulink>
-     </para>
-    </listitem>
-   </itemizedlist>
-  </sect2>
- </sect1>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <ulink url="&url.yaz.zoom.connections;"
+	>The Connections section f the ZOOM-C documentation</ulink>
+      </para>
+     </listitem>
+    </itemizedlist>
+   </sect2>
+  </sect1>
 
 
  <sect1 id="zoom-query">
@@ -184,14 +183,13 @@
       ~prefixQuery ();
     };
    </synopsis>
-   <para>
-    This class enables a query to be created by compiling YAZ's
-    cryptic but powerful
-    <ulink url="http://www.indexdata.dk/yaz/doc/tools.tkl#PQF"
-	>Prefix Query Notation (PQN)</ulink>.
-   </para>
-  </sect2>
-
+    <para>
+     This class enables a query to be created by compiling YAZ's
+     cryptic but powerful
+     <ulink url="&url.yaz.pqf;">Prefix Query Notation (PQN)</ulink>.
+    </para>
+   </sect2>
+   
   <sect2>
    <title><literal>ZOOM::CCLQuery</literal></title>
    <synopsis>
@@ -204,8 +202,7 @@
    <para>
     This class enables a query to be created using the simpler but
     less expressive
-    <ulink url="http://www.indexdata.dk/yaz/doc/tools.tkl#CCL"
-	>Common Command Language (CCL)</ulink>.
+    <ulink url="&url.yaz.ccl;">Common Command Language (CCL)</ulink>.
     The qualifiers recognised by the CCL parser are specified in an
     external configuration file in the format described by the YAZ
     documentation.
@@ -257,7 +254,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.query.tkl"
+       <ulink url="&url.yaz.zoom.query;"
 	>The Queries section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -339,7 +336,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.resultsets.tkl"
+      <ulink url="&url.yaz.zoom.resultsets;"
 	>The Result Sets section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -469,7 +466,7 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://www.indexdata.dk/yaz/doc/zoom.records.tkl"
+      <ulink url="&url.yaz.zoom.records;"
 	>The Records section of the ZOOM-C documentation</ulink>
      </para>
     </listitem>
@@ -654,10 +651,8 @@
     </listitem>
     <listitem>
      <para>
-      <ulink url="http://lcweb.loc.gov/z3950/agency/defns/bib1diag.html"
-	>Bib-1 Diagnostics</ulink> on the
-      <ulink url="http://lcweb.loc.gov/z3950/agency/"
-	>Z39.50 Maintenance Agency</ulink> site.
+      <ulink url="&url.z39.50.diagnostics;">Bib-1 Diagnostics</ulink> on the
+      <ulink url="&url.z39.50;">Z39.50 Maintenance Agency</ulink> site.
      </para>
     </listitem>
    </itemizedlist>
@@ -667,7 +662,7 @@
     <literal>exception</literal> class and its subclasses.  The
     closest thing is the <literal>ZOOM_connection_error</literal>
     function described in
-    <ulink url="http://www.indexdata.dk/yaz/doc/zoom.tkl#zoom.connections"
+     <ulink url="&url.yaz.zoom.connections;"
 	>The Connections section</ulink> of the documentation.
    </para>
   </sect2>

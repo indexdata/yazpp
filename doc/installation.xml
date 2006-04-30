@@ -1,5 +1,5 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.18 2006-04-27 13:04:39 adam Exp $ -->
+  <!-- $Id: installation.xml,v 1.19 2006-04-30 12:53:14 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.
@@ -17,7 +17,7 @@
    For some platforms there are binary packages for YAZ.
   </para>
   <section id="unix">
-   <title>Building on Unix</title>
+   <title>Installation on Unix (from source)</title>
    <para>On UNIX, the software is compiled as follows:
     <screen>
      $ ./configure
@@ -34,7 +34,7 @@
       <term><literal>--prefix </literal>directory</term>
       <listitem><para>
         Specifies installation prefix. By default
-        <literal>/usr/local</literal> is used.
+        <filename>/usr/local</filename> is used.
        </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -70,46 +70,46 @@
     This is what you have after successful compilation:
     <variablelist>
      <varlistentry>
-      <term><literal>src/libyazpp.la</literal></term> 
+      <term><filename>src/libyazpp.la</filename></term> 
       <listitem><para>
         The YAZ++ library.
 	This library gets installed in your libraries directory
-	(<parameter>prefix</parameter><literal>/lib</literal>).
+	(<parameter>prefix</parameter><filename>/lib</filename>).
        </para></listitem>
      </varlistentry>
      
      <varlistentry>
-      <term><literal>src/libzoompp.la</literal></term> 
+      <term><filename>src/libzoompp.la</filename></term> 
       <listitem><para>
         The <link linkend="zoom">ZOOM-C++</link> library.
 	This library gets installed in your libraries directory
-	(<parameter>prefix</parameter><literal>/lib</literal>).
+	(<parameter>prefix</parameter><filename>/lib</filename>).
        </para></listitem>
      </varlistentry>
      
      <varlistentry>
-      <term><literal>include/yazpp/*.h</literal></term> 
+      <term><filename>include/yazpp/*.h</filename></term> 
       <listitem><para>
         Various C++ header files, which you'll need for YAZ++
 	development. All these are installed in your header files area
-	(<parameter>prefix</parameter><literal>/include/yazpp</literal>).
+	(<parameter>prefix</parameter><filename>/include/yazpp</filename>).
        </para></listitem>
      </varlistentry>
      
      <varlistentry>
-      <term><literal>yazpp-config</literal></term> 
+      <term><filename>yazpp-config</filename></term> 
       <listitem><para>
         A Bourne shell-script utility that returns the values of the
 	<envar>CFLAGS</envar> and <envar>LIBS</envar>
 	environment variables
         needed in order to compile your applications with the YAZ++
 	library.  This script gets installed in your binaries directory
-        (<parameter>prefix</parameter><literal>/bin</literal>).
+        (<parameter>prefix</parameter><filename>/bin</filename>).
        </para></listitem>
      </varlistentry>
 
      <varlistentry>
-      <term><literal>zoom/zclient</literal></term> 
+      <term><filename>zoom/zclient</filename></term> 
       <listitem><para>
         ZOOM C++ demonstration client that uses the ZOOM C++ classes.
 	This client does not get installed in the system directories.
@@ -117,7 +117,7 @@
      </varlistentry>
 
      <varlistentry>
-      <term><literal>src/yaz-my-client</literal></term> 
+      <term><filename>src/yaz-my-client</filename></term> 
       <listitem><para>
         YAZ C++ demonstration client. This client does not
         get installed in the system directories.
@@ -125,7 +125,7 @@
      </varlistentry>
 
      <varlistentry>
-      <term><literal>src/yaz-my-server</literal></term> 
+      <term><filename>src/yaz-my-server</filename></term> 
       <listitem><para>
         YAZ C++ demonstration server. This server does not
         get installed in the system directories.
@@ -135,14 +135,14 @@
    </para>
   </section>
   <section id="windows">
-   <title>Building on Windows</title>
+   <title>Installation on Windows</title>
    <para>
     YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
     with <ulink url="&url.vstudio;">Microsoft Visual Studio</ulink>.
-    Version 6 and .NET 2003 has been tested. We expect that YAZ++ compiles
-    with version 5 as well.
+    Version 2003 (7) and 2005 (8) has been tested.
+    We expect that YAZ++ compiles with versions 5 and 6 as well.
    </para>
-    <para>
+   <para>
     Start a command prompt and switch the sub directory
     <filename>WIN</filename> where the file <filename>makefile</filename>
     is located. Customize the installation by editing the
@@ -160,7 +160,7 @@
 	(code generation is multi-threaded DLL).
        </para></listitem>
      </varlistentry>
-     <varlistentry><term><literal>YAZ_DIR</literal></term>
+     <varlistentry><term><filename>YAZ_DIR</filename></term>
       <listitem><para>
 	Specifies the directory of the YAZ source.
        </para></listitem>
@@ -198,13 +198,27 @@
      <varlistentry><term><filename>bin/yazpp.dll</filename></term>
       <listitem><para>
 	YAZ++ DLL . Includes ZOOM C++ as well.
+	For the debug version <filename>lib/yazppd.dll</filename>
+	is created instead.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>lib/yazpp.lib</filename></term>
       <listitem><para>
 	Import library for <filename>yazpp.dll</filename>.
+	For the debug version <filename>lib/yazppd.lib</filename>
+	is created instead.
        </para></listitem></varlistentry>
      
+     <varlistentry><term><filename>bin/yaz-my-client.exe</filename></term>
+      <listitem><para>
+	Z39.50 client demonstrating the YAZ++ API.
+       </para></listitem></varlistentry>
+
+     <varlistentry><term><filename>bin/yaz-my-server.exe</filename></term>
+      <listitem><para>
+	Z39.50 server demonstrating the YAZ++ API.
+       </para></listitem></varlistentry>
+
      <varlistentry><term><filename>bin/zclient.exe</filename></term>
       <listitem><para>
 	ZOOM C++ demo client. A simple WIN32 console application.
