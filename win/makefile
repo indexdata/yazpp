@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.10 2006-03-29 13:14:19 adam Exp $
+# $Id: makefile,v 1.11 2006-04-30 05:52:06 adam Exp $
 
 ###########################################################
 ############### Parameters 
@@ -68,7 +68,8 @@ $(BINDIR)\yaz.dll: $(YAZ_DIR)\bin\yaz.dll
   copy "$(YAZ_DIR)\bin\yaz.dll" $(BINDIR)
 
 COMMON_C_OPTIONS=          \
-  /nologo /W3 /GX /FD /c   \
+  /nologo /W3 /EHsc /FD /c   \
+  /D "_CRT_SECURE_NO_DEPRECATE" \
   $(YAZ_DEF)               \
   /D "_WINDOWS"            \
   /D "WIN32"               \
@@ -111,7 +112,7 @@ LINK=link.exe
 LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
            advapi32.lib uuid.lib \
            wsock32.lib  advapi32.lib \
-           $(YAZ_LIB) $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
+           $(YAZ_LIB)
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
