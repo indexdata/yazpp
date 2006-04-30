@@ -1,10 +1,10 @@
 # Copyright (C) 1999-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.16 2006-04-30 14:00:07 adam Exp $
+# $Id: makefile,v 1.17 2006-04-30 14:14:59 adam Exp $
 
 # Parameters 
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 # YAZ
 YAZ_DIR=..\..\yaz
