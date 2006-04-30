@@ -1,15 +1,16 @@
-# Copyright (C) 1995-2005, Index Data ApS
+# Copyright (C) 1995-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.12 2006-04-30 07:21:42 adam Exp $
+# $Id: makefile,v 1.13 2006-04-30 07:43:06 adam Exp $
 
 ###########################################################
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 # YAZ
 YAZ_DIR=..\..\yaz
+
 
 default: all
 
@@ -45,8 +46,16 @@ TMP=$(TMPDIR)
 ############### Targets - what to make
 ###########################################################
 
+!if $(DEBUG)
+YAZPP_DLL=$(BINDIR)\yazppd.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazppd.lib
+YAZD=yazd
+!else
 YAZPP_DLL=$(BINDIR)\yazpp.dll
 YAZPP_IMPLIB=$(LIBDIR)\yazpp.lib
+YAZD=yaz
+!endif
+
 ZCLIENT=$(BINDIR)\zclient.exe
 MY_CLIENT=$(BINDIR)\yaz-my-client.exe
 
@@ -60,12 +69,12 @@ myclient: $(MY_CLIENT)
 ###########################################################
 
 # YAZ includes & libs
-YAZ_LIB="$(YAZ_DIR)\lib\yaz.lib"
+YAZ_LIB="$(YAZ_DIR)\lib\$(YAZD).lib"
 YAZ_DEF=/I"$(YAZ_DIR)\include"
-yaz: $(BINDIR)\yaz.dll $(BINDIR)\yaz.dll
+yaz: $(BINDIR)\$(YAZD).dll $(BINDIR)\$(YAZD).dll
 
-$(BINDIR)\yaz.dll: $(YAZ_DIR)\bin\yaz.dll
-  copy "$(YAZ_DIR)\bin\yaz.dll" $(BINDIR)
+$(BINDIR)\$(YAZD).dll: $(YAZ_DIR)\bin\$(YAZD).dll
+  copy "$(YAZ_DIR)\bin\$(YAZD).dll" $(BINDIR)
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /EHsc /FD /c \
@@ -221,7 +230,6 @@ $(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
 		$(YAZPP_DLL_OBJS)
 		/out:"$(YAZPP_DLL)"
 		/implib:"$(YAZPP_IMPLIB)"
-		/map:"$(LIBDIR)\yazpp.map"  
 <<
 
 $(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
