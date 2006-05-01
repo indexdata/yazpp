@@ -1,4 +1,4 @@
---- 1.0.0 [in progress]
+--- 1.0.0 2006/05/01
 
 On Windows, DEBUG=1 produces yazppd.{lib,dll}. DEBUG=0 producess
 yazpp.{lib,dll} as usual.
