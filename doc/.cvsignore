@@ -13,3 +13,7 @@ yazpp.pdf
 manpage.links
 manpage.refs
 html
+tkl.xsl
+yazhtml.dsl
+yazphp.dsl
+yazprint.dsl
