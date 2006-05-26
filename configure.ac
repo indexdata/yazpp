@@ -1,6 +1,6 @@
 dnl YAZ++ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.4 2006-04-30 12:22:03 adam Exp $
+dnl $Id: configure.ac,v 1.5 2006-05-26 19:46:37 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yazpp],[1.0.0],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -40,5 +40,6 @@ AC_OUTPUT([
 	doc/Makefile
 	doc/yazpp.xml
 	doc/common/Makefile
-	doc/common/html.dsl doc/common/html.xsl doc/common/print.dsl doc/common/tkl.xsl
+	doc/common/tkl.xsl doc/common/html.xsl doc/common/man.xsl 
+	doc/common/print.dsl doc/common/html.dsl
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])

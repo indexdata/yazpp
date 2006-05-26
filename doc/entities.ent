@@ -1,0 +1,6 @@
+<!-- $Id: entities.ent,v 1.1 2006-05-26 19:46:37 adam Exp $ -->
+<!ENTITY chap-introduction SYSTEM "introduction.xml">
+<!ENTITY chap-installation SYSTEM "installation.xml">
+<!ENTITY chap-zoom SYSTEM "zoom.xml">
+<!ENTITY chap-api SYSTEM "api.xml">
+<!ENTITY app-license SYSTEM "license.xml">

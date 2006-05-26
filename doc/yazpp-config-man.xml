@@ -1,5 +1,7 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" "">
-<!-- $Id: yazpp-config-man.xml,v 1.4 2006-04-25 12:37:05 marc Exp $ -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
+ "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" 
+[ ]>
+<!-- $Id: yazpp-config-man.xml,v 1.5 2006-05-26 19:46:37 adam Exp $ -->
 <refentry id="yazpp-config">
  <refmeta>
   <refentrytitle>yazpp-config</refentrytitle>

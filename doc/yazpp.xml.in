@@ -1,15 +1,13 @@
 <?xml version="1.0" standalone="no"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4//EN"
-                    "@DTD_DIR@/docbookx.dtd" [
-     <!ENTITY chap-introduction SYSTEM "introduction.xml">
-     <!ENTITY chap-installation SYSTEM "installation.xml">
-     <!ENTITY chap-zoom SYSTEM "zoom.xml">
-     <!ENTITY chap-api SYSTEM "api.xml">
-     <!ENTITY app-license SYSTEM "license.xml">
-     <!ENTITY % common  SYSTEM "common/common.ent">
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" 
+[
+     <!ENTITY % entities  SYSTEM "@srcdir@/entities.ent">
+     %entities;
+     <!ENTITY % common  SYSTEM "@srcdir@/common/common.ent">
      %common;
 ]>
-<!-- $Id: yazpp.xml.in,v 1.5 2006-04-30 12:51:45 adam Exp $ -->
+<!-- $Id: yazpp.xml.in,v 1.6 2006-05-26 19:46:37 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -42,7 +40,7 @@
     This manual covers version @VERSION@.
     </simpara>
    <simpara>
-    CVS ID: $Id: yazpp.xml.in,v 1.5 2006-04-30 12:51:45 adam Exp $
+    CVS ID: $Id: yazpp.xml.in,v 1.6 2006-05-26 19:46:37 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>
