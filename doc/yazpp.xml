@@ -4,12 +4,12 @@
 [
      <!ENTITY % local SYSTEM "local.ent">
      %local;
-     <!ENTITY % entities  SYSTEM "entities.ent">
+     <!ENTITY % entities SYSTEM "entities.ent">
      %entities;
-     <!ENTITY % common  SYSTEM "common/common.ent">
+     <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yazpp.xml,v 1.1 2006-06-02 08:43:12 adam Exp $ -->
+<!-- $Id: yazpp.xml,v 1.2 2006-06-02 08:50:29 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -39,10 +39,10 @@
     ZOOM (<link linkend="zoom">ZOOM-C++</link>).
    </simpara>
    <simpara>
-    This manual covers version 1.0.0.
+    This manual covers version &version;.
     </simpara>
    <simpara>
-    CVS ID: $Id: yazpp.xml,v 1.1 2006-06-02 08:43:12 adam Exp $
+    CVS ID: $Id: yazpp.xml,v 1.2 2006-06-02 08:50:29 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>
