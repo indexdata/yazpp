@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.20 2006-05-26 19:46:37 adam Exp $
+## $Id: Makefile.am,v 1.21 2006-06-02 08:43:12 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
@@ -9,9 +9,9 @@ XMLFILES = \
  zoom.xml \
  api.xml \
  license.xml \
- yazpp.xml.in
+ yazpp.xml
 
-TOP = yazpp.xml
+TOP = $(srcdir)/yazpp.xml
 
 MANFILES = yazpp-config.8
 
@@ -36,10 +36,17 @@ doc_DATA = $(HTMLFILES)
 
 man_MANS = $(MANFILES)
 
-EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS) $(REFFILES) entities.ent
+EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS) $(REFFILES) \
+	entities.ent local.ent.in
 
 $(HTMLFILES): $(XMLFILES)
-	xsltproc common/html.xsl $(TOP)
+	$(HTML_COMPILE) $(TOP)
+
+index.tkl: $(XMLFILES) common/tkl.xsl
+	$(TKL_COMPILE) $(TOP)
+
+yazpp-config.8: yazpp-config-man.xml
+	$(MAN_COMPILE) $(srcdir)/yazpp-config-man.xml
 
 yazpp.pdf: $(XMLFILES)
 	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common/; fi
@@ -48,11 +55,6 @@ yazpp.pdf: $(XMLFILES)
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
 
-index.tkl: $(XMLFILES) common/tkl.xsl
-	xsltproc common/tkl.xsl $(TOP)
-
-yazpp-config.8: yazpp-config-man.xml
-	xsltproc common/man.xsl $(srcdir)/yazpp-config-man.xml
 
 clean-data-hook:
 	rm -f [0-9]* *.bak

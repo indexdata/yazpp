@@ -1,7 +1,6 @@
 *.log
 Makefile
 Makefile.in
-yazpp.xml
 *.html
 *.tkl
 yazpp-config.8
@@ -14,6 +13,7 @@ manpage.links
 manpage.refs
 html
 tkl.xsl
-yazhtml.dsl
-yazphp.dsl
-yazprint.dsl
+htmlhelp.hhp
+local.ent.in
+toc.hhc
+
