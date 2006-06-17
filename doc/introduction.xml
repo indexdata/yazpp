@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.8 2006-04-27 13:04:39 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.9 2006-06-17 19:16:04 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
    <ulink url="&url.yazplusplus;">YAZ++</ulink> 
@@ -11,7 +11,7 @@
    <ulink url="&url.zoom.bind.cplusplus;">ZOOM C++</ulink>).
   </para>
   <para>
-   Later versions (0.7+) of YAZ++ also supports SRW/SRU.
+   Later versions (0.7+) of YAZ++ also supports SRU.
   </para>
   <section>
    <title>Licensing</title>
