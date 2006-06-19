@@ -2,12 +2,13 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.19 2006-03-29 13:14:18 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.20 2006-06-19 13:12:07 adam Exp $
  */
 
 #include <yaz/logrpn.h>
 #include <yazpp/z-query.h>
 #include <yaz/pquery.h>
+#include <assert.h>
 
 using namespace yazpp_1;
 
@@ -18,21 +19,33 @@ Yaz_Z_Query::Yaz_Z_Query()
     odr_print = odr_createmem(ODR_PRINT);
 }
 
-Yaz_Z_Query& Yaz_Z_Query::operator=(const Yaz_Z_Query &p)
+
+Yaz_Z_Query::Yaz_Z_Query(const Yaz_Z_Query &q)
 {
-    if (this != &p)
+    odr_encode = odr_createmem(ODR_ENCODE);
+    odr_decode = odr_createmem(ODR_DECODE);
+    odr_print = odr_createmem(ODR_PRINT);
+
+    m_len = q.m_len;
+    m_buf = (char*) odr_malloc(odr_encode, m_len);
+    memcpy(m_buf, q.m_buf, m_len);
+}
+
+Yaz_Z_Query& Yaz_Z_Query::operator=(const Yaz_Z_Query &q)
+{
+    if (this != &q)
     {
         odr_reset(odr_encode);
-        if (!p.m_buf)
+        if (!q.m_buf)
         {
             m_buf = 0;
             m_len = 0;
         }
         else
         {
-            m_len = p.m_len;
+            m_len = q.m_len;
             m_buf = (char*) odr_malloc(odr_encode, m_len);
-            memcpy(m_buf, p.m_buf, m_len);
+            memcpy(m_buf, q.m_buf, m_len);
         }
     }
     return *this;
@@ -112,7 +125,7 @@ void Yaz_Z_Query::print(char *str, int len)
     odr_reset(odr_decode);
 }
 
-int Yaz_Z_Query::match(Yaz_Z_Query *other)
+int Yaz_Z_Query::match(const Yaz_Z_Query *other)
 {
     if (m_len != other->m_len)
         return 0;
