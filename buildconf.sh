@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.16 2006-05-26 19:46:37 adam Exp $
+# $Id: buildconf.sh,v 1.17 2006-07-07 06:21:29 adam Exp $
 
 if automake --version|head -1 |grep '1\.[4-7]'; then
     echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
@@ -42,7 +42,7 @@ esac
 
 if $enable_configure; then
     if test -n "$sh_flags"; then
-	CFLAGS="$sh_flags" CXXFLAGS="$sh_flags" ./configure $*
+	CFLAGS="$sh_flags" CXXFLAGS="$sh_flags" ./configure --disable-shared --enable-static $*
     else
 	./configure $*
     fi
