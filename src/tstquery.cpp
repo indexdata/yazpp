@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2005, Index Data.
+ * Copyright (c) 1998-2006, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstquery.cpp,v 1.2 2006-03-29 13:14:15 adam Exp $
+ * $Id: tstquery.cpp,v 1.3 2006-07-07 12:57:15 adam Exp $
  */
 
 #include <stdlib.h>
@@ -34,8 +34,8 @@ void tst1(const char *query_str_in, const char *query_expected)
 int main(int argc, char **argv)
 {
     tst1("", "");
-    tst1("x", "RPN: @attrset Bib-1 x");
-    tst1("@and a b", "RPN: @attrset Bib-1 @and a b");
+    tst1("x", "RPN @attrset Bib-1 x");
+    tst1("@and a b", "RPN @attrset Bib-1 @and a b");
 }
 
 /*
