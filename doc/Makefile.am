@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.22 2006-06-28 21:43:45 adam Exp $
+## $Id: Makefile.am,v 1.23 2006-09-07 10:07:02 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
@@ -17,20 +17,7 @@ MANFILES = yazpp-config.8
 
 REFFILES = yazpp-config-man.xml
 
-HTMLFILES = \
- api.html \
- implementations.html \
- index.html \
- installation.html \
- introduction.html \
- license.html \
- windows.html \
- zoom-connection.html \
- zoom-exception.html \
- zoom-query.html \
- zoom-record.html \
- zoom-resultset.html \
- zoom.html
+HTMLFILES = index.html
 
 doc_DATA = $(HTMLFILES) 
 
@@ -40,6 +27,7 @@ EXTRA_DIST = $(XMLFILES) $(doc_DATA) $(man_MANS) $(REFFILES) \
 	entities.ent local.ent.in
 
 $(HTMLFILES): $(XMLFILES)
+	rm -f *.html
 	$(HTML_COMPILE) $(TOP)
 
 index.tkl: $(XMLFILES) common/tkl.xsl
@@ -60,17 +48,15 @@ clean-data-hook:
 	rm -f [0-9]* *.bak
 
 dist-hook:
-	if test -f index.html; then for f in *.html; do \
-		found=0; \
-		b=`basename $$f`; \
-		for h in $(HTMLFILES); do \
-			if test "$$h" = "$$b"; then \
-				found=1; \
-			fi \
-		done; \
-		if test "$$found" = "0"; then \
-			echo "$$h not found in HTMLFILES"; \
-			exit 1; \
-		fi \
-	done; fi
+	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
+	for p in $$d/*.html; do \
+		cp $$p $(distdir); \
+	done
+
+install-data-hook:
+	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
+	for p in $$d/*.html; do \
+		$(docDATA_INSTALL) $$p $(DESTDIR)/$(docdir); \
+	done
+
 
