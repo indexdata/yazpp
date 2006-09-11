@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-cql2rpn.cpp,v 1.9 2006-03-29 13:14:15 adam Exp $
+ * $Id: yaz-cql2rpn.cpp,v 1.10 2006-09-11 23:06:28 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -45,7 +45,7 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
     }
     else
     {
-        char rpn_buf[1024];
+        char rpn_buf[10240];
         r = cql_transform_buf(m_transform, cql_parser_result(cp), 
                               rpn_buf, sizeof(rpn_buf)-1);
         if (!r)
