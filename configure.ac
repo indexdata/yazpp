@@ -1,6 +1,6 @@
 dnl YAZ++ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.10 2006-07-07 12:34:13 adam Exp $
+dnl $Id: configure.ac,v 1.11 2006-09-14 06:57:59 marc Exp $
 AC_PREREQ(2.59)
 AC_INIT([yazpp],[1.0.1],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -41,3 +41,29 @@ AC_OUTPUT([
 	doc/common/Makefile
 	doc/common/print.dsl
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])
+
+
+echo \
+"------------------------------------------------------------------------
+
+  YAZPP Package:              ${PACKAGE}
+  YAZPP Version:              ${VERSION}
+  Source code location:       ${srcdir}
+  CPP Preprocessor:           ${CPP}
+  CPP Preprocessor flags:     ${CPPFLAGS}
+  CXX Compiler:               ${CXX}
+  CXX Compiler flags:         ${CXXFLAGS}
+  Linker flags:               ${LDFLAGS}
+  Linked libs:                ${LIBS}
+  Host System Type:           ${host}
+  Install path:               ${prefix}
+  Automake:                   ${AUTOMAKE}
+  Archiver:                   ${AR}
+  Ranlib:                     ${RANLIB}
+  YAZ Version:                ${YAZVERSION}
+  YAZ Include:                ${YAZINC}
+  YAZ La Lib:                 ${YAZLALIB}
+  YAZ Lib:                    ${YAZLIB}
+  Bugreport:                  ${PACKAGE_BUGREPORT}
+
+------------------------------------------------------------------------"
