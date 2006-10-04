@@ -19,3 +19,25 @@ dist-hook:
 	cp $(srcdir)/debian/rules $(distdir)/debian
 	cp $(srcdir)/debian/*.postinst $(distdir)/debian
 	cp $(srcdir)/debian/*.install $(distdir)/debian
+
+
+# doxygen target
+.PHONY:dox
+dox:
+	doxygen
+
+.PHONY:firefox
+firefox:
+	firefox  -new-window file://`pwd`/dox/html/index.html &
+
+.PHONY:konqueror
+konqueror:
+	konqueror file://`pwd`/dox/html/index.html &
+
+.PHONY:galeon
+galeon:
+	galeon file://`pwd`/dox/html/index.html &
+
+.PHONY:epiphany
+epiphany:
+	epiphany --new-window file://`pwd`/dox/html/index.html &

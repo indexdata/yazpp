@@ -1,6 +1,6 @@
 dnl YAZ++ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.11 2006-09-14 06:57:59 marc Exp $
+dnl $Id: configure.ac,v 1.12 2006-10-04 07:51:17 marc Exp $
 AC_PREREQ(2.59)
 AC_INIT([yazpp],[1.0.1],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -29,6 +29,7 @@ YAZPP_SRC_ROOT=`cd ${srcdir}; pwd`
 YAZPP_BUILD_ROOT=`pwd`
 
 AC_OUTPUT([
+	Doxyfile
 	Makefile
 	src/Makefile
 	include/Makefile
