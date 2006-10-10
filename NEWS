@@ -1,3 +1,5 @@
+Change wording of YAZ++ license to the 'Revised BSD License'.
+
 Added assignment operator for class Yaz_Z_Query.
 
 --- 1.0.0 2006/05/01
