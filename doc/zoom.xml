@@ -1,5 +1,5 @@
 <chapter id="zoom">
- <!-- $Id: zoom.xml,v 1.16 2006-04-30 12:53:14 adam Exp $ -->
+ <!-- $Id: zoom.xml,v 1.17 2006-10-10 21:59:43 adam Exp $ -->
  <title>ZOOM-C++</title>
 
 
@@ -145,7 +145,7 @@
    (links below).
   </para>
 
-  <sect2>
+  <sect2 id="connection.references">
    <title>References</title>
    <itemizedlist>
     <listitem>
@@ -174,7 +174,7 @@
    a specific query notation.
   </para>
 
-  <sect2>
+  <sect2 id="ZOOM::prefixQuery">
    <title><literal>ZOOM::prefixQuery</literal></title>
    <synopsis>
     class prefixQuery : public query {
@@ -190,7 +190,7 @@
     </para>
    </sect2>
    
-  <sect2>
+  <sect2 id="ZOOM::CCLQuery">
    <title><literal>ZOOM::CCLQuery</literal></title>
    <synopsis>
     class CCLQuery : public query {
@@ -216,7 +216,7 @@
    </para>
   </sect2>
 
-  <sect2>
+  <sect2 id="queries.discussion">
    <title>Discussion</title>
    <para>
     It will be readily recognised that these objects have no methods
@@ -243,7 +243,7 @@
    </screen>
   </sect2>
 
-  <sect2>
+  <sect2 id="query.references">
    <title>References</title>
    <itemizedlist>
     <listitem>
@@ -325,7 +325,7 @@
    <link linkend="zoom-exception"><literal>exception</literal></link>.
   </para>
 
-  <sect2>
+  <sect2 id="resultset.references">
    <title>References</title>
    <itemizedlist>
     <listitem>
@@ -417,7 +417,7 @@
    it apart ``by hand''.
   </para>
 
-  <sect2>
+  <sect2 id="zoom.memory.management">
    <title>Memory Management</title>
    <para>
     The <literal>record</literal> objects returned from
@@ -455,7 +455,7 @@
    </programlisting>
   </sect2>
 
-  <sect2>
+  <sect2 id="record.references">
    <title>References</title>
    <itemizedlist>
     <listitem>
@@ -507,7 +507,7 @@
    It has three concrete subclasses:
   </para>
 
-  <sect2>
+  <sect2 id="ZOOM::systemException">
    <title><literal>ZOOM::systemException</literal></title>
    <synopsis>
     class systemException: public exception {
@@ -528,7 +528,7 @@
    </para>
   </sect2>
 
-  <sect2>
+  <sect2 id="ZOOM::bib1Exception">
    <title><literal>ZOOM::bib1Exception</literal></title>
    <synopsis>
     class bib1Exception: public exception {
@@ -557,7 +557,7 @@
    </para>
   </sect2>
 
-  <sect2>
+  <sect2 id="ZOOM::queryException">
    <title><literal>ZOOM::queryException</literal></title>
    <synopsis>
     class queryException: public exception {
@@ -640,7 +640,7 @@
    </para>
   </sect2>
 
-  <sect2>
+  <sect2 id="exception.references">
    <title>References</title>
    <itemizedlist>
     <listitem>

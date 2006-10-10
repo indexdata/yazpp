@@ -146,7 +146,7 @@
   </section>
 
   <section id="implementations"><title>Implementations</title>
-   <section><title>Yaz_SocketManager</title>
+   <section id="Yaz_SocketManager"><title>Yaz_SocketManager</title>
     <para>
      This class implements the <link linkend="ISocketObservable">
       ISocketObservable</link> interface and is a portable 
@@ -177,7 +177,8 @@
      };
     </synopsis>
    </section>
-   <section><title>PDU_Assoc</title>
+   <section id="PDU_Assoc">
+    <title>PDU_Assoc</title>
     <para>
      This class implements the interfaces
      <link linkend="IPDU_Observable">IPDU_Observable</link>

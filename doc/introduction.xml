@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.9 2006-06-17 19:16:04 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.10 2006-10-10 21:59:43 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   <para>
    <ulink url="&url.yazplusplus;">YAZ++</ulink> 
@@ -13,11 +13,11 @@
   <para>
    Later versions (0.7+) of YAZ++ also supports SRU.
   </para>
-  <section>
+  <section id="licensing">
    <title>Licensing</title>
    <para>
     YAZ++ and ZOOM-C++ is is covered
-    by the <link linkend="yaz.license">YAZ license</link>.
+    by Revised <link linkend="license">BSD License</link>.
    </para>
   </section>
  </chapter>
