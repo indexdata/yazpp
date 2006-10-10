@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.23 2006-03-29 13:14:16 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.24 2006-10-10 13:31:49 adam Exp $
  */
 
 #include <stdlib.h>
@@ -311,7 +311,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
         if (!(*etype->fun)(odr_decode(), (char **)&rr, 0, 0))
         {
             odr_perror(odr_decode(), "Decoding constructed record.");
-            fprintf(stderr, "[Near %d]\n", odr_offset(odr_decode()));
+            fprintf(stderr, "[Near %ld]\n", (long) odr_offset(odr_decode()));
             fprintf(stderr, "Packet dump:\n---------\n");
             odr_dumpBER(stderr, (char*)record->u.octet_aligned->buf,
                         record->u.octet_aligned->len);

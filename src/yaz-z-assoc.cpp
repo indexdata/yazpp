@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.39 2006-03-29 13:14:18 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.40 2006-10-10 13:31:49 adam Exp $
  */
 
 #include <assert.h>
@@ -213,9 +213,9 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
     if (!z_GDU(m_odr_in, &apdu, 0, 0))
     {
         const char *element = odr_getelement(m_odr_in);
-        yaz_log(YLOG_LOG, "PDU decode failed '%s' near byte %d. Element %s",
+        yaz_log(YLOG_LOG, "PDU decode failed '%s' near byte %ld. Element %s",
                 odr_errmsg(odr_geterror(m_odr_in)),
-                odr_offset(m_odr_in),
+                (long) odr_offset(m_odr_in),
                 element ? element : "unknown");
         yaz_log(YLOG_LOG, "PDU dump:");
         odr_dumpBER(yaz_log_file(), buf, len);
