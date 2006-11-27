@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.24 2006-10-11 09:39:43 adam Exp $
+## $Id: Makefile.am,v 1.25 2006-11-27 11:34:52 adam Exp $
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
@@ -30,7 +30,7 @@ $(HTMLFILES): $(XMLFILES)
 	rm -f *.html
 	$(HTML_COMPILE) $(TOP)
 
-index.tkl: $(XMLFILES) common/tkl.xsl
+index.tkl: $(XMLFILES)
 	$(TKL_COMPILE) $(TOP)
 
 yazpp-config.8: yazpp-config-man.xml
