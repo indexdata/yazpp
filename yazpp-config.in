@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yazpp-config.in,v 1.1 2006-03-29 13:14:13 adam Exp $
+# $Id: yazpp-config.in,v 1.2 2006-12-12 14:39:02 marc Exp $
 yazppprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -86,7 +86,7 @@ else
     fi
     YAZPPLALIB=$YAZPPLIB
     if test "$yazppprefix" = "/usr"; then
-	YAZPPINC=
+	YAZPPINC="@YAZINC@"
     else
 	YAZPPINC="@YAZINC@ -I${yazppprefix}/include"
     fi
