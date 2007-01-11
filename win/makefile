@@ -1,6 +1,6 @@
 # Copyright (C) 1999-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.17 2006-04-30 14:14:59 adam Exp $
+# $Id: makefile,v 1.18 2007-01-11 12:18:55 adam Exp $
 
 # Parameters 
 
@@ -67,9 +67,9 @@ myclient: $(MY_CLIENT)
 # YAZ includes & libs
 YAZ_LIB="$(YAZ_DIR)\lib\$(YAZD).lib"
 YAZ_DEF=/I"$(YAZ_DIR)\include"
-yaz: $(BINDIR)\$(YAZD).dll $(BINDIR)\$(YAZD).dll
+yaz: $(BINDIR)\$(YAZD).dll 
 
-$(BINDIR)\$(YAZD).dll: $(YAZ_DIR)\bin\$(YAZD).dll
+$(BINDIR)\$(YAZD).dll: "$(YAZ_DIR)\bin\$(YAZD).dll"
   copy "$(YAZ_DIR)\bin\$(YAZD).dll" $(BINDIR)
 
 COMMON_C_OPTIONS=          \
