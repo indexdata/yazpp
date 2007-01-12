@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-cql2rpn.cpp,v 1.11 2007-01-12 10:09:25 adam Exp $
+ * $Id: yaz-cql2rpn.cpp,v 1.12 2007-01-12 10:15:06 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -49,7 +49,6 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
     int r = cql_parser_string(cp, cql_query);
     if (r)
     {
-        yaz_log(YLOG_LOG, "CQL Parse Error");
         r = 10;
     }
     else
