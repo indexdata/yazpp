@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: cql2rpn.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: cql2rpn.h,v 1.2 2007-01-12 10:09:25 adam Exp $
  */
 
 #include <yaz/cql.h>
@@ -14,6 +14,7 @@ class YAZ_EXPORT Yaz_cql2rpn {
     Yaz_cql2rpn();
     ~Yaz_cql2rpn();
     void set_pqf_file(const char *fname);
+    bool parse_spec_file(const char *fname, int *error);
     int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o,
                         char **addinfop);
  private:

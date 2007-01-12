@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-cql2rpn.cpp,v 1.10 2006-09-11 23:06:28 adam Exp $
+ * $Id: yaz-cql2rpn.cpp,v 1.11 2007-01-12 10:09:25 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -26,6 +26,15 @@ void Yaz_cql2rpn::set_pqf_file(const char *fname)
 {
     if (!m_transform)
         m_transform = cql_transform_open_fname(fname);
+}
+
+
+bool Yaz_cql2rpn::parse_spec_file(const char *fname, int *error)
+{
+    *error = 0;
+    cql_transform_close(m_transform);
+    m_transform = cql_transform_open_fname(fname);
+    return m_transform ? true : false;
 }
 
 int Yaz_cql2rpn::query_transform(const char *cql_query, 
