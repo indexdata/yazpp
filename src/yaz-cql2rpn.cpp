@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-cql2rpn.cpp,v 1.12 2007-01-12 10:15:06 adam Exp $
+ * $Id: yaz-cql2rpn.cpp,v 1.13 2007-01-16 11:54:55 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -66,8 +66,6 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
                 size_t off;
                 const char *pqf_msg;
                 int code = yaz_pqf_error(pp, &pqf_msg, &off);
-                yaz_log(YLOG_WARN, "PQF Parser Error %s (code %d)",
-                        pqf_msg, code);
                 r = -1;
             }
             yaz_pqf_destroy(pp);
@@ -75,8 +73,6 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
         else
         {
             r = cql_transform_error(m_transform, &addinfo);
-            yaz_log(YLOG_LOG, "CQL Transform Error %d %s", r,
-                    addinfo ? addinfo : "");
         }
     }   
     cql_parser_destroy(cp);
