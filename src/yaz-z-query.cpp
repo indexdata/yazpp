@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 1998-2005, Index Data.
+ * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.20 2006-06-19 13:12:07 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.21 2007-03-20 07:54:11 adam Exp $
  */
 
-#include <yaz/logrpn.h>
+#include <yaz/querytowrbuf.h>
 #include <yazpp/z-query.h>
 #include <yaz/pquery.h>
 #include <assert.h>
@@ -101,7 +101,7 @@ Z_Query *Yaz_Z_Query::get_Z_Query()
     return query;
 }
 
-void Yaz_Z_Query::print(char *str, int len)
+void Yaz_Z_Query::print(char *str, size_t len)
 {
     Z_Query *query;
     *str = 0;
@@ -110,18 +110,16 @@ void Yaz_Z_Query::print(char *str, int len)
     odr_setbuf(odr_decode, m_buf, m_len, 0);
     if (!z_Query(odr_decode, &query, 0, 0))
         return;
-    WRBUF wbuf = zquery2pquery(query);
-    if (wbuf)
+    WRBUF wbuf = wrbuf_alloc();
+    yaz_query_to_wrbuf(wbuf, query);
+    if (wrbuf_len(wbuf) > len-1)
     {
-        if (wrbuf_len(wbuf) > len-1)
-        {
-            memcpy(str, wrbuf_buf(wbuf), len-1);
-            str[len-1] = '\0';
-        }
-        else
-            strcpy(str, wrbuf_buf(wbuf));
-        wrbuf_free(wbuf,1);
+        memcpy(str, wrbuf_buf(wbuf), len-1);
+        str[len-1] = '\0';
     }
+    else
+        strcpy(str, wrbuf_cstr(wbuf));
+    wrbuf_destroy(wbuf);
     odr_reset(odr_decode);
 }
 
@@ -134,13 +132,6 @@ int Yaz_Z_Query::match(const Yaz_Z_Query *other)
     if (memcmp(m_buf, other->m_buf, m_len))
         return 0;
     return 1;
-}
-
-WRBUF Yaz_Z_Query::zquery2pquery(Z_Query *q)
-{
-    WRBUF w = wrbuf_alloc();
-    wrbuf_put_zquery(w, q);
-    return w;
 }
 
 /*

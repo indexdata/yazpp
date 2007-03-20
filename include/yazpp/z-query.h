@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-query.h,v 1.2 2006-06-19 13:12:06 adam Exp $
+ * $Id: z-query.h,v 1.3 2007-03-20 07:54:11 adam Exp $
  */
 
 #ifndef YAZPP_Z_QUERY_INCLUDED
@@ -30,7 +30,7 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     /// Get Z Query
     Z_Query *get_Z_Query ();
     /// print query
-    void print(char *str, int len);
+    void print(char *str, size_t len);
     /// match query
     int match(const Yaz_Z_Query *other);
     /// Copy
@@ -43,7 +43,6 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     ODR odr_decode;
     ODR odr_encode;
     ODR odr_print;
-    WRBUF zquery2pquery(Z_Query *q);
 };
 };
 #endif

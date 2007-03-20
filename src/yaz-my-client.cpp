@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.24 2006-10-10 13:31:49 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.25 2007-03-20 07:54:11 adam Exp $
  */
 
 #include <stdlib.h>
@@ -327,6 +327,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
     }
     if (r->which == Z_External_octet && record->u.octet_aligned->len)
     {
+        yaz_marc_t mt = yaz_marc_create();
         switch (ent->value)
         {
         case VAL_ISO2709:
@@ -351,13 +352,20 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
         case VAL_SIGLEMARC:
         case VAL_ISDSMARC:
         case VAL_RUSMARC:
-            marc_display((char*) record->u.octet_aligned->buf,0);
+            const char *result_buf;
+            size_t result_size;
+            yaz_marc_decode_buf(mt, (const char *)
+                                record->u.octet_aligned->buf,
+                                record->u.octet_aligned->len,
+                                &result_buf, &result_size);
+            fwrite(result_buf, 1, result_size, stdout);
             break;
         default:
             recv_textRecord((int) ent->value,
                             (const char *) record->u.octet_aligned->buf,
                             (size_t) record->u.octet_aligned->len);
         }
+        yaz_marc_destroy(mt);
     }
     else if (ent && ent->value == VAL_SUTRS && r->which == Z_External_sutrs)
         recv_textRecord((int) VAL_SUTRS, (const char *) r->u.sutrs->buf,
