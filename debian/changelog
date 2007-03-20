@@ -1,14 +1,6 @@
-yazpp (1.0.2-1) unstable; urgency=low
+yazpp (1.0.3-1) unstable; urgency=low
 
-  * Upstream
+  * Upstream ; libyazpp2.
 
- -- Marc Cromme <marc@indexdata.dk>  Mon, 29 Jan 2007 14:25:56 +0100
-
-yazpp (1.0.0-1) unstable; urgency=low
-
-  * Removed docbook depends. Not needed becuase they're part of dist.
-  * Upstream
-  * Renaming from package name yaz++ to yazpp
-
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon,  1 May 2006 10:21:55 +0200
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 20 Mar 2007 09:03:53 +0100
 

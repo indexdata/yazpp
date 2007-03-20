@@ -1,6 +1,14 @@
+
+--- 1.0.3 in progress
+
+Debian libyazpp2 package; depending on libyaz3.
+
 Change wording of YAZ++ license to the 'Revised BSD License'.
 
-Added assignment operator for class Yaz_Z_Query.
+Added assignment operator for class Yaz_Z_Query. This could break
+binary layout.
+
+Branch out: YAZPP_1_0_2_branch.
 
 --- 1.0.0 2006/05/01
 

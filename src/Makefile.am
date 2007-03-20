@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.32 2006-04-20 11:26:34 adam Exp $
+## $Id: Makefile.am,v 1.33 2007-03-20 16:21:58 adam Exp $
 
 check_PROGRAMS = tstquery
 noinst_PROGRAMS = yaz-my-server yaz-my-client
@@ -9,7 +9,7 @@ TESTS = $(check_PROGRAMS)
 AM_CXXFLAGS = -I$(srcdir)/../include $(YAZINC)
 
 lib_LTLIBRARIES = libyazpp.la
-libyazpp_la_LDFLAGS=-version-info 1:0:0
+libyazpp_la_LDFLAGS=-version-info 2:0:0
 
 DISTCLEANFILES = yazpp-config
 
