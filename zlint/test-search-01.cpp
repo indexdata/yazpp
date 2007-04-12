@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2004, Index Data.
+ * Copyright (c) 2004-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: test-search-01.cpp,v 1.6 2005-08-11 18:53:01 adam Exp $
+ * $Id: test-search-01.cpp,v 1.7 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -10,6 +10,7 @@
 #include <yaz/sortspec.h>
 
 #include <zlint.h>
+#include <yaz/oid_db.h>
 
 static const char *try_query[] = {
     "@attr 1=4 petersson",
@@ -131,8 +132,9 @@ Zlint_code Zlint_test_search_01::sendTest(Zlint *z)
 
         z->msg_check_for("record syntax %s", try_syntax[m_record_syntax_no]);
         pr->preferredRecordSyntax =
-            yaz_str_to_z3950oid(z->odr_encode(), CLASS_RECSYN,
-                                try_syntax[m_record_syntax_no]);
+            yaz_string_to_oid_odr(yaz_oid_std(),
+                                  CLASS_RECSYN, try_syntax[m_record_syntax_no],
+                                  z->odr_encode());
         z->send_Z_PDU(apdu, &len);
         return TEST_CONTINUE;
     }
@@ -221,8 +223,9 @@ Zlint_code Zlint_test_search_01::recv_gdu(Zlint *z, Z_GDU *gdu)
             {
                 Z_External *ext = sr->records->u.databaseOrSurDiagnostics->records[0]->u.databaseRecord;
                 Odr_oid *expectRecordSyntax =
-                    yaz_str_to_z3950oid(z->odr_decode(), CLASS_RECSYN,
-                                        try_syntax[m_record_syntax_no]);
+                    yaz_string_to_oid_odr(
+                        yaz_oid_std(), CLASS_RECSYN,
+                        try_syntax[m_record_syntax_no], z->odr_decode());
                 if (oid_oidcmp(expectRecordSyntax,
                                ext->direct_reference))
                 {

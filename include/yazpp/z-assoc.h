@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-assoc.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: z-assoc.h,v 1.2 2007-04-12 15:00:33 adam Exp $
  */
 
 #ifndef YAZ_Z_ASSOC_INCLUDED
@@ -63,18 +63,18 @@ class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
     void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
     Z_OtherInformationUnit *update_otherInformation (
         Z_OtherInformation **otherInformationP, int createFlag,
-        int *oid, int categoryValue, int deleteFlag);
+        const int *oid, int categoryValue, int deleteFlag);
     void set_otherInformationString (
         Z_OtherInformation **otherInformationP,
-        int *oid, int categoryValue,
+        const int *oid, int categoryValue,
         const char *str);
     void set_otherInformationString (
         Z_OtherInformation **otherInformation,
-        int oidval, int categoryValue,
+        const char *oidname, int categoryValue,
         const char *str);
     void set_otherInformationString (
         Z_APDU *apdu,
-        int oidval, int categoryValue,
+        const char *oidval, int categoryValue,
         const char *str);
 
     Z_ReferenceId *getRefID(char* str);

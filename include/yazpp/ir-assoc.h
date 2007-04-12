@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: ir-assoc.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: ir-assoc.h,v 1.2 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <yazpp/z-assoc.h>
@@ -74,7 +74,7 @@ class YAZ_EXPORT IR_Assoc: public Z_Assoc {
     char *m_cookie;
     int m_num_databaseNames;
     char **m_databaseNames;
-    int m_preferredRecordSyntax;
+    char *m_preferredRecordSyntax;
     Z_ElementSetNames *m_elementSetNames;
     int m_lastReceived;
     int m_log;

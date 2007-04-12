@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2004, Index Data.
+ * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.26 2007-04-10 12:14:04 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.27 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <stdlib.h>
@@ -13,6 +13,7 @@
 #include <yazpp/ir-assoc.h>
 #include <yazpp/pdu-assoc.h>
 #include <yazpp/socket-manager.h>
+#include <yaz/oid_db.h>
 
 extern "C" {
 #if HAVE_READLINE_READLINE_H
@@ -48,10 +49,8 @@ public:
     void recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset);
     void recv_record(Z_DatabaseRecord *record, int offset,
                      const char *databaseName);
-    void recv_textRecord(int type, const char *buf, size_t len);
+    void recv_textRecord(const char *buf, size_t len);
     void recv_genericRecord(Z_GenericRecord *r);
-    void display_genericRecord(Z_GenericRecord *r, int level);
-    void display_variant(Z_Variant *v, int level);
     void connectNotify();
     void failNotify();
     void timeoutNotify();
@@ -114,14 +113,12 @@ void usage(char *prog)
 
 char *MyClient::get_cookie(Z_OtherInformation **otherInfo)
 {
-    int oid[OID_SIZE];
     Z_OtherInformationUnit *oi;
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_USERINFO;
-    ent.value = (oid_value) VAL_COOKIE;
 
-    if (oid_ent_to_oid (&ent, oid) && 
+    const int *oid = 
+        yaz_string_to_oid(yaz_oid_std(), CLASS_USERINFO, OID_STR_COOKIE);
+
+    if (oid && 
         (oi = update_otherInformation(otherInfo, 0, oid, 1, 1)) &&
         oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
@@ -149,7 +146,6 @@ void MyClient::recv_initResponse(Z_InitResponse *initResponse)
 void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
 {
     int i;
-    oident *ent;
     Z_DefaultDiagFormat *r;
 
     printf("Diagnostic message(s) from database:\n");
@@ -163,11 +159,7 @@ void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
         }
         else
             r = p->u.defaultFormat;
-        if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
-            ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
-            printf("Missing or unknown diagset\n");
-        printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
-#ifdef ASN_COMPILED
+             printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
@@ -177,152 +169,43 @@ void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
             printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
             break;
         }
-#else
-        if (r->addinfo && *r->addinfo)
-            printf(" -- '%s'\n", r->addinfo);
-        else
-            printf("\n");
-#endif
     }
 }
 
-void MyClient::recv_textRecord(int type, const char *buf, size_t len)
+void MyClient::recv_textRecord(const char *buf, size_t len)
 {
     fwrite (buf, 1, len, stdout);
     fputc ('\n', stdout);
 }
 
-void MyClient::display_variant(Z_Variant *v, int level)
-{
-    int i;
-
-    for (i = 0; i < v->num_triples; i++)
-    {
-        printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
-            *v->triples[i]->type);
-        if (v->triples[i]->which == Z_Triple_internationalString)
-            printf(",value=%s\n", v->triples[i]->value.internationalString);
-        else
-            printf("\n");
-    }
-}
-
-void MyClient::display_genericRecord(Z_GenericRecord *r, int level)
-{
-    int i;
-
-    if (!r)
-        return;
-    for (i = 0; i < r->num_elements; i++)
-    {
-        Z_TaggedElement *t;
-
-        printf("%*s", level * 4, "");
-        t = r->elements[i];
-        printf("(");
-        if (t->tagType)
-            printf("%d,", *t->tagType);
-        else
-            printf("?,");
-        if (t->tagValue->which == Z_StringOrNumeric_numeric)
-            printf("%d) ", *t->tagValue->u.numeric);
-        else
-            printf("%s) ", t->tagValue->u.string);
-        if (t->content->which == Z_ElementData_subtree)
-        {
-            printf("\n");
-            display_genericRecord(t->content->u.subtree, level+1);
-        }
-        else if (t->content->which == Z_ElementData_string)
-            printf("%s\n", t->content->u.string);
-        else if (t->content->which == Z_ElementData_numeric)
-            printf("%d\n", *t->content->u.numeric);
-        else if (t->content->which == Z_ElementData_oid)
-        {
-            int *ip = t->content->u.oid;
-            oident *oent;
-
-            if ((oent = oid_getentbyoid(t->content->u.oid)))
-                printf("OID: %s\n", oent->desc);
-            else
-            {
-                printf("{");
-                while (ip && *ip >= 0)
-                    printf(" %d", *(ip++));
-                printf(" }\n");
-            }
-        }
-        else if (t->content->which == Z_ElementData_noDataRequested)
-            printf("[No data requested]\n");
-        else if (t->content->which == Z_ElementData_elementEmpty)
-            printf("[Element empty]\n");
-        else if (t->content->which == Z_ElementData_elementNotThere)
-            printf("[Element not there]\n");
-        else
-            printf("??????\n");
-        if (t->appliedVariant)
-            display_variant(t->appliedVariant, level+1);
-        if (t->metaData && t->metaData->supportedVariants)
-        {
-            int c;
-
-            printf("%*s---- variant list\n", (level+1)*4, "");
-            for (c = 0; c < t->metaData->num_supportedVariants; c++)
-            {
-                printf("%*svariant #%d\n", (level+1)*4, "", c);
-                display_variant(t->metaData->supportedVariants[c], level + 2);
-            }
-        }
-    }
-}
-
 void MyClient::recv_genericRecord(Z_GenericRecord *r)
 {
-    display_genericRecord(r, 0);
+    WRBUF w = wrbuf_alloc();
+    yaz_display_grs1(w, r, 0);
+    fwrite(wrbuf_buf(w), 1, wrbuf_len(w), stdout);
+    wrbuf_destroy(w);
 }
 
 void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
                            const char *databaseName)
 {
     Z_External *r = (Z_External*) record;
-    oident *ent = oid_getentbyoid(r->direct_reference);
-
     /*
      * Tell the user what we got.
      */
     if (r->direct_reference)
     {
-        printf("Record type: ");
-        if (ent)
-            printf("%s\n", ent->desc);
+        char name_oid_str[OID_STR_MAX];
+        const char *name_oid = yaz_oid_to_string_buf(r->direct_reference, 0, 
+                                                     name_oid_str);
+        printf("Record type: %s\n", name_oid ? name_oid : "unknown");
     }
     if (r->which == Z_External_octet && record->u.octet_aligned->len)
     {
-        yaz_marc_t mt = yaz_marc_create();
-        switch (ent->value)
+        if (yaz_oid_is_iso2709(r->direct_reference))
         {
-        case VAL_ISO2709:
-        case VAL_UNIMARC:
-        case VAL_INTERMARC:
-        case VAL_USMARC:
-        case VAL_UKMARC:
-        case VAL_NORMARC:
-        case VAL_LIBRISMARC:
-        case VAL_DANMARC:
-        case VAL_FINMARC:
-        case VAL_MAB:
-        case VAL_CANMARC:
-        case VAL_SBN:
-        case VAL_PICAMARC:
-        case VAL_AUSMARC:
-        case VAL_IBERMARC:
-        case VAL_CATMARC:
-        case VAL_MALMARC:
-        case VAL_JPMARC:
-        case VAL_SWEMARC:
-        case VAL_SIGLEMARC:
-        case VAL_ISDSMARC:
-        case VAL_RUSMARC:
+            yaz_marc_t mt = yaz_marc_create();
+
             const char *result_buf;
             size_t result_size;
             yaz_marc_decode_buf(mt, (const char *)
@@ -330,18 +213,18 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
                                 record->u.octet_aligned->len,
                                 &result_buf, &result_size);
             fwrite(result_buf, 1, result_size, stdout);
-            break;
-        default:
-            recv_textRecord((int) ent->value,
-                            (const char *) record->u.octet_aligned->buf,
+            yaz_marc_destroy(mt);
+        }
+        else
+        {
+            recv_textRecord((const char *) record->u.octet_aligned->buf,
                             (size_t) record->u.octet_aligned->len);
         }
-        yaz_marc_destroy(mt);
     }
-    else if (ent && ent->value == VAL_SUTRS && r->which == Z_External_sutrs)
-        recv_textRecord((int) VAL_SUTRS, (const char *) r->u.sutrs->buf,
+    else if (r->which == Z_External_sutrs)
+        recv_textRecord((const char *) r->u.sutrs->buf,
                         (size_t) r->u.sutrs->len);
-    else if (ent && ent->value == VAL_GRS1 && r->which == Z_External_grs1)
+    else if (r->which == Z_External_grs1)
         recv_genericRecord(r->u.grs1);
     else 
     {
@@ -366,9 +249,7 @@ void MyClient::recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset)
 
 void MyClient::recv_records (Z_Records *records)
 {
-#ifdef ASN_COMPILED
     Z_DiagRec dr, *dr_p = &dr;
-#endif
     if (!records)
         return;
     int i;
@@ -381,13 +262,9 @@ void MyClient::recv_records (Z_Records *records)
         m_setOffset += records->u.databaseOrSurDiagnostics->num_records;
         break;
     case Z_Records_NSD:
-#ifdef ASN_COMPILED
         dr.which = Z_DiagRec_defaultFormat;
         dr.u.defaultFormat = records->u.nonSurrogateDiagnostic;
         recv_diagrecs (&dr_p, 1);
-#else
-        recv_diagrecs (&records->u.nonSurrogateDiagnostic, 1);
-#endif
         break;
     case Z_Records_multipleNSD:
         recv_diagrecs (records->u.multipleNonSurDiagnostics->diagRecs,

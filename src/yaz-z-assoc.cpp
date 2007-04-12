@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2004, Index Data.
+ * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.40 2006-10-10 13:31:49 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.41 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <assert.h>
@@ -11,6 +11,7 @@
 #include <yaz/log.h>
 #include <yazpp/z-assoc.h>
 #include <yaz/otherinfo.h>
+#include <yaz/oid_db.h>
 
 using namespace yazpp_1;
 
@@ -375,34 +376,31 @@ void Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 
 void Z_Assoc::set_otherInformationString (
     Z_APDU *apdu,
-    int oidval, int categoryValue,
+    const char *oidname, int categoryValue,
     const char *str)
 {
     Z_OtherInformation **otherInformation;
     get_otherInfoAPDU(apdu, &otherInformation);
     if (!otherInformation)
         return;
-    set_otherInformationString(otherInformation, oidval, categoryValue, str);
+    set_otherInformationString(otherInformation, oidname, categoryValue, str);
 }
 
 void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
-    int oidval, int categoryValue,
+    const char *oidname, int categoryValue,
     const char *str)
 {
-    int oid[OID_SIZE];
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_USERINFO;
-    ent.value = (oid_value) oidval;
-    if (!oid_ent_to_oid (&ent, oid))
+    int *oid = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_USERINFO, oidname,
+                                     odr_encode());
+    if (!oid)
         return ;
     set_otherInformationString(otherInformation, oid, categoryValue, str);
 }
 
 void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
-    int *oid, int categoryValue, const char *str)
+    const int *oid, int categoryValue, const char *str)
 {
     Z_OtherInformationUnit *oi =
         update_otherInformation(otherInformation, 1, oid, categoryValue, 0);
@@ -413,7 +411,7 @@ void Z_Assoc::set_otherInformationString (
 
 Z_OtherInformationUnit *Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
-    int *oid, int categoryValue, int deleteFlag)
+    const int *oid, int categoryValue, int deleteFlag)
 {
     return yaz_oi_update (otherInformationP,
                           (createFlag ? odr_encode() : 0),

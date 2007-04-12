@@ -1,6 +1,6 @@
-dnl YAZ++ Toolkit, Index Data 1994-2006
+dnl YAZ++ Toolkit, Index Data 1994-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.15 2007-03-20 16:21:58 adam Exp $
+dnl $Id: configure.ac,v 1.16 2007-04-12 15:00:33 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yazpp],[1.0.3],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -13,7 +13,7 @@ AC_PROG_CXX
 AC_HEADER_STDC
 AM_PROG_LIBTOOL
 
-YAZ_INIT(threads,2.1.50)
+YAZ_INIT(threads,2.1.99)
 if test -z "$YAZLIB"; then
 	AC_MSG_ERROR([YAZ development libraries missing])
 fi

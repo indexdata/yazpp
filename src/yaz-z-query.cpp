@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-query.cpp,v 1.21 2007-03-20 07:54:11 adam Exp $
+ * $Id: yaz-z-query.cpp,v 1.22 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <yaz/querytowrbuf.h>
@@ -63,7 +63,7 @@ int Yaz_Z_Query::set_rpn(const char *rpn)
     odr_reset(odr_encode);
     Z_Query *query = (Z_Query*) odr_malloc(odr_encode, sizeof(*query));
     query->which = Z_Query_type_1;
-    query->u.type_1 = p_query_rpn(odr_encode, PROTO_Z3950, rpn);
+    query->u.type_1 = p_query_rpn(odr_encode, rpn);
     if (!query->u.type_1)
         return -1;
     if (!z_Query(odr_encode, &query, 0, 0))

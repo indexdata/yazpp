@@ -2,13 +2,14 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.27 2006-03-29 13:14:15 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.28 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <assert.h>
 
 #include <yaz/log.h>
 #include <yazpp/ir-assoc.h>
+#include <yaz/oid_db.h>
 
 using namespace yazpp_1;
 
@@ -17,7 +18,7 @@ IR_Assoc::IR_Assoc(IPDU_Observable *the_PDU_Observable)
 {
     m_num_databaseNames = 0;
     m_databaseNames = 0;
-    m_preferredRecordSyntax = VAL_NONE;
+    m_preferredRecordSyntax = 0;
     m_elementSetNames = 0;
     m_lastReceived = 0;
     m_host = 0;
@@ -30,6 +31,7 @@ IR_Assoc::IR_Assoc(IPDU_Observable *the_PDU_Observable)
 
 IR_Assoc::~IR_Assoc()
 {
+    xfree(m_preferredRecordSyntax);
     if (m_elementSetNames)
         delete [] m_elementSetNames->u.generic;
     delete [] m_elementSetNames;
@@ -89,35 +91,20 @@ void IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
     delete [] list;
 }
 
-void IR_Assoc::set_preferredRecordSyntax (int value)
-{
-    m_preferredRecordSyntax = value;
-}
-
 void IR_Assoc::set_preferredRecordSyntax (const char *syntax)
 {
-    m_preferredRecordSyntax = VAL_NONE;
+    xfree(m_preferredRecordSyntax);
+    m_preferredRecordSyntax = 0;    
     if (syntax && *syntax)
-        m_preferredRecordSyntax = oid_getvalbyname (syntax);
-}
-
-void IR_Assoc::get_preferredRecordSyntax (int *value)
-{
-    *value = m_preferredRecordSyntax;
+        m_preferredRecordSyntax = xstrdup(syntax);
 }
 
 void IR_Assoc::get_preferredRecordSyntax (const char **dst)
 {
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_RECSYN;
-    ent.value = (enum oid_value) m_preferredRecordSyntax;
-
-    int oid[OID_SIZE];
-    oid_ent_to_oid (&ent, oid);
-    struct oident *entp = oid_getentbyoid (oid);
-    
-    *dst = entp ? entp->desc : "";
+    if (m_preferredRecordSyntax)
+        *dst = m_preferredRecordSyntax;
+    else
+        *dst = "";
 }
 
 void IR_Assoc::set_elementSetName (const char *elementSetName)
@@ -201,28 +188,24 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
-    int recordSyntax;
 
     req->query = query->get_Z_Query();
     if (!req->query)
         return -1;
     get_databaseNames (&req->num_databaseNames, &req->databaseNames);
-    int oid_syntax[OID_SIZE];
-    oident prefsyn;
+    const char *recordSyntax;
     get_preferredRecordSyntax(&recordSyntax);
-    if (recordSyntax != VAL_NONE)
+    if (recordSyntax && *recordSyntax)
     {
-        prefsyn.proto = PROTO_Z3950;
-        prefsyn.oclass = CLASS_RECSYN;
-        prefsyn.value = (enum oid_value) recordSyntax;
-        oid_ent_to_oid(&prefsyn, oid_syntax);
-        req->preferredRecordSyntax = oid_syntax;
+        req->preferredRecordSyntax
+            = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, recordSyntax,
+                                    odr_encode());
     }
     yaz_log (m_log, "send_searchRequest");
     assert (req->otherInfo == 0);
     if (m_cookie)
     {
-        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
         assert (req->otherInfo);
     }
 
@@ -250,17 +233,13 @@ int IR_Assoc::send_presentRequest(int start,
     req->resultSetStartPoint = &start;
     req->numberOfRecordsRequested = &number;
 
-    int oid_syntax[OID_SIZE];
-    oident prefsyn;
-    int recordSyntax;
+    const char *recordSyntax;
     get_preferredRecordSyntax (&recordSyntax);
-    if (recordSyntax != VAL_NONE)
+    if (recordSyntax && *recordSyntax)
     {
-        prefsyn.proto = PROTO_Z3950;
-        prefsyn.oclass = CLASS_RECSYN;
-        prefsyn.value = (enum oid_value) recordSyntax;
-        oid_ent_to_oid(&prefsyn, oid_syntax);
-        req->preferredRecordSyntax = oid_syntax;
+        req->preferredRecordSyntax =
+            yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, recordSyntax,
+                                  odr_encode());
     }
     Z_RecordComposition compo;
     Z_ElementSetNames *elementSetNames;
@@ -273,7 +252,8 @@ int IR_Assoc::send_presentRequest(int start,
     }
 
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 
+                                   1, m_cookie);
 
     if ( pRefId )
     {
@@ -404,9 +384,9 @@ int IR_Assoc::send_initRequest(char* pRefId)
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+        set_otherInformationString(&req->otherInfo, OID_STR_PROXY, 1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
     return send_Z_PDU(apdu, 0);
 }
 
@@ -435,9 +415,9 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, VAL_PROXY, 1, m_host);
+        set_otherInformationString(&req->otherInfo, OID_STR_PROXY, 1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, VAL_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
 
     return send_Z_PDU(apdu, 0);
 }
