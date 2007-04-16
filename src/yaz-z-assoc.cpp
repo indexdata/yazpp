@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.41 2007-04-12 15:00:33 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.42 2007-04-16 21:54:23 adam Exp $
  */
 
 #include <assert.h>
@@ -374,29 +374,17 @@ void Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     }
 }
 
-void Z_Assoc::set_otherInformationString (
+void Z_Assoc::set_otherInformationString(
     Z_APDU *apdu,
-    const char *oidname, int categoryValue,
-    const char *str)
+    const int *oid, int categoryValue, const char *str)
 {
     Z_OtherInformation **otherInformation;
     get_otherInfoAPDU(apdu, &otherInformation);
     if (!otherInformation)
         return;
-    set_otherInformationString(otherInformation, oidname, categoryValue, str);
-}
-
-void Z_Assoc::set_otherInformationString (
-    Z_OtherInformation **otherInformation,
-    const char *oidname, int categoryValue,
-    const char *str)
-{
-    int *oid = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_USERINFO, oidname,
-                                     odr_encode());
-    if (!oid)
-        return ;
     set_otherInformationString(otherInformation, oid, categoryValue, str);
 }
+
 
 void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,

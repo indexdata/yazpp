@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2003, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-ir-assoc.cpp,v 1.28 2007-04-12 15:00:33 adam Exp $
+ * $Id: yaz-ir-assoc.cpp,v 1.29 2007-04-16 21:54:23 adam Exp $
  */
 
 #include <assert.h>
@@ -205,7 +205,8 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
     assert (req->otherInfo == 0);
     if (m_cookie)
     {
-        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+                                   1, m_cookie);
         assert (req->otherInfo);
     }
 
@@ -252,7 +253,7 @@ int IR_Assoc::send_presentRequest(int start,
     }
 
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
                                    1, m_cookie);
 
     if ( pRefId )
@@ -384,9 +385,11 @@ int IR_Assoc::send_initRequest(char* pRefId)
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, OID_STR_PROXY, 1, m_host);
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy, 
+                                   1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+                                   1, m_cookie);
     return send_Z_PDU(apdu, 0);
 }
 
@@ -415,9 +418,11 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, OID_STR_PROXY, 1, m_host);
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy, 
+                                   1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, OID_STR_COOKIE, 1, m_cookie);
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+                                   1, m_cookie);
 
     return send_Z_PDU(apdu, 0);
 }

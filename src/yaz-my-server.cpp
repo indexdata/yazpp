@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.21 2007-04-12 15:00:33 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.22 2007-04-16 21:54:23 adam Exp $
  */
 
 #include <stdlib.h>
@@ -133,7 +133,7 @@ void MyRetrieval::sr_record (const char *resultSetName,
     const char *rec = get_record(position);
     if (rec)
         create_databaseRecord(odr_encode(), namePlusRecord, 0,
-                              OID_STR_USMARC, rec, strlen(rec));
+                              yaz_oid_recsyn_usmarc, rec, strlen(rec));
     else
         create_surrogateDiagnostics(odr_encode(), namePlusRecord, 0,
                                     YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);

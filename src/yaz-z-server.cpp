@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.25 2007-04-12 15:00:33 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.26 2007-04-16 21:54:23 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -113,11 +113,10 @@ void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
  * database record.
  */
 void Z_ServerUtility::create_databaseRecord (
-    ODR odr, Z_NamePlusRecord *rec, const char *dbname, const char *format,
+    ODR odr, Z_NamePlusRecord *rec, const char *dbname, const int *format,
     const void *buf, int len)
 {
-    int *oid = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, format,
-                                     odr);
+    int *oid = odr_oiddup(odr, format);
     rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
     rec->which = Z_NamePlusRecord_databaseRecord;
     rec->u.databaseRecord = z_ext_record_oid(odr, oid,
@@ -143,8 +142,7 @@ void Z_ServerUtility::create_surrogateDiagnostics(
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-    dr->diagnosticSetId =
-        yaz_string_to_oid_odr(yaz_oid_std(), CLASS_DIAGSET, OID_STR_BIB1, odr);
+    dr->diagnosticSetId = odr_oiddup(odr, yaz_oid_diagset_bib_1);
 
     dr->condition = err;
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
@@ -166,8 +164,7 @@ Z_Records *Z_ServerUtility::create_nonSurrogateDiagnostics (
     *err = error;
     rec->which = Z_Records_NSD;
     rec->u.nonSurrogateDiagnostic = dr;
-    dr->diagnosticSetId =
-        yaz_string_to_oid_odr(yaz_oid_std(), CLASS_DIAGSET, OID_STR_BIB1, odr);
+    dr->diagnosticSetId = odr_oiddup(odr, yaz_oid_diagset_bib_1);
 
     dr->condition = err;
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
@@ -189,8 +186,7 @@ void Z_ServerUtility::create_diagnostics (
         
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-    dr->diagnosticSetId =
-        yaz_string_to_oid_odr(yaz_oid_std(), CLASS_DIAGSET, OID_STR_BIB1, odr);
+    dr->diagnosticSetId = odr_oiddup(odr, yaz_oid_diagset_bib_1);
     dr->condition = odr_intdup (odr, error);
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");

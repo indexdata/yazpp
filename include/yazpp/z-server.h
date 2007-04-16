@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.2 2007-04-12 15:00:33 adam Exp $
+ * $Id: z-server.h,v 1.3 2007-04-16 21:54:23 adam Exp $
  */
 
 #include <yazpp/z-assoc.h>
@@ -14,7 +14,7 @@ class Z_Server;
 class YAZ_EXPORT Z_ServerUtility {
  public:
     void create_databaseRecord (ODR odr, Z_NamePlusRecord *rec,
-                                const char *dbname, const char *format,
+                                const char *dbname, const int *format,
                                 const void *buf, int len);
     void create_surrogateDiagnostics(ODR odr, Z_NamePlusRecord *rec,
                                      const char *dbname, int error,
