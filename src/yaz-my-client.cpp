@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-client.cpp,v 1.28 2007-04-16 21:54:23 adam Exp $
+ * $Id: yaz-my-client.cpp,v 1.29 2007-05-02 09:17:48 adam Exp $
  */
 
 #include <stdlib.h>
@@ -116,7 +116,7 @@ char *MyClient::get_cookie(Z_OtherInformation **otherInfo)
     Z_OtherInformationUnit *oi =
         update_otherInformation(otherInfo, 0, yaz_oid_userinfo_cookie, 1, 1);
 
-    if (oi->which == Z_OtherInfo_characterInfo)
+    if (oi && oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
     return 0;
 }
