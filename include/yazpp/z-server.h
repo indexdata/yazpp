@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: z-server.h,v 1.3 2007-04-16 21:54:23 adam Exp $
+ * $Id: z-server.h,v 1.4 2007-05-08 12:04:50 adam Exp $
  */
 
 #include <yazpp/z-assoc.h>
@@ -14,7 +14,7 @@ class Z_Server;
 class YAZ_EXPORT Z_ServerUtility {
  public:
     void create_databaseRecord (ODR odr, Z_NamePlusRecord *rec,
-                                const char *dbname, const int *format,
+                                const char *dbname, const Odr_oid *format,
                                 const void *buf, int len);
     void create_surrogateDiagnostics(ODR odr, Z_NamePlusRecord *rec,
                                      const char *dbname, int error,
@@ -81,10 +81,10 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IServer_Facility,
                              Z_PresentResponse *presentResponse) = 0;
     virtual void sr_record (const char *resultSetName,
                             int position,
-                            int *format,
-                                Z_RecordComposition *comp,
-                                Z_NamePlusRecord *namePlusRecord,
-                                Z_Records *diagnostics) = 0;
+                            Odr_oid *format,
+                            Z_RecordComposition *comp,
+                            Z_NamePlusRecord *namePlusRecord,
+                            Z_Records *diagnostics) = 0;
     int init(Z_Server *server,
              Z_InitRequest *initRequest,
              Z_InitResponse *initResponse);
@@ -98,7 +98,7 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IServer_Facility,
                              int start, int num,
                              Z_RecordComposition *comp,
                              int *next, int *pres,
-                             int *oid);
+                             Odr_oid *oid);
 
     void fetch_via_piggyback (Z_Server *s,
                               Z_SearchRequest *searchRequest,

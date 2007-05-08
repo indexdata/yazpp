@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server.cpp,v 1.26 2007-04-16 21:54:23 adam Exp $
+ * $Id: yaz-z-server.cpp,v 1.27 2007-05-08 12:04:50 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -113,10 +113,10 @@ void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
  * database record.
  */
 void Z_ServerUtility::create_databaseRecord (
-    ODR odr, Z_NamePlusRecord *rec, const char *dbname, const int *format,
+    ODR odr, Z_NamePlusRecord *rec, const char *dbname, const Odr_oid *format,
     const void *buf, int len)
 {
-    int *oid = odr_oiddup(odr, format);
+    Odr_oid *oid = odr_oiddup(odr, format);
     rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
     rec->which = Z_NamePlusRecord_databaseRecord;
     rec->u.databaseRecord = z_ext_record_oid(odr, oid,

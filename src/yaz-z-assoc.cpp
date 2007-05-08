@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.42 2007-04-16 21:54:23 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.43 2007-05-08 12:04:50 adam Exp $
  */
 
 #include <assert.h>
@@ -376,7 +376,7 @@ void Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 
 void Z_Assoc::set_otherInformationString(
     Z_APDU *apdu,
-    const int *oid, int categoryValue, const char *str)
+    const Odr_oid *oid, int categoryValue, const char *str)
 {
     Z_OtherInformation **otherInformation;
     get_otherInfoAPDU(apdu, &otherInformation);
@@ -388,7 +388,7 @@ void Z_Assoc::set_otherInformationString(
 
 void Z_Assoc::set_otherInformationString (
     Z_OtherInformation **otherInformation,
-    const int *oid, int categoryValue, const char *str)
+    const Odr_oid *oid, int categoryValue, const char *str)
 {
     Z_OtherInformationUnit *oi =
         update_otherInformation(otherInformation, 1, oid, categoryValue, 0);
@@ -399,7 +399,7 @@ void Z_Assoc::set_otherInformationString (
 
 Z_OtherInformationUnit *Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
-    const int *oid, int categoryValue, int deleteFlag)
+    const Odr_oid *oid, int categoryValue, int deleteFlag)
 {
     return yaz_oi_update (otherInformationP,
                           (createFlag ? odr_encode() : 0),

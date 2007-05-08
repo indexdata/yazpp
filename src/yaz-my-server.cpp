@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2001, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-my-server.cpp,v 1.22 2007-04-16 21:54:23 adam Exp $
+ * $Id: yaz-my-server.cpp,v 1.23 2007-05-08 12:04:50 adam Exp $
  */
 
 #include <stdlib.h>
@@ -44,7 +44,7 @@ public:
                          Z_PresentResponse *presentResponse);
     void sr_record (const char *resultSetName,
                     int position,
-                    int *format,
+                    Odr_oid *format,
                     Z_RecordComposition *comp,
                     Z_NamePlusRecord *namePlusRecord,
                     Z_Records *records);
@@ -124,7 +124,7 @@ void MyRetrieval::sr_present (Z_PresentRequest *presentRequest,
 
 void MyRetrieval::sr_record (const char *resultSetName,
                              int position,
-                             int *format,
+                             Odr_oid *format,
                              Z_RecordComposition *comp,
                              Z_NamePlusRecord *namePlusRecord,
                              Z_Records *records)

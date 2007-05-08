@@ -1,6 +1,6 @@
 dnl YAZ++ Toolkit, Index Data 1994-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.16 2007-04-12 15:00:33 adam Exp $
+dnl $Id: configure.ac,v 1.17 2007-05-08 12:04:50 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yazpp],[1.0.3],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -13,12 +13,12 @@ AC_PROG_CXX
 AC_HEADER_STDC
 AM_PROG_LIBTOOL
 
-YAZ_INIT(threads,2.1.99)
+YAZ_INIT([threads],[3.0.2])
 if test -z "$YAZLIB"; then
 	AC_MSG_ERROR([YAZ development libraries missing])
 fi
 YAZ_DOC
-AC_CHECK_HEADERS(unistd.h sys/stat.h sys/time.h sys/types.h)
+AC_CHECK_HEADERS([unistd.h sys/stat.h sys/time.h sys/types.h])
 
 AC_ARG_ENABLE(zoom,[  --disable-zoom          disable ZOOM (for old C++ compilers)],[enable_zoom=$enableval],[enable_zoom=yes])
 AM_CONDITIONAL(ZOOM, test $enable_zoom = "yes")

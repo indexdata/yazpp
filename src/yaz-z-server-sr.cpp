@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.12 2006-03-29 13:14:18 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.13 2007-05-08 12:04:50 adam Exp $
  *
  */
 
@@ -16,7 +16,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                                                  int start, int xnum,
                                                  Z_RecordComposition *comp,
                                                  int *next, int *pres,
-                                                 int *format)
+                                                 Odr_oid *format)
 {
     int recno, total_length = 0, toget = xnum, dumped_records = 0;
     Z_Records *records =
