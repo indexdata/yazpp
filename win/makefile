@@ -1,10 +1,11 @@
 # Copyright (C) 1999-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.19 2007-05-06 20:29:50 adam Exp $
+# $Id: makefile,v 1.20 2007-06-14 08:27:20 adam Exp $
 
 # Parameters 
 
 DEBUG=0   # 0 for release, 1 for debug
+USE_MANIFEST = 0 # Can be enabled Visual Studio 2005
 
 # YAZ
 YAZ_DIR=..\..\yaz
@@ -45,11 +46,11 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-YAZPP_DLL=$(BINDIR)\yazpp2d.dll
+DLL=$(BINDIR)\yazpp2d.dll
 YAZPP_IMPLIB=$(LIBDIR)\yazpp2d.lib
 YAZD=yaz3d
 !else
-YAZPP_DLL=$(BINDIR)\yazpp2.dll
+DLL=$(BINDIR)\yazpp2.dll
 YAZPP_IMPLIB=$(LIBDIR)\yazpp2.lib
 YAZD=yaz3
 !endif
@@ -58,7 +59,7 @@ ZCLIENT=$(BINDIR)\zclient.exe
 MY_CLIENT=$(BINDIR)\yaz-my-client.exe
 
 # shortcut names defined here
-dll: $(YAZPP_DLL)
+dll: $(DLL)
 zclient: $(ZCLIENT)
 myclient: $(MY_CLIENT)
 
@@ -140,7 +141,7 @@ LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 
 # Source and object modules
 
-YAZPP_DLL_OBJS = \
+DLL_OBJS = \
    "$(OBJDIR)\gdu.obj" \
    "$(OBJDIR)\gduqueue.obj" \
    "$(OBJDIR)\pdu-observer.obj" \
@@ -193,32 +194,28 @@ RSOPT=/d_DEBUG
 RSOPT=/d_NDEBUG
 !endif
 
-$(YAZPP_DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(YAZPP_DLL_OBJS)
-	$(LINK) \
-		$(LNKOPT) \
-		$(LINK_LIBS) \
-		$(DLL_LINK_OPTIONS) \
-		$(YAZPP_DLL_OBJS) \
-		/out:"$(YAZPP_DLL)" \
-		/implib:"$(YAZPP_IMPLIB)" 
+!if $(USE_MANIFEST)
+MT=mt.exe /nologo
+!else
+MT=echo
+!endif
+
+
+LINK_DLL = $(LINK) $(LNKOPT) $(LINK_LIBS) $(DLL_LINK_OPTIONS)
+LINK_PROGRAM = $(LINK) $(LNKOPT) $(CLIENT_LINK_OPTIONS) $(LINK_LIBS) $(YAZPP_IMPLIB)
+
+
+$(DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(DLL_OBJS)
+	$(LINK_DLL) $(DLL_OBJS) /out:$@ /implib:"$(YAZPP_IMPLIB)" 
+	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
-	$(LINK) \
-		$(LNKOPT) \
-		$(CLIENT_LINK_OPTIONS) \
-		$(LINK_LIBS)  \
-            	$(YAZPP_IMPLIB) \
-		$(MY_CLIENT_OBJS) \
-		/out:$(MY_CLIENT)
+	$(LINK_PROGRAM) $(MY_CLIENT_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
-	$(LINK) \
-        	$(LNKOPT) \
-		$(CLIENT_LINK_OPTIONS) \
-		$(LINK_LIBS) \
-		$(YAZPP_IMPLIB) \
-		$(ZCLIENT_OBJS) \
-		/out:$(ZCLIENT)
+	$(LINK_PROGRAM) $(ZCLIENT_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 generated: $(ZOOMDIR)\zoom.h
 
