@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.26 2007-06-17 07:06:20 adam Exp $
+## $Id: Makefile.am,v 1.27 2007-07-10 09:41:38 adam Exp $
 SUBDIRS = common
 
 XMLFILES = \
@@ -54,7 +54,7 @@ dist-hook:
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
 	for p in $$d/*.html; do \
-		$(docDATA_INSTALL) $$p $(DESTDIR)/$(docdir); \
+		$(docDATA_INSTALL) $$p $(DESTDIR)$(docdir); \
 	done
 
 uninstall-hook:
