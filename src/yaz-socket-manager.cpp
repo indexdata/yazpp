@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.37 2007-11-09 21:49:15 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.38 2007-11-09 22:10:10 adam Exp $
  */
 
 #if HAVE_SYS_TIME_H
@@ -160,7 +160,7 @@ int SocketManager::processEvent()
     }
 
     int pass = 0;
-    while ((res = yaz_poll(fds, no_fds, timeout)) < 0)
+    while ((res = yaz_poll(fds, no_fds, timeout, 0)) < 0)
     {
         if (errno != EINTR)
         {
