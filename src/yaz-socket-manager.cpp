@@ -2,11 +2,8 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-socket-manager.cpp,v 1.36 2006-03-29 13:14:17 adam Exp $
+ * $Id: yaz-socket-manager.cpp,v 1.37 2007-11-09 21:49:15 adam Exp $
  */
-#ifdef WIN32
-#include <winsock.h>
-#endif
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -23,7 +20,9 @@
 #include <assert.h>
 
 #include <yaz/log.h>
+
 #include <yazpp/socket-manager.h>
+#include <yaz/poll.h>
 
 using namespace yazpp_1;
 
@@ -118,38 +117,26 @@ int SocketManager::processEvent()
         return 1;
     }
 
-    fd_set in, out, except;
     int res;
-    int max = 0;
-    int no = 0;
-
-    FD_ZERO(&in);
-    FD_ZERO(&out);
-    FD_ZERO(&except);
-
     time_t now = time(0);
+    int i;
+    int no_fds = 0;
     for (p = m_observers; p; p = p->next)
+        no_fds++;
+
+    if (!no_fds)
+        return 0;
+    struct yaz_poll_fd *fds = new yaz_poll_fd [no_fds];
+    for (i = 0, p = m_observers; p; p = p->next, i++)
     {
-        int fd = p->fd;
-        if (p->mask)
-            no++;
+        fds[i].fd = p->fd;
+        int input_mask = 0;
         if (p->mask & SOCKET_OBSERVE_READ)
-        {
-            yaz_log (m_log, "SocketManager::select fd=%d read", fd);
-            FD_SET(fd, &in);
-        }
+            input_mask += yaz_poll_read;
         if (p->mask & SOCKET_OBSERVE_WRITE)
-        {
-            yaz_log (m_log, "SocketManager::select fd=%d write", fd);
-            FD_SET(fd, &out);
-        }
+            input_mask += yaz_poll_write;
         if (p->mask & SOCKET_OBSERVE_EXCEPT)
-        {
-            yaz_log (m_log, "SocketManager::select fd=%d except", fd);
-            FD_SET(fd, &except);
-        }
-        if (fd > max)
-            max = fd;
+            input_mask += yaz_poll_except;
         if (p->timeout > 0 ||
             (p->timeout == 0 && (p->mask & SOCKET_OBSERVE_WRITE) == 0))
         {
@@ -169,45 +156,35 @@ int SocketManager::processEvent()
         }
         else
             p->timeout_this = -1;
-    }
-    if (!no)
-    {
-        yaz_log (m_log, "no pending events return 0");
-        if (!m_observers)
-            yaz_log (m_log, "no observers");
-        return 0;
+        fds[i].input_mask = (enum yaz_poll_mask) input_mask;
     }
 
-    struct timeval to;
-    to.tv_sec = timeout;
-    to.tv_usec = 0;
-    
-    yaz_log (m_log, "SocketManager::select begin no=%d timeout=%d",
-             no, timeout);
     int pass = 0;
-    while ((res = select(max + 1, &in, &out, &except,
-                         timeout== -1 ? 0 : &to)) < 0)
+    while ((res = yaz_poll(fds, no_fds, timeout)) < 0)
+    {
         if (errno != EINTR)
         {
-            yaz_log(YLOG_ERRNO|YLOG_WARN, "select");
-            yaz_log(YLOG_WARN, "errno=%d max=%d timeout=%d",
-                             errno, max, timeout);
+            yaz_log(YLOG_ERRNO|YLOG_WARN, "yaz_poll");
+            yaz_log(YLOG_WARN, "errno=%d timeout=%d", errno, timeout);
             if (++pass > 10)
                 return -1;
         }
+    }
+    
     yaz_log(m_log, "select returned res=%d", res);
     now = time(0);
-    for (p = m_observers; p; p = p->next)
+    for (i = 0, p = m_observers; p; p = p->next, i++)
     {
-        int fd = p->fd;
+        enum yaz_poll_mask output_mask = fds[i].output_mask;
+
         int mask = 0;
-        if (FD_ISSET(fd, &in))
+        if (output_mask & yaz_poll_read)
             mask |= SOCKET_OBSERVE_READ;
 
-        if (FD_ISSET(fd, &out))
+        if (output_mask & yaz_poll_write)
             mask |= SOCKET_OBSERVE_WRITE;
 
-        if (FD_ISSET(fd, &except))
+        if (output_mask & yaz_poll_except)
             mask |= SOCKET_OBSERVE_EXCEPT;
         
         if (mask)
@@ -232,6 +209,7 @@ int SocketManager::processEvent()
             putEvent (event);
         }
     }
+    delete [] fds;
     if ((event = getEvent()))
     {
         event->observer->socketNotify(event->event);
