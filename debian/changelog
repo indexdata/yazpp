@@ -1,3 +1,9 @@
+yazpp (1.0.4-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 12 Nov 2007 14:49:54 +0100
+
 yazpp (1.0.3-1) unstable; urgency=low
 
   * Upstream ; libyazpp2.

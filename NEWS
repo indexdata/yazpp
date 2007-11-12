@@ -1,3 +1,8 @@
+--- 1.0.4 2007/11/12
+
+SocketManager class implemented uses yaz_poll instead of select(2)
+directly. This allows more than 1024 sockets to be in use on some
+systems.
 
 --- 1.0.3 2007/05/09
 
