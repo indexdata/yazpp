@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-assoc.cpp,v 1.43 2007-05-08 12:04:50 adam Exp $
+ * $Id: yaz-z-assoc.cpp,v 1.44 2008-01-21 15:57:28 adam Exp $
  */
 
 #include <assert.h>
@@ -292,7 +292,7 @@ int Z_Assoc::client(const char *addr)
 
 void Z_Assoc::close()
 {
-    m_PDU_Observable->close ();
+    m_PDU_Observable->close_session();
 }
 
 int Z_Assoc::server(const char *addr)

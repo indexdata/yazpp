@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-pdu-assoc.cpp,v 1.46 2006-03-30 11:58:00 adam Exp $
+ * $Id: yaz-pdu-assoc.cpp,v 1.47 2008-01-21 15:57:27 adam Exp $
  */
 
 #include <assert.h>
@@ -30,6 +30,7 @@ void PDU_Assoc::init(ISocketObservable *socketObservable)
     m_destroyed = 0;
     m_idleTime = 0;
     m_log = YLOG_DEBUG;
+    m_session_is_dead = false;
 }
 
 PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable)
@@ -79,7 +80,7 @@ void PDU_Assoc::socketNotify(int event)
           this, m_state, event);
     if (event & SOCKET_OBSERVE_EXCEPT)
     {
-        close();
+        shutdown();
         m_PDU_Observer->failNotify();
         return;
     }
@@ -95,7 +96,7 @@ void PDU_Assoc::socketNotify(int event)
         {
             yaz_log (m_log, "PDU_Assoc::cs_accept failed");
             m_cs = 0;
-            close();
+            shutdown();
             m_PDU_Observer->failNotify();
         }
         else
@@ -123,7 +124,7 @@ void PDU_Assoc::socketNotify(int event)
             event & SOCKET_OBSERVE_WRITE)
         {
             // For Unix: if both read and write is set, then connect failed.
-            close();
+            shutdown();
             m_PDU_Observer->failNotify();
         }
         else
@@ -199,7 +200,7 @@ void PDU_Assoc::socketNotify(int event)
                 else if (res <= 0)
                 {
                     yaz_log (m_log, "PDU_Assoc::Connection closed by peer");
-                    close();
+                    shutdown();
                     if (m_PDU_Observer)
                         m_PDU_Observer->failNotify(); // problem here..
                     return;
@@ -234,21 +235,31 @@ void PDU_Assoc::socketNotify(int event)
         break;
     case Closed:
         yaz_log (m_log, "CLOSING state=%d event was %d", m_state, event);
-        close();
+        shutdown();
         m_PDU_Observer->failNotify();
         break;
     default:
         yaz_log (m_log, "Unknown state=%d event was %d", m_state, event);
-        close();
+        shutdown();
         m_PDU_Observer->failNotify();
     }
 }
 
-void PDU_Assoc::close()
+void PDU_Assoc::close_session()
+{
+    m_session_is_dead = true;
+    if (!m_queue_out)
+    {
+        shutdown();
+        m_PDU_Observer->failNotify();
+    }
+}
+
+void PDU_Assoc::shutdown()
 {
     PDU_Assoc *ch;
     for (ch = m_children; ch; ch = ch->m_next)
-        ch->close();
+        ch->shutdown();
 
     m_socketObservable->deleteObserver(this);
     m_state = Closed;
@@ -271,7 +282,7 @@ void PDU_Assoc::close()
 
 void PDU_Assoc::destroy()
 {
-    close();
+    shutdown();
 
     if (m_destroyed)
         *m_destroyed = 1;
@@ -331,13 +342,18 @@ int PDU_Assoc::flush_PDU()
         m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
                                          SOCKET_OBSERVE_WRITE|
                                          SOCKET_OBSERVE_EXCEPT);
+        if (m_session_is_dead)
+        {
+            shutdown();
+            m_PDU_Observer->failNotify();
+        }
         return 0;
     }
     r = cs_put (m_cs, q->m_buf, q->m_len);
     if (r < 0)
     {
         yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put failed");
-        close();
+        shutdown();
         m_PDU_Observer->failNotify();
         return r;
     }
@@ -401,7 +417,7 @@ COMSTACK PDU_Assoc::comstack(const char *type_and_host, void **vp)
 
 int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
 {
-    close();
+    shutdown();
 
     m_PDU_Observer = observer;
     void *ap;
@@ -430,7 +446,7 @@ void PDU_Assoc::idleTime(int idleTime)
 int PDU_Assoc::connect(IPDU_Observer *observer, const char *addr)
 {
     yaz_log (m_log, "PDU_Assoc::connect %s", addr);
-    close();
+    shutdown();
     m_PDU_Observer = observer;
     void *ap;
     m_cs = comstack(addr, &ap);
@@ -484,7 +500,7 @@ void PDU_Assoc::childNotify(COMSTACK cs)
 
     if (!new_observable->m_PDU_Observer)
     {
-        new_observable->close();
+        new_observable->shutdown();
         delete new_observable;
         return;
     }

@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-observer.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: pdu-observer.h,v 1.2 2008-01-21 15:57:27 adam Exp $
  */
 
 #ifndef YAZ_PDU_OBSERVER_H
@@ -29,7 +29,7 @@ class YAZ_EXPORT IPDU_Observable {
     /// Listen on address addr.
     virtual int listen(IPDU_Observer *observer, const char *addr) = 0;
     /// Close connection
-    virtual void close() = 0;
+    virtual void shutdown() = 0;
     /// Make clone of this object using this interface
     virtual IPDU_Observable *clone() = 0;
     /// Destroy completely
@@ -38,6 +38,8 @@ class YAZ_EXPORT IPDU_Observable {
     virtual void idleTime (int timeout) = 0;
     /// Get peername
     virtual const char *getpeername() = 0;
+    /// Close session
+    virtual void close_session() = 0;
 
     virtual ~IPDU_Observable();
 };

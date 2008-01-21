@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: pdu-assoc.h,v 1.1 2006-03-29 13:14:15 adam Exp $
+ * $Id: pdu-assoc.h,v 1.2 2008-01-21 15:57:27 adam Exp $
  */
 
 #ifndef YAZ_PDU_ASSOC_INCLUDED
@@ -53,6 +53,7 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     int m_idleTime;
     int m_log;
     void init(yazpp_1::ISocketObservable *socketObservable);
+    bool m_session_is_dead;
  public:
     COMSTACK comstack(const char *type_and_host, void **vp);
     /// Create object using specified socketObservable
@@ -73,13 +74,15 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     /// Socket notification
     void socketNotify(int event);
     /// Close socket
-    void close();
+    void shutdown();
     /// Close and destroy
     void destroy();
     /// Set Idle Time
     void idleTime (int timeout);
     /// Child start...
     virtual void childNotify(COMSTACK cs);
+    /// close session
+    void close_session();
     const char *getpeername();
 };
 
