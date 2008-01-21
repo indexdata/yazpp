@@ -1,3 +1,5 @@
+--- 1.1.0 2008/MM/DD
+
 --- 1.0.4 2007/11/12
 
 SocketManager class implemented uses yaz_poll instead of select(2)
