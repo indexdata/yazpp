@@ -1,6 +1,6 @@
 # Copyright (C) 1999-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.20 2007-06-14 08:27:20 adam Exp $
+# $Id: makefile,v 1.21 2008-02-21 10:16:26 adam Exp $
 
 # Parameters 
 
@@ -46,12 +46,12 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yazpp2d.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp2d.lib
+DLL=$(BINDIR)\yazpp3d.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp3d.lib
 YAZD=yaz3d
 !else
-DLL=$(BINDIR)\yazpp2.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp2.lib
+DLL=$(BINDIR)\yazpp3.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp3.lib
 YAZD=yaz3
 !endif
 
