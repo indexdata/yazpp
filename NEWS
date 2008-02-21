@@ -1,5 +1,7 @@
 --- 1.1.0 2008/MM/DD
 
+Fixed bug #2095: libzoompp.so must be it's own debian package.
+
 --- 1.0.4 2007/11/12
 
 SocketManager class implemented uses yaz_poll instead of select(2)
