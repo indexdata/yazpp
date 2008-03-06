@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: yaz-z-server-sr.cpp,v 1.13 2007-05-08 12:04:50 adam Exp $
+ * $Id: yaz-z-server-sr.cpp,v 1.12.2.1 2008-03-06 13:01:55 adam Exp $
  *
  */
 
@@ -16,7 +16,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                                                  int start, int xnum,
                                                  Z_RecordComposition *comp,
                                                  int *next, int *pres,
-                                                 Odr_oid *format)
+                                                 int *format)
 {
     int recno, total_length = 0, toget = xnum, dumped_records = 0;
     Z_Records *records =
@@ -191,9 +191,12 @@ int Yaz_Facility_Retrieval::init(Z_Server *s, Z_InitRequest *initRequest,
         ODR_MASK_SET(res, Z_Options_search);
     if (ODR_MASK_GET(req, Z_Options_present))
         ODR_MASK_SET(res, Z_Options_present);
-    m_preferredMessageSize = *initRequest->preferredMessageSize;
-    m_maximumRecordSize = *initRequest->maximumRecordSize;
-    return sr_init (initRequest, initResponse);
+    *initResponse->preferredMessageSize = *initRequest->preferredMessageSize;
+    *initResponse->maximumRecordSize = *initRequest->maximumRecordSize;
+    int r = sr_init(initRequest, initResponse);
+    m_preferredMessageSize = *initResponse->preferredMessageSize;
+    m_maximumRecordSize = *initResponse->maximumRecordSize;
+    return r;
 }
 
 ODR Yaz_Facility_Retrieval::odr_encode()
