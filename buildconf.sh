@@ -1,6 +1,14 @@
 #!/bin/sh
 # $Id: buildconf.sh,v 1.17 2006-07-07 06:21:29 adam Exp $
 
+test -d config || mkdir config
+if test -d m4/.git -a -d doc/common/.git; then
+    :
+else
+    git submodule init
+    git submodule update
+fi
+
 if automake --version|head -1 |grep '1\.[4-7]'; then
     echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
     if test -f /etc/debian_version; then
