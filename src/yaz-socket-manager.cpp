@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include <yaz/log.h>
 
@@ -104,6 +105,72 @@ void SocketManager::timeoutObserver(ISocketObserver *observer,
         se->timeout = timeout;
 }
 
+
+void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
+                                        int no_fds, int timeout)
+
+{
+    yaz_log(m_log, "yaz_poll returned res=%d", res);
+    time_t now = time(0);
+    int i;
+    int no_put_events = 0;
+    SocketEntry *p;
+
+    for (i = 0, p = m_observers; p; p = p->next, i++)
+    {
+        enum yaz_poll_mask output_mask = fds[i].output_mask;
+
+        int mask = 0;
+        if (output_mask & yaz_poll_read)
+            mask |= SOCKET_OBSERVE_READ;
+
+        if (output_mask & yaz_poll_write)
+            mask |= SOCKET_OBSERVE_WRITE;
+
+        if (output_mask & yaz_poll_except)
+            mask |= SOCKET_OBSERVE_EXCEPT;
+        
+        if (mask)
+        {
+            SocketEvent *event = new SocketEvent;
+            p->last_activity = now;
+            event->observer = p->observer;
+            event->event = mask;
+            putEvent (event);
+            no_put_events++;
+            yaz_log (m_log, "putEvent I/O mask=%d", mask);
+        }
+        else if (res == 0 && p->timeout_this == timeout)
+        {
+            SocketEvent *event = new SocketEvent;
+            assert (p->last_activity);
+            yaz_log (m_log, "putEvent timeout fd=%d, now = %ld last_activity=%ld timeout=%d",
+                     p->fd, now, p->last_activity, p->timeout);
+            p->last_activity = now;
+            event->observer = p->observer;
+            event->event = SOCKET_OBSERVE_TIMEOUT;
+            putEvent (event);
+            no_put_events++;
+            
+        }
+    }
+    SocketEvent *event = getEvent();
+    if (event)
+    {
+        event->observer->socketNotify(event->event);
+        delete event;
+    }
+    else
+    {
+        // bug #2035
+        
+        yaz_log(YLOG_WARN, "unhandled socket event. yaz_poll returned %d", res);
+        yaz_log(YLOG_WARN, "no_put_events=%d no_fds=%d i=%d timeout=%d",
+                no_put_events, no_fds, i, timeout);
+        abort();
+    }
+}
+
 int SocketManager::processEvent()
 {
     SocketEntry *p;
@@ -170,53 +237,10 @@ int SocketManager::processEvent()
                 return -1;
         }
     }
-    
-    yaz_log(m_log, "select returned res=%d", res);
-    now = time(0);
-    for (i = 0, p = m_observers; p; p = p->next, i++)
-    {
-        enum yaz_poll_mask output_mask = fds[i].output_mask;
 
-        int mask = 0;
-        if (output_mask & yaz_poll_read)
-            mask |= SOCKET_OBSERVE_READ;
+    inspect_poll_result(res, fds, no_fds, timeout);
 
-        if (output_mask & yaz_poll_write)
-            mask |= SOCKET_OBSERVE_WRITE;
-
-        if (output_mask & yaz_poll_except)
-            mask |= SOCKET_OBSERVE_EXCEPT;
-        
-        if (mask)
-        {
-            SocketEvent *event = new SocketEvent;
-            p->last_activity = now;
-            event->observer = p->observer;
-            event->event = mask;
-            putEvent (event);
-
-            yaz_log (m_log, "putEvent I/O mask=%d", mask);
-        }
-        else if (res == 0 && p->timeout_this == timeout)
-        {
-            SocketEvent *event = new SocketEvent;
-            assert (p->last_activity);
-            yaz_log (m_log, "putEvent timeout fd=%d, now = %ld last_activity=%ld timeout=%d",
-                     p->fd, now, p->last_activity, p->timeout);
-            p->last_activity = now;
-            event->observer = p->observer;
-            event->event = SOCKET_OBSERVE_TIMEOUT;
-            putEvent (event);
-        }
-    }
     delete [] fds;
-    if ((event = getEvent()))
-    {
-        event->observer->socketNotify(event->event);
-        delete event;
-        return 1;
-    }
-    yaz_log(YLOG_WARN, "unhandled event in processEvent res=%d", res);
     return 1;
 }
 

@@ -11,6 +11,7 @@
 #include <yazpp/socket-observer.h>
 #include <time.h>
 
+struct yaz_poll_fd;
 namespace yazpp_1 {
 
 /** Simple Socket Manager.
@@ -44,6 +45,8 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     void putEvent(SocketEvent *event);
     void removeEvent(ISocketObserver *observer);
     int m_log;
+    void inspect_poll_result(int res, struct yaz_poll_fd *fds, int no_fds,
+                             int timeout);
  public:
     /// Add an observer
     virtual void addObserver(int fd, ISocketObserver *observer);
