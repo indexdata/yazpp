@@ -7,3 +7,4 @@ zoom.h
 libzoompp.la
 zclient
 *.lo
+*.o
