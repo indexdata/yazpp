@@ -1,6 +1,4 @@
-YAZ++ - A C++ library for YAZ and a ZOOM C++ API.
-
-$Id: README,v 1.8 2006-04-30 12:21:37 adam Exp $
+YAZ++ AKA yazpp - A C++ library for YAZ and a ZOOM C++ API.
 
 Introduction
 ------------

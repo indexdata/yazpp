@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2006, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: tstquery.cpp,v 1.3 2006-07-07 12:57:15 adam Exp $
  */
 
 #include <stdlib.h>

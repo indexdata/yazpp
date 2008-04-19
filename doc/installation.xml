@@ -1,5 +1,4 @@
 <chapter id="installation">
-  <!-- $Id: installation.xml,v 1.20 2006-04-30 13:11:01 adam Exp $ -->
   <title>Installation</title>
   <para>
    You need a C++ compiler to compile and use YAZ++.

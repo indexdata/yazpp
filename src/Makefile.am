@@ -1,4 +1,3 @@
-## $Id: Makefile.am,v 1.34 2008-01-21 16:10:10 adam Exp $
 
 check_PROGRAMS = tstquery
 noinst_PROGRAMS = yaz-my-server yaz-my-client

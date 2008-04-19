@@ -9,7 +9,6 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yazpp.xml,v 1.3 2007-05-22 11:11:05 adam Exp $ -->
 <book id="yazpp">
  <bookinfo>
   <title>YAZ++ User's Guide and Reference</title>
@@ -42,7 +41,6 @@
     This manual covers version &version;.
     </simpara>
    <simpara>
-    CVS ID: $Id: yazpp.xml,v 1.3 2007-05-22 11:11:05 adam Exp $
    </simpara>
    <simpara>
     <inlinemediaobject>

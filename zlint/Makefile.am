@@ -1,4 +1,3 @@
-## $Id: Makefile.am,v 1.7 2006-03-29 13:14:19 adam Exp $
 
 AM_CXXFLAGS = $(YAZINC) -I$(srcdir)/../include
 

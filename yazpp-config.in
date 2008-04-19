@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: yazpp-config.in,v 1.3 2007-04-13 10:26:57 adam Exp $
 yazppprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no

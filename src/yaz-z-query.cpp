@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2007, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: yaz-z-query.cpp,v 1.22 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <yaz/querytowrbuf.h>

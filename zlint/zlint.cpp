@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2004, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: zlint.cpp,v 1.12 2005-09-22 12:40:45 adam Exp $
  */
 
 #include <stdio.h>

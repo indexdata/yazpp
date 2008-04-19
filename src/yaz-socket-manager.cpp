@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2005, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: yaz-socket-manager.cpp,v 1.38 2007-11-09 22:10:10 adam Exp $
  */
 
 #if HAVE_SYS_TIME_H

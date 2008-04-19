@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2004, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: test-init-02.cpp,v 1.5 2005-08-11 18:53:01 adam Exp $
  */
 
 #include <yaz/log.h>

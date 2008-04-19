@@ -1,6 +1,5 @@
-dnl YAZ++ Toolkit, Index Data 1994-2008
+dnl YAZ++ Toolkit Index Data 1998-2008
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.23 2008-02-22 14:25:53 adam Exp $
 AC_PREREQ(2.60)
 AC_INIT([yazpp],[1.1.0],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)

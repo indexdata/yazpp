@@ -1,4 +1,3 @@
-## $Id: Makefile.am,v 1.28 2007-07-10 09:42:28 adam Exp $
 SUBDIRS = common
 
 XMLFILES = \

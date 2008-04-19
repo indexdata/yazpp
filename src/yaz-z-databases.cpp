@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2001, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: yaz-z-databases.cpp,v 1.7 2006-03-29 13:14:18 adam Exp $
  */
 
 #include <string.h>

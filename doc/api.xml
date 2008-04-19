@@ -1,5 +1,4 @@
 <chapter id="api">
-  <!-- $Id: -->
   <title>YAZ C++ API</title>
   <para>
    The YAZ C++ API is an client - and server API that exposes

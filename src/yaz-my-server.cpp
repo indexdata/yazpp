@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2001, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: yaz-my-server.cpp,v 1.23 2007-05-08 12:04:50 adam Exp $
  */
 
 #include <stdlib.h>

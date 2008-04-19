@@ -1,4 +1,3 @@
-## $Id: Makefile.am,v 1.3 2004-01-29 20:28:41 adam Exp $
 
 AM_LDFLAGS=-version-info 1:0:0
 

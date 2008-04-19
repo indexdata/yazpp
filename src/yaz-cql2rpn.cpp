@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2004, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: yaz-cql2rpn.cpp,v 1.14 2007-03-20 07:54:11 adam Exp $
  */
 
 #include <yaz/log.h>

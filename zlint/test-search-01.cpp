@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2004-2007, Index Data.
+/* This file is part of the yazpp toolkit.
+ * Copyright (C) 1998-2008 Index Data and Mike Taylor
  * See the file LICENSE for details.
- * 
- * $Id: test-search-01.cpp,v 1.7 2007-04-12 15:00:33 adam Exp $
  */
 
 #include <yaz/log.h>
