@@ -93,7 +93,8 @@ void Z_Assoc::recv_PDU(const char *buf, int len)
     }
     else
     {
-        close();
+        m_PDU_Observable->shutdown();
+        failNotify();
     }
 }
 
