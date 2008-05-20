@@ -94,7 +94,6 @@ void Z_Assoc::recv_PDU(const char *buf, int len)
     else
     {
         close();
-        failNotify();
     }
 }
 
