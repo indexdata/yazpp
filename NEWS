@@ -1,3 +1,7 @@
+--- 1.1.0.1 2008/05/21
+
+Fixed handling for Z39.50 decoding (memory violation).
+
 --- 1.1.0 2008/02/29
 
 Fixed bug #2095: libzoompp.so must be it's own debian package.
