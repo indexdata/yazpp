@@ -32,7 +32,7 @@ using namespace yazpp_1;
 enum Zlint_code {
     TEST_FINISHED,
     TEST_CONTINUE,
-    TEST_REOPEN,
+    TEST_REOPEN
 };
 
 class Zlint_test;
