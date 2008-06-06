@@ -1,3 +1,11 @@
+--- 1.1.1 2008/06/06
+
+Require YAZ 3.0.30 because it offers a new function: yaz_mk_sru_surrogate
+that yazproxy makes use of.
+
+Removed debian directory from tar-dist to ease integration for Debian
+maintainers.
+
 --- 1.1.0.1 2008/05/21
 
 Fixed handling for Z39.50 decoding (memory violation).
