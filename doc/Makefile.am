@@ -35,11 +35,7 @@ yazpp-config.8: yazpp-config-man.xml
 
 yazpp.pdf: $(XMLFILES)
 	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common/; fi
-	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(TOP)
-	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
-	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
-	pdfjadetex yazpp.tex >pdfjadetex.log 2>&1
-
+	$(PDF_COMPILE) $(TOP)
 
 clean-data-hook:
 	rm -f [0-9]* *.bak
