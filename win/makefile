@@ -113,9 +113,7 @@ RELEASE_C_OPTIONS=  \
 ### Linker options
 LINK=link.exe
 
-LINK_LIBS= kernel32.lib user32.lib gdi32.lib advapi32.lib uuid.lib \
-           wsock32.lib  advapi32.lib \
-           $(YAZ_LIB)
+LINK_LIBS= kernel32.lib advapi32.lib $(YAZ_LIB)
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
