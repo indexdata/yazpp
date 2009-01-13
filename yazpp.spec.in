@@ -25,7 +25,7 @@ Libraries for the YAZ++ package.
 %package -n libyazpp3-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyazpp3-devel = %{version} libyaz3-devel
+Requires: libyazpp3 = %{version} libyaz3-devel
 
 %description -n libyazpp3-devel
 Development libraries and include files for the YAZ++ package.
