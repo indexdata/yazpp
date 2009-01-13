@@ -7,7 +7,9 @@ ACLOCAL_AMFLAGS = -I m4
 aclocaldir=$(datadir)/aclocal
 aclocal_DATA = m4/yazpp.m4
 
-EXTRA_DIST= LICENSE TODO yazpp-config.in m4/yaz.m4 m4/yazpp.m4 buildconf.sh
+SPEC_FILE=$(PACKAGE).spec
+EXTRA_DIST= $(SPEC_FILE) README LICENSE NEWS \
+	yazpp-config.in m4/yaz.m4 m4/yazpp.m4 buildconf.sh Doxyfile.in
 
 dist-hook:
 	if test -x /usr/bin/git -a -d .git; then git log >ChangeLog ; cp ChangeLog $(distdir); fi
@@ -20,18 +22,3 @@ dist-hook:
 dox:
 	doxygen
 
-.PHONY:firefox
-firefox:
-	firefox  -new-window file://`pwd`/dox/html/index.html &
-
-.PHONY:konqueror
-konqueror:
-	konqueror file://`pwd`/dox/html/index.html &
-
-.PHONY:galeon
-galeon:
-	galeon file://`pwd`/dox/html/index.html &
-
-.PHONY:epiphany
-epiphany:
-	epiphany --new-window file://`pwd`/dox/html/index.html &

@@ -40,6 +40,7 @@ AC_OUTPUT([
 	doc/local.ent
 	doc/common/Makefile
 	doc/common/print.dsl
+	yazpp.spec
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])
 
 
