@@ -103,6 +103,7 @@ class YAZ_EXPORT IR_Assoc: public Z_Assoc {
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
