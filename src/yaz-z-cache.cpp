@@ -5,6 +5,7 @@
 
 #include <yaz/log.h>
 #include <yaz/proto.h>
+#include <yaz/copy_types.h>
 #include <yazpp/record-cache.h>
 
 using namespace yazpp_1;
@@ -84,6 +85,7 @@ void RecordCache::copy_presentRequest(Z_PresentRequest *pr)
     odr_destroy(decode);
 }
 
+
 void RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
                            int hits)
 {
@@ -106,23 +108,14 @@ void RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
         comp->u.simple = esn;
     }
 
-    // Z_NamePlusRecordList *npr to be owned by m_mem..
-    NMEM tmp_mem = odr_extract_mem(o);
-    nmem_transfer(m_mem, tmp_mem);
-    nmem_destroy(tmp_mem);
-    
     // Insert individual records in cache
     int i;
     for (i = 0; i<npr->num_records; i++)
     {
         RecordCache_Entry *entry = (RecordCache_Entry *)
             nmem_malloc(m_mem, sizeof(*entry));
-        entry->m_record = (Z_NamePlusRecord *)
-            nmem_malloc(m_mem, sizeof(*entry->m_record));
-        entry->m_record->databaseName = npr->records[i]->databaseName;
-        entry->m_record->which = npr->records[i]->which;
-        entry->m_record->u.databaseRecord  = npr->records[i]->u.databaseRecord;
-        entry->m_comp = comp;
+        entry->m_record = yaz_clone_z_NamePlusRecord(npr->records[i], m_mem);
+        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_mem);
         entry->m_offset = i + start;
         entry->m_next = m_entries;
         m_entries = entry;
