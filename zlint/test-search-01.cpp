@@ -143,7 +143,7 @@ Zlint_code Zlint_test_search_01::sendTest(Zlint *z)
         {
             z->msg_check_for("sort %s", try_sort[m_sort_no]);
 
-            char *setstring = "default";
+            const char *setstring = "default";
             int len;
             Z_SortRequest *sr = apdu->u.sortRequest;
             
