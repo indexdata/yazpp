@@ -25,24 +25,27 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef YAZPP_BW_H
-#define YAZPP_BW_H
+#ifndef YAZPP_LIMIT_CONNECT_H
+#define YAZPP_LIMIT_CONNECT_H
 
 #include <yaz/yconfig.h>
+#include <yazpp/bw.h>
 
 namespace yazpp_1 {
-    class YAZ_EXPORT Yaz_bw {
+    class YAZ_EXPORT LimitConnect {
     public:
-        Yaz_bw(int sz);
-        ~Yaz_bw();
-        void add_bytes(int m);
-        int get_total();
+        LimitConnect();
+        ~LimitConnect();
+        void add_connect(const char *peername);
+        int get_total(const char *peername);
+        void cleanup(bool all);
+        void set_period(int sec);
     private:
-        long m_sec;   // time of most recent bucket
-        int *m_bucket;
-        int m_ptr;
-        int m_size;
+        struct Peer;
+        
+        int m_period; 
+        Peer *m_peers;
+        Peer **lookup(const char *peername);
     };
 }
 

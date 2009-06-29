@@ -142,6 +142,7 @@ DLL_OBJS = \
    "$(OBJDIR)\bw.obj" \
    "$(OBJDIR)\gdu.obj" \
    "$(OBJDIR)\gduqueue.obj" \
+   "$(OBJDIR)\limit-connect.obj" \
    "$(OBJDIR)\pdu-observer.obj" \
    "$(OBJDIR)\query.obj" \
    "$(OBJDIR)\socket-observer.obj" \

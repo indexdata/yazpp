@@ -25,28 +25,102 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <yazpp/limit-connect.h>
 
-#ifndef YAZPP_BW_H
-#define YAZPP_BW_H
+#include <time.h>
+#include <string.h>
+#include <yaz/xmalloc.h>
 
-#include <yaz/yconfig.h>
+using namespace yazpp_1;
 
-namespace yazpp_1 {
-    class YAZ_EXPORT Yaz_bw {
-    public:
-        Yaz_bw(int sz);
-        ~Yaz_bw();
-        void add_bytes(int m);
-        int get_total();
-    private:
-        long m_sec;   // time of most recent bucket
-        int *m_bucket;
-        int m_ptr;
-        int m_size;
-    };
+struct LimitConnect::Peer {
+    friend class LimitConnect;
+    
+    Peer(int sz, const char *peername);
+    ~Peer();
+    void add_connect();
+    
+    char *m_peername;
+    Yaz_bw m_bw;
+    Peer *m_next;
+};
+
+LimitConnect::LimitConnect()
+{
+    m_period = 60;
+    m_peers = 0;
 }
 
-#endif
+
+LimitConnect::~LimitConnect()
+{
+    cleanup(true);
+}
+
+void LimitConnect::set_period(int sec)
+{
+    m_period = sec;
+}
+
+LimitConnect::Peer::Peer(int sz, const char *peername) : m_bw(sz)
+{
+    m_peername = xstrdup(peername);
+    m_next = 0;
+}
+
+LimitConnect::Peer::~Peer()
+{
+    xfree(m_peername);
+}
+
+void LimitConnect::Peer::add_connect()
+{
+    m_bw.add_bytes(1);
+}
+
+LimitConnect::Peer **LimitConnect::lookup(const char *peername)
+{
+    Peer **p = &m_peers;
+    while (*p)
+    {
+	if (!strcmp((*p)->m_peername, peername))
+	    break;
+	p = &(*p)->m_next;
+    }
+    return p;
+}
+
+void LimitConnect::add_connect(const char *peername)
+{
+    Peer **p = lookup(peername);
+    if (!*p)
+	*p = new Peer(m_period, peername);
+    (*p)->add_connect();
+}
+
+int LimitConnect::get_total(const char *peername)
+{
+    Peer **p = lookup(peername);
+    if (!*p)
+	return 0;
+    return (*p)->m_bw.get_total();
+}
+
+void LimitConnect::cleanup(bool all)
+{
+    Peer **p = &m_peers;
+    while (*p)
+    {
+	Peer *tp = *p;
+	if (all || (tp->m_bw.get_total() == 0))
+	{
+	    *p = tp->m_next;
+	    delete tp;
+	}
+	else
+	    p = &tp->m_next;
+    }
+}
 
 /*
  * Local variables:

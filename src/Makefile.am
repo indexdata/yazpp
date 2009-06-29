@@ -18,8 +18,8 @@ libyazpp_la_SOURCES=socket-observer.cpp pdu-observer.cpp query.cpp \
 	yaz-z-assoc.cpp yaz-z-query.cpp yaz-ir-assoc.cpp \
 	yaz-z-server.cpp yaz-pdu-assoc-thread.cpp yaz-z-server-sr.cpp \
 	yaz-z-server-ill.cpp yaz-z-server-update.cpp yaz-z-databases.cpp \
-	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp gduqueue.cpp bw.cpp
-
+	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp gduqueue.cpp \
+	bw.cpp limit-connect.cpp
 
 yaz_my_client_SOURCES=yaz-my-client.cpp
 

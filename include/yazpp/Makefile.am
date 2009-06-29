@@ -4,6 +4,7 @@ pkginclude_HEADERS = \
 	gdu.h \
 	gduqueue.h \
 	ir-assoc.h \
+	limit-connect.h \
 	pdu-assoc.h \
 	pdu-observer.h \
 	query.h \
