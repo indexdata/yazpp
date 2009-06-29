@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2008 Index Data
+# Copyright (C) 1998-2009 Index Data
 # All rights reserved.
 
 # Parameters 

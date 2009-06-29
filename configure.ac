@@ -1,4 +1,4 @@
-dnl YAZ++ Toolkit Index Data 1998-2008
+dnl YAZ++ Toolkit Index Data 1998-2009
 dnl See the file LICENSE for details.
 AC_PREREQ(2.60)
 AC_INIT([yazpp],[1.1.2],[adam@indexdata.dk])
