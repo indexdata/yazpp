@@ -42,6 +42,7 @@ namespace yazpp_1 {
         GDU &operator=(const GDU &);
         Z_GDU *get() const;
         void move_away_gdu(ODR dst, Z_GDU **gdu);
+        int get_size();
     private:
         void base(Z_GDU *gdu, ODR o);
         Z_GDU *m_gdu;

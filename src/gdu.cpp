@@ -46,6 +46,15 @@ void GDU::base(Z_GDU *gdu, ODR encode)
     odr_destroy(encode);
 }
 
+int GDU::get_size()
+{
+    int len = 0;
+    ODR encode = odr_createmem(ODR_ENCODE);
+    if (m_gdu && z_GDU(encode, &m_gdu, 0, "encode"))
+        odr_getbuf(encode, &len, 0);
+    odr_destroy(encode);
+    return len;
+}
 
 GDU &GDU::operator=(const GDU &g)
 {
