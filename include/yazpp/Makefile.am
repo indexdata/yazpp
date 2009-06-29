@@ -1,5 +1,6 @@
 
 pkginclude_HEADERS = \
+	bw.h \
 	gdu.h \
 	gduqueue.h \
 	ir-assoc.h \

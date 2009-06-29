@@ -139,6 +139,7 @@ LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 # Source and object modules
 
 DLL_OBJS = \
+   "$(OBJDIR)\bw.obj" \
    "$(OBJDIR)\gdu.obj" \
    "$(OBJDIR)\gduqueue.obj" \
    "$(OBJDIR)\pdu-observer.obj" \
