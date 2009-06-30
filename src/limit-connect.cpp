@@ -30,6 +30,7 @@
 #include <time.h>
 #include <string.h>
 #include <yaz/xmalloc.h>
+#include <yazpp/timestat.h>
 
 using namespace yazpp_1;
 
@@ -41,7 +42,7 @@ struct LimitConnect::Peer {
     void add_connect();
     
     char *m_peername;
-    Yaz_bw m_bw;
+    TimeStat m_bw;
     Peer *m_next;
 };
 

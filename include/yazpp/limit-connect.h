@@ -29,7 +29,6 @@
 #define YAZPP_LIMIT_CONNECT_H
 
 #include <yaz/yconfig.h>
-#include <yazpp/bw.h>
 
 namespace yazpp_1 {
     class YAZ_EXPORT LimitConnect {

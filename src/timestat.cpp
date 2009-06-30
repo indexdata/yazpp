@@ -25,28 +25,52 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <yazpp/timestat.h>
 
-#ifndef YAZPP_BW_H
-#define YAZPP_BW_H
+using namespace yazpp_1;
 
-#include <yaz/yconfig.h>
-
-namespace yazpp_1 {
-    class YAZ_EXPORT Yaz_bw {
-    public:
-        Yaz_bw(int sz);
-        ~Yaz_bw();
-        void add_bytes(int m);
-        int get_total();
-    private:
-        long m_sec;   // time of most recent bucket
-        int *m_bucket;
-        int m_ptr;
-        int m_size;
-    };
+TimeStat::TimeStat(int sz)
+{
+    m_sec = 0;
+    m_size = sz;
+    m_bucket = new int[m_size];
+    m_ptr = 0;
 }
 
-#endif
+TimeStat::~TimeStat()
+{
+    delete [] m_bucket;
+}
+
+int TimeStat::get_total()
+{
+    add_bytes(0);
+    int bw = 0;
+    int i;
+    for (i = 0; i<m_size; i++)
+        bw += m_bucket[i];
+    return bw;
+}
+
+void TimeStat::add_bytes(int b)
+{
+    time_t now = time(0);
+
+    if (now >= m_sec)
+    {
+        int d = now - m_sec;
+        if (d > m_size)
+            d = m_size;
+        while (--d >= 0)
+        {
+            if (++m_ptr == m_size)
+                m_ptr = 0;
+            m_bucket[m_ptr] = 0;
+        }
+        m_bucket[m_ptr] += b;
+    }
+    m_sec = now;
+}
 
 /*
  * Local variables:

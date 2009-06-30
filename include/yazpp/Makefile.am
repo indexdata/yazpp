@@ -1,6 +1,6 @@
 
 pkginclude_HEADERS = \
-	bw.h \
+	timestat.h \
 	gdu.h \
 	gduqueue.h \
 	ir-assoc.h \
