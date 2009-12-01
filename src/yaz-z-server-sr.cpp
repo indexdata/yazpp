@@ -12,7 +12,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                                                  const char *resultSetName,
                                                  int start, int xnum,
                                                  Z_RecordComposition *comp,
-                                                 int *next, int *pres,
+                                                 Odr_int *next, Odr_int *pres,
                                                  Odr_oid *format)
 {
     int recno, total_length = 0, toget = xnum, dumped_records = 0;
@@ -114,7 +114,7 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
     Z_RecordComposition comp, *compp = 0;
     int hits = *res->resultCount;
     
-    int *nulint = (int *)odr_malloc (odr_encode(), sizeof(*nulint));
+    Odr_int *nulint = (Odr_int *)odr_malloc (odr_encode(), sizeof(*nulint));
     *nulint = 0;
     
     comp.which = Z_RecordComp_simple;
@@ -136,7 +136,8 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
     
     if (toget && !res->records)
     {
-        res->presentStatus = (int *) odr_malloc (odr_encode(), sizeof(int));
+        res->presentStatus = (Odr_int *)
+            odr_malloc (odr_encode(), sizeof(Odr_int));
         *res->presentStatus = Z_PRES_SUCCESS;
         res->records =
             pack_records(s, req->resultSetName, 1, toget, compp, 

@@ -221,10 +221,10 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
     return send_Z_PDU(apdu, 0);
 }
 
-int IR_Assoc::send_presentRequest(int start, 
-                                      int number, 
-                                      char* pResultSetId,
-                                      char* pRefId)
+int IR_Assoc::send_presentRequest(Odr_int start, 
+                                  Odr_int number, 
+                                  char* pResultSetId,
+                                  char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;

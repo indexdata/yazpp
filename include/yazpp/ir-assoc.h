@@ -77,7 +77,7 @@ class YAZ_EXPORT IR_Assoc: public Z_Assoc {
     /// Send Services
     int send_initRequest(char* pRefId=NULL);
     int send_searchRequest(Yaz_Z_Query *query, char* pResultSetId = NULL, char* pRefId = NULL);
-    int send_presentRequest(int start, int number, char* pResultSetId = NULL, char* pRefId = NULL);
+    int send_presentRequest(Odr_int start, Odr_int number, char* pResultSetId = NULL, char* pRefId = NULL);
     int send_deleteResultSetRequest(char* pResultSetId = 0, char* pRefId = 0);
     
     /// Recv Services

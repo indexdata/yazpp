@@ -117,7 +117,7 @@ class YAZ_EXPORT Yaz_Facility_Retrieval : public IServer_Facility,
                              const char *resultSetName,
                              int start, int num,
                              Z_RecordComposition *comp,
-                             int *next, int *pres,
+                             Odr_int *next, Odr_int *pres,
                              Odr_oid *oid);
 
     void fetch_via_piggyback (Z_Server *s,

@@ -128,7 +128,7 @@ void Z_ServerUtility::create_surrogateDiagnostics(
     ODR odr, Z_NamePlusRecord *rec, const char *dbname,
     int error, char *const addinfo)
 {
-    int *err = (int *)odr_malloc (odr, sizeof(*err));
+    Odr_int *err = (Odr_int *)odr_malloc (odr, sizeof(*err));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (odr, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
         odr_malloc (odr, sizeof(*dr));
@@ -152,7 +152,7 @@ Z_Records *Z_ServerUtility::create_nonSurrogateDiagnostics (
 {
     Z_Records *rec = (Z_Records *)
         odr_malloc (odr, sizeof(*rec));
-    int *err = (int *)
+    Odr_int *err = (Odr_int *)
         odr_malloc (odr, sizeof(*err));
     Z_DiagRec *drec = (Z_DiagRec *)
         odr_malloc (odr, sizeof(*drec));

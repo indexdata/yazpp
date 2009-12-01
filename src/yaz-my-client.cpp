@@ -153,7 +153,7 @@ void MyClient::recv_diagrecs(Z_DiagRec **pp, int num)
         }
         else
             r = p->u.defaultFormat;
-             printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+             printf("    [" ODR_INT_PRINTF "] %s", *r->condition, diagbib1_str(*r->condition));
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
@@ -277,7 +277,7 @@ void MyClient::recv_searchResponse(Z_SearchResponse *searchResponse)
     else
     {
         printf ("Ok\n");
-        printf ("Hits: %d\n", *searchResponse->resultCount);
+        printf ("Hits: " ODR_INT_PRINTF "\n", *searchResponse->resultCount);
     }
     recv_records (searchResponse->records);
 }
