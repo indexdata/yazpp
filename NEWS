@@ -1,3 +1,7 @@
+--- 1.1.6 2009/12/03
+
+Prepare for 64-bit YAZ. YAZ++ will still work with YAZ 3.0.47 or later.
+
 --- 1.1.5 2009/11/19
 
 Fix install doc rule for Automake 1.11
