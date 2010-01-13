@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libzoompp.la
 noinst_PROGRAMS = zclient
 endif
 
-libzoompp_la_LDFLAGS=-version-info 3:0:0
+libzoompp_la_LDFLAGS=-version-info 4:0:0
 LDADD=libzoompp.la $(YAZLALIB)
 
 mirk_sources = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
