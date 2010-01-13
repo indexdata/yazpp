@@ -27,7 +27,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
     records->u.databaseOrSurDiagnostics = reclist;
     reclist->num_records = 0;
     reclist->records = list;
-    *pres = Z_PRES_SUCCESS;
+    *pres = Z_PresentStatus_success;
     *next = 0;
 
     for (recno = start; reclist->num_records < toget; recno++)
@@ -44,7 +44,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
 
         if (records->which != Z_Records_DBOSD)
         {
-            *pres = Z_PRES_FAILURE;
+            *pres = Z_PresentStatus_failure;
             return records;
         }
 
@@ -65,7 +65,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
             /* record is small enough, really */
             if (this_length <= m_preferredMessageSize)
             {
-                *pres = Z_PRES_PARTIAL_2;
+                *pres = Z_PresentStatus_partial_2;
                 break;
             }
             if (this_length >= m_maximumRecordSize)
@@ -138,7 +138,7 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
     {
         res->presentStatus = (Odr_int *)
             odr_malloc (odr_encode(), sizeof(Odr_int));
-        *res->presentStatus = Z_PRES_SUCCESS;
+        *res->presentStatus = Z_PresentStatus_success;
         res->records =
             pack_records(s, req->resultSetName, 1, toget, compp, 
                          res->nextResultSetPosition,
