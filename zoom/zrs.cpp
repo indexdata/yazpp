@@ -1,5 +1,3 @@
-// $Header: /home/cvsroot/yaz++/zoom/zrs.cpp,v 1.7 2005-06-25 15:53:21 adam Exp $
-
 // Z39.50 Result Set class
 
 #include "zoom.h"

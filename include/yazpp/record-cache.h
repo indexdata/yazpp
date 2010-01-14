@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) 1998-2009 Index Data and Mike Taylor
+ * Copyright (C) 1998-2010 Index Data and Mike Taylor
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -50,9 +50,8 @@ class YAZ_EXPORT RecordCache {
     RecordCache_Entry *m_entries;
     Z_SearchRequest *m_searchRequest;
     Z_PresentRequest *m_presentRequest;
-    int match (RecordCache_Entry *entry,
-               Odr_oid *syntax, int offset,
-               Z_RecordComposition *comp);
+    int match(RecordCache_Entry *entry, Odr_oid *syntax, int offset,
+              Z_RecordComposition *comp);
     int m_max_size;
 };
 };

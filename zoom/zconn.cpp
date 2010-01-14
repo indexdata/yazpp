@@ -1,5 +1,3 @@
-// $Header: /home/cvsroot/yaz++/zoom/zconn.cpp,v 1.9 2005-06-25 15:53:21 adam Exp $
-
 // Z39.50 Connection class
 
 #include "zoom.h"

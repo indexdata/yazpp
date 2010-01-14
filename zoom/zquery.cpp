@@ -1,5 +1,3 @@
-// $Header: /home/cvsroot/yaz++/zoom/zquery.cpp,v 1.7 2005-06-25 15:53:21 adam Exp $
-
 // Z39.50 Query classes
 
 #include "zoom.h"

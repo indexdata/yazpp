@@ -1,5 +1,3 @@
-// $Id: zclient.cpp,v 1.8 2005-06-25 15:53:21 adam Exp $
-
 // Simple sample client
 
 #include <stdlib.h>             // for atoi()

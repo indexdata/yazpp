@@ -1,5 +1,3 @@
-// $Header: /home/cvsroot/yaz++/zoom/zexcept.cpp,v 1.11 2005-06-25 15:53:21 adam Exp $
-
 // Z39.50 Exception classes
 
 #include <iostream>
