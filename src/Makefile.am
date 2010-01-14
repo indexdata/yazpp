@@ -21,6 +21,8 @@ libyazpp_la_SOURCES=socket-observer.cpp pdu-observer.cpp query.cpp \
 	yaz-z-cache.cpp yaz-cql2rpn.cpp gdu.cpp gduqueue.cpp \
 	timestat.cpp limit-connect.cpp
 
+libyazpp_la_LIBADD = $(YAZLALIB)
+
 yaz_my_client_SOURCES=yaz-my-client.cpp
 
 yaz_my_server_SOURCES=yaz-my-server.cpp yaz-marc-sample.cpp
