@@ -44,7 +44,7 @@ class YAZ_EXPORT RecordCache {
 
     void copy_searchRequest(Z_SearchRequest *sr);
     void copy_presentRequest(Z_PresentRequest *pr);
-    void set_max_size(int sz);
+    void set_max_size(size_t sz);
  private:
     NMEM m_mem;
     RecordCache_Entry *m_entries;
@@ -52,7 +52,7 @@ class YAZ_EXPORT RecordCache {
     Z_PresentRequest *m_presentRequest;
     int match(RecordCache_Entry *entry, Odr_oid *syntax, int offset,
               Z_RecordComposition *comp);
-    int m_max_size;
+    size_t m_max_size;
 };
 };
 /*

@@ -31,7 +31,7 @@ RecordCache::~RecordCache ()
     nmem_destroy(m_mem);
 }
 
-void RecordCache::set_max_size(int sz)
+void RecordCache::set_max_size(size_t sz)
 {
     m_max_size = sz;
 }
