@@ -22,7 +22,7 @@ Requires: libyaz4
 %description -n libyazpp4
 Libraries for the YAZ++ package.
 
-%package -n libyazpp3-devel
+%package -n libyazpp4-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
 Requires: libyazpp4 = %{version} libyaz4-devel
@@ -48,12 +48,12 @@ make prefix=${RPM_BUILD_ROOT}/%{_prefix} mandir=${RPM_BUILD_ROOT}/%{_mandir} \
 %clean
 rm -fr ${RPM_BUILD_ROOT}
 
-%files -n libyazpp3
+%files -n libyazpp4
 %doc README LICENSE NEWS
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
-%files -n libyazpp3-devel
+%files -n libyazpp4-devel
 %defattr(-,root,root)
 %{_bindir}/yazpp-config
 %{_includedir}/yazpp
