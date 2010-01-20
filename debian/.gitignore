@@ -1,0 +1,9 @@
+copyright
+files
+*.debhelper
+*.debhelper.log
+*.substvars
+libyazpp4
+libyazpp4-dev
+yazpp-doc
+tmp

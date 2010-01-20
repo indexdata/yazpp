@@ -1,8 +1,8 @@
-yazpp (1.1.6-2indexdata) karmic; urgency=low
+yazpp (1.2.0-1indexdata) unstable; urgency=low
 
-  * Using libyaz4.
+  * Upstream.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 13 Jan 2010 15:58:07 +0100
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 20 Jan 2010 10:41:40 +0100
 
 yazpp (1.1.6-1indexdata) unstable; urgency=low
 
