@@ -1,3 +1,7 @@
+--- 1.2.1 2010/01/28
+
+Update dependency on newer because YAZ 4.0.1 has new functions.
+
 --- 1.2.0 2010/01/20
 
 Debian/Windows/RPM packages link with YAZ 4.
