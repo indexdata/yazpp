@@ -17,7 +17,7 @@ if test -z "$YAZLIB"; then
 	AC_MSG_ERROR([YAZ development libraries missing])
 fi
 YAZ_DOC
-AC_CHECK_HEADERS([unistd.h sys/stat.h sys/time.h sys/types.h])
+AC_CHECK_HEADERS([unistd.h sys/stat.h sys/time.h sys/types.h fcntl.h])
 
 AC_ARG_ENABLE(zoom,[  --disable-zoom          disable ZOOM (for old C++ compilers)],[enable_zoom=$enableval],[enable_zoom=yes])
 AM_CONDITIONAL(ZOOM, test $enable_zoom = "yes")

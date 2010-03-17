@@ -10,6 +10,10 @@
 
 #include <yazpp/pdu-assoc.h>
 
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 using namespace yazpp_1;
 
 void PDU_Assoc::init(ISocketObservable *socketObservable)
@@ -425,11 +429,21 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
         return -1;
     if (cs_bind(m_cs, ap, CS_SERVER) < 0)
         return -2;
-    m_socketObservable->addObserver(cs_fileno(m_cs), this);
+
+    int fd = cs_fileno(m_cs);
+#if HAVE_FCNTL_H
+    int oldflags = fcntl(fd, F_GETFD, 0);
+    if (oldflags >= 0)
+    {
+        oldflags |= FD_CLOEXEC;
+        fcntl(fd, F_SETFD, oldflags);
+    }
+#endif
+    m_socketObservable->addObserver(fd, this);
     yaz_log(m_log, "maskObserver 9");
     m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
                                      SOCKET_OBSERVE_EXCEPT);
-    yaz_log (m_log, "PDU_Assoc::listen ok fd=%d", cs_fileno(m_cs));
+    yaz_log (m_log, "PDU_Assoc::listen ok fd=%d", fd);
     m_state = Listen;
     return 0;
 }
