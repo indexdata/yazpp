@@ -1,3 +1,10 @@
+--- 1.2.2 2010/05/11
+
+Update dependency to YAZ 4.0.7 because it has an important fix
+for record conversion (for Metaproxy).
+
+Build for Ubuntu karmic.
+
 --- 1.2.1 2010/01/28
 
 Update dependency on newer because YAZ 4.0.1 has new functions.
