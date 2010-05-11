@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Standards-Version: 3.6.2
-Build-Depends: debhelper (>= 4.0.0), libxml2-dev, libxslt1-dev, libyaz4-dev (>= 4.0.7)
+Build-Depends: debhelper (>= 4.0.0), libxml2-dev, libxslt1-dev, libyaz4-dev (>= 4.0.8)
 
 Package: libyazpp4
 Section: libs
