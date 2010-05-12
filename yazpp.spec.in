@@ -59,7 +59,6 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_includedir}/yazpp
 %{_libdir}/*.so
 %{_libdir}/*.a
-%{_libdir}/*.la
 %{_datadir}/aclocal/yazpp.m4
 %{_mandir}/man8/yazpp-config.*
 %{_datadir}/doc/yazpp
