@@ -8,7 +8,9 @@ noinst_PROGRAMS = zclient
 endif
 
 libzoompp_la_LDFLAGS=-version-info 4:0:0
-LDADD=libzoompp.la $(YAZLALIB)
+LDADD=libzoompp.la
+
+libzoompp_la_LIBADD = $(YAZLALIB)
 
 mirk_sources = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
 libzoompp_la_SOURCES = $(mirk_sources) interface.h
