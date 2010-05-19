@@ -115,7 +115,7 @@ LINK=link.exe
 
 LINK_LIBS= kernel32.lib advapi32.lib $(YAZ_LIB)
 
-COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no
 
 DEBUG_LNK_OPTIONS= /debug 
 
