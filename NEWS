@@ -1,3 +1,7 @@
+--- 1.2.3 2010/06/15
+
+No *.la in Debian/RPM pacakges.
+
 --- 1.2.2 2010/05/11
 
 Update dependency to YAZ 4.0.8 because it has an important fix for
