@@ -49,6 +49,9 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %clean
 rm -fr ${RPM_BUILD_ROOT}
 
+%post -n libyazpp4 -p /sbin/ldconfig 
+%postun -n libyazpp4 -p /sbin/ldconfig 
+
 %files -n libyazpp4
 %doc README LICENSE NEWS
 %defattr(-,root,root)
