@@ -9,7 +9,7 @@ Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: pkgconfig libyaz4-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
-URL: http://www.indexdata.dk/yazplusplus/
+URL: http://www.indexdata.com/yazplusplus
 
 %description
 YAZ++ package.
