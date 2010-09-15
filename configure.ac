@@ -22,11 +22,6 @@ AC_CHECK_HEADERS([unistd.h sys/stat.h sys/time.h sys/types.h fcntl.h])
 AC_ARG_ENABLE(zoom,[  --disable-zoom          disable ZOOM (for old C++ compilers)],[enable_zoom=$enableval],[enable_zoom=yes])
 AM_CONDITIONAL(ZOOM, test $enable_zoom = "yes")
 
-AC_SUBST(YAZPP_SRC_ROOT)
-AC_SUBST(YAZPP_BUILD_ROOT)
-YAZPP_SRC_ROOT=`cd ${srcdir}; pwd`
-YAZPP_BUILD_ROOT=`pwd`
-
 AC_OUTPUT([
 	Doxyfile
 	Makefile

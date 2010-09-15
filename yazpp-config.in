@@ -1,22 +1,21 @@
 #!/bin/sh
-yazppprefix=@prefix@
-yaz_echo_cflags=no
-yaz_echo_libs=no
-yaz_echo_help=no
-yaz_echo_tabs=no
-yaz_echo_source=yes
-yaz_echo_lalibs=no
-yazpp_src_root=@YAZPP_SRC_ROOT@
-yazpp_build_root=@YAZPP_BUILD_ROOT@
-
+prefix=@prefix@
+echo_cflags=no
+echo_libs=no
+echo_help=no
+echo_tabs=no
+echo_source=yes
+echo_lalibs=no
+src_root=@abs_top_srcdir@
+build_root=@abs_top_builddir@
 yazlibs="@YAZLIB@ @LIBS@"
 yazlalibs="@YAZLALIB@ @LIBS@"
-YAZPPVERSION=@VERSION@
+VERSION=@VERSION@
 
 usage()
 {
 	cat <<EOF
-Usage: yaz++-config [OPTIONS] [LIBRARIES]
+Usage: yazpp-config [OPTIONS] [LIBRARIES]
 Options:
 	[--prefix[=DIR]]
 	[--version]
@@ -28,7 +27,7 @@ EOF
 }
 
 if test $# -eq 0; then
-	yaz_echo_help=yes
+	echo_help=yes
 fi
 
 while test $# -gt 0; do
@@ -39,30 +38,30 @@ while test $# -gt 0; do
 
   case $1 in
     --prefix=*)
-      yazppprefix=$optarg
+      prefix=$optarg
       ;;
     --prefix)
-      echo $yazppprefix
+      echo $prefix
       exit 0
       ;;
     --version)
-      echo $YAZPPVERSION
+      echo $VERSION
       exit 0
       ;;
     --cflags)
-      yaz_echo_cflags=yes
+      echo_cflags=yes
       ;;
     --libs)
-      yaz_echo_libs=yes
+      echo_libs=yes
       ;;
     --tabs)
-      yaz_echo_tabs=yes
+      echo_tabs=yes
       ;;
     --lalibs)
-      yaz_echo_lalibs=yes
+      echo_lalibs=yes
       ;;
     -*)
-      yaz_echo_help=yes
+      echo_help=yes
       ;;
   esac
   shift
@@ -72,34 +71,34 @@ libs_short="-lyazpp -lzoompp"
 
 YAZPPINC="@YAZINC@"
 
-if test "$yaz_echo_source" = "yes"; then
-    YAZPPLIB="-L${yazpp_build_root}/src/.libs -lyazpp"
-    YAZPPLIB="$YAZPPLIB -L${yazpp_build_root}/zoom/.libs -lzoompp"
+if test "$echo_source" = "yes"; then
+    YAZPPLIB="-L${build_root}/src/.libs -lyazpp"
+    YAZPPLIB="$YAZPPLIB -L${build_root}/zoom/.libs -lzoompp"
     YAZPPLIB="$YAZPPLIB $yazlibs"
-    YAZPPLALIB="${yazpp_build_root}/src/libyazpp.la $yazlalibs"
-    YAZPPINC="-I${yazpp_src_root}/include $YAZPPINC"
+    YAZPPLALIB="${build_root}/src/libyazpp.la $yazlalibs"
+    YAZPPINC="-I${src_root}/include $YAZPPINC"
 else
 
-    if test "$yazppprefix" = "/usr"; then
+    if test "$prefix" = "/usr"; then
 	YAZPPLIB="${libs_short} $yazlibs"
     else
-	YAZPPLIB="-L${yazppprefix}/lib ${libs_short} $yazlibs"
+	YAZPPLIB="-L${prefix}/lib ${libs_short} $yazlibs"
     fi
     YAZPPLALIB=$YAZPPLIB
-    if test "$yazppprefix" != "/usr"; then
-	YAZPPINC="-I${yazppprefix}/include $YAZPPINC"
+    if test "$prefix" != "/usr"; then
+	YAZPPINC="-I${prefix}/include $YAZPPINC"
     fi
 fi
 
-if test "$yaz_echo_help" = "yes"; then
+if test "$echo_help" = "yes"; then
 	usage 1 1>&2
 fi
-if test "$yaz_echo_cflags" = "yes"; then
+if test "$echo_cflags" = "yes"; then
 	echo $YAZPPINC
 fi
-if test "$yaz_echo_libs" = "yes"; then
+if test "$echo_libs" = "yes"; then
 	echo $YAZPPLIB
 fi
-if test "$yaz_echo_lalibs" = "yes"; then
+if test "$echo_lalibs" = "yes"; then
 	echo $YAZPPLALIB
 fi
