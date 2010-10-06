@@ -10,7 +10,7 @@ XMLFILES = \
 
 TOP = $(srcdir)/yazpp.xml
 
-MANFILES = yazpp-config.8
+MANFILES = yazpp-config.1
 
 REFFILES = yazpp-config-man.xml
 
@@ -30,7 +30,7 @@ $(HTMLFILES): $(XMLFILES)
 index.tkl: $(XMLFILES)
 	$(TKL_COMPILE) $(TOP)
 
-yazpp-config.8: yazpp-config-man.xml
+yazpp-config.1: yazpp-config-man.xml
 	$(MAN_COMPILE) $(srcdir)/yazpp-config-man.xml
 
 yazpp.pdf: $(XMLFILES)
