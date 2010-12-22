@@ -1,6 +1,6 @@
 Summary: YAZ++ package (main)
 Name: yazpp
-Version: @VERSION@
+Version: 1.2.3
 Release: 2
 License: BSD
 Group: Applications/Internet
