@@ -1,5 +1,8 @@
 #!/bin/sh
 prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
 echo_cflags=no
 echo_libs=no
 echo_help=no
@@ -82,11 +85,11 @@ else
     if test "$prefix" = "/usr"; then
 	YAZPPLIB="${libs_short} $yazlibs"
     else
-	YAZPPLIB="-L${prefix}/lib ${libs_short} $yazlibs"
+	YAZPPLIB="-L${libdir} ${libs_short} $yazlibs"
     fi
     YAZPPLALIB=$YAZPPLIB
     if test "$prefix" != "/usr"; then
-	YAZPPINC="-I${prefix}/include $YAZPPINC"
+	YAZPPINC="-I${includedir} $YAZPPINC"
     fi
 fi
 
