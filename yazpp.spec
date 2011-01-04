@@ -7,6 +7,7 @@ Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
+Prefix: %{_prefix}
 BuildRequires: pkgconfig, libyaz4-devel >= 4.1.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
