@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) 1998-2010 Index Data and Mike Taylor
+ * Copyright (C) 1998-2011 Index Data and Mike Taylor
  * See the file LICENSE for details.
  */
 
