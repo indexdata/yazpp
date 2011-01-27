@@ -1,7 +1,7 @@
 dnl This file is part of yazpp
 dnl Copyright (C) 1998-2011 Index Data
 AC_PREREQ(2.60)
-AC_INIT([yazpp],[1.2.3],[adam@indexdata.dk])
+AC_INIT([yazpp],[1.2.4],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9])

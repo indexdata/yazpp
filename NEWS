@@ -1,3 +1,12 @@
+--- 1.2.4 2011/01/27
+
+RPM: Release includes 'indexdata' name. Use indexdata in release name so
+this package can be distinguished from other vendors.
+
+RPM: make it relocatable.
+
+yazpp-config: Use exec_prefix, libdir, includedir.
+
 --- 1.2.3 2010/06/15
 
 No *.la in Debian/RPM pacakges.
