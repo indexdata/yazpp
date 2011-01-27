@@ -1,7 +1,7 @@
 Summary: YAZ++ package (main)
 Name: yazpp
 Version: 1.2.3
-Release: 2
+Release: 2indexdata
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
