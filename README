@@ -1,5 +1,8 @@
 YAZ++ AKA yazpp - A C++ library for YAZ and a ZOOM C++ API.
 
+Copyright (C) 1998-2011 Index Data
+See the file LICENSE for details.
+
 Introduction
 ------------
 
@@ -15,7 +18,7 @@ Documentation
 -------------
 
 The "doc" directory contains documentation in HTML and PDF.
-You can also read it online at http://www.indexdata.dk/yazplusplus/
+You can also read it online at http://www.indexdata.com/yazpp
 
 Overview
 --------
@@ -40,7 +43,7 @@ ZOOM-C++
 
 The ZOOM library in this distribution implements the ZOOM C++ binding
 described on the ZOOM web-site at 
-	http://zoom.z3950.org/bind/cplusplus/index.html
+	http://zoom.z3950.org/bind/cplusplus/
 It provides a simple but powerful API for constructing Z39.50 client
 applications.  See the documentation in doc/zoom.xml for much more
 information.

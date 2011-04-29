@@ -1,10 +1,17 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
- "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" 
 [ ]>
 <refentry id="yazpp-config">
+
+ <refentryinfo>
+  <productname>yazpp</productname>
+  <info><orgname>Index Data</orgname></info>
+ </refentryinfo>
+ 
  <refmeta>
   <refentrytitle>yazpp-config</refentrytitle>
-  <manvolnum>8</manvolnum>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
  
  <refnamediv>

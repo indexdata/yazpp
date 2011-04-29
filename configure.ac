@@ -1,7 +1,7 @@
-dnl YAZ++ Toolkit Index Data 1998-2010
-dnl See the file LICENSE for details.
+dnl This file is part of yazpp
+dnl Copyright (C) 1998-2011 Index Data
 AC_PREREQ(2.60)
-AC_INIT([yazpp],[1.2.3],[adam@indexdata.dk])
+AC_INIT([yazpp],[1.2.4],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9])
@@ -22,11 +22,6 @@ AC_CHECK_HEADERS([unistd.h sys/stat.h sys/time.h sys/types.h fcntl.h])
 AC_ARG_ENABLE(zoom,[  --disable-zoom          disable ZOOM (for old C++ compilers)],[enable_zoom=$enableval],[enable_zoom=yes])
 AM_CONDITIONAL(ZOOM, test $enable_zoom = "yes")
 
-AC_SUBST(YAZPP_SRC_ROOT)
-AC_SUBST(YAZPP_BUILD_ROOT)
-YAZPP_SRC_ROOT=`cd ${srcdir}; pwd`
-YAZPP_BUILD_ROOT=`pwd`
-
 AC_OUTPUT([
 	Doxyfile
 	Makefile
@@ -40,8 +35,7 @@ AC_OUTPUT([
 	doc/local.ent
 	doc/common/Makefile
 	doc/common/print.dsl
-	yazpp.spec
-],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])
+],[sed s%echo_source=yes%echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])
 
 
 echo \

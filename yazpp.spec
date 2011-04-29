@@ -1,15 +1,16 @@
 Summary: YAZ++ package (main)
 Name: yazpp
-Version: @VERSION@
-Release: 1
+Version: 1.2.4
+Release: 1indexdata
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: pkgconfig libyaz4-devel
+Prefix: %{_prefix}
+BuildRequires: pkgconfig, libyaz4-devel >= 4.1.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
-URL: http://www.indexdata.dk/yazplusplus/
+URL: http://www.indexdata.com/yazplusplus
 
 %description
 YAZ++ package.
@@ -17,7 +18,7 @@ YAZ++ package.
 %package -n libyazpp4
 Summary: YAZ++ and ZOOM library
 Group: Libraries
-Requires: libyaz4
+Requires: libyaz4 >= 4.1.0
 
 %description -n libyazpp4
 Libraries for the YAZ++ package.
@@ -25,7 +26,7 @@ Libraries for the YAZ++ package.
 %package -n libyazpp4-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyazpp4 = %{version} libyaz4-devel
+Requires: libyazpp4 = %{version}, libyaz4-devel
 
 %description -n libyazpp4-devel
 Development libraries and include files for the YAZ++ package.
@@ -49,6 +50,9 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %clean
 rm -fr ${RPM_BUILD_ROOT}
 
+%post -n libyazpp4 -p /sbin/ldconfig 
+%postun -n libyazpp4 -p /sbin/ldconfig 
+
 %files -n libyazpp4
 %doc README LICENSE NEWS
 %defattr(-,root,root)
@@ -61,6 +65,6 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_libdir}/*.so
 %{_libdir}/*.a
 %{_datadir}/aclocal/yazpp.m4
-%{_mandir}/man8/yazpp-config.*
+%{_mandir}/man?/yazpp-config.*
 %{_datadir}/doc/yazpp
 
