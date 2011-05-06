@@ -1,3 +1,7 @@
+--- 1.2.5 2011/05/06
+
+Make packages for Debian wheezy, Ubuntu natty.
+
 --- 1.2.4 2011/01/27
 
 RPM: Release includes 'indexdata' name. Use indexdata in release name so
