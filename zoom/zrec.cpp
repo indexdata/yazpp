@@ -1,5 +1,8 @@
 // Z39.50 Record class
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "zoom.h"
 #include <yaz/yaz-util.h>       // for yaz_matchstr()
 

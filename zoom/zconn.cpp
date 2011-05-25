@@ -1,5 +1,8 @@
 // Z39.50 Connection class
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "zoom.h"
 
 

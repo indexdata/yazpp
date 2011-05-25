@@ -3,6 +3,9 @@
  * See the file LICENSE for details.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <yazpp/pdu-observer.h>
  
 using namespace yazpp_1;

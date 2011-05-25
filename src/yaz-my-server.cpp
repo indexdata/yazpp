@@ -3,6 +3,9 @@
  * See the file LICENSE for details.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdlib.h>
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>

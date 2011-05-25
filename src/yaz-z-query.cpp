@@ -3,6 +3,9 @@
  * See the file LICENSE for details.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <yaz/querytowrbuf.h>
 #include <yazpp/z-query.h>
 #include <yaz/pquery.h>

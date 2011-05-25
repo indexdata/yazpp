@@ -1,5 +1,8 @@
 // Z39.50 Result Set class
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "zoom.h"
 
 

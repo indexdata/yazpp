@@ -3,6 +3,9 @@
  * See the file LICENSE for details.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #ifdef WIN32
 #define USE_THREADS 1
 #endif

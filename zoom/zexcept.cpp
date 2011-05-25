@@ -1,5 +1,8 @@
 // Z39.50 Exception classes
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <iostream>
 #include <errno.h>
 #include <string.h>             // for strerror(), strlen(), strcpy()
