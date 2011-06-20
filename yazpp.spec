@@ -1,6 +1,6 @@
 Summary: YAZ++ package (main)
 Name: yazpp
-Version: 1.2.5
+Version: 1.2.6
 Release: 1indexdata
 License: BSD
 Group: Applications/Internet
@@ -8,7 +8,7 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-BuildRequires: pkgconfig, libyaz4-devel >= 4.1.0
+BuildRequires: pkgconfig, libyaz4-devel >= 4.2.3
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
 
@@ -18,7 +18,7 @@ YAZ++ package.
 %package -n libyazpp4
 Summary: YAZ++ and ZOOM library
 Group: Libraries
-Requires: libyaz4 >= 4.1.0
+Requires: libyaz4 >= 4.2.3
 
 %description -n libyazpp4
 Libraries for the YAZ++ package.

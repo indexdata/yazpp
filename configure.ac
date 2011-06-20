@@ -1,7 +1,7 @@
 dnl This file is part of yazpp
 dnl Copyright (C) 1998-2011 Index Data
 AC_PREREQ(2.60)
-AC_INIT([yazpp],[1.2.5],[adam@indexdata.dk])
+AC_INIT([yazpp],[1.2.6],[adam@indexdata.dk])
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
@@ -13,7 +13,7 @@ AC_PROG_CXX
 AC_HEADER_STDC
 AM_PROG_LIBTOOL
 
-YAZ_INIT([threads],[4.0.8])
+YAZ_INIT([threads],[4.2.3])
 if test -z "$YAZLIB"; then
 	AC_MSG_ERROR([YAZ development libraries missing])
 fi

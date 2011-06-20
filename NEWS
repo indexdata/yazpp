@@ -1,3 +1,10 @@
+--- 1.2.6 2011/06/20
+
+Use config.h for configure defines.
+
+Depend on YAZ 4.2.3 because of YAZ provides new facilities and these
+are needed by Metaproxy.
+
 --- 1.2.5 2011/05/06
 
 Make packages for Debian wheezy, Ubuntu natty.
