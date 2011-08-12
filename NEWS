@@ -1,3 +1,7 @@
+--- 1.2.7 2011/08/12
+
+Force YAZ 4.2.8 because it provides new functionality.
+
 --- 1.2.6 2011/06/20
 
 Use config.h for configure defines.
