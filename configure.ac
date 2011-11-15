@@ -1,7 +1,9 @@
 dnl This file is part of yazpp
 dnl Copyright (C) 1998-2011 Index Data
 AC_PREREQ(2.60)
-AC_INIT([yazpp],[1.2.7],[adam@indexdata.dk])
+AC_INIT([yazpp],
+m4_esyscmd([. ./IDMETA; echo $VERSION|tr -d '\n']),
+[adam@indexdata.dk])
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
