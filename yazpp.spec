@@ -1,6 +1,7 @@
+%define idmetaversion %(. ./IDMETA; echo $VERSION|tr -d '\n')
 Summary: YAZ++ package (main)
 Name: yazpp
-Version: 1.2.7
+Version: %{idmetaversion}
 Release: 1indexdata
 License: BSD
 Group: Applications/Internet
