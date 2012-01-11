@@ -1,5 +1,5 @@
 dnl This file is part of yazpp
-dnl Copyright (C) 1998-2011 Index Data
+dnl Copyright (C) 1998-2012 Index Data
 AC_PREREQ(2.60)
 AC_INIT([yazpp],
 m4_esyscmd([. ./IDMETA; echo $VERSION|tr -d '\n']),
