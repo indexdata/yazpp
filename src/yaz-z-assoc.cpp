@@ -218,7 +218,15 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
         yaz_log(YLOG_LOG, "PDU decode failed '%s' near byte %ld. Element %s",
                 odr_errmsg(odr_geterror(m_odr_in)),
                 (long) odr_offset(m_odr_in),
-                element ? element : "unknown");
+                element && *element ? element : "unknown");
+        yaz_log(YLOG_LOG, "Buffer length: %d", (int) len);
+        if (len > 0)
+        {
+            WRBUF w = wrbuf_alloc();
+            wrbuf_write_escaped(w, buf, len > 20 ? 20 : len);
+            yaz_log(YLOG_LOG, "Buffer content: %s", wrbuf_cstr(w));
+            wrbuf_destroy(w);
+        }
         yaz_log(YLOG_LOG, "PDU dump:");
         odr_dumpBER(yaz_log_file(), buf, len);
         return 0;
