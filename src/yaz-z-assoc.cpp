@@ -223,8 +223,8 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
         if (len > 0)
         {
             WRBUF w = wrbuf_alloc();
-            wrbuf_write_escaped(w, buf, len > 20 ? 20 : len);
-            yaz_log(YLOG_LOG, "Buffer content: %s", wrbuf_cstr(w));
+            wrbuf_write_escaped(w, buf, len > 1024 ? 1024 : len);
+            yaz_log(YLOG_LOG, "Buffer bytes: %s", wrbuf_cstr(w));
             wrbuf_destroy(w);
         }
         yaz_log(YLOG_LOG, "PDU dump:");
