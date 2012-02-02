@@ -1,3 +1,5 @@
+Log incoming HTTP package content if decoding fails.
+
 --- 1.2.7 2011/08/12
 
 Force YAZ 4.2.8 because it provides new functionality.
