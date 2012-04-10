@@ -422,6 +422,29 @@ COMSTACK PDU_Assoc::comstack(const char *type_and_host, void **vp)
 
 int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
 {
+    if (*addr == '\0')
+    {
+        m_socketObservable->deleteObserver(this);
+        m_state = Closed;
+        if (m_cs)
+        {
+            yaz_log (m_log, "PDU_Assoc::close fd=%d", cs_fileno(m_cs));
+            cs_close (m_cs);
+        }
+        m_cs = 0;
+        while (m_queue_out)
+        {
+            PDU_Queue *q_this = m_queue_out;
+            m_queue_out = m_queue_out->m_next;
+            delete q_this;
+        }
+        xfree (m_input_buf);
+        m_input_buf = 0;
+        m_input_len = 0;
+        
+        return 0;
+    }
+
     shutdown();
 
     m_PDU_Observer = observer;

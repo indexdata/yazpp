@@ -168,7 +168,6 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
         yaz_log(YLOG_WARN, "unhandled socket event. yaz_poll returned %d", res);
         yaz_log(YLOG_WARN, "no_put_events=%d no_fds=%d i=%d timeout=%d",
                 no_put_events, no_fds, i, timeout);
-        abort();
     }
 }
 
