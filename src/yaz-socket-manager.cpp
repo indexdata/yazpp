@@ -39,6 +39,15 @@ SocketManager::SocketEntry **SocketManager::lookupObserver(
     return se;
 }
 
+int SocketManager::getNumberOfObservers()
+{
+    int i = 0;
+    SocketEntry *se;
+    for (se = m_observers; se; se = se->next, i++)
+        ;
+    return i;
+}
+
 void SocketManager::addObserver(int fd, ISocketObserver *observer)
 {
     SocketEntry *se;
@@ -227,21 +236,19 @@ int SocketManager::processEvent()
     }
 
     int pass = 0;
-    while ((res = yaz_poll(fds, no_fds, timeout, 0)) < 0)
+    while ((res = yaz_poll(fds, no_fds, timeout, 0)) < 0 && pass < 10)
     {
-        if (errno != EINTR)
-        {
-            yaz_log(YLOG_ERRNO|YLOG_WARN, "yaz_poll");
-            yaz_log(YLOG_WARN, "errno=%d timeout=%d", errno, timeout);
-            if (++pass > 10)
-                return -1;
-        }
+        if (errno == EINTR)
+            continue;
+        yaz_log(YLOG_ERRNO|YLOG_WARN, "yaz_poll");
+        yaz_log(YLOG_WARN, "errno=%d timeout=%d", errno, timeout);
     }
 
-    inspect_poll_result(res, fds, no_fds, timeout);
+    if (res >= 0)
+        inspect_poll_result(res, fds, no_fds, timeout);
 
     delete [] fds;
-    return 1;
+    return res >= 0 ? 1 : -1;
 }
 
 

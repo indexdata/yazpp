@@ -81,6 +81,7 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
                                  int timeout);
     /// Process one event. return > 0 if event could be processed;
     int processEvent();
+    int getNumberOfObservers();
     SocketManager();
     virtual ~SocketManager();
 };
