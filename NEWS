@@ -1,3 +1,8 @@
+--- 1.3.0 2012/04/25
+
+Add facility to allow a server to close its listener. PDU_Assoc::listen
+with addr=="" stops listener.
+
 --- 1.2.8 2012/02/02
 
 Log incoming HTTP package content if decoding fails.
