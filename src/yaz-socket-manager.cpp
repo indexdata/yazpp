@@ -124,10 +124,21 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
     time_t now = time(0);
     int i;
     int no_put_events = 0;
-    SocketEntry *p;
+    int no_lost_observers = 0;
 
-    for (i = 0, p = m_observers; p; p = p->next, i++)
+    for (i = 0; i < no_fds; i++)
     {
+        SocketEntry *p;
+        for (p = m_observers; p; p = p->next)
+            if (p->fd == fds[i].fd)
+                break;
+        if (!p)
+        {
+            // m_observers list changed since poll started
+            no_lost_observers++;
+            continue;
+        }
+
         enum yaz_poll_mask output_mask = fds[i].output_mask;
 
         int mask = 0;
@@ -172,11 +183,14 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
     }
     else
     {
-        // bug #2035
-        
-        yaz_log(YLOG_WARN, "unhandled socket event. yaz_poll returned %d", res);
-        yaz_log(YLOG_WARN, "no_put_events=%d no_fds=%d i=%d timeout=%d",
-                no_put_events, no_fds, i, timeout);
+        if (no_lost_observers == 0)
+        {
+            // bug #2035
+            yaz_log(YLOG_WARN, "unhandled socket event. yaz_poll returned %d",
+                    res);
+            yaz_log(YLOG_WARN, "no_put_events=%d no_fds=%d i=%d timeout=%d",
+                    no_put_events, no_fds, i, timeout);
+        }
     }
 }
 
