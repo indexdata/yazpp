@@ -253,7 +253,10 @@ int SocketManager::processEvent()
     while ((res = yaz_poll(fds, no_fds, timeout, 0)) < 0 && pass < 10)
     {
         if (errno == EINTR)
-            continue;
+        {
+            delete [] fds;
+            return 1;
+        }
         yaz_log(YLOG_ERRNO|YLOG_WARN, "yaz_poll");
         yaz_log(YLOG_WARN, "errno=%d timeout=%d", errno, timeout);
     }
