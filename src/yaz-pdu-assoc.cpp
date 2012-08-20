@@ -389,6 +389,8 @@ int PDU_Assoc::flush_PDU()
         yaz_log(m_log, "maskObserver 8");
         m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
                                          SOCKET_OBSERVE_EXCEPT);
+        if (m_session_is_dead)
+            shutdown();
     }
     return r;
 }
