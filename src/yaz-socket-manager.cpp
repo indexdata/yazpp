@@ -32,7 +32,7 @@ SocketManager::SocketEntry **SocketManager::lookupObserver(
     ISocketObserver *observer)
 {
     SocketEntry **se;
-    
+
     for (se = &m_observers; *se; se = &(*se)->next)
         if ((*se)->observer == observer)
             break;
@@ -81,7 +81,7 @@ void SocketManager::deleteObserver(ISocketObserver *observer)
 void SocketManager::deleteObservers()
 {
     SocketEntry *se = m_observers;
-    
+
     while (se)
     {
         SocketEntry *se_next = se->next;
@@ -150,7 +150,7 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
 
         if (output_mask & yaz_poll_except)
             mask |= SOCKET_OBSERVE_EXCEPT;
-        
+
         if (mask)
         {
             SocketEvent *event = new SocketEvent;
@@ -172,7 +172,7 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
             event->event = SOCKET_OBSERVE_TIMEOUT;
             putEvent (event);
             no_put_events++;
-            
+
         }
     }
     SocketEvent *event = getEvent();
@@ -241,7 +241,7 @@ int SocketManager::processEvent()
             if (timeout == -1 || timeout_this < timeout)
                 timeout = timeout_this;
             p->timeout_this = timeout_this;
-            yaz_log (m_log, "SocketManager::select timeout_this=%d", 
+            yaz_log (m_log, "SocketManager::select timeout_this=%d",
                      p->timeout_this);
         }
         else

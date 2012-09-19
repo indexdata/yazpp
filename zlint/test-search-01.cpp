@@ -99,14 +99,14 @@ Zlint_code Zlint_test_search_01::sendTest(Zlint *z)
             sr->query->which = Z_Query_type_1;
             Z_RPNQuery *rpn;
             YAZ_PQF_Parser pqf_parser = yaz_pqf_create ();
-            
+
             z->getDatabase(&sr->databaseNames, &sr->num_databaseNames);
-            
+
             rpn = yaz_pqf_parse(pqf_parser, z->odr_encode(),
                                 try_query[m_query_no]);
-            
+
             yaz_pqf_destroy (pqf_parser);
-            
+
             if (!rpn)
             {
                 z->msg_check_fail("Query %s invalid", try_query[m_query_no]);
@@ -149,7 +149,7 @@ Zlint_code Zlint_test_search_01::sendTest(Zlint *z)
             const char *setstring = "default";
             int len;
             Z_SortRequest *sr = apdu->u.sortRequest;
-            
+
             sr->num_inputResultSetNames = 1;
             sr->num_inputResultSetNames = 1;
             sr->inputResultSetNames = (Z_InternationalString **)
@@ -189,8 +189,8 @@ Zlint_code Zlint_test_search_01::recv_gdu(Zlint *z, Z_GDU *gdu)
              gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_searchResponse)
     {
         Z_SearchResponse *sr = gdu->u.z3950->u.searchResponse;
-        if (sr->records && (sr->records->which == Z_Records_NSD 
-                            || 
+        if (sr->records && (sr->records->which == Z_Records_NSD
+                            ||
                             sr->records->which == Z_Records_multipleNSD))
             m_query_no++;
         else if (!sr->resultCount || *sr->resultCount == 0)
@@ -204,12 +204,12 @@ Zlint_code Zlint_test_search_01::recv_gdu(Zlint *z, Z_GDU *gdu)
         }
         return sendTest(z);
     }
-    else if (gdu->which == Z_GDU_Z3950 && 
+    else if (gdu->which == Z_GDU_Z3950 &&
              gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_presentResponse)
     {
         Z_PresentResponse *sr = gdu->u.z3950->u.presentResponse;
-        if (sr->records && (sr->records->which == Z_Records_NSD 
-                            || 
+        if (sr->records && (sr->records->which == Z_Records_NSD
+                            ||
                             sr->records->which == Z_Records_multipleNSD))
         {
             z->msg_check_ok();
@@ -257,7 +257,7 @@ Zlint_code Zlint_test_search_01::recv_gdu(Zlint *z, Z_GDU *gdu)
         m_record_syntax_no++;
         return sendTest(z);
     }
-    else if (gdu->which == Z_GDU_Z3950 && 
+    else if (gdu->which == Z_GDU_Z3950 &&
              gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_sortResponse)
     {
         Z_SortResponse *sr =  gdu->u.z3950->u.sortResponse;

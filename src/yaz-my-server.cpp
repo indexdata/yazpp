@@ -194,14 +194,14 @@ int main(int argc, char **argv)
     char *prog = *argv;
     const char *addr = "tcp:@:9999";
     char *apdu_log = 0;
-    
+
     SocketManager mySocketManager;
-    
+
     PDU_Assoc *my_PDU_Assoc = 0;
-    
+
     MyServer *z = 0;
     int ret;
-    
+
     while ((ret = options("a:v:T", argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 #else
     my_PDU_Assoc = new PDU_Assoc(&mySocketManager);
 #endif
-    
+
     z = new MyServer(my_PDU_Assoc);
     z->server(addr);
     if (apdu_log)

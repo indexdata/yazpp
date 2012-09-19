@@ -61,16 +61,16 @@ void Z_Server::recv_GDU (Z_GDU *apdu, int len)
 }
 
 void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
-{   
+{
     Z_Server_Facility_Info *f = m_facilities;
-    
+
     if (apdu_request->which == Z_APDU_initRequest)
     {
         Z_APDU *apdu_response = create_Z_PDU(Z_APDU_initResponse);
 
         Z_InitRequest *req = apdu_request->u.initRequest;
         Z_InitResponse *resp = apdu_response->u.initResponse;
-        
+
         if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
         {
             ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
@@ -135,7 +135,7 @@ void Z_ServerUtility::create_surrogateDiagnostics(
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (odr, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
         odr_malloc (odr, sizeof(*dr));
-    
+
     yaz_log(YLOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     *err = error;
     rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
@@ -180,11 +180,11 @@ void Z_ServerUtility::create_diagnostics (
     Z_DiagRec *drec = (Z_DiagRec *) odr_malloc (odr, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
         odr_malloc (odr, sizeof(*dr));
-    
+
     *num = 1;
     *dreca = (Z_DiagRec **) odr_malloc (odr, sizeof(*dreca));
     (*dreca)[0] = drec;
-        
+
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
     dr->diagnosticSetId = odr_oiddup(odr, yaz_oid_diagset_bib_1);

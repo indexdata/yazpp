@@ -91,7 +91,7 @@ void MyClient::failNotify()
 
 IPDU_Observer *MyClient::sessionNotify(IPDU_Observable *the_PDU_Observable,
                                        int fd)
-{ 
+{
     return new MyClient(the_PDU_Observable, m_socketManager);
 }
 
@@ -193,7 +193,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
     if (r->direct_reference)
     {
         char name_oid_str[OID_STR_MAX];
-        const char *name_oid = yaz_oid_to_string_buf(r->direct_reference, 0, 
+        const char *name_oid = yaz_oid_to_string_buf(r->direct_reference, 0,
                                                      name_oid_str);
         printf("Record type: %s\n", name_oid ? name_oid : "unknown");
     }
@@ -223,7 +223,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
                         (size_t) r->u.sutrs->len);
     else if (r->which == Z_External_grs1)
         recv_genericRecord(r->u.grs1);
-    else 
+    else
     {
         printf("Unknown record representation.\n");
         if (!z_External(odr_print(), &r, 0, 0))
@@ -231,7 +231,7 @@ void MyClient::recv_record(Z_DatabaseRecord *record, int offset,
             odr_perror(odr_print(), "Printing external");
             odr_reset(odr_print());
         }
-    }    
+    }
 }
 
 void MyClient::recv_namePlusRecord (Z_NamePlusRecord *zpr, int offset)
@@ -414,14 +414,14 @@ int MyClient::processCommand(const char *commandLine)
         {"proxy", &MyClient::cmd_proxy, "<host>:[':'<port>]"},
         {0,0,0}
     };
-    
+
     if (sscanf(commandLine, "%s %[^;]", cmdStr, cmdArgs) < 1)
         return 1;
     int i;
     for (i = 0; cmd[i].cmd; i++)
         if (!strncmp(cmd[i].cmd, cmdStr, strlen(cmdStr)))
             break;
-    
+
     int res = 1;
     if (cmd[i].cmd) // Invoke command handler
         res = (this->*cmd[i].fun)(cmdArgs);
@@ -450,7 +450,7 @@ const char *MyClient::getCommand()
     strncpy(m_thisCommand,line_in, 1023);
     m_thisCommand[1023] = '\0';
     free (line_in);
-#else    
+#else
     // Read using fgets(3)
     printf (C_PROMPT);
     fflush(stdout);

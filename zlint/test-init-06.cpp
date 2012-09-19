@@ -25,7 +25,7 @@ Zlint_code Zlint_test_init_06::init(Zlint *z)
     Z_InitRequest *init = apdu->u.initRequest;
 
     z->msg_check_for("for init options");
-    
+
     /* set all options.. see what target really supports .. */
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
     ODR_MASK_ZERO(init->options);
@@ -48,7 +48,7 @@ Zlint_code Zlint_test_init_06::recv_gdu(Zlint *z, Z_GDU *gdu)
         gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
     {
         Z_InitResponse *init = gdu->u.z3950->u.initResponse;
-        
+
         if (init->options)
         {
             int i;

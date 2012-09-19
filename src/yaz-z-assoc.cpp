@@ -24,7 +24,7 @@ int Z_Assoc::yaz_init_func()
     return 1;
 }
 
-int Z_Assoc::yaz_init_flag =  Z_Assoc::yaz_init_func();  
+int Z_Assoc::yaz_init_flag =  Z_Assoc::yaz_init_func();
 
 Z_Assoc::Z_Assoc(IPDU_Observable *the_PDU_Observable)
 {
@@ -49,7 +49,7 @@ void Z_Assoc::set_APDU_log(const char *fname)
     delete [] m_APDU_fname;
     m_APDU_fname = 0;
 
-    if (fname) 
+    if (fname)
     {
         m_APDU_fname = new char[strlen(fname)+1];
         strcpy (m_APDU_fname, fname);
@@ -77,7 +77,7 @@ const char *Z_Assoc::get_APDU_log()
 
 Z_Assoc::~Z_Assoc()
 {
-    m_PDU_Observable->destroy();  
+    m_PDU_Observable->destroy();
     delete m_PDU_Observable;
     odr_destroy (m_odr_print);     // note: also runs fclose on m_APDU_file ..
     odr_destroy (m_odr_out);
@@ -120,7 +120,7 @@ Z_ReferenceId **Z_Assoc::get_referenceIdP(Z_APDU *apdu)
     switch (apdu->which)
     {
     case  Z_APDU_initRequest:
-        return &apdu->u.initRequest->referenceId; 
+        return &apdu->u.initRequest->referenceId;
     case  Z_APDU_initResponse:
         return &apdu->u.initResponse->referenceId;
     case  Z_APDU_searchRequest:
@@ -258,7 +258,7 @@ int Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
 
     if (!r) // decoding failed. Get the failed element
         element = odr_getelement(m_odr_out);
-    
+
     if (m_APDU_yazlog || !r)
     {
         if (!r)

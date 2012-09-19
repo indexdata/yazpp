@@ -37,7 +37,7 @@ Zlint_code Zlint_test_scan_01::init(Zlint *z)
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
     ODR_MASK_SET(init->options, Z_Options_namedResultSets);
     ODR_MASK_SET(init->options, Z_Options_scan);
-    
+
     int r = z->send_Z_PDU(apdu, &len);
     if (r < 0)
     {
@@ -61,9 +61,9 @@ Zlint_code Zlint_test_scan_01::sendTest(Zlint *z)
                                                  z->odr_encode(),
                                                  &sr->attributeSet,
                                                  try_scan[m_scan_no]);
-        
+
         z->getDatabase(&sr->databaseNames, &sr->num_databaseNames);
-        
+
         yaz_pqf_destroy (pqf_parser);
         z->send_Z_PDU(apdu, &len);
         return TEST_CONTINUE;

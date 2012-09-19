@@ -28,7 +28,7 @@
 #include <yaz/proto.h>
 
 namespace yazpp_1 {
-/** Z39.50 Databases list 
+/** Z39.50 Databases list
  */
 class YAZ_EXPORT Yaz_Z_Databases {
 public:

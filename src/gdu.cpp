@@ -42,7 +42,7 @@ void GDU::base(Z_GDU *gdu, ODR encode)
     {
         int len;
         char *buf = odr_getbuf(encode, &len, 0);
-        
+
         odr_setbuf(m_decode, buf, len, 0);
         z_GDU(m_decode, &m_gdu, 0, 0);
     }

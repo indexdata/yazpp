@@ -35,9 +35,9 @@ private:
     int m_test_reported;
 };
 
-Zlint::Zlint(IPDU_Observable *the_PDU_Observable) : 
+Zlint::Zlint(IPDU_Observable *the_PDU_Observable) :
     Z_Assoc(the_PDU_Observable)
-    
+
 {
     m_PDU_Observable = the_PDU_Observable;
     m_host = 0;
@@ -149,7 +149,7 @@ IPDU_Observer *Zlint::sessionNotify(
 
 Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 {
-    Z_ReferenceId *id = 
+    Z_ReferenceId *id =
         (Z_ReferenceId *) odr_malloc(odr_encode(), sizeof(*id));
     id->size = id->len = len;
     id->buf = (unsigned char*) odr_malloc(odr_encode(), len);

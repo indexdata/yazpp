@@ -111,15 +111,15 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
 {
     bool_t *sr = (bool_t *)odr_malloc (odr_encode(), sizeof(*sr));
     *sr = 1;
-    
+
     int toget = 0;
-    
+
     Z_RecordComposition comp, *compp = 0;
     int hits = *res->resultCount;
-    
+
     Odr_int *nulint = (Odr_int *)odr_malloc (odr_encode(), sizeof(*nulint));
     *nulint = 0;
-    
+
     comp.which = Z_RecordComp_simple;
     /* how many records does the user agent want, then? */
     if (hits <= *req->smallSetUpperBound)
@@ -136,14 +136,14 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
         if ((comp.u.simple = req->mediumSetElementSetNames))
             compp = &comp;
     }
-    
+
     if (toget && !res->records)
     {
         res->presentStatus = (Odr_int *)
             odr_malloc (odr_encode(), sizeof(Odr_int));
         *res->presentStatus = Z_PresentStatus_success;
         res->records =
-            pack_records(s, req->resultSetName, 1, toget, compp, 
+            pack_records(s, req->resultSetName, 1, toget, compp,
                          res->nextResultSetPosition,
                          res->presentStatus,
                          req->preferredRecordSyntax);
@@ -171,7 +171,7 @@ void Yaz_Facility_Retrieval::fetch_via_present (Z_Server *s,
                                                 Z_PresentResponse *res)
 {
     res->records =
-        pack_records (s, req->resultSetId,*req->resultSetStartPoint, 
+        pack_records (s, req->resultSetId,*req->resultSetStartPoint,
                       *req->numberOfRecordsRequested,
                       req->recordComposition,
                       res->nextResultSetPosition,
@@ -187,7 +187,7 @@ int Yaz_Facility_Retrieval::init(Z_Server *s, Z_InitRequest *initRequest,
 {
     Z_Options *req = initRequest->options;
     Z_Options *res = initResponse->options;
-    
+
     if (ODR_MASK_GET(req, Z_Options_search))
         ODR_MASK_SET(res, Z_Options_search);
     if (ODR_MASK_GET(req, Z_Options_present))
@@ -208,7 +208,7 @@ ODR Yaz_Facility_Retrieval::odr_decode()
 }
 
 int Yaz_Facility_Retrieval::recv(Z_Server *s, Z_APDU *apdu_request)
-{   
+{
     Z_APDU *apdu_response;
     m_odr_encode = s->odr_encode();
     m_odr_decode = s->odr_decode();

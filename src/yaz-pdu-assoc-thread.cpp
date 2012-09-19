@@ -47,7 +47,7 @@ PDU_AssocThread::PDU_AssocThread(
     ISocketObservable *socketObservable)
     : PDU_Assoc(socketObservable)
 {
-    
+
 }
 
 void worker::run()
@@ -64,7 +64,7 @@ void worker::run()
 void __cdecl
 #else
 void *
-#endif 
+#endif
 events(void *p)
 {
     worker *w = (worker *) p;
@@ -83,7 +83,7 @@ void PDU_AssocThread::childNotify(COMSTACK cs)
     /// Clone PDU Observer
     new_observable->m_PDU_Observer =
         m_PDU_Observer->sessionNotify(new_observable, cs_fileno(cs));
-    
+
     if (!new_observable->m_PDU_Observer)
     {
         new_observable->shutdown();

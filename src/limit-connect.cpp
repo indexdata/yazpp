@@ -39,11 +39,11 @@ using namespace yazpp_1;
 
 struct LimitConnect::Peer {
     friend class LimitConnect;
-    
+
     Peer(int sz, const char *peername);
     ~Peer();
     void add_connect();
-    
+
     char *m_peername;
     TimeStat m_bw;
     Peer *m_next;

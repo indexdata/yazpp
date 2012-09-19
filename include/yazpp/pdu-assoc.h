@@ -42,7 +42,7 @@ namespace yazpp_1 {
 class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     friend class PDU_AssocThread;
  private:
-    enum { 
+    enum {
         Connecting,
         Listen,
         Ready,

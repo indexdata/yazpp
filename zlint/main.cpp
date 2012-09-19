@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
     SocketManager mySocketManager;
     Zlint z(new PDU_Assoc(&mySocketManager));
- 
+
     if (argc > 1)
         z.set_host(argv[1]);
     else

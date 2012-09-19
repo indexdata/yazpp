@@ -72,7 +72,7 @@ void RecordCache::copy_presentRequest(Z_PresentRequest *pr)
 {
     ODR encode = odr_createmem(ODR_ENCODE);
     ODR decode = odr_createmem(ODR_DECODE);
-    
+
     m_searchRequest = 0;
     m_presentRequest = 0;
     int v = z_PresentRequest (encode, &pr, 1, 0);
@@ -133,7 +133,7 @@ int RecordCache::match (RecordCache_Entry *entry,
     int match = 0;
     ODR o1 = odr_createmem(ODR_ENCODE);
     ODR o2 = odr_createmem(ODR_ENCODE);
-    
+
     z_RecordComposition(o1, &comp, 1, 0);
     z_RecordComposition(o2, &entry->m_comp, 1, 0);
 
@@ -141,12 +141,12 @@ int RecordCache::match (RecordCache_Entry *entry,
     char *buf1 = odr_getbuf(o1, &len1, 0);
     int len2 = -1;
     char *buf2 = odr_getbuf(o2, &len2, 0);
-    
+
     if (buf1 && buf2 && len1 && len1 == len2 && !memcmp(buf1, buf2, len1))
         match = 1;
     else if (!buf1 && !buf2 && !len1 && !len2)
         match = 1;
-    
+
     odr_destroy(o1);
     odr_destroy(o2);
     if (!match)

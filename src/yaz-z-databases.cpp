@@ -27,7 +27,7 @@ Yaz_Z_Databases::~Yaz_Z_Databases()
 void Yaz_Z_Databases::set (int num, const char **db)
 {
     nmem_reset (nmem);
- 
+
     m_list = (char **) nmem_malloc (nmem, num * sizeof(char*));
     m_num = num;
     for (int i = 0; i<num; i++)

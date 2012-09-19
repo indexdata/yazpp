@@ -31,7 +31,7 @@ Zlint_code Zlint_test_init_05::init(Zlint *z)
     Z_InitRequest *init = apdu->u.initRequest;
 
     z->msg_check_for("for double init");
-    
+
     /* send double init with differnet refID's */
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
     ODR_MASK_SET(init->options, Z_Options_concurrentOperations);
@@ -43,13 +43,13 @@ Zlint_code Zlint_test_init_05::init(Zlint *z)
         z->msg_check_fail("unable to send init request");
         return TEST_FINISHED;
     }
-        
+
     apdu = z->create_Z_PDU(Z_APDU_initRequest);
     init = apdu->u.initRequest;
-    
+
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
     ODR_MASK_SET(init->options, Z_Options_concurrentOperations);
-    
+
     init->referenceId = z->mk_refid(REFID_BUF2, REFID_LEN2);
 
     r = z->send_Z_PDU(apdu, &len);
@@ -68,7 +68,7 @@ Zlint_code Zlint_test_init_05::recv_gdu(Zlint *z, Z_GDU *gdu)
     {
         Z_InitResponse *init = gdu->u.z3950->u.initResponse;
         int result = init->result ? *init->result : 0;
-        
+
         if (m_init_response_no == 0)
         {
             if (!init->referenceId)
@@ -95,7 +95,7 @@ Zlint_code Zlint_test_init_05::recv_gdu(Zlint *z, Z_GDU *gdu)
                 z->msg_check_fail("reference ID does not match from "
                                   "second init response");
         }
-        
+
         if (!result)
         {
             z->msg_check_fail("init rejected (result false)");

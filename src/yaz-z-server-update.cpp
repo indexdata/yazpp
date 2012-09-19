@@ -16,14 +16,14 @@ int Yaz_Facility_Update::init(Z_Server *s, Z_InitRequest *initRequest,
 {
     Z_Options *req = initRequest->options;
     Z_Options *res = initResponse->options;
-    
+
     if (ODR_MASK_GET(req, Z_Options_extendedServices))
         ODR_MASK_SET(res, Z_Options_extendedServices);
     return 1;
 }
 
 int Yaz_Facility_Update::recv(Z_Server *s, Z_APDU *apdu_request)
-{   
+{
     Z_APDU *apdu_response;
 
     if (apdu_request->which != Z_APDU_extendedServicesRequest)

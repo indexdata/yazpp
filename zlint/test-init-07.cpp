@@ -28,7 +28,7 @@ Zlint_code Zlint_test_init_07::init(Zlint *z)
     Z_OtherInformation **oi;
 
     z->msg_check_for("for character set negotiation");
-    
+
     /* set all options.. see what target really supports .. */
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
     yaz_oi_APDU(apdu, &oi);
@@ -48,13 +48,13 @@ Zlint_code Zlint_test_init_07::init(Zlint *z)
             "ISO-8859-1"
         };
         char *yazLang = 0;
-        
+
         if ((p0=yaz_oi_update(oi, z->odr_encode(), NULL, 0, 0))) {
             ODR_MASK_SET(init->options, Z_Options_negotiationModel);
-            
+
             p0->which = Z_OtherInfo_externallyDefinedInfo;
             p0->information.externallyDefinedInfo =
-                
+
                 yaz_set_proposal_charneg(
                     z->odr_encode(),
                     negotiationCharset, 5,
@@ -81,13 +81,13 @@ Zlint_code Zlint_test_init_07::recv_gdu(Zlint *z, Z_GDU *gdu)
         {
             Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(init->otherInfo);
-            
+
             if (p) {
-                
+
                 char *charset=NULL, *lang=NULL;
                 int selected;
                 NMEM m = nmem_create();
-                
+
                 yaz_get_response_charneg(m, p, &charset, &lang,
                                          &selected);
                 z->msg_check_ok();

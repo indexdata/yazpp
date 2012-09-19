@@ -30,7 +30,7 @@ Zlint_code Zlint_test_init_01::init(Zlint *z)
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(init->protocolVersion, Z_ProtocolVersion_3);
-    
+
     int r = z->send_Z_PDU(apdu, &len);
     if (r < 0)
     {

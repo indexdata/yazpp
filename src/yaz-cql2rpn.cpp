@@ -38,7 +38,7 @@ bool Yaz_cql2rpn::parse_spec_file(const char *fname, int *error)
     return m_transform ? true : false;
 }
 
-int Yaz_cql2rpn::query_transform(const char *cql_query, 
+int Yaz_cql2rpn::query_transform(const char *cql_query,
                                  Z_RPNQuery **rpnquery, ODR o,
                                  char **addinfop)
 {
@@ -55,7 +55,7 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
     else
     {
         char rpn_buf[10240];
-        r = cql_transform_buf(m_transform, cql_parser_result(cp), 
+        r = cql_transform_buf(m_transform, cql_parser_result(cp),
                               rpn_buf, sizeof(rpn_buf)-1);
         if (!r)
         {
@@ -75,7 +75,7 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
         {
             r = cql_transform_error(m_transform, &addinfo);
         }
-    }   
+    }
     cql_parser_destroy(cp);
     if (addinfo)
         *addinfop = odr_strdup(o, addinfo);

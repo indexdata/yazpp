@@ -31,7 +31,7 @@
 #include <yaz/yconfig.h>
 
 namespace yazpp_1 {
-    
+
     enum SocketObserve {
         SOCKET_OBSERVE_READ=1,
         SOCKET_OBSERVE_WRITE=2,
@@ -43,7 +43,7 @@ namespace yazpp_1 {
    Forward reference
 */
     class ISocketObserver;
-    
+
 /** Socket Observable.
     This interface implements notification of socket events.
     The module interested in (observing) the sockets
@@ -76,7 +76,7 @@ namespace yazpp_1 {
                                      int timeout)=0;
         virtual ~ISocketObservable();
     };
-    
+
 /** Socket Observer.
     The ISocketObserver interface implements a module interested
     socket events. Look for objects that implements the
@@ -88,7 +88,7 @@ namespace yazpp_1 {
         virtual void socketNotify(int event) = 0;
         virtual ~ISocketObserver();
     };
-    
+
 };
 #endif
 /*

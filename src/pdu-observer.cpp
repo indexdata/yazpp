@@ -7,7 +7,7 @@
 #include <config.h>
 #endif
 #include <yazpp/pdu-observer.h>
- 
+
 using namespace yazpp_1;
 
 IPDU_Observable::~IPDU_Observable()

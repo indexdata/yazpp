@@ -57,7 +57,7 @@ namespace ZOOM {
     }
 
 
-    
+
     bib1Exception::bib1Exception(int errcode, const std::string &addinfo) :
         exception(errcode), info(addinfo) {
         // std::cerr << "WARNING: made bib1Exception(" << errcode << "=" <<

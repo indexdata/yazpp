@@ -41,8 +41,8 @@ namespace yazpp_1 {
         void set_period(int sec);
     private:
         struct Peer;
-        
-        int m_period; 
+
+        int m_period;
         Peer *m_peers;
         Peer **lookup(const char *peername);
     };

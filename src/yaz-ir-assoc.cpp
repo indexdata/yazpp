@@ -95,7 +95,7 @@ void IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
 void IR_Assoc::set_preferredRecordSyntax (const char *syntax)
 {
     xfree(m_preferredRecordSyntax);
-    m_preferredRecordSyntax = 0;    
+    m_preferredRecordSyntax = 0;
     if (syntax && *syntax)
         m_preferredRecordSyntax = xstrdup(syntax);
 }
@@ -165,7 +165,7 @@ void IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
         recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-        yaz_log (m_log, "recv searchResponse"); 
+        yaz_log (m_log, "recv searchResponse");
         recv_searchResponse(apdu->u.searchResponse);
         break;
     case Z_APDU_presentRequest:
@@ -206,7 +206,7 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
     assert (req->otherInfo == 0);
     if (m_cookie)
     {
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
                                    1, m_cookie);
         assert (req->otherInfo);
     }
@@ -224,8 +224,8 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
     return send_Z_PDU(apdu, 0);
 }
 
-int IR_Assoc::send_presentRequest(Odr_int start, 
-                                  Odr_int number, 
+int IR_Assoc::send_presentRequest(Odr_int start,
+                                  Odr_int number,
                                   char* pResultSetId,
                                   char* pRefId)
 {
@@ -254,7 +254,7 @@ int IR_Assoc::send_presentRequest(Odr_int start,
     }
 
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
                                    1, m_cookie);
 
     if ( pRefId )
@@ -366,7 +366,7 @@ int IR_Assoc::send_initRequest(char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
-    
+
     ODR_MASK_SET(req->options, Z_Options_search);
     ODR_MASK_SET(req->options, Z_Options_present);
     ODR_MASK_SET(req->options, Z_Options_namedResultSets);
@@ -386,10 +386,10 @@ int IR_Assoc::send_initRequest(char* pRefId)
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy,
                                    1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
                                    1, m_cookie);
     return send_Z_PDU(apdu, 0);
 }
@@ -412,17 +412,17 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     {
         *req->deleteFunction = Z_DeleteResultSetRequest_all;
     }
-    
+
     if ( pRefId )
     {
         req->referenceId = getRefID(pRefId);
     }
 
     if (m_proxy && m_host)
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_proxy,
                                    1, m_host);
     if (m_cookie)
-        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie, 
+        set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
                                    1, m_cookie);
 
     return send_Z_PDU(apdu, 0);

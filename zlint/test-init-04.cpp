@@ -47,7 +47,7 @@ Zlint_code Zlint_test_init_04::recv_gdu(Zlint *z, Z_GDU *gdu)
         gdu->u.z3950 && gdu->u.z3950->which == Z_APDU_initResponse)
     {
         Z_InitResponse *init = gdu->u.z3950->u.initResponse;
-        
+
         if (!init->referenceId)
             z->msg_check_fail("missing referenceID from init response");
         else if (init->referenceId->len != REFID_LEN1

@@ -116,7 +116,7 @@ void PDU_Assoc::socketNotify(int event)
                 m_state = Ready;
                 flush_PDU();
             }
-            else  
+            else
             {   // accept still incomplete.
                 yaz_log(m_log, "maskObserver 2");
                 m_socketObservable->maskObserver(this,
@@ -125,7 +125,7 @@ void PDU_Assoc::socketNotify(int event)
         }
         break;
     case Connecting:
-        if (event & SOCKET_OBSERVE_READ && 
+        if (event & SOCKET_OBSERVE_READ &&
             event & SOCKET_OBSERVE_WRITE)
         {
             // For Unix: if both read and write is set, then connect failed.
@@ -160,7 +160,7 @@ void PDU_Assoc::socketNotify(int event)
         {
             int res;
             COMSTACK new_line;
-            
+
             if ((res = cs_listen(m_cs, 0, 0)) == 1)
                 return;
             if (res < 0)
@@ -170,7 +170,7 @@ void PDU_Assoc::socketNotify(int event)
             }
             if (!(new_line = cs_accept(m_cs)))
                 return;
-            /* 1. create socket-manager 
+            /* 1. create socket-manager
                2. create pdu-assoc
                3. create top-level object
                     setup observer for child fileid in pdu-assoc
@@ -220,7 +220,7 @@ void PDU_Assoc::socketNotify(int event)
                 PDU_Queue **pq = &m_queue_in;
                 while (*pq)
                     pq = &(*pq)->m_next;
-                
+
                 *pq = new PDU_Queue(m_input_buf, res);
 #else
                 m_PDU_Observer->recv_PDU(m_input_buf, res);
@@ -332,7 +332,7 @@ PDU_Assoc::PDU_Queue::~PDU_Queue()
 int PDU_Assoc::flush_PDU()
 {
     int r;
-    
+
     if (m_state != Ready && m_state != Writing)
     {
         yaz_log (m_log, "YAZ_PDU_Assoc::flush_PDU, not ready");
@@ -377,7 +377,7 @@ int PDU_Assoc::flush_PDU()
         yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put %d bytes fd=%d (inc)",
                  q->m_len, cs_fileno(m_cs));
         return r;
-    } 
+    }
     yaz_log (m_log, "PDU_Assoc::flush_PDU cs_put %d bytes", q->m_len);
     // whole packet sent... delete this and proceed to next ...
     m_queue_out = q->m_next;
@@ -400,7 +400,7 @@ int PDU_Assoc::send_PDU(const char *buf, int len)
     yaz_log (m_log, "PDU_Assoc::send_PDU");
     PDU_Queue **pq = &m_queue_out;
     int is_idle = (*pq ? 0 : 1);
-    
+
     if (!m_cs)
     {
         yaz_log (m_log, "PDU_Assoc::send_PDU failed, m_cs == 0");
@@ -443,7 +443,7 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
         xfree (m_input_buf);
         m_input_buf = 0;
         m_input_len = 0;
-        
+
         return 0;
     }
 
@@ -533,7 +533,7 @@ void PDU_Assoc::childNotify(COMSTACK cs)
 {
     PDU_Assoc *new_observable =
         new PDU_Assoc (m_socketObservable, cs);
-    
+
     // Clone PDU Observer
     new_observable->m_PDU_Observer = m_PDU_Observer->sessionNotify
         (new_observable, cs_fileno(cs));

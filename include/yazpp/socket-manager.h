@@ -58,7 +58,7 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     };
     SocketEvent *m_queue_front;
     SocketEvent *m_queue_back;
-    
+
     SocketEntry **lookupObserver
         (ISocketObserver *observer);
     SocketEvent *getEvent();

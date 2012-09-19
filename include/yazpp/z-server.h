@@ -39,7 +39,7 @@ class YAZ_EXPORT Z_ServerUtility {
     void create_surrogateDiagnostics(ODR odr, Z_NamePlusRecord *rec,
                                      const char *dbname, int error,
                                      char *const addinfo);
-    
+
     Z_Records *create_nonSurrogateDiagnostics (ODR odr, int error,
                                                const char *addinfo);
 
