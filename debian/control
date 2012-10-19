@@ -1,5 +1,5 @@
 Source: yazpp
-Section: devel
+Section: libdevel
 Priority: optional
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Standards-Version: 3.6.2
@@ -15,7 +15,7 @@ Description: YAZ++ and ZOOM library
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
 Package: libyazpp4-dev
-Section: devel
+Section: libdevel
 Architecture: any
 Conflicts: libyazpp-dev, libyazpp2-dev, libyazpp3-dev
 Depends: libyazpp4 (= ${Source-Version}), libyaz4-dev
