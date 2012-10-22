@@ -160,15 +160,12 @@ Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 int Zlint::initResponseGetVersion(Z_InitResponse *init)
 {
     int no = 0;
-    int off = 0;
     int i;
     for (i = 0; i<12; i++)
         if (ODR_MASK_GET(init->protocolVersion, no))
         {
             no = i+1;
         }
-        else
-            off = 1;
     return no;
 }
 
