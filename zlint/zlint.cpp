@@ -79,13 +79,12 @@ void Zlint::timeoutNotify()
     {
         if (m_cur_test->m_t->recv_fail(this, 2) != TEST_FINISHED)
         {
-            close();
             client(m_host);
             timeout(30);
             return;
         }
+        close_goto_next();
     }
-    close_goto_next();
 }
 
 void Zlint::failNotify()
@@ -94,13 +93,12 @@ void Zlint::failNotify()
     {
         if (m_cur_test->m_t->recv_fail(this, 1) != TEST_FINISHED)
         {
-            close();
             client(m_host);
             timeout(30);
             return;
         }
+        close_goto_next();
     }
-    close_goto_next();
 }
 
 void Zlint::connectNotify()
@@ -109,8 +107,8 @@ void Zlint::connectNotify()
     {
         if (m_cur_test->m_t->init(this) != TEST_FINISHED)
             return;
+        close_goto_next();
     }
-    close_goto_next();
 }
 
 void Zlint::recv_GDU(Z_GDU *gdu, int len)
@@ -122,23 +120,25 @@ void Zlint::recv_GDU(Z_GDU *gdu, int len)
             return;
         if (r == TEST_REOPEN)
         {
-            close();
             client(m_host);
             timeout(30);
             return;
         }
+        close_goto_next();
     }
-    close_goto_next();
 }
 
 void Zlint::close_goto_next()
 {
-    close();
     if (m_cur_test)
         m_cur_test = m_cur_test->m_next;
     if (m_cur_test)
+    {
         client(m_host);
-    timeout(30);
+        timeout(30);
+    }
+    else
+        close();
 }
 
 IPDU_Observer *Zlint::sessionNotify(
