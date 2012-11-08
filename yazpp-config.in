@@ -9,6 +9,7 @@ echo_help=no
 echo_tabs=no
 echo_source=yes
 echo_lalibs=no
+echo_zoom=no
 src_root=@abs_top_srcdir@
 build_root=@abs_top_builddir@
 yazlibs="@YAZLIB@ @LIBS@"
@@ -62,6 +63,9 @@ while test $# -gt 0; do
 	--lalibs)
 	    echo_lalibs=yes
 	    ;;
+	zoom)
+	    echo_zoom=yes
+	    ;;
 	-*)
 	    echo_help=yes
 	    ;;
@@ -69,25 +73,28 @@ while test $# -gt 0; do
     shift
 done
 
-libs_short="-lyazpp -lzoompp"
-
 YAZPPINC="@YAZINC@"
+YAZPPLALIB="$yazlalibs"
+YAZPPLIB="$yazlibs"
 
 if test "$echo_source" = "yes"; then
-    YAZPPLIB="-L${build_root}/src/.libs -lyazpp"
-    YAZPPLIB="$YAZPPLIB -L${build_root}/zoom/.libs -lzoompp"
-    YAZPPLIB="$YAZPPLIB $yazlibs"
-    YAZPPLALIB="${build_root}/src/libyazpp.la $yazlalibs"
-    YAZPPINC="-I${src_root}/include $YAZPPINC"
+    YAZPPLIB="-L${build_root}/src/.libs -lyazpp $YAZPPLIB"
+    YAZPPLALIB="${build_root}/src/libyazpp.la $YAZPPLALIB"
+    YAZPPINC="$YAZPPINC -I${src_root}/include"
 else
-    if test "$prefix" = "/usr"; then
-	YAZPPLIB="${libs_short} $yazlibs"
+    if test "$echo_zoom" = "yes"; then
+	libs_short="-lzoompp"
     else
-	YAZPPLIB="-L${libdir} ${libs_short} $yazlibs"
+	libs_short="-lyazpp"
+    fi
+    if test "$prefix" = "/usr"; then
+	YAZPPLIB="${libs_short} $YAZPPLIB"
+    else
+	YAZPPLIB="-L${libdir} ${libs_short} $YAZPPLIB"
     fi
     YAZPPLALIB=$YAZPPLIB
     if test "$prefix" != "/usr"; then
-	YAZPPINC="-I${includedir} $YAZPPINC"
+	YAZPPINC="$YAZPPINC -I${includedir}"
     fi
 fi
 

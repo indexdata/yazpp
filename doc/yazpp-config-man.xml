@@ -1,5 +1,5 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [ ]>
 <refentry id="yazpp-config">
 
@@ -7,18 +7,18 @@
   <productname>yazpp</productname>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yazpp-config</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yazpp-config</refname>
   <refpurpose>Script to get information about YAZ++.</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yazpp-config</command>
@@ -27,35 +27,32 @@
    <arg choice="opt"><option>--libs</option></arg>
    <arg choice="opt"><option>--lalibs</option></arg>
    <arg choice="opt"><option>--cflags</option></arg>
-   <!-- <arg choice="opt"><option>- -comp</option></arg> -->
-   <!-- <arg choice="opt" rep="repeat">libraries</arg> -->
+   <arg choice="opt" rep="repeat">libraries</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yazpp-config</command> is a script that returns information
    that your own software should use to build software that uses YAZ++.
   </para>
 
-  <!--
   <para>
    The following libraries are supported:
   </para>
 
   <variablelist>
    <varlistentry>
-    <term>threads</term>
+    <term>zoom</term>
     <listitem><para>
-      Use the threaded version of YAZ.
+      Report the zoompp library rather than yazpp.
      </para></listitem>
    </varlistentry>
   </variablelist>
-  -->
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>--prefix[=<replaceable>DIR</replaceable>]</term>
@@ -89,10 +86,10 @@
    <varlistentry>
     <term>--cflags</term>
     <listitem><para>
-      Return C Compiler flags.
+      Return C++ Compiler flags.
      </para></listitem>
    </varlistentry>
-   
+
 
    <!--<varlistentry>
     <term>- -comp</term>
@@ -103,7 +100,7 @@
 
   </variablelist>
  </refsect1>
- 
+
  <refsect1><title>FILES</title>
   <para>
    <filename><replaceable>prefix</replaceable>/bin/yazpp-config</filename>
