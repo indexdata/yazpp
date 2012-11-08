@@ -8,7 +8,7 @@ noinst_PROGRAMS = zclient
 endif
 
 libzoompp_la_LDFLAGS=-version-info 4:0:0
-LDADD=libzoompp.la
+LDADD=libzoompp.la $(YAZLALIB)
 
 libzoompp_la_LIBADD = $(YAZLALIB)
 
