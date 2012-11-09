@@ -33,6 +33,8 @@
 #include <yazpp/pdu-observer.h>
 
 namespace yazpp_1 {
+    class PDU_Assoc_priv;
+
 /** Simple Protocol Data Unit Assocation.
     This object sends - and receives PDU's using the COMSTACK
     network utility. To use the association in client role, use
@@ -41,46 +43,18 @@ namespace yazpp_1 {
  */
 class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     friend class PDU_AssocThread;
- private:
-    enum {
-        Connecting,
-        Listen,
-        Ready,
-        Closed,
-        Writing,
-        Accepting
-    } m_state;
-    class PDU_Queue {
-    public:
-        PDU_Queue(const char *buf, int len);
-        ~PDU_Queue();
-        char *m_buf;
-        int m_len;
-        PDU_Queue *m_next;
-    };
-    PDU_Assoc *m_parent;
-    PDU_Assoc *m_children;
-    PDU_Assoc *m_next;
-    COMSTACK m_cs;
-    yazpp_1::ISocketObservable *m_socketObservable;
+    PDU_Assoc_priv *m_p;
     IPDU_Observer *m_PDU_Observer;
-    char *m_input_buf;
-    int m_input_len;
-    PDU_Queue *m_queue_out;
-    PDU_Queue *m_queue_in;
+
     int flush_PDU();
-    int *m_destroyed;
-    int m_idleTime;
-    int m_log;
-    void init(yazpp_1::ISocketObservable *socketObservable);
-    bool m_session_is_dead;
- public:
     COMSTACK comstack(const char *type_and_host, void **vp);
+ public:
     /// Create object using specified socketObservable
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable);
     /// Create Object using existing comstack
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable,
-                  COMSTACK cs);
+              COMSTACK cs);
+    virtual ~PDU_Assoc();
     /// Close socket and destroy object.
     /// virtual ~PDU_Assoc();
     /// Clone the object
@@ -98,7 +72,7 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     /// Close and destroy
     void destroy();
     /// Set Idle Time
-    void idleTime (int timeout);
+    void idleTime(int timeout);
     /// Child start...
     virtual void childNotify(COMSTACK cs);
     /// close session
