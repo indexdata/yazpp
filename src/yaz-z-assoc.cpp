@@ -14,102 +14,134 @@
 #include <yaz/otherinfo.h>
 #include <yaz/oid_db.h>
 
+namespace yazpp_1
+{
+    class Z_Assoc_priv
+    {
+        friend class Z_Assoc;
+    private:
+        Z_Assoc_priv(IPDU_Observable *the_PDU_Observable);
+        ~Z_Assoc_priv();
+        static int yaz_init_flag;
+        static int yaz_init_func();
+        IPDU_Observable *PDU_Observable;
+        ODR odr_in;
+        ODR odr_out;
+        ODR odr_print;
+        int log;
+        FILE *APDU_file;
+        char *APDU_fname;
+        char *hostname;
+        int APDU_yazlog;
+    };
+};
+
 using namespace yazpp_1;
 
-int Z_Assoc::yaz_init_func()
+int Z_Assoc_priv::yaz_init_func()
 {
 #ifndef WIN32
-    signal (SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
 #endif
     return 1;
 }
 
-int Z_Assoc::yaz_init_flag =  Z_Assoc::yaz_init_func();
+int Z_Assoc_priv::yaz_init_flag =  Z_Assoc_priv::yaz_init_func();
+
+Z_Assoc_priv::Z_Assoc_priv(IPDU_Observable *the_PDU_Observable)
+{
+    PDU_Observable = the_PDU_Observable;
+    odr_in = odr_createmem(ODR_DECODE);
+    odr_out = odr_createmem(ODR_ENCODE);
+    odr_print = odr_createmem(ODR_PRINT);
+    log = YLOG_DEBUG;
+    APDU_file = 0;
+    APDU_fname = 0;
+    hostname = 0;
+    APDU_yazlog = 0;
+}
+
+Z_Assoc_priv::~Z_Assoc_priv()
+{
+    PDU_Observable->destroy();
+    delete PDU_Observable;
+    odr_destroy(odr_print);     // note: also runs fclose on APDU_file ..
+    odr_destroy(odr_out);
+    odr_destroy(odr_in);
+    delete [] APDU_fname;
+    delete [] hostname;
+}
 
 Z_Assoc::Z_Assoc(IPDU_Observable *the_PDU_Observable)
 {
-    m_PDU_Observable = the_PDU_Observable;
-    m_odr_in = odr_createmem (ODR_DECODE);
-    m_odr_out = odr_createmem (ODR_ENCODE);
-    m_odr_print = odr_createmem (ODR_PRINT);
-    m_log = YLOG_DEBUG;
-    m_APDU_file = 0;
-    m_APDU_fname = 0;
-    m_hostname = 0;
-    m_APDU_yazlog = 0;
+    m_p = new Z_Assoc_priv(the_PDU_Observable);
+}
+
+Z_Assoc::~Z_Assoc()
+{
+    delete m_p;
 }
 
 void Z_Assoc::set_APDU_log(const char *fname)
 {
-    if (m_APDU_file && m_APDU_file != stderr)
+    if (m_p->APDU_file && m_p->APDU_file != stderr)
     {
-        fclose (m_APDU_file);
-        m_APDU_file = 0;
+        fclose(m_p->APDU_file);
+        m_p->APDU_file = 0;
     }
-    delete [] m_APDU_fname;
-    m_APDU_fname = 0;
+    delete [] m_p->APDU_fname;
+    m_p->APDU_fname = 0;
 
     if (fname)
     {
-        m_APDU_fname = new char[strlen(fname)+1];
-        strcpy (m_APDU_fname, fname);
+        m_p->APDU_fname = new char[strlen(fname)+1];
+        strcpy(m_p->APDU_fname, fname);
         if (!strcmp(fname, "-"))
-            m_APDU_file = stderr;
+            m_p->APDU_file = stderr;
         else if (*fname == '\0')
-            m_APDU_file = 0;
+            m_p->APDU_file = 0;
         else
-            m_APDU_file = fopen (fname, "a");
-        odr_setprint(m_odr_print, m_APDU_file);
+            m_p->APDU_file = fopen(fname, "a");
+        odr_setprint(m_p->odr_print, m_p->APDU_file);
     }
 }
 
 int Z_Assoc::set_APDU_yazlog(int v)
 {
-    int old = m_APDU_yazlog;
-    m_APDU_yazlog = v;
+    int old = m_p->APDU_yazlog;
+    m_p->APDU_yazlog = v;
     return old;
 }
 
 const char *Z_Assoc::get_APDU_log()
 {
-    return m_APDU_fname;
-}
-
-Z_Assoc::~Z_Assoc()
-{
-    m_PDU_Observable->destroy();
-    delete m_PDU_Observable;
-    odr_destroy (m_odr_print);     // note: also runs fclose on m_APDU_file ..
-    odr_destroy (m_odr_out);
-    odr_destroy (m_odr_in);
-    delete [] m_APDU_fname;
-    delete [] m_hostname;
+    return m_p->APDU_fname;
 }
 
 void Z_Assoc::recv_PDU(const char *buf, int len)
 {
-    yaz_log (m_log, "recv_PDU len=%d", len);
-    Z_GDU *apdu = decode_GDU (buf, len);
+    yaz_log(m_p->log, "recv_PDU len=%d", len);
+    Z_GDU *apdu = decode_GDU(buf, len);
     if (apdu)
     {
-        recv_GDU (apdu, len);
+        recv_GDU(apdu, len);
     }
     else
     {
-        m_PDU_Observable->shutdown();
+        m_p->PDU_Observable->shutdown();
         failNotify();
     }
 }
 
 Z_APDU *Z_Assoc::create_Z_PDU(int type)
 {
-    Z_APDU *apdu = zget_APDU(m_odr_out, type);
+    Z_APDU *apdu = zget_APDU(m_p->odr_out, type);
     if (apdu->which == Z_APDU_initRequest)
     {
         Z_InitRequest * p = apdu->u.initRequest;
-        char *newName = (char*) odr_malloc(m_odr_out, 50);
-        strcpy (newName, p->implementationName);
-        strcat (newName, " YAZ++");
+        char *newName = (char*) odr_malloc(m_p->odr_out, 50);
+        strcpy(newName, p->implementationName);
+        strcat(newName, " YAZ++");
         p->implementationName = newName;
     }
     return apdu;
@@ -175,10 +207,11 @@ void Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
     Z_ReferenceId **id_to = get_referenceIdP(to);
     if (id_from && *id_from && id_to)
     {
-        *id_to = (Z_ReferenceId*) odr_malloc (m_odr_out, sizeof(**id_to));
+        *id_to = (Z_ReferenceId*) odr_malloc(m_p->odr_out, sizeof(**id_to));
         (*id_to)->size = (*id_to)->len = (*id_from)->len;
-        (*id_to)->buf = (unsigned char*) odr_malloc (m_odr_out, (*id_to)->len);
-        memcpy ((*id_to)->buf, (*id_from)->buf, (*id_to)->len);
+        (*id_to)->buf = (unsigned char*)
+            odr_malloc(m_p->odr_out, (*id_to)->len);
+        memcpy((*id_to)->buf, (*id_from)->buf, (*id_to)->len);
     }
     else if (id_to)
         *id_to = 0;
@@ -200,7 +233,7 @@ int Z_Assoc::send_GDU(Z_GDU *apdu, int *plen)
     {
         if (plen)
             *plen = len;
-        return m_PDU_Observable->send_PDU(buf, len);
+        return m_p->PDU_Observable->send_PDU(buf, len);
     }
     return -1;
 }
@@ -209,15 +242,15 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
 {
     Z_GDU *apdu;
 
-    odr_reset (m_odr_in);
-    odr_setbuf (m_odr_in, (char*) buf, len, 0);
+    odr_reset(m_p->odr_in);
+    odr_setbuf(m_p->odr_in, (char*) buf, len, 0);
 
-    if (!z_GDU(m_odr_in, &apdu, 0, 0))
+    if (!z_GDU(m_p->odr_in, &apdu, 0, 0))
     {
-        const char *element = odr_getelement(m_odr_in);
+        const char *element = odr_getelement(m_p->odr_in);
         yaz_log(YLOG_LOG, "PDU decode failed '%s' near byte %ld. Element %s",
-                odr_errmsg(odr_geterror(m_odr_in)),
-                (long) odr_offset(m_odr_in),
+                odr_errmsg(odr_geterror(m_p->odr_in)),
+                (long) odr_offset(m_p->odr_in),
                 element && *element ? element : "unknown");
         yaz_log(YLOG_LOG, "Buffer length: %d", (int) len);
         if (len > 0)
@@ -233,19 +266,19 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
     }
     else
     {
-        if (m_APDU_yazlog)
+        if (m_p->APDU_yazlog)
         {   // use YAZ log FILE
-            FILE *save = m_APDU_file;
+            FILE *save = m_p->APDU_file;
 
-            odr_setprint(m_odr_print, yaz_log_file());
-            z_GDU(m_odr_print, &apdu, 0, "decode");
-            m_APDU_file = save;
-            odr_setprint(m_odr_print, save);
+            odr_setprint(m_p->odr_print, yaz_log_file());
+            z_GDU(m_p->odr_print, &apdu, 0, "decode");
+            m_p->APDU_file = save;
+            odr_setprint(m_p->odr_print, save);
         }
-        if (m_APDU_file)
+        if (m_p->APDU_file)
         {
-            z_GDU(m_odr_print, &apdu, 0, "decode");
-            fflush(m_APDU_file);
+            z_GDU(m_p->odr_print, &apdu, 0, "decode");
+            fflush(m_p->APDU_file);
         }
         return apdu;
     }
@@ -254,81 +287,81 @@ Z_GDU *Z_Assoc::decode_GDU(const char *buf, int len)
 int Z_Assoc::encode_GDU(Z_GDU *apdu, char **buf, int *len)
 {
     const char *element = 0;
-    int r = z_GDU(m_odr_out, &apdu, 0, 0);
+    int r = z_GDU(m_p->odr_out, &apdu, 0, 0);
 
     if (!r) // decoding failed. Get the failed element
-        element = odr_getelement(m_odr_out);
+        element = odr_getelement(m_p->odr_out);
 
-    if (m_APDU_yazlog || !r)
+    if (m_p->APDU_yazlog || !r)
     {
         if (!r)
-            yaz_log (YLOG_LOG, "PDU encode failed. Element %s",
-                     element ? element : "unknown");
-        FILE *save = m_APDU_file;
+            yaz_log(YLOG_LOG, "PDU encode failed. Element %s",
+                    element ? element : "unknown");
+        FILE *save = m_p->APDU_file;
         FILE *yazf = yaz_log_file();
-        odr_setprint(m_odr_print, yazf); // use YAZ log FILE
-        z_GDU(m_odr_print, &apdu, 0, "encode");
-        m_APDU_file = save;
-        odr_setprint(m_odr_print, save);
+        odr_setprint(m_p->odr_print, yazf); // use YAZ log FILE
+        z_GDU(m_p->odr_print, &apdu, 0, "encode");
+        m_p->APDU_file = save;
+        odr_setprint(m_p->odr_print, save);
     }
-    if (m_APDU_file)
+    if (m_p->APDU_file)
     {
         if (!r)
-            fprintf (m_APDU_file, "PDU encode failed. Element %s",
-                     element ? element : "unknown");
-        z_GDU(m_odr_print, &apdu, 0, "encode");
-        fflush(m_APDU_file);
+            fprintf(m_p->APDU_file, "PDU encode failed. Element %s",
+                    element ? element : "unknown");
+        z_GDU(m_p->odr_print, &apdu, 0, "encode");
+        fflush(m_p->APDU_file);
     }
     if (!r)  // encoding failed
         return -1;
-    *buf = odr_getbuf (m_odr_out, len, 0);
-    odr_reset (m_odr_out);
+    *buf = odr_getbuf(m_p->odr_out, len, 0);
+    odr_reset(m_p->odr_out);
     return *len;
 }
 
 const char *Z_Assoc::get_hostname()
 {
-    return m_hostname;
+    return m_p->hostname;
 }
 
 int Z_Assoc::client(const char *addr)
 {
-    delete [] m_hostname;
-    m_hostname = new char[strlen(addr)+1];
-    strcpy (m_hostname, addr);
-    return m_PDU_Observable->connect (this, addr);
+    delete [] m_p->hostname;
+    m_p->hostname = new char[strlen(addr)+1];
+    strcpy(m_p->hostname, addr);
+    return m_p->PDU_Observable->connect(this, addr);
 }
 
 void Z_Assoc::close()
 {
-    m_PDU_Observable->close_session();
+    m_p->PDU_Observable->close_session();
 }
 
 int Z_Assoc::server(const char *addr)
 {
-    delete [] m_hostname;
-    m_hostname = new char[strlen(addr)+1];
-    strcpy (m_hostname, addr);
-    return m_PDU_Observable->listen (this, addr);
+    delete [] m_p->hostname;
+    m_p->hostname = new char[strlen(addr)+1];
+    strcpy(m_p->hostname, addr);
+    return m_p->PDU_Observable->listen(this, addr);
 }
 
 ODR Z_Assoc::odr_encode()
 {
-    return m_odr_out;
+    return m_p->odr_out;
 }
 
 ODR Z_Assoc::odr_decode()
 {
-    return m_odr_in;
+    return m_p->odr_in;
 }
 ODR Z_Assoc::odr_print()
 {
-    return m_odr_print;
+    return m_p->odr_print;
 }
 
 void Z_Assoc::timeout(int timeout)
 {
-    m_PDU_Observable->idleTime(timeout);
+    m_p->PDU_Observable->idleTime(timeout);
 }
 
 void Z_Assoc::get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip)
@@ -403,16 +436,16 @@ void Z_Assoc::set_otherInformationString (
         update_otherInformation(otherInformation, 1, oid, categoryValue, 0);
     if (!oi)
         return;
-    oi->information.characterInfo = odr_strdup (odr_encode(), str);
+    oi->information.characterInfo = odr_strdup(odr_encode(), str);
 }
 
 Z_OtherInformationUnit *Z_Assoc::update_otherInformation (
     Z_OtherInformation **otherInformationP, int createFlag,
     const Odr_oid *oid, int categoryValue, int deleteFlag)
 {
-    return yaz_oi_update (otherInformationP,
-                          (createFlag ? odr_encode() : 0),
-                          oid, categoryValue, deleteFlag);
+    return yaz_oi_update(otherInformationP,
+                         (createFlag ? odr_encode() : 0),
+                         oid, categoryValue, deleteFlag);
 }
 
 Z_ReferenceId* Z_Assoc::getRefID(char* str)
@@ -421,7 +454,7 @@ Z_ReferenceId* Z_Assoc::getRefID(char* str)
 
     if (str)
     {
-        id = (Z_ReferenceId*) odr_malloc (m_odr_out, sizeof(*id));
+        id = (Z_ReferenceId*) odr_malloc(m_p->odr_out, sizeof(*id));
         id->size = id->len = strlen(str);
         id->buf = (unsigned char *) str;
     }

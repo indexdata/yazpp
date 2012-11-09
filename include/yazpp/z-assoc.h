@@ -34,13 +34,15 @@
 #include <yazpp/pdu-observer.h>
 
 namespace yazpp_1 {
+    class Z_Assoc_priv;
+
 /** Z39.50 Assocation.
     This object implements the client - and server role of a generic
     Z39.50 Association.
 */
 class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
- public:
-    /// Create object using the PDU Observer specified
+  public:
+        /// Create object using the PDU Observer specified
     Z_Assoc(IPDU_Observable *the_PDU_Observable);
     /// Destroy assocation and close PDU Observer
     virtual ~Z_Assoc();
@@ -98,19 +100,8 @@ class YAZ_EXPORT Z_Assoc : public IPDU_Observer {
     const char *get_hostname();
 
     int set_APDU_yazlog(int v);
-
- private:
-    static int yaz_init_flag;
-    static int yaz_init_func();
-    IPDU_Observable *m_PDU_Observable;
-    ODR m_odr_in;
-    ODR m_odr_out;
-    ODR m_odr_print;
-    int m_log;
-    FILE *m_APDU_file;
-    char *m_APDU_fname;
-    char *m_hostname;
-    int m_APDU_yazlog;
+  private:
+    Z_Assoc_priv *m_p;
 };
 };
 
