@@ -52,6 +52,7 @@ namespace yazpp_1 {
         int idleTime;
         int log;
         void init(yazpp_1::ISocketObservable *socketObservable);
+        COMSTACK comstack(const char *type_and_host, void **vp);
         bool m_session_is_dead;
     };
 }
@@ -463,7 +464,7 @@ int PDU_Assoc::send_PDU(const char *buf, int len)
     return 0;
 }
 
-COMSTACK PDU_Assoc::comstack(const char *type_and_host, void **vp)
+COMSTACK PDU_Assoc_priv::comstack(const char *type_and_host, void **vp)
 {
     return cs_create_host(type_and_host, 2, vp);
 }
@@ -497,7 +498,7 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
 
     m_PDU_Observer = observer;
     void *ap;
-    m_p->cs = comstack(addr, &ap);
+    m_p->cs = m_p->comstack(addr, &ap);
 
     if (!m_p->cs)
         return -1;
@@ -535,7 +536,7 @@ int PDU_Assoc::connect(IPDU_Observer *observer, const char *addr)
     shutdown();
     m_PDU_Observer = observer;
     void *ap;
-    m_p->cs = comstack(addr, &ap);
+    m_p->cs = m_p->comstack(addr, &ap);
     if (!m_p->cs)
         return -1;
     int res = cs_connect(m_p->cs, ap);

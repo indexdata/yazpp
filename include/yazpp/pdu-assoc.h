@@ -45,36 +45,26 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     friend class PDU_AssocThread;
     PDU_Assoc_priv *m_p;
     IPDU_Observer *m_PDU_Observer;
-
     int flush_PDU();
-    COMSTACK comstack(const char *type_and_host, void **vp);
  public:
-    /// Create object using specified socketObservable
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable);
-    /// Create Object using existing comstack
-    PDU_Assoc(yazpp_1::ISocketObservable *socketObservable,
-              COMSTACK cs);
-    /// virtual ~PDU_Assoc();
+
+    PDU_Assoc(yazpp_1::ISocketObservable *socketObservable, COMSTACK cs);
+
     virtual ~PDU_Assoc();
-    /// Clone the object
-    IPDU_Observable *clone();
-    /// Send PDU
-    int send_PDU(const char *buf, int len);
-    /// connect to server (client role)
-    int connect(IPDU_Observer *observer, const char *addr);
-    /// listen for clients (server role)
-    int listen(IPDU_Observer *observer, const char *addr);
-    /// Socket notification
-    void socketNotify(int event);
-    /// Close socket
-    void shutdown();
-    /// Close and destroy
-    void destroy();
-    /// Set Idle Time
-    void idleTime(int timeout);
-    /// Child start...
+
+    // optional feature implemented by PDU_Assoc (also by PDU_Asso_Thread)
     virtual void childNotify(COMSTACK cs);
-    /// close session
+
+    // mefhods below are from IPDU_Observable
+    IPDU_Observable *clone();
+    int send_PDU(const char *buf, int len);
+    int connect(IPDU_Observer *observer, const char *addr);
+    int listen(IPDU_Observer *observer, const char *addr);
+    void socketNotify(int event);
+    void shutdown();
+    void destroy();
+    void idleTime(int timeout);
     void close_session();
     const char *getpeername();
 };
