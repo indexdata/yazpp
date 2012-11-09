@@ -54,9 +54,8 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     /// Create Object using existing comstack
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable,
               COMSTACK cs);
-    virtual ~PDU_Assoc();
-    /// Close socket and destroy object.
     /// virtual ~PDU_Assoc();
+    virtual ~PDU_Assoc();
     /// Clone the object
     IPDU_Observable *clone();
     /// Send PDU
