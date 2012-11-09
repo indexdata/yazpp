@@ -21,7 +21,8 @@ using namespace yazpp_1;
 
 namespace yazpp_1 {
     class PDU_Assoc_priv {
-    public:
+        friend class PDU_Assoc;
+    private:
         enum {
             Connecting,
             Listen,
