@@ -523,6 +523,11 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
     return 0;
 }
 
+COMSTACK PDU_Assoc::get_comstack()
+{
+    return m_p->cs;
+}
+
 void PDU_Assoc::idleTime(int idleTime)
 {
     m_p->idleTime = idleTime;

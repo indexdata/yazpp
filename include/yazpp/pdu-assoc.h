@@ -51,6 +51,8 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
 
     PDU_Assoc(yazpp_1::ISocketObservable *socketObservable, COMSTACK cs);
 
+    COMSTACK get_comstack(); 
+
     virtual ~PDU_Assoc();
 
     // optional feature implemented by PDU_Assoc (also by PDU_Asso_Thread)
