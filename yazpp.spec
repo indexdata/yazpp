@@ -16,20 +16,21 @@ URL: http://www.indexdata.com/yazplusplus
 %description
 YAZ++ package.
 
-%package -n libyazpp4
+%package -n libyazpp5
 Summary: YAZ++ and ZOOM library
 Group: Libraries
 Requires: libyaz4 >= 4.2.8
 
-%description -n libyazpp4
+%description -n libyazpp5
 Libraries for the YAZ++ package.
 
-%package -n libyazpp4-devel
+%package -n libyazpp5-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyazpp4 = %{version}, libyaz4-devel
+Requires: libyazpp5 = %{version}, libyaz4-devel
+Conflicts: libyazpp4-devel
 
-%description -n libyazpp4-devel
+%description -n libyazpp5-devel
 Development libraries and include files for the YAZ++ package.
 
 %prep
@@ -51,15 +52,15 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %clean
 rm -fr ${RPM_BUILD_ROOT}
 
-%post -n libyazpp4 -p /sbin/ldconfig 
-%postun -n libyazpp4 -p /sbin/ldconfig 
+%post -n libyazpp5 -p /sbin/ldconfig 
+%postun -n libyazpp5 -p /sbin/ldconfig 
 
-%files -n libyazpp4
+%files -n libyazpp5
 %doc README LICENSE NEWS
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
-%files -n libyazpp4-devel
+%files -n libyazpp5-devel
 %defattr(-,root,root)
 %{_bindir}/yazpp-config
 %{_includedir}/yazpp

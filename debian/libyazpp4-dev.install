@@ -1,9 +1,0 @@
-debian/tmp/usr/include/yazpp/*.h
-debian/tmp/usr/lib/libyazpp*.a
-debian/tmp/usr/lib/libzoompp*.a
-debian/tmp/usr/lib/libyazpp.so
-debian/tmp/usr/lib/libzoompp.so
-debian/tmp/usr/bin/yazpp-config
-debian/tmp/usr/share/aclocal/yazpp.m4
-debian/tmp/usr/share/man/man1/yazpp-config.1
-

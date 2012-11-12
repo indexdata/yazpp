@@ -8,7 +8,7 @@ TESTS = $(check_PROGRAMS)
 AM_CXXFLAGS = -I$(srcdir)/../include $(YAZINC)
 
 lib_LTLIBRARIES = libyazpp.la
-libyazpp_la_LDFLAGS=-version-info 4:0:0
+libyazpp_la_LDFLAGS=-version-info 5:0:0
 
 DISTCLEANFILES = yazpp-config
 
