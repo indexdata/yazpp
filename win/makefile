@@ -45,12 +45,12 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yazpp4d.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp4d.lib
+DLL=$(BINDIR)\yazpp5d.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp5d.lib
 YAZD=yaz4d
 !else
-DLL=$(BINDIR)\yazpp4.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp4.lib
+DLL=$(BINDIR)\yazpp5.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp5.lib
 YAZD=yaz4
 !endif
 
