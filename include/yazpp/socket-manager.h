@@ -44,13 +44,6 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     struct Rep;
 
     Rep *m_p;
-
-    SocketEntry **lookupObserver(ISocketObserver *observer);
-    SocketEvent *getEvent();
-    void putEvent(SocketEvent *event);
-    void removeEvent(ISocketObserver *observer);
-    void inspect_poll_result(int res, struct yaz_poll_fd *fds, int no_fds,
-                             int timeout);
  public:
     /// Add an observer
     virtual void addObserver(int fd, ISocketObserver *observer);
@@ -61,8 +54,7 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     /// Set event mask for observer
     virtual void maskObserver(ISocketObserver *observer, int mask);
     /// Set timeout
-    virtual void timeoutObserver(ISocketObserver *observer,
-                                 int timeout);
+    virtual void timeoutObserver(ISocketObserver *observer, int timeout);
     /// Process one event. return > 0 if event could be processed;
     int processEvent();
     int getNumberOfObservers();

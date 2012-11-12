@@ -47,18 +47,24 @@ struct SocketManager::SocketEvent {
 };
 
 struct SocketManager::Rep {
+    void putEvent(SocketEvent *event);
+    SocketEvent *getEvent();
+    void removeEvent(ISocketObserver *observer);
+    void inspect_poll_result(int res, struct yaz_poll_fd *fds, int no_fds,
+                             int timeout);
+    SocketEntry **lookupObserver(ISocketObserver *observer);
     SocketEntry *observers;       // all registered observers
     SocketEvent *queue_front;
     SocketEvent *queue_back;
     int log;
 };
 
-SocketManager::SocketEntry **SocketManager::lookupObserver(
+SocketManager::SocketEntry **SocketManager::Rep::lookupObserver(
     ISocketObserver *observer)
 {
     SocketEntry **se;
 
-    for (se = &m_p->observers; *se; se = &(*se)->next)
+    for (se = &observers; *se; se = &(*se)->next)
         if ((*se)->observer == observer)
             break;
     return se;
@@ -77,7 +83,7 @@ void SocketManager::addObserver(int fd, ISocketObserver *observer)
 {
     SocketEntry *se;
 
-    se = *lookupObserver(observer);
+    se = *m_p->lookupObserver(observer);
     if (!se)
     {
         se = new SocketEntry;
@@ -93,10 +99,10 @@ void SocketManager::addObserver(int fd, ISocketObserver *observer)
 
 void SocketManager::deleteObserver(ISocketObserver *observer)
 {
-    SocketEntry **se = lookupObserver(observer);
+    SocketEntry **se = m_p->lookupObserver(observer);
     if (*se)
     {
-        removeEvent(observer);
+        m_p->removeEvent(observer);
         SocketEntry *se_tmp = *se;
         *se = (*se)->next;
         delete se_tmp;
@@ -125,7 +131,7 @@ void SocketManager::maskObserver(ISocketObserver *observer, int mask)
                     mask & SOCKET_OBSERVE_WRITE,
                     mask & SOCKET_OBSERVE_EXCEPT);
 
-    se = *lookupObserver(observer);
+    se = *m_p->lookupObserver(observer);
     if (se)
         se->mask = mask;
 }
@@ -135,16 +141,16 @@ void SocketManager::timeoutObserver(ISocketObserver *observer,
 {
     SocketEntry *se;
 
-    se = *lookupObserver(observer);
+    se = *m_p->lookupObserver(observer);
     if (se)
         se->timeout = timeout;
 }
 
-void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
-                                        int no_fds, int timeout)
+void SocketManager::Rep::inspect_poll_result(int res, struct yaz_poll_fd *fds,
+                                             int no_fds, int timeout)
 
 {
-    yaz_log(m_p->log, "yaz_poll returned res=%d", res);
+    yaz_log(log, "yaz_poll returned res=%d", res);
     time_t now = time(0);
     int i;
     int no_put_events = 0;
@@ -153,7 +159,7 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
     for (i = 0; i < no_fds; i++)
     {
         SocketEntry *p;
-        for (p = m_p->observers; p; p = p->next)
+        for (p = observers; p; p = p->next)
             if (p->fd == fds[i].fd)
                 break;
         if (!p)
@@ -183,13 +189,13 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
             event->event = mask;
             putEvent(event);
             no_put_events++;
-            yaz_log(m_p->log, "putEvent I/O mask=%d", mask);
+            yaz_log(log, "putEvent I/O mask=%d", mask);
         }
         else if (res == 0 && p->timeout_this == timeout)
         {
             SocketEvent *event = new SocketEvent;
             assert(p->last_activity);
-            yaz_log(m_p->log, "putEvent timeout fd=%d, now = %ld "
+            yaz_log(log, "putEvent timeout fd=%d, now = %ld "
                     "last_activity=%ld timeout=%d",
                     p->fd, now, p->last_activity, p->timeout);
             p->last_activity = now;
@@ -222,7 +228,7 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
 int SocketManager::processEvent()
 {
     SocketEntry *p;
-    SocketEvent *event = getEvent();
+    SocketEvent *event = m_p->getEvent();
     int timeout = -1;
     yaz_log(m_p->log, "SocketManager::processEvent manager=%p", this);
     if (event)
@@ -287,7 +293,7 @@ int SocketManager::processEvent()
     }
 
     if (res >= 0)
-        inspect_poll_result(res, fds, no_fds, timeout);
+        m_p->inspect_poll_result(res, fds, no_fds, timeout);
 
     delete [] fds;
     return res >= 0 ? 1 : -1;
@@ -296,45 +302,45 @@ int SocketManager::processEvent()
 //    n p    n p  ......   n p    n p
 //   front                        back
 
-void SocketManager::putEvent(SocketEvent *event)
+void SocketManager::Rep::putEvent(SocketEvent *event)
 {
     // put in back of queue
-    if (m_p->queue_back)
+    if (queue_back)
     {
-        m_p->queue_back->prev = event;
-        assert(m_p->queue_front);
+        queue_back->prev = event;
+        assert(queue_front);
     }
     else
     {
-        assert(!m_p->queue_front);
-        m_p->queue_front = event;
+        assert(!queue_front);
+        queue_front = event;
     }
-    event->next = m_p->queue_back;
+    event->next = queue_back;
     event->prev = 0;
-    m_p->queue_back = event;
+    queue_back = event;
 }
 
-SocketManager::SocketEvent *SocketManager::getEvent()
+SocketManager::SocketEvent *SocketManager::Rep::getEvent()
 {
     // get from front of queue
-    SocketEvent *event = m_p->queue_front;
+    SocketEvent *event = queue_front;
     if (!event)
         return 0;
-    assert(m_p->queue_back);
-    m_p->queue_front = event->prev;
-    if (m_p->queue_front)
+    assert(queue_back);
+    queue_front = event->prev;
+    if (queue_front)
     {
-        assert(m_p->queue_back);
-        m_p->queue_front->next = 0;
+        assert(queue_back);
+        queue_front->next = 0;
     }
     else
-        m_p->queue_back = 0;
+        queue_back = 0;
     return event;
 }
 
-void SocketManager::removeEvent(ISocketObserver *observer)
+void SocketManager::Rep::removeEvent(ISocketObserver *observer)
 {
-    SocketEvent *ev = m_p->queue_back;
+    SocketEvent *ev = queue_back;
     while (ev)
     {
         SocketEvent *ev_next = ev->next;
@@ -343,11 +349,11 @@ void SocketManager::removeEvent(ISocketObserver *observer)
             if (ev->prev)
                 ev->prev->next = ev->next;
             else
-                m_p->queue_back = ev->next;
+                queue_back = ev->next;
             if (ev->next)
                 ev->next->prev = ev->prev;
             else
-                m_p->queue_front = ev->prev;
+                queue_front = ev->prev;
             delete ev;
         }
         ev = ev_next;
