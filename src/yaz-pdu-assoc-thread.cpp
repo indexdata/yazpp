@@ -50,6 +50,11 @@ PDU_AssocThread::PDU_AssocThread(
 
 }
 
+PDU_AssocThread::~PDU_AssocThread()
+{
+
+}
+
 void worker::run()
 {
     yaz_log (YLOG_LOG, "thread started");
