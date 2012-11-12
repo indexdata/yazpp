@@ -13,3 +13,6 @@ bin
 ChangeLog
 Doxyfile
 dox
+build-stamp
+config.guess
+config.sub
