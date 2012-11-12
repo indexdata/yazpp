@@ -29,7 +29,6 @@
 #define YAZ_SOCKET_MANAGER_INCLUDED
 
 #include <yazpp/socket-observer.h>
-#include <time.h>
 
 struct yaz_poll_fd;
 namespace yazpp_1 {
@@ -40,31 +39,16 @@ namespace yazpp_1 {
 */
 class YAZ_EXPORT SocketManager : public ISocketObservable {
  private:
-    struct SocketEntry {
-        ISocketObserver *observer;
-        int fd;
-        unsigned mask;
-        int timeout;
-        int timeout_this;
-        time_t last_activity;
-        SocketEntry *next;
-    };
-    SocketEntry *m_observers;       // all registered observers
-    struct SocketEvent {
-        ISocketObserver *observer;
-        int event;
-        SocketEvent *next;          // front in queue
-        SocketEvent *prev;          // back in queue
-    };
-    SocketEvent *m_queue_front;
-    SocketEvent *m_queue_back;
+    struct SocketEntry;
+    struct SocketEvent;
+    struct Rep;
 
-    SocketEntry **lookupObserver
-        (ISocketObserver *observer);
+    Rep *m_p;
+
+    SocketEntry **lookupObserver(ISocketObserver *observer);
     SocketEvent *getEvent();
     void putEvent(SocketEvent *event);
     void removeEvent(ISocketObserver *observer);
-    int m_log;
     void inspect_poll_result(int res, struct yaz_poll_fd *fds, int no_fds,
                              int timeout);
  public:

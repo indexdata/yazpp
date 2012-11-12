@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <yaz/log.h>
 
@@ -28,12 +29,36 @@
 
 using namespace yazpp_1;
 
+struct SocketManager::SocketEntry {
+    ISocketObserver *observer;
+    int fd;
+    unsigned mask;
+    int timeout;
+    int timeout_this;
+    time_t last_activity;
+    SocketEntry *next;
+};
+
+struct SocketManager::SocketEvent {
+    ISocketObserver *observer;
+    int event;
+    SocketEvent *next;          // front in queue
+    SocketEvent *prev;          // back in queue
+};
+
+struct SocketManager::Rep {
+    SocketEntry *observers;       // all registered observers
+    SocketEvent *queue_front;
+    SocketEvent *queue_back;
+    int log;
+};
+
 SocketManager::SocketEntry **SocketManager::lookupObserver(
     ISocketObserver *observer)
 {
     SocketEntry **se;
 
-    for (se = &m_observers; *se; se = &(*se)->next)
+    for (se = &m_p->observers; *se; se = &(*se)->next)
         if ((*se)->observer == observer)
             break;
     return se;
@@ -43,7 +68,7 @@ int SocketManager::getNumberOfObservers()
 {
     int i = 0;
     SocketEntry *se;
-    for (se = m_observers; se; se = se->next, i++)
+    for (se = m_p->observers; se; se = se->next, i++)
         ;
     return i;
 }
@@ -56,8 +81,8 @@ void SocketManager::addObserver(int fd, ISocketObserver *observer)
     if (!se)
     {
         se = new SocketEntry;
-        se->next= m_observers;
-        m_observers = se;
+        se->next= m_p->observers;
+        m_p->observers = se;
         se->observer = observer;
     }
     se->fd = fd;
@@ -71,7 +96,7 @@ void SocketManager::deleteObserver(ISocketObserver *observer)
     SocketEntry **se = lookupObserver(observer);
     if (*se)
     {
-        removeEvent (observer);
+        removeEvent(observer);
         SocketEntry *se_tmp = *se;
         *se = (*se)->next;
         delete se_tmp;
@@ -80,7 +105,7 @@ void SocketManager::deleteObserver(ISocketObserver *observer)
 
 void SocketManager::deleteObservers()
 {
-    SocketEntry *se = m_observers;
+    SocketEntry *se = m_p->observers;
 
     while (se)
     {
@@ -88,14 +113,14 @@ void SocketManager::deleteObservers()
         delete se;
         se = se_next;
     }
-    m_observers = 0;
+    m_p->observers = 0;
 }
 
 void SocketManager::maskObserver(ISocketObserver *observer, int mask)
 {
     SocketEntry *se;
 
-    yaz_log(m_log, "obs=%p read=%d write=%d except=%d", observer,
+    yaz_log(m_p->log, "obs=%p read=%d write=%d except=%d", observer,
                     mask & SOCKET_OBSERVE_READ,
                     mask & SOCKET_OBSERVE_WRITE,
                     mask & SOCKET_OBSERVE_EXCEPT);
@@ -115,12 +140,11 @@ void SocketManager::timeoutObserver(ISocketObserver *observer,
         se->timeout = timeout;
 }
 
-
 void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
                                         int no_fds, int timeout)
 
 {
-    yaz_log(m_log, "yaz_poll returned res=%d", res);
+    yaz_log(m_p->log, "yaz_poll returned res=%d", res);
     time_t now = time(0);
     int i;
     int no_put_events = 0;
@@ -129,12 +153,12 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
     for (i = 0; i < no_fds; i++)
     {
         SocketEntry *p;
-        for (p = m_observers; p; p = p->next)
+        for (p = m_p->observers; p; p = p->next)
             if (p->fd == fds[i].fd)
                 break;
         if (!p)
         {
-            // m_observers list changed since poll started
+            // m_p->observers list changed since poll started
             no_lost_observers++;
             continue;
         }
@@ -157,20 +181,21 @@ void SocketManager::inspect_poll_result(int res, struct yaz_poll_fd *fds,
             p->last_activity = now;
             event->observer = p->observer;
             event->event = mask;
-            putEvent (event);
+            putEvent(event);
             no_put_events++;
-            yaz_log (m_log, "putEvent I/O mask=%d", mask);
+            yaz_log(m_p->log, "putEvent I/O mask=%d", mask);
         }
         else if (res == 0 && p->timeout_this == timeout)
         {
             SocketEvent *event = new SocketEvent;
-            assert (p->last_activity);
-            yaz_log (m_log, "putEvent timeout fd=%d, now = %ld last_activity=%ld timeout=%d",
-                     p->fd, now, p->last_activity, p->timeout);
+            assert(p->last_activity);
+            yaz_log(m_p->log, "putEvent timeout fd=%d, now = %ld "
+                    "last_activity=%ld timeout=%d",
+                    p->fd, now, p->last_activity, p->timeout);
             p->last_activity = now;
             event->observer = p->observer;
             event->event = SOCKET_OBSERVE_TIMEOUT;
-            putEvent (event);
+            putEvent(event);
             no_put_events++;
 
         }
@@ -199,7 +224,7 @@ int SocketManager::processEvent()
     SocketEntry *p;
     SocketEvent *event = getEvent();
     int timeout = -1;
-    yaz_log (m_log, "SocketManager::processEvent manager=%p", this);
+    yaz_log(m_p->log, "SocketManager::processEvent manager=%p", this);
     if (event)
     {
         event->observer->socketNotify(event->event);
@@ -211,13 +236,13 @@ int SocketManager::processEvent()
     time_t now = time(0);
     int i;
     int no_fds = 0;
-    for (p = m_observers; p; p = p->next)
+    for (p = m_p->observers; p; p = p->next)
         no_fds++;
 
     if (!no_fds)
         return 0;
     struct yaz_poll_fd *fds = new yaz_poll_fd [no_fds];
-    for (i = 0, p = m_observers; p; p = p->next, i++)
+    for (i = 0, p = m_p->observers; p; p = p->next, i++)
     {
         fds[i].fd = p->fd;
         int input_mask = 0;
@@ -241,8 +266,8 @@ int SocketManager::processEvent()
             if (timeout == -1 || timeout_this < timeout)
                 timeout = timeout_this;
             p->timeout_this = timeout_this;
-            yaz_log (m_log, "SocketManager::select timeout_this=%d",
-                     p->timeout_this);
+            yaz_log(m_p->log, "SocketManager::select timeout_this=%d",
+                    p->timeout_this);
         }
         else
             p->timeout_this = -1;
@@ -268,49 +293,48 @@ int SocketManager::processEvent()
     return res >= 0 ? 1 : -1;
 }
 
-
 //    n p    n p  ......   n p    n p
 //   front                        back
 
 void SocketManager::putEvent(SocketEvent *event)
 {
     // put in back of queue
-    if (m_queue_back)
+    if (m_p->queue_back)
     {
-        m_queue_back->prev = event;
-        assert (m_queue_front);
+        m_p->queue_back->prev = event;
+        assert(m_p->queue_front);
     }
     else
     {
-        assert (!m_queue_front);
-        m_queue_front = event;
+        assert(!m_p->queue_front);
+        m_p->queue_front = event;
     }
-    event->next = m_queue_back;
+    event->next = m_p->queue_back;
     event->prev = 0;
-    m_queue_back = event;
+    m_p->queue_back = event;
 }
 
 SocketManager::SocketEvent *SocketManager::getEvent()
 {
     // get from front of queue
-    SocketEvent *event = m_queue_front;
+    SocketEvent *event = m_p->queue_front;
     if (!event)
         return 0;
-    assert (m_queue_back);
-    m_queue_front = event->prev;
-    if (m_queue_front)
+    assert(m_p->queue_back);
+    m_p->queue_front = event->prev;
+    if (m_p->queue_front)
     {
-        assert (m_queue_back);
-        m_queue_front->next = 0;
+        assert(m_p->queue_back);
+        m_p->queue_front->next = 0;
     }
     else
-        m_queue_back = 0;
+        m_p->queue_back = 0;
     return event;
 }
 
 void SocketManager::removeEvent(ISocketObserver *observer)
 {
-    SocketEvent *ev = m_queue_back;
+    SocketEvent *ev = m_p->queue_back;
     while (ev)
     {
         SocketEvent *ev_next = ev->next;
@@ -319,11 +343,11 @@ void SocketManager::removeEvent(ISocketObserver *observer)
             if (ev->prev)
                 ev->prev->next = ev->next;
             else
-                m_queue_back = ev->next;
+                m_p->queue_back = ev->next;
             if (ev->next)
                 ev->next->prev = ev->prev;
             else
-                m_queue_front = ev->prev;
+                m_p->queue_front = ev->prev;
             delete ev;
         }
         ev = ev_next;
@@ -332,15 +356,17 @@ void SocketManager::removeEvent(ISocketObserver *observer)
 
 SocketManager::SocketManager()
 {
-    m_observers = 0;
-    m_queue_front = 0;
-    m_queue_back = 0;
-    m_log = YLOG_DEBUG;
+    m_p = new Rep;
+    m_p->observers = 0;
+    m_p->queue_front = 0;
+    m_p->queue_back = 0;
+    m_p->log = YLOG_DEBUG;
 }
 
 SocketManager::~SocketManager()
 {
     deleteObservers();
+    delete m_p;
 }
 /*
  * Local variables:
