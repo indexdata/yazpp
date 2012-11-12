@@ -13,7 +13,17 @@
 
 using namespace yazpp_1;
 
-struct yazpp_1::RecordCache_Entry {
+struct RecordCache::Rep {
+    NMEM nmem;
+    RecordCache_Entry *entries;
+    Z_SearchRequest *searchRequest;
+    Z_PresentRequest *presentRequest;
+    int match(RecordCache_Entry *entry, Odr_oid *syntax, int offset,
+              Z_RecordComposition *comp);
+    size_t max_size;
+};
+
+struct RecordCache::RecordCache_Entry {
     int m_offset;
     Z_NamePlusRecord *m_record;
     Z_RecordComposition *m_comp;
@@ -22,30 +32,32 @@ struct yazpp_1::RecordCache_Entry {
 
 RecordCache::RecordCache ()
 {
-    m_mem = nmem_create();
-    m_entries = 0;
-    m_presentRequest = 0;
-    m_searchRequest = 0;
-    m_max_size = 200000;
+    m_p = new Rep;
+    m_p->nmem = nmem_create();
+    m_p->entries = 0;
+    m_p->presentRequest = 0;
+    m_p->searchRequest = 0;
+    m_p->max_size = 200000;
 }
 
 RecordCache::~RecordCache ()
 {
-    nmem_destroy(m_mem);
+    nmem_destroy(m_p->nmem);
+    delete m_p;
 }
 
 void RecordCache::set_max_size(size_t sz)
 {
-    m_max_size = sz;
+    m_p->max_size = sz;
 }
 
 void RecordCache::clear ()
 {
-    nmem_destroy(m_mem);
-    m_mem = nmem_create();
-    m_entries = 0;
-    m_presentRequest = 0;
-    m_searchRequest = 0;
+    nmem_destroy(m_p->nmem);
+    m_p->nmem = nmem_create();
+    m_p->entries = 0;
+    m_p->presentRequest = 0;
+    m_p->searchRequest = 0;
 }
 
 void RecordCache::copy_searchRequest(Z_SearchRequest *sr)
@@ -53,16 +65,16 @@ void RecordCache::copy_searchRequest(Z_SearchRequest *sr)
     ODR encode = odr_createmem(ODR_ENCODE);
     ODR decode = odr_createmem(ODR_DECODE);
 
-    m_searchRequest = 0;
-    m_presentRequest = 0;
+    m_p->searchRequest = 0;
+    m_p->presentRequest = 0;
     int v = z_SearchRequest (encode, &sr, 1, 0);
     if (v)
     {
         int len;
         char *buf = odr_getbuf(encode, &len, 0);
         odr_setbuf(decode, buf, len, 0);
-        z_SearchRequest(decode, &m_searchRequest, 1, 0);
-        nmem_transfer(m_mem, decode->mem);
+        z_SearchRequest(decode, &m_p->searchRequest, 1, 0);
+        nmem_transfer(m_p->nmem, decode->mem);
     }
     odr_destroy(encode);
     odr_destroy(decode);
@@ -73,40 +85,40 @@ void RecordCache::copy_presentRequest(Z_PresentRequest *pr)
     ODR encode = odr_createmem(ODR_ENCODE);
     ODR decode = odr_createmem(ODR_DECODE);
 
-    m_searchRequest = 0;
-    m_presentRequest = 0;
+    m_p->searchRequest = 0;
+    m_p->presentRequest = 0;
     int v = z_PresentRequest (encode, &pr, 1, 0);
     if (v)
     {
         int len;
         char *buf = odr_getbuf(encode, &len, 0);
         odr_setbuf(decode, buf, len, 0);
-        z_PresentRequest(decode, &m_presentRequest, 1, 0);
-        nmem_transfer(m_mem, decode->mem);
+        z_PresentRequest(decode, &m_p->presentRequest, 1, 0);
+        nmem_transfer(m_p->nmem, decode->mem);
     }
     odr_destroy(encode);
     odr_destroy(decode);
 }
 
 
-void RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
-                           int hits)
+void RecordCache::add(ODR o, Z_NamePlusRecordList *npr, int start,
+                      int hits)
 {
-    if (nmem_total(m_mem) > m_max_size)
+    if (nmem_total(m_p->nmem) > m_p->max_size)
         return;
     // Build appropriate compspec for this response
     Z_RecordComposition *comp = 0;
-    if (hits == -1 && m_presentRequest)
-        comp = m_presentRequest->recordComposition;
-    else if (hits > 0 && m_searchRequest)
+    if (hits == -1 && m_p->presentRequest)
+        comp = m_p->presentRequest->recordComposition;
+    else if (hits > 0 && m_p->searchRequest)
     {
         Z_ElementSetNames *esn;
 
-        if (hits <= *m_searchRequest->smallSetUpperBound)
-            esn = m_searchRequest->smallSetElementSetNames;
+        if (hits <= *m_p->searchRequest->smallSetUpperBound)
+            esn = m_p->searchRequest->smallSetElementSetNames;
         else
-            esn = m_searchRequest->mediumSetElementSetNames;
-        comp = (Z_RecordComposition *) nmem_malloc(m_mem, sizeof(*comp));
+            esn = m_p->searchRequest->mediumSetElementSetNames;
+        comp = (Z_RecordComposition *) nmem_malloc(m_p->nmem, sizeof(*comp));
         comp->which = Z_RecordComp_simple;
         comp->u.simple = esn;
     }
@@ -116,16 +128,17 @@ void RecordCache::add (ODR o, Z_NamePlusRecordList *npr, int start,
     for (i = 0; i<npr->num_records; i++)
     {
         RecordCache_Entry *entry = (RecordCache_Entry *)
-            nmem_malloc(m_mem, sizeof(*entry));
-        entry->m_record = yaz_clone_z_NamePlusRecord(npr->records[i], m_mem);
-        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_mem);
+            nmem_malloc(m_p->nmem, sizeof(*entry));
+        entry->m_record =
+            yaz_clone_z_NamePlusRecord(npr->records[i], m_p->nmem);
+        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_p->nmem);
         entry->m_offset = i + start;
-        entry->m_next = m_entries;
-        m_entries = entry;
+        entry->m_next = m_p->entries;
+        m_p->entries = entry;
     }
 }
 
-int RecordCache::match (RecordCache_Entry *entry,
+int RecordCache::Rep::match(RecordCache_Entry *entry,
                             Odr_oid *syntax, int offset,
                             Z_RecordComposition *comp)
 {
@@ -170,19 +183,19 @@ int RecordCache::match (RecordCache_Entry *entry,
     return 0;
 }
 
-int RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
-                             int start, int num,
-                             Odr_oid *syntax,
-                             Z_RecordComposition *comp)
+int RecordCache::lookup(ODR o, Z_NamePlusRecordList **npr,
+                        int start, int num,
+                        Odr_oid *syntax,
+                        Z_RecordComposition *comp)
 {
     int i;
     yaz_log(YLOG_DEBUG, "cache lookup start=%d num=%d", start, num);
 
     for (i = 0; i<num; i++)
     {
-        RecordCache_Entry *entry = m_entries;
+        RecordCache_Entry *entry = m_p->entries;
         for(; entry; entry = entry->m_next)
-            if (match(entry, syntax, start+i, comp))
+            if (m_p->match(entry, syntax, start+i, comp))
                 break;
         if (!entry)
             return 0;
@@ -193,9 +206,9 @@ int RecordCache::lookup (ODR o, Z_NamePlusRecordList **npr,
         odr_malloc(o, num * sizeof(Z_NamePlusRecord *));
     for (i = 0; i<num; i++)
     {
-        RecordCache_Entry *entry = m_entries;
+        RecordCache_Entry *entry = m_p->entries;
         for(; entry; entry = entry->m_next)
-            if (match(entry, syntax, start+i, comp))
+            if (m_p->match(entry, syntax, start+i, comp))
                 break;
         if (!entry)
             return 0;
