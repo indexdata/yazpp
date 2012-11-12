@@ -58,11 +58,8 @@ class YAZ_EXPORT Yaz_Z_Query : public Yaz_Query {
     /// Assign RPN string to it
     Yaz_Z_Query& operator=(const char *rpn);
  private:
-    char *m_buf;
-    int m_len;
-    ODR odr_decode;
-    ODR odr_encode;
-    ODR odr_print;
+    class Rep;
+    Rep *m_p;
 };
 };
 #endif

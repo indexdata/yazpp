@@ -13,40 +13,55 @@
 
 using namespace yazpp_1;
 
+class Yaz_Z_Query::Rep {
+    friend class Yaz_Z_Query;
+    char *buf;
+    int len;
+    ODR odr_decode;
+    ODR odr_encode;
+    ODR odr_print;
+};
+
+
 Yaz_Z_Query::Yaz_Z_Query()
 {
-    odr_encode = odr_createmem(ODR_ENCODE);
-    odr_decode = odr_createmem(ODR_DECODE);
-    odr_print = odr_createmem(ODR_PRINT);
+    m_p = new Rep;
+    m_p->odr_encode = odr_createmem(ODR_ENCODE);
+    m_p->odr_decode = odr_createmem(ODR_DECODE);
+    m_p->odr_print = odr_createmem(ODR_PRINT);
+    m_p->len = 0;
+    m_p->buf = 0;
 }
 
 
 Yaz_Z_Query::Yaz_Z_Query(const Yaz_Z_Query &q)
 {
-    odr_encode = odr_createmem(ODR_ENCODE);
-    odr_decode = odr_createmem(ODR_DECODE);
-    odr_print = odr_createmem(ODR_PRINT);
+    m_p = new Rep;
 
-    m_len = q.m_len;
-    m_buf = (char*) odr_malloc(odr_encode, m_len);
-    memcpy(m_buf, q.m_buf, m_len);
+    m_p->odr_encode = odr_createmem(ODR_ENCODE);
+    m_p->odr_decode = odr_createmem(ODR_DECODE);
+    m_p->odr_print = odr_createmem(ODR_PRINT);
+
+    m_p->len = q.m_p->len;
+    m_p->buf = (char*) odr_malloc(m_p->odr_encode, m_p->len);
+    memcpy(m_p->buf, q.m_p->buf, m_p->len);
 }
 
 Yaz_Z_Query& Yaz_Z_Query::operator=(const Yaz_Z_Query &q)
 {
     if (this != &q)
     {
-        odr_reset(odr_encode);
-        if (!q.m_buf)
+        odr_reset(m_p->odr_encode);
+        if (!q.m_p->buf)
         {
-            m_buf = 0;
-            m_len = 0;
+            m_p->buf = 0;
+            m_p->len = 0;
         }
         else
         {
-            m_len = q.m_len;
-            m_buf = (char*) odr_malloc(odr_encode, m_len);
-            memcpy(m_buf, q.m_buf, m_len);
+            m_p->len = q.m_p->len;
+            m_p->buf = (char*) odr_malloc(m_p->odr_encode, m_p->len);
+            memcpy(m_p->buf, q.m_p->buf, m_p->len);
         }
     }
     return *this;
@@ -60,44 +75,44 @@ Yaz_Z_Query& Yaz_Z_Query::operator=(const char *rpn)
 
 int Yaz_Z_Query::set_rpn(const char *rpn)
 {
-    m_buf = 0;
-    odr_reset(odr_encode);
-    Z_Query *query = (Z_Query*) odr_malloc(odr_encode, sizeof(*query));
+    m_p->buf = 0;
+    odr_reset(m_p->odr_encode);
+    Z_Query *query = (Z_Query*) odr_malloc(m_p->odr_encode, sizeof(*query));
     query->which = Z_Query_type_1;
-    query->u.type_1 = p_query_rpn(odr_encode, rpn);
+    query->u.type_1 = p_query_rpn(m_p->odr_encode, rpn);
     if (!query->u.type_1)
         return -1;
-    if (!z_Query(odr_encode, &query, 0, 0))
+    if (!z_Query(m_p->odr_encode, &query, 0, 0))
         return -1;
-    // z_Query(odr_print, &query, 0, 0);
-    m_buf = odr_getbuf(odr_encode, &m_len, 0);
-    return m_len;
+    m_p->buf = odr_getbuf(m_p->odr_encode, &m_p->len, 0);
+    return m_p->len;
 }
 
 void Yaz_Z_Query::set_Z_Query(Z_Query *z_query)
 {
-    m_buf = 0;
-    odr_reset(odr_encode);
-    if (!z_Query(odr_encode, &z_query, 0, 0))
+    m_p->buf = 0;
+    odr_reset(m_p->odr_encode);
+    if (!z_Query(m_p->odr_encode, &z_query, 0, 0))
         return;
-    m_buf = odr_getbuf(odr_encode, &m_len, 0);
+    m_p->buf = odr_getbuf(m_p->odr_encode, &m_p->len, 0);
 }
 
 Yaz_Z_Query::~Yaz_Z_Query()
 {
-    odr_destroy(odr_encode);
-    odr_destroy(odr_decode);
-    odr_destroy(odr_print);
+    odr_destroy(m_p->odr_encode);
+    odr_destroy(m_p->odr_decode);
+    odr_destroy(m_p->odr_print);
+    delete m_p;
 }
 
 Z_Query *Yaz_Z_Query::get_Z_Query()
 {
     Z_Query *query;
-    if (!m_buf)
+    if (!m_p->buf)
         return 0;
-    odr_reset(odr_decode);
-    odr_setbuf(odr_decode, m_buf, m_len, 0);
-    if (!z_Query(odr_decode, &query, 0, 0))
+    odr_reset(m_p->odr_decode);
+    odr_setbuf(m_p->odr_decode, m_p->buf, m_p->len, 0);
+    if (!z_Query(m_p->odr_decode, &query, 0, 0))
         return 0;
     return query;
 }
@@ -106,10 +121,10 @@ void Yaz_Z_Query::print(char *str, size_t len)
 {
     Z_Query *query;
     *str = 0;
-    if (!m_buf)
+    if (!m_p->buf)
         return;
-    odr_setbuf(odr_decode, m_buf, m_len, 0);
-    if (!z_Query(odr_decode, &query, 0, 0))
+    odr_setbuf(m_p->odr_decode, m_p->buf, m_p->len, 0);
+    if (!z_Query(m_p->odr_decode, &query, 0, 0))
         return;
     WRBUF wbuf = wrbuf_alloc();
     yaz_query_to_wrbuf(wbuf, query);
@@ -121,16 +136,16 @@ void Yaz_Z_Query::print(char *str, size_t len)
     else
         strcpy(str, wrbuf_cstr(wbuf));
     wrbuf_destroy(wbuf);
-    odr_reset(odr_decode);
+    odr_reset(m_p->odr_decode);
 }
 
 int Yaz_Z_Query::match(const Yaz_Z_Query *other)
 {
-    if (m_len != other->m_len)
+    if (m_p->len != other->m_p->len)
         return 0;
-    if (!m_buf || !other->m_buf)
+    if (!m_p->buf || !other->m_p->buf)
         return 0;
-    if (memcmp(m_buf, other->m_buf, m_len))
+    if (memcmp(m_p->buf, other->m_p->buf, m_p->len))
         return 0;
     return 1;
 }
