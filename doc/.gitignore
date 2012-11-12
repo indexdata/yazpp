@@ -3,7 +3,7 @@ Makefile
 Makefile.in
 *.html
 *.tkl
-yazpp-config.8
+yazpp-config.1
 yazpp.tex
 yazpp.log
 yazpp.aux
