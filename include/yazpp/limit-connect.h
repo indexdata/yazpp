@@ -40,11 +40,10 @@ namespace yazpp_1 {
         void cleanup(bool all);
         void set_period(int sec);
     private:
+        struct Rep;
         struct Peer;
 
-        int m_period;
-        Peer *m_peers;
-        Peer **lookup(const char *peername);
+        Rep *m_p;
     };
 }
 

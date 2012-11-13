@@ -37,9 +37,13 @@
 
 using namespace yazpp_1;
 
-struct LimitConnect::Peer {
-    friend class LimitConnect;
+struct LimitConnect::Rep {
+    int m_period;
+    Peer *m_peers;
+    Peer **lookup(const char *peername);
+};
 
+struct LimitConnect::Peer {
     Peer(int sz, const char *peername);
     ~Peer();
     void add_connect();
@@ -51,19 +55,21 @@ struct LimitConnect::Peer {
 
 LimitConnect::LimitConnect()
 {
-    m_period = 60;
-    m_peers = 0;
+    m_p = new Rep;
+    m_p->m_period = 60;
+    m_p->m_peers = 0;
 }
 
 
 LimitConnect::~LimitConnect()
 {
     cleanup(true);
+    delete m_p;
 }
 
 void LimitConnect::set_period(int sec)
 {
-    m_period = sec;
+    m_p->m_period = sec;
 }
 
 LimitConnect::Peer::Peer(int sz, const char *peername) : m_bw(sz)
@@ -82,7 +88,7 @@ void LimitConnect::Peer::add_connect()
     m_bw.add_bytes(1);
 }
 
-LimitConnect::Peer **LimitConnect::lookup(const char *peername)
+LimitConnect::Peer **LimitConnect::Rep::lookup(const char *peername)
 {
     Peer **p = &m_peers;
     while (*p)
@@ -96,15 +102,15 @@ LimitConnect::Peer **LimitConnect::lookup(const char *peername)
 
 void LimitConnect::add_connect(const char *peername)
 {
-    Peer **p = lookup(peername);
+    Peer **p = m_p->lookup(peername);
     if (!*p)
-	*p = new Peer(m_period, peername);
+	*p = new Peer(m_p->m_period, peername);
     (*p)->add_connect();
 }
 
 int LimitConnect::get_total(const char *peername)
 {
-    Peer **p = lookup(peername);
+    Peer **p = m_p->lookup(peername);
     if (!*p)
 	return 0;
     return (*p)->m_bw.get_total();
@@ -112,7 +118,7 @@ int LimitConnect::get_total(const char *peername)
 
 void LimitConnect::cleanup(bool all)
 {
-    Peer **p = &m_peers;
+    Peer **p = &m_p->m_peers;
     while (*p)
     {
 	Peer *tp = *p;
