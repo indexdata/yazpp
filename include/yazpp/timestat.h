@@ -29,7 +29,6 @@
 #ifndef YAZPP_TIMESTAT_H
 #define YAZPP_TIMESTAT_H
 
-#include <time.h>
 #include <yaz/yconfig.h>
 
 namespace yazpp_1 {
@@ -40,10 +39,8 @@ namespace yazpp_1 {
         void add_bytes(int m);
         int get_total();
     private:
-        time_t m_sec;   // time of most recent bucket
-        int *m_bucket;
-        int m_ptr;
-        int m_size;
+        class Rep;
+        Rep *m_p;
     };
 }
 

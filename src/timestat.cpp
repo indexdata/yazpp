@@ -29,20 +29,31 @@
 #include <config.h>
 #endif
 #include <yazpp/timestat.h>
+#include <time.h>
 
 using namespace yazpp_1;
 
+class TimeStat::Rep {
+    friend class TimeStat;
+    time_t sec;   // time of most recent bucket
+    int *bucket;
+    int ptr;
+    int size;
+};
+
 TimeStat::TimeStat(int sz)
 {
-    m_sec = 0;
-    m_size = sz;
-    m_bucket = new int[m_size];
-    m_ptr = 0;
+    m_p = new Rep;
+    m_p->sec = 0;
+    m_p->size = sz;
+    m_p->bucket = new int[m_p->size];
+    m_p->ptr = 0;
 }
 
 TimeStat::~TimeStat()
 {
-    delete [] m_bucket;
+    delete [] m_p->bucket;
+    delete m_p;
 }
 
 int TimeStat::get_total()
@@ -50,8 +61,8 @@ int TimeStat::get_total()
     add_bytes(0);
     int bw = 0;
     int i;
-    for (i = 0; i<m_size; i++)
-        bw += m_bucket[i];
+    for (i = 0; i < m_p->size; i++)
+        bw += m_p->bucket[i];
     return bw;
 }
 
@@ -59,20 +70,20 @@ void TimeStat::add_bytes(int b)
 {
     time_t now = time(0);
 
-    if (now >= m_sec)
+    if (now >= m_p->sec)
     {
-        int d = now - m_sec;
-        if (d > m_size)
-            d = m_size;
+        int d = now - m_p->sec;
+        if (d > m_p->size)
+            d = m_p->size;
         while (--d >= 0)
         {
-            if (++m_ptr == m_size)
-                m_ptr = 0;
-            m_bucket[m_ptr] = 0;
+            if (++m_p->ptr == m_p->size)
+                m_p->ptr = 0;
+            m_p->bucket[m_p->ptr] = 0;
         }
-        m_bucket[m_ptr] += b;
+        m_p->bucket[m_p->ptr] += b;
     }
-    m_sec = now;
+    m_p->sec = now;
 }
 
 /*
