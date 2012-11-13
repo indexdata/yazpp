@@ -78,8 +78,13 @@ YAZPPLALIB="$yazlalibs"
 YAZPPLIB="$yazlibs"
 
 if test "$echo_source" = "yes"; then
-    YAZPPLIB="-L${build_root}/src/.libs -lyazpp $YAZPPLIB"
-    YAZPPLALIB="${build_root}/src/libyazpp.la $YAZPPLALIB"
+    if test "$echo_zoom" = "yes"; then
+        YAZPPLIB="-L${build_root}/zoom/.libs -lzoomzpp $YAZPPLIB"
+        YAZPPLALIB="${build_root}/zoom/libzoompp.la $YAZPPLALIB"
+    else
+        YAZPPLIB="-L${build_root}/src/.libs -lyazpp $YAZPPLIB"
+        YAZPPLALIB="${build_root}/src/libyazpp.la $YAZPPLALIB"
+    fi
     YAZPPINC="$YAZPPINC -I${src_root}/include"
 else
     if test "$echo_zoom" = "yes"; then
