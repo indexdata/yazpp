@@ -95,7 +95,7 @@ binary-arch: build install
 	dh_fixperms
 #	dh_perl
 #	dh_python
-	dh_makeshlibs -V 'libyazpp5 (>= 1.4.0)'
+	dh_makeshlibs -V 'libyazpp5 (>= 1.4.1)'
 	dh_installdeb
 	dh_shlibdeps -l debian/libyazpp5/usr/lib
 	dh_gencontrol
