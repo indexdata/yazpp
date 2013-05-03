@@ -193,6 +193,7 @@ int main(int argc, char **argv)
     char *arg;
     char *prog = *argv;
     const char *addr = "tcp:@:9999";
+    const char *cert_fname = 0;
     char *apdu_log = 0;
 
     SocketManager mySocketManager;
@@ -202,7 +203,7 @@ int main(int argc, char **argv)
     MyServer *z = 0;
     int ret;
 
-    while ((ret = options("a:v:T", argv, argc, &arg)) != -2)
+    while ((ret = options("a:C:v:T", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -211,6 +212,9 @@ int main(int argc, char **argv)
             break;
         case 'a':
             apdu_log = xstrdup(arg);
+            break;
+        case 'C':
+            cert_fname = xstrdup(arg);
             break;
         case 'v':
             yaz_log_init_level (yaz_log_mask_str(arg));
@@ -231,6 +235,8 @@ int main(int argc, char **argv)
 #else
     my_PDU_Assoc = new PDU_Assoc(&mySocketManager);
 #endif
+
+    my_PDU_Assoc->set_cert_fname(cert_fname);
 
     z = new MyServer(my_PDU_Assoc);
     z->server(addr);

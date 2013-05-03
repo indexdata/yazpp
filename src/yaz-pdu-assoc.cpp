@@ -54,6 +54,7 @@ namespace yazpp_1 {
         void init(yazpp_1::ISocketObservable *socketObservable);
         COMSTACK comstack(const char *type_and_host, void **vp);
         bool m_session_is_dead;
+        char *cert_fname;
     };
 }
 
@@ -73,10 +74,12 @@ void PDU_Assoc_priv::init(ISocketObservable *socketObservable)
     idleTime = 0;
     log = YLOG_DEBUG;
     m_session_is_dead = false;
+    cert_fname = 0;
 }
 
 PDU_Assoc::~PDU_Assoc()
 {
+    xfree(m_p->cert_fname);
     delete m_p;
 }
 
@@ -502,6 +505,10 @@ int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
 
     if (!m_p->cs)
         return -1;
+
+    if (m_p->cert_fname)
+        cs_set_ssl_certificate_file(m_p->cs, m_p->cert_fname);
+
     if (cs_bind(m_p->cs, ap, CS_SERVER) < 0)
         return -2;
 
@@ -607,6 +614,15 @@ const char*PDU_Assoc::getpeername()
         return 0;
     return cs_addrstr(m_p->cs);
 }
+
+void PDU_Assoc::set_cert_fname(const char *fname)
+{
+    xfree(m_p->cert_fname);
+    m_p->cert_fname = 0;
+    if (fname)
+        m_p->cert_fname = xstrdup(fname);
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

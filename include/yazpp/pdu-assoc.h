@@ -69,6 +69,7 @@ class YAZ_EXPORT PDU_Assoc : public IPDU_Observable, yazpp_1::ISocketObserver {
     void idleTime(int timeout);
     void close_session();
     const char *getpeername();
+    void set_cert_fname(const char *fname);
 };
 
 class YAZ_EXPORT PDU_AssocThread : public PDU_Assoc {
