@@ -57,7 +57,7 @@
     <literal>./configure --help</literal>.
    </para>
    <para>
-    Configure uses GCC's C/C++ compiler if available. To specify another
+    Configure uses GNU's C/C++ compiler if available. To specify another
     compiler, set <literal>CXX</literal>. To use other compiler flags,
     specify <literal>CXXFLAGS</literal>. To use <literal>CC</literal> 
     with debugging you could use:
