@@ -194,17 +194,17 @@
     The following files are generated upon successful compilation:
     
     <variablelist>
-     <varlistentry><term><filename>bin/yazpp_1.dll</filename></term>
+     <varlistentry><term><filename>bin/yazpp5.dll</filename></term>
       <listitem><para>
 	YAZ++ DLL . Includes ZOOM C++ as well.
-	For the debug version <filename>lib/yazpp_1_d.dll</filename>
+	For the debug version <filename>lib/yazpp5d.dll</filename>
 	is created instead.
        </para></listitem></varlistentry>
      
-     <varlistentry><term><filename>lib/yazpp_1.lib</filename></term>
+     <varlistentry><term><filename>lib/yazpp5.lib</filename></term>
       <listitem><para>
-	Import library for <filename>yazpp_1.dll</filename>.
-	For the debug version <filename>lib/yazpp_1_d.lib</filename>
+	Import library for <filename>yazpp5.dll</filename>.
+	For the debug version <filename>lib/yazpp5d.lib</filename>
 	is created instead.
        </para></listitem></varlistentry>
      
