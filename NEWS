@@ -1,3 +1,10 @@
+--- 1.4.1 2013/05/03
+
+Allow SSL certificate to be given for PDU_Assoc. Makes it possible
+to use yazpp API in SSL/HTTPS in server role.
+
+New Debian package libyazpp5-dbg.
+
 --- 1.4.0 2012/11/13
 
 Pimpl some public classes SocketManager, Z_Assoc, PDU_Assoc,
