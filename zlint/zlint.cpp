@@ -14,6 +14,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/charneg.h>
 #include <yaz/log.h>
+#include <yaz/odr.h>
 
 #include <zlint.h>
 
@@ -149,12 +150,7 @@ IPDU_Observer *Zlint::sessionNotify(
 
 Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 {
-    Z_ReferenceId *id =
-        (Z_ReferenceId *) odr_malloc(odr_encode(), sizeof(*id));
-    id->size = id->len = len;
-    id->buf = (unsigned char*) odr_malloc(odr_encode(), len);
-    memcpy(id->buf, buf, len);
-    return id;
+    return odr_create_Odr_oct(odr_encode(), buf, len);
 }
 
 int Zlint::initResponseGetVersion(Z_InitResponse *init)

@@ -205,16 +205,14 @@ void Z_Assoc::transfer_referenceId(Z_APDU *from, Z_APDU *to)
 {
     Z_ReferenceId **id_from = get_referenceIdP(from);
     Z_ReferenceId **id_to = get_referenceIdP(to);
-    if (id_from && *id_from && id_to)
+    if (id_to)
     {
-        *id_to = (Z_ReferenceId*) odr_malloc(m_p->odr_out, sizeof(**id_to));
-        (*id_to)->size = (*id_to)->len = (*id_from)->len;
-        (*id_to)->buf = (unsigned char*)
-            odr_malloc(m_p->odr_out, (*id_to)->len);
-        memcpy((*id_to)->buf, (*id_from)->buf, (*id_to)->len);
+        if (id_from && *id_from)
+            *id_to = odr_create_Odr_oct(m_p->odr_out, (*id_from)->buf,
+                                        (*id_from)->len);
+        else
+            *id_to = 0;
     }
-    else if (id_to)
-        *id_to = 0;
 }
 
 int Z_Assoc::send_Z_PDU(Z_APDU *apdu, int *plen)
@@ -453,11 +451,7 @@ Z_ReferenceId* Z_Assoc::getRefID(char* str)
     Z_ReferenceId* id = NULL;
 
     if (str)
-    {
-        id = (Z_ReferenceId*) odr_malloc(m_p->odr_out, sizeof(*id));
-        id->size = id->len = strlen(str);
-        id->buf = (unsigned char *) str;
-    }
+        id = odr_create_Odr_oct(m_p->odr_out, str, strlen(str));
     return id;
 }
 
