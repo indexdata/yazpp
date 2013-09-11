@@ -451,7 +451,11 @@ Z_ReferenceId* Z_Assoc::getRefID(char* str)
     Z_ReferenceId* id = NULL;
 
     if (str)
-        id = odr_create_Odr_oct(m_p->odr_out, str, strlen(str));
+        id = odr_create_Odr_oct(m_p->odr_out, 
+#if YAZ_VERSIONL < 0x50000
+                                (unsigned char *)
+#endif
+                                str, strlen(str));
     return id;
 }
 

@@ -150,7 +150,11 @@ IPDU_Observer *Zlint::sessionNotify(
 
 Z_ReferenceId *Zlint::mk_refid(const char *buf, int len)
 {
-    return odr_create_Odr_oct(odr_encode(), buf, len);
+    return odr_create_Odr_oct(odr_encode(),
+#if YAZ_VERSIONL < 0x50000
+                              (unsigned char *)
+#endif
+                              buf, len);
 }
 
 int Zlint::initResponseGetVersion(Z_InitResponse *init)
