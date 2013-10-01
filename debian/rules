@@ -8,14 +8,14 @@ override_dh_auto_configure:
 	dh_auto_configure -- --with-yaz=/usr/bin
 
 override_dh_strip:
-	dh_strip --dbg-package=libyazpp5-dbg
+	dh_strip --dbg-package=libyazpp6-dbg
 
 override_dh_auto_install:
 	dh_auto_install	
 	mv debian/tmp/usr/share/doc/yazpp debian/tmp/usr/share/doc/yazpp-doc
 
 override_dh_makeshlibs:
-	dh_makeshlibs -V 'libyazpp5 (>= 1.4.1)'
+	dh_makeshlibs -V 'libyazpp6 (>= 1.4.1)'
 
 override_dh_installchangelogs:
 	dh_installchangelogs NEWS

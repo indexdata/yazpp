@@ -9,28 +9,29 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-BuildRequires: pkgconfig, libyaz4-devel >= 4.2.8
+BuildRequires: pkgconfig, libyaz5-devel >= 5.0.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
 
 %description
 YAZ++ package.
 
-%package -n libyazpp5
+%package -n libyazpp6
 Summary: YAZ++ and ZOOM library
 Group: Libraries
-Requires: libyaz4 >= 4.2.8
+Requires: libyaz5 >= 5.0.0
 
-%description -n libyazpp5
+%description -n libyazpp6
 Libraries for the YAZ++ package.
 
-%package -n libyazpp5-devel
+%package -n libyazpp6-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyazpp5 = %{version}, libyaz4-devel
+Requires: libyazpp6 = %{version}, libyaz5-devel
 Conflicts: libyazpp4-devel
+Conflicts: libyazpp5-devel
 
-%description -n libyazpp5-devel
+%description -n libyazpp6-devel
 Development libraries and include files for the YAZ++ package.
 
 %prep
@@ -51,15 +52,15 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %clean
 rm -fr ${RPM_BUILD_ROOT}
 
-%post -n libyazpp5 -p /sbin/ldconfig 
-%postun -n libyazpp5 -p /sbin/ldconfig 
+%post -n libyazpp6 -p /sbin/ldconfig 
+%postun -n libyazpp6 -p /sbin/ldconfig 
 
-%files -n libyazpp5
+%files -n libyazpp6
 %doc README LICENSE NEWS
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
-%files -n libyazpp5-devel
+%files -n libyazpp6-devel
 %defattr(-,root,root)
 %{_bindir}/yazpp-config
 %{_includedir}/yazpp
