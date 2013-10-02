@@ -45,13 +45,13 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yazpp5d.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp5d.lib
-YAZD=yaz4d
+DLL=$(BINDIR)\yazpp6d.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp6d.lib
+YAZD=yaz5d
 !else
-DLL=$(BINDIR)\yazpp5.dll
-YAZPP_IMPLIB=$(LIBDIR)\yazpp5.lib
-YAZD=yaz4
+DLL=$(BINDIR)\yazpp6.dll
+YAZPP_IMPLIB=$(LIBDIR)\yazpp6.lib
+YAZD=yaz5
 !endif
 
 ZCLIENT=$(BINDIR)\zclient.exe
