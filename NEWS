@@ -1,3 +1,9 @@
+--- 1.5.0 2013/10/04
+
+Bump so/DLL to version 6 and use YAZ 5.
+
+Use odr_create_Odr_oct and make yazpp work with both YAZ 4 and YAZ 5.
+
 --- 1.4.1 2013/05/03
 
 Allow SSL certificate to be given for PDU_Assoc. Makes it possible
