@@ -1,5 +1,5 @@
 
-check_PROGRAMS = tstquery
+check_PROGRAMS = test_query
 noinst_PROGRAMS = yaz-my-server yaz-my-client
 bin_SCRIPTS = yazpp-config
 
@@ -27,6 +27,6 @@ yaz_my_client_SOURCES=yaz-my-client.cpp
 
 yaz_my_server_SOURCES=yaz-my-server.cpp yaz-marc-sample.cpp
 
-tstquery_SOURCES=tstquery.cpp
+test_query_SOURCES=test_query.cpp
 
 LDADD=libyazpp.la $(YAZLALIB)
