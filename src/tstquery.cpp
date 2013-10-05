@@ -8,10 +8,12 @@
 #endif
 #include <stdlib.h>
 #include <yazpp/z-query.h>
+#include <yaz/test.h>
+#include <yaz/log.h>
 
 using namespace yazpp_1;
 
-void tst1(const char *query_str_in, const char *query_expected)
+int tst1(const char *query_str_in, const char *query_expected)
 {
     Yaz_Z_Query q;
 
@@ -26,17 +28,20 @@ void tst1(const char *query_str_in, const char *query_expected)
 
     if (strcmp(query_str_out, query_expected))
     {
-	fprintf(stderr, "tstquery: query mismatch out=%s expected=%s\n",
+	yaz_log(YLOG_LOG, "query mismatch out=%s expected=%s",
 		query_str_out, query_expected);
-	exit(1);
+        return 0;
     }
+    return 1;
 }
 
 int main(int argc, char **argv)
 {
-    tst1("", "");
-    tst1("x", "RPN @attrset Bib-1 x");
-    tst1("@and a b", "RPN @attrset Bib-1 @and a b");
+    YAZ_CHECK_INIT(argc, argv);
+    YAZ_CHECK(tst1("", ""));
+    YAZ_CHECK(tst1("x", "RPN @attrset Bib-1 x"));
+    YAZ_CHECK(tst1("@and a b", "RPN @attrset Bib-1 @and a b"));
+    YAZ_CHECK_TERM;
 }
 
 /*
