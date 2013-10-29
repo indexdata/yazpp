@@ -7,6 +7,7 @@
 #include <config.h>
 #endif
 #include <yaz/log.h>
+#include <yaz/diagsrw.h>
 #include <yaz/pquery.h>
 #include <yazpp/cql2rpn.h>
 
@@ -50,18 +51,17 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
     int r = cql_parser_string(cp, cql_query);
     if (r)
     {
-        r = 10;
+        r = YAZ_SRW_QUERY_SYNTAX_ERROR;
     }
     else
     {
-        char rpn_buf[10240];
-        r = cql_transform_buf(m_transform, cql_parser_result(cp),
-                              rpn_buf, sizeof(rpn_buf)-1);
+        WRBUF w = wrbuf_alloc();
+        r = cql_transform(m_transform, cql_parser_result(cp), wrbuf_vp_puts, w);
         if (!r)
         {
             YAZ_PQF_Parser pp = yaz_pqf_create();
 
-            *rpnquery = yaz_pqf_parse(pp, o, rpn_buf);
+            *rpnquery = yaz_pqf_parse(pp, o, wrbuf_cstr(w));
             if (!*rpnquery)
             {
                 size_t off;
@@ -75,12 +75,10 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
         {
             r = cql_transform_error(m_transform, &addinfo);
         }
+        wrbuf_destroy(w);
     }
     cql_parser_destroy(cp);
-    if (addinfo)
-        *addinfop = odr_strdup(o, addinfo);
-    else
-        *addinfop = 0;
+    *addinfop = odr_strdup_null(o, addinfo);
     return r;
 }
 /*
