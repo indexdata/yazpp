@@ -9,6 +9,7 @@
 #include <yaz/log.h>
 #include <yaz/diagsrw.h>
 #include <yaz/pquery.h>
+#include <yaz/sortspec.h>
 #include <yazpp/cql2rpn.h>
 
 using namespace yazpp_1;
@@ -55,13 +56,32 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
     }
     else
     {
-        WRBUF w = wrbuf_alloc();
-        r = cql_transform(m_transform, cql_parser_result(cp), wrbuf_vp_puts, w);
+        WRBUF pqf = wrbuf_alloc();
+        r = cql_transform(m_transform, cql_parser_result(cp),
+                          wrbuf_vp_puts, pqf);
         if (!r)
         {
+            WRBUF sortkeys = wrbuf_alloc();
+            WRBUF sortspec = wrbuf_alloc();
+            if (cql_sortby_to_sortkeys(cql_parser_result(cp),
+                                       wrbuf_vp_puts, sortkeys))
+            {
+                r = YAZ_SRW_UNSUPP_SORT_TYPE;
+            }
+            else
+            {
+                yaz_srw_sortkeys_to_sort_spec(wrbuf_cstr(sortkeys), sortspec);
+                Z_SortKeySpecList *sksl =
+                    yaz_sort_spec(o, wrbuf_cstr(sortspec));
+                if (sksl)
+                    yaz_sort_spec_to_type7(sksl, pqf);
+            }
+            wrbuf_destroy(sortspec);
+            wrbuf_destroy(sortkeys);
+
             YAZ_PQF_Parser pp = yaz_pqf_create();
 
-            *rpnquery = yaz_pqf_parse(pp, o, wrbuf_cstr(w));
+            *rpnquery = yaz_pqf_parse(pp, o, wrbuf_cstr(pqf));
             if (!*rpnquery)
             {
                 size_t off;
@@ -75,7 +95,7 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
         {
             r = cql_transform_error(m_transform, &addinfo);
         }
-        wrbuf_destroy(w);
+        wrbuf_destroy(pqf);
     }
     cql_parser_destroy(cp);
     *addinfop = odr_strdup_null(o, addinfo);
