@@ -35,10 +35,15 @@ AC_OUTPUT([
 	yazpp-config
 	zoom/Makefile
 	doc/Makefile
-	doc/local.ent
+	doc/local0.ent
 	doc/common/Makefile
 	doc/common/print.dsl
-],[sed s%echo_source=yes%echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config])
+],[
+	sed s%echo_source=yes%echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config
+	diff doc/local.ent doc/local0.ent >/dev/null 2>/dev/null \
+		|| cp doc/local0.ent doc/local.ent
+  ]
+)
 
 
 echo \
