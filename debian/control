@@ -17,7 +17,7 @@ Description: YAZ++ library
 Package: libyazpp6-dbg
 Section: debug
 Architecture: any
-Depends: ${misc:Depends}, libyazpp5 (= ${Source-Version})
+Depends: ${misc:Depends}, libyazpp6 (= ${Source-Version})
 Description: debugging symbols for YAZ++ library
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
