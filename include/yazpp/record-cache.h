@@ -36,6 +36,8 @@ class YAZ_EXPORT RecordCache {
     RecordCache ();
     ~RecordCache ();
     void add(ODR o, Z_NamePlusRecordList *npr, int start, int hits);
+    void add(ODR o, Z_NamePlusRecordList *npr, int start,
+             Z_RecordComposition *comp);
 
     int lookup(ODR o, Z_NamePlusRecordList **npr, int start, int num,
                Odr_oid *syntax, Z_RecordComposition *comp);

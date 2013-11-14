@@ -100,12 +100,29 @@ void RecordCache::copy_presentRequest(Z_PresentRequest *pr)
     odr_destroy(decode);
 }
 
+void RecordCache::add(ODR o, Z_NamePlusRecordList *npr, int start,
+                      Z_RecordComposition *comp)
+{
+    if (nmem_total(m_p->nmem) > m_p->max_size)
+        return;
+    // Insert individual records in cache
+    int i;
+    for (i = 0; i < npr->num_records; i++)
+    {
+        RecordCache_Entry *entry = (RecordCache_Entry *)
+            nmem_malloc(m_p->nmem, sizeof(*entry));
+        entry->m_record =
+            yaz_clone_z_NamePlusRecord(npr->records[i], m_p->nmem);
+        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_p->nmem);
+        entry->m_offset = i + start;
+        entry->m_next = m_p->entries;
+        m_p->entries = entry;
+    }
+}
 
 void RecordCache::add(ODR o, Z_NamePlusRecordList *npr, int start,
                       int hits)
 {
-    if (nmem_total(m_p->nmem) > m_p->max_size)
-        return;
     // Build appropriate compspec for this response
     Z_RecordComposition *comp = 0;
     if (hits == -1 && m_p->presentRequest)
@@ -122,20 +139,7 @@ void RecordCache::add(ODR o, Z_NamePlusRecordList *npr, int start,
         comp->which = Z_RecordComp_simple;
         comp->u.simple = esn;
     }
-
-    // Insert individual records in cache
-    int i;
-    for (i = 0; i<npr->num_records; i++)
-    {
-        RecordCache_Entry *entry = (RecordCache_Entry *)
-            nmem_malloc(m_p->nmem, sizeof(*entry));
-        entry->m_record =
-            yaz_clone_z_NamePlusRecord(npr->records[i], m_p->nmem);
-        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_p->nmem);
-        entry->m_offset = i + start;
-        entry->m_next = m_p->entries;
-        m_p->entries = entry;
-    }
+    add(o, npr, start, comp);
 }
 
 int RecordCache::Rep::match(RecordCache_Entry *entry,
