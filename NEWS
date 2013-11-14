@@ -1,3 +1,10 @@
+--- 1.5.2 2013/11/14
+
+Make improved RecordCache::add YPP-10 . This will take a CompSpec as
+argument. We leave existing RecordCache:add for now.
+
+Fix libyazpp6-dbg to depend on libyazpp6.
+
 --- 1.5.1 2013/10/29
 
 query_transform considers SORTBY clause and generates type-7 sort. YPP-9
