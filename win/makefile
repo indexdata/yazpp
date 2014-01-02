@@ -1,8 +1,8 @@
-# Copyright (C) 1998-2013 Index Data
-# All rights reserved.
+# This file is part of the yazpp toolkit
+# Copyright (C) Index Data
+# See the file LICENSE for details.
 
 # Parameters 
-
 DEBUG=0   # 0 for release, 1 for debug
 USE_MANIFEST = 1 # Can be enabled Visual Studio 2005
 
