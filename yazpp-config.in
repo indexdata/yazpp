@@ -1,8 +1,8 @@
 #!/bin/sh
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+libdir="@libdir@"
+includedir="@includedir@"
 echo_cflags=no
 echo_libs=no
 echo_help=no
@@ -10,8 +10,8 @@ echo_tabs=no
 echo_source=yes
 echo_lalibs=no
 echo_zoom=no
-src_root=@abs_top_srcdir@
-build_root=@abs_top_builddir@
+src_root="@abs_top_srcdir@"
+build_root="@abs_top_builddir@"
 yazlibs="@YAZLIB@ @LIBS@"
 yazlalibs="@YAZLALIB@ @LIBS@"
 VERSION=@VERSION@
@@ -97,7 +97,7 @@ else
     else
 	YAZPPLIB="-L${libdir} ${libs_short} $YAZPPLIB"
     fi
-    YAZPPLALIB=$YAZPPLIB
+    YAZPPLALIB="$YAZPPLIB"
     if test "$prefix" != "/usr"; then
 	YAZPPINC="$YAZPPINC -I${includedir}"
     fi
