@@ -132,17 +132,21 @@ void PDU_Assoc::socketNotify(int event)
 {
     yaz_log(m_p->log, "PDU_Assoc::socketNotify p=%p state=%d event = %d",
             this, m_p->state, event);
-    if (event & SOCKET_OBSERVE_EXCEPT)
+    if ((event & SOCKET_OBSERVE_EXCEPT) &&
+        m_p->state != PDU_Assoc_priv::Connecting)
     {
+        yaz_log(m_p->log, "PDU_Assoc::socketNotify except");
         shutdown();
         m_PDU_Observer->failNotify();
         return;
     }
     else if (event & SOCKET_OBSERVE_TIMEOUT)
     {
+        yaz_log(m_p->log, "PDU_Assoc::socketNotify timeout");
         m_PDU_Observer->timeoutNotify();
         return;
     }
+    int res;
     switch (m_p->state)
     {
     case PDU_Assoc_priv::Accepting:
@@ -174,40 +178,30 @@ void PDU_Assoc::socketNotify(int event)
         }
         break;
     case PDU_Assoc_priv::Connecting:
-        if (event & SOCKET_OBSERVE_READ &&
-            event & SOCKET_OBSERVE_WRITE)
+        yaz_log(m_p->log, "PDU_Assoc::socketNotify Connecting");
+        res = cs_rcvconnect(m_p->cs);
+        if (res == 1)
         {
-            // For Unix: if both read and write is set, then connect failed.
-            shutdown();
-            m_PDU_Observer->failNotify();
+            unsigned mask = SOCKET_OBSERVE_EXCEPT;
+            if (m_p->cs->io_pending & CS_WANT_WRITE)
+                mask |= SOCKET_OBSERVE_WRITE;
+            if (m_p->cs->io_pending & CS_WANT_READ)
+                mask |= SOCKET_OBSERVE_READ;
+            yaz_log(m_p->log, "maskObserver 3");
+            m_p->m_socketObservable->addObserver(cs_fileno(m_p->cs), this);
+            m_p->m_socketObservable->maskObserver(this, mask);
         }
         else
         {
-            yaz_log(m_p->log, "cs_rcvconnect");
-            int res = cs_rcvconnect(m_p->cs);
-            if (res == 1)
-            {
-                unsigned mask = SOCKET_OBSERVE_EXCEPT;
-                if (m_p->cs->io_pending & CS_WANT_WRITE)
-                    mask |= SOCKET_OBSERVE_WRITE;
-                if (m_p->cs->io_pending & CS_WANT_READ)
-                    mask |= SOCKET_OBSERVE_READ;
-                yaz_log(m_p->log, "maskObserver 3");
-                m_p->m_socketObservable->maskObserver(this, mask);
-            }
-            else
-            {
-                m_p->state = PDU_Assoc_priv::Ready;
-                if (m_PDU_Observer)
-                    m_PDU_Observer->connectNotify();
-                flush_PDU();
-            }
+            m_p->state = PDU_Assoc_priv::Ready;
+            if (m_PDU_Observer)
+                m_PDU_Observer->connectNotify();
+            flush_PDU();
         }
         break;
     case PDU_Assoc_priv::Listen:
         if (event & SOCKET_OBSERVE_READ)
         {
-            int res;
             COMSTACK new_line;
 
             if ((res = cs_listen(m_p->cs, 0, 0)) == 1)
@@ -231,15 +225,17 @@ void PDU_Assoc::socketNotify(int event)
         }
         break;
     case PDU_Assoc_priv::Writing:
+        yaz_log(m_p->log, "PDU_Assoc::socketNotify writing");
         if (event & (SOCKET_OBSERVE_READ|SOCKET_OBSERVE_WRITE))
             flush_PDU();
         break;
     case PDU_Assoc_priv::Ready:
+        yaz_log(m_p->log, "PDU_Assoc::socketNotify ready");
         if (event & (SOCKET_OBSERVE_READ|SOCKET_OBSERVE_WRITE))
         {
             do
             {
-                int res = cs_get(m_p->cs, &m_p->input_buf, &m_p->input_len);
+                res = cs_get(m_p->cs, &m_p->input_buf, &m_p->input_len);
                 if (res == 1)
                 {
                     unsigned mask = SOCKET_OBSERVE_EXCEPT;
@@ -383,16 +379,17 @@ int PDU_Assoc::flush_PDU()
 {
     int r;
 
+    yaz_log(m_p->log, "PDU_Assoc::flush_PDU");
     if (m_p->state != PDU_Assoc_priv::Ready && m_p->state != PDU_Assoc_priv::Writing)
     {
-        yaz_log(m_p->log, "YAZ_PDU_Assoc::flush_PDU, not ready");
+        yaz_log(m_p->log, "PDU_Assoc::flush_PDU, not ready");
         return 1;
     }
     PDU_Assoc_priv::PDU_Queue *q = m_p->queue_out;
     if (!q)
     {
         m_p->state = PDU_Assoc_priv::Ready;
-        yaz_log(m_p->log, "YAZ_PDU_Assoc::flush_PDU queue empty");
+        yaz_log(m_p->log, "PDU_Assoc::flush_PDU queue empty");
         yaz_log(m_p->log, "maskObserver 6");
         m_p->m_socketObservable->maskObserver(this, SOCKET_OBSERVE_READ|
                                               SOCKET_OBSERVE_WRITE|
@@ -412,6 +409,7 @@ int PDU_Assoc::flush_PDU()
         m_PDU_Observer->failNotify();
         return r;
     }
+    m_p->m_socketObservable->addObserver(cs_fileno(m_p->cs), this);
     if (r == 1)
     {
         unsigned mask = SOCKET_OBSERVE_EXCEPT;
