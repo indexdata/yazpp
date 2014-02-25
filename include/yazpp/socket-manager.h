@@ -46,13 +46,13 @@ class YAZ_EXPORT SocketManager : public ISocketObservable {
     Rep *m_p;
  public:
     /// Add an observer
-    virtual void addObserver(int fd, ISocketObserver *observer);
+    virtual void addObserver(ISocketObserver *observer);
     /// Delete an observer
     virtual void deleteObserver(ISocketObserver *observer);
     /// Delete all observers
     virtual void deleteObservers();
     /// Set event mask for observer
-    virtual void maskObserver(ISocketObserver *observer, int mask);
+    virtual void maskObserver(ISocketObserver *observer, int mask, int fd);
     /// Set timeout
     virtual void timeoutObserver(ISocketObserver *observer, int timeout);
     /// Process one event. return > 0 if event could be processed;

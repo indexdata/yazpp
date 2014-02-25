@@ -79,7 +79,7 @@ int SocketManager::getNumberOfObservers()
     return i;
 }
 
-void SocketManager::addObserver(int fd, ISocketObserver *observer)
+void SocketManager::addObserver(ISocketObserver *observer)
 {
     SocketEntry *se;
 
@@ -91,7 +91,7 @@ void SocketManager::addObserver(int fd, ISocketObserver *observer)
         m_p->observers = se;
         se->observer = observer;
     }
-    se->fd = fd;
+    se->fd = -1;
     se->mask = 0;
     se->last_activity = 0;
     se->timeout = -1;
@@ -122,18 +122,21 @@ void SocketManager::deleteObservers()
     m_p->observers = 0;
 }
 
-void SocketManager::maskObserver(ISocketObserver *observer, int mask)
+void SocketManager::maskObserver(ISocketObserver *observer, int mask, int fd)
 {
     SocketEntry *se;
 
-    yaz_log(m_p->log, "obs=%p read=%d write=%d except=%d", observer,
-                    mask & SOCKET_OBSERVE_READ,
-                    mask & SOCKET_OBSERVE_WRITE,
-                    mask & SOCKET_OBSERVE_EXCEPT);
+    yaz_log(m_p->log, "obs=%p read=%d write=%d except=%d fd=%d", observer,
+            mask & SOCKET_OBSERVE_READ,
+            mask & SOCKET_OBSERVE_WRITE,
+            mask & SOCKET_OBSERVE_EXCEPT, fd);
 
     se = *m_p->lookupObserver(observer);
     if (se)
+    {
         se->mask = mask;
+        se->fd = fd;
+    }
 }
 
 void SocketManager::timeoutObserver(ISocketObserver *observer,
