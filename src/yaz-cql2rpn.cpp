@@ -11,6 +11,7 @@
 #include <yaz/pquery.h>
 #include <yaz/sortspec.h>
 #include <yazpp/cql2rpn.h>
+#include <yaz/rpn2cql.h>
 
 using namespace yazpp_1;
 
@@ -38,6 +39,20 @@ bool Yaz_cql2rpn::parse_spec_file(const char *fname, int *error)
     cql_transform_close(m_transform);
     m_transform = cql_transform_open_fname(fname);
     return m_transform ? true : false;
+}
+
+int Yaz_cql2rpn::rpn2cql_transform(Z_RPNQuery *q, WRBUF cql, ODR o,
+                                   char **addinfop)
+{
+    int r = cql_transform_rpn2cql_wrbuf(m_transform, cql, q);
+    *addinfop = 0;
+    if (r)
+    {
+        const char *addinfo = 0;
+        r = cql_transform_error(m_transform, &addinfo);
+        *addinfop = odr_strdup_null(o, addinfo);
+    }
+    return r;
 }
 
 int Yaz_cql2rpn::query_transform(const char *cql_query,

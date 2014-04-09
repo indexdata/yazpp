@@ -37,6 +37,7 @@ class YAZ_EXPORT Yaz_cql2rpn {
     bool parse_spec_file(const char *fname, int *error);
     int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o,
                         char **addinfop);
+    int rpn2cql_transform(Z_RPNQuery *q, WRBUF cql, ODR o, char **addinfop);
  private:
     cql_transform_t m_transform;
 };
