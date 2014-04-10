@@ -44,14 +44,14 @@ bool Yaz_cql2rpn::parse_spec_file(const char *fname, int *error)
 int Yaz_cql2rpn::rpn2cql_transform(Z_RPNQuery *q, WRBUF cql, ODR o,
                                    char **addinfop)
 {
-    int r = cql_transform_rpn2cql_wrbuf(m_transform, cql, q);
-    *addinfop = 0;
-    if (r)
-    {
-        const char *addinfo = 0;
-        r = cql_transform_error(m_transform, &addinfo);
-        *addinfop = odr_strdup_null(o, addinfo);
-    }
+    WRBUF addinfo = wrbuf_alloc();
+    int r = cql_transform_rpn2cql_stream_r(m_transform, addinfo,
+                                           wrbuf_vp_puts, cql, q);
+    if (r && wrbuf_len(addinfo))
+        *addinfop = odr_strdup_null(o, wrbuf_cstr(addinfo));
+    else
+        *addinfop = 0;
+    wrbuf_destroy(addinfo);
     return r;
 }
 
@@ -59,21 +59,24 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
                                  Z_RPNQuery **rpnquery, ODR o,
                                  char **addinfop)
 {
-    const char *addinfo = 0;
     if (!m_transform)
         return -3;
     CQL_parser cp = cql_parser_create();
+    WRBUF addinfo = wrbuf_alloc();
+    const char *lead = "query_transform::query_transform";
 
     int r = cql_parser_string(cp, cql_query);
     if (r)
     {
+        wrbuf_printf(addinfo, "%s:cql_parser_string failed: %s",
+                     lead, cql_query);
         r = YAZ_SRW_QUERY_SYNTAX_ERROR;
     }
     else
     {
         WRBUF pqf = wrbuf_alloc();
-        r = cql_transform(m_transform, cql_parser_result(cp),
-                          wrbuf_vp_puts, pqf);
+        r = cql_transform_r(m_transform, cql_parser_result(cp), addinfo,
+                            wrbuf_vp_puts, pqf);
         if (!r)
         {
             WRBUF sortkeys = wrbuf_alloc();
@@ -81,6 +84,8 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
             if (cql_sortby_to_sortkeys(cql_parser_result(cp),
                                        wrbuf_vp_puts, sortkeys))
             {
+                wrbuf_printf(addinfo, "%s: cql_parser_string failed: %s",
+                             lead, cql_query);
                 r = YAZ_SRW_UNSUPP_SORT_TYPE;
             }
             else
@@ -102,18 +107,20 @@ int Yaz_cql2rpn::query_transform(const char *cql_query,
                 size_t off;
                 const char *pqf_msg;
                 yaz_pqf_error(pp, &pqf_msg, &off);
-                r = -1;
+                wrbuf_printf(addinfo, "%s: yaz_pqf_parse failed: %s",
+                             lead, wrbuf_cstr(pqf));
+                r = YAZ_SRW_SYSTEM_TEMPORARILY_UNAVAILABLE;
             }
             yaz_pqf_destroy(pp);
-        }
-        else
-        {
-            r = cql_transform_error(m_transform, &addinfo);
         }
         wrbuf_destroy(pqf);
     }
     cql_parser_destroy(cp);
-    *addinfop = odr_strdup_null(o, addinfo);
+    if (r && wrbuf_len(addinfo))
+        *addinfop = odr_strdup_null(o, wrbuf_cstr(addinfo));
+    else
+        *addinfop = 0;
+    wrbuf_destroy(addinfo);
     return r;
 }
 /*
