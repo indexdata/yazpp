@@ -1,3 +1,11 @@
+--- 1.6.0 2014/04/19
+
+New method rpn2cql_transform for Yaz_cql2rpn
+
+Use new cql_transform_rpn2cql_stream_r function from YAZ.
+
+yazpp-config: quote some RHS values (that might include blanks)
+
 --- 1.5.2 2013/11/14
 
 Make improved RecordCache::add YPP-10 . This will take a CompSpec as
