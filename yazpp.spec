@@ -9,7 +9,7 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-BuildRequires: pkgconfig, libyaz5-devel >= 5.0.0
+BuildRequires: pkgconfig, libyaz5-devel >= 5.1.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
 
@@ -19,7 +19,7 @@ YAZ++ package.
 %package -n libyazpp6
 Summary: YAZ++ and ZOOM library
 Group: Libraries
-Requires: libyaz5 >= 5.0.0
+Requires: libyaz5 >= 5.1.0
 
 %description -n libyazpp6
 Libraries for the YAZ++ package.
