@@ -1,0 +1,1334 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
+]>
+<book id="yazpp">
+ <bookinfo>
+  <title>YAZ++ User's Guide and Reference</title>
+  <authorgroup>
+   <author><firstname>Mike</firstname><surname>Taylor</surname></author>
+   <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
+   </authorgroup>
+  <copyright>
+   <year>&copyright-year;</year>
+   <holder>Index Data Aps</holder>
+  </copyright>
+  <abstract>
+   <simpara>
+    <ulink url="&url.yazplusplus;">YAZ++</ulink>
+    is a set of libraries and header files that make it easier
+    to use the popular C-language
+    <ulink url="&url.yaz;">YAZ toolkit</ulink>
+    from C++, together with some utilities written using these
+    libraries.  It includes an implementation of the C++ binding for
+    ZOOM (<link linkend="zoom">ZOOM-C++</link>).
+   </simpara>
+   <simpara>
+    This manual covers version &version;.
+    </simpara>
+   <simpara>
+   </simpara>
+   <simpara>
+    <inlinemediaobject>
+     <imageobject>
+      <imagedata fileref="common/id.png" format="PNG"/>
+     </imageobject>
+    </inlinemediaobject>
+   </simpara>
+  </abstract>
+ </bookinfo>
+ <chapter id="introduction">
+  <title>Introduction</title>
+  <para>
+   <ulink url="&url.yazplusplus;">YAZ++</ulink>
+   is a C++ layer for YAZ and implements the ANSI
+   <ulink url="&url.z39.50;">Z39.50</ulink> protocol for information
+   retrieval (client and server side).
+  </para>
+  <para>
+   The YAZ++ packages also features a ZOOM interface for C++ (
+   <ulink url="&url.zoom.bind.cplusplus;">ZOOM C++</ulink>).
+  </para>
+  <para>
+   Later versions (0.7+) of YAZ++ also supports SRU.
+  </para>
+  <section id="licensing">
+   <title>Licensing</title>
+   <para>
+    YAZ++ and ZOOM-C++ is is covered
+    by Revised <link linkend="license">BSD License</link>.
+   </para>
+  </section>
+ </chapter>
+<chapter id="installation">
+  <title>Installation</title>
+  <para>
+   You need a C++ compiler to compile and use YAZ++.
+   The software was implemented using <ulink url="&url.gcc;">GCC</ulink>
+   so we know that works well with YAZ++. From time to time the
+   software is compiled on Windows using Visual C++.
+   Other compilers should work too. Let us know of portability
+   problems, etc. with your system.
+  </para>
+  <para>
+   YAZ++ is built on top of the
+   <ulink url="&url.yaz;">YAZ</ulink>
+   toolkit.
+   You need to install that first.
+   For some platforms there are binary packages for YAZ.
+  </para>
+  <section id="unix">
+   <title>Installation on Unix (from source)</title>
+   <para>On UNIX, the software is compiled as follows:
+    <screen>
+     $ ./configure
+     $ make
+     $ su
+     # make install
+    </screen>
+   </para>
+   <para>
+    You can supply options for the <literal>configure</literal> script.
+    The most useful ones are:
+    <variablelist>
+     <varlistentry>
+      <term><literal>--prefix </literal>directory</term>
+      <listitem><para>
+        Specifies installation prefix. By default
+        <filename>/usr/local</filename> is used.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>--with-yaz </literal>directory</term>
+      <listitem><para>
+        Specifies the location of <filename>yaz-config</filename>.
+        The <filename>yaz-config</filename> program is generated in
+        the source directory of YAZ as well as the binaries
+        directory when YAZ is installed (via make install).
+        </para>
+       <para>
+        If you don't supply this option, <literal>configure</literal> will
+        look for <filename>yaz-config</filename> in directories of the
+        <envar>PATH</envar> environment - which is nearly always
+        what you want.
+       </para></listitem>
+     </varlistentry>
+    </variablelist>
+    For the whole list of <literal>configure</literal> options, refer
+    to the help:
+    <literal>./configure --help</literal>.
+   </para>
+   <para>
+    Configure uses GNU's C/C++ compiler if available. To specify another
+    compiler, set <literal>CXX</literal>. To use other compiler flags,
+    specify <literal>CXXFLAGS</literal>. To use <literal>CC</literal>
+    with debugging you could use:
+    <screen>
+     CXXFLAGS="-g" CXX=CC ./configure
+    </screen>
+   </para>
+   <para>
+    This is what you have after successful compilation:
+    <variablelist>
+     <varlistentry>
+      <term><filename>src/libyazpp.la</filename></term>
+      <listitem><para>
+       The YAZ++ library.
+       This library gets installed in your libraries directory
+       (<parameter>prefix</parameter><filename>/lib</filename>).
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>src/libzoompp.la</filename></term>
+      <listitem><para>
+       The <link linkend="zoom">ZOOM-C++</link> library.
+       This library gets installed in your libraries directory
+       (<parameter>prefix</parameter><filename>/lib</filename>).
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>include/yazpp/*.h</filename></term>
+      <listitem><para>
+       Various C++ header files, which you'll need for YAZ++
+       development. All these are installed in your header files area
+       (<parameter>prefix</parameter><filename>/include/yazpp</filename>).
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>yazpp-config</filename></term>
+      <listitem><para>
+       A Bourne shell-script utility that returns the values of the
+       <envar>CFLAGS</envar> and <envar>LIBS</envar>
+       environment variables
+       needed in order to compile your applications with the YAZ++
+       library.  This script gets installed in your binaries directory
+       (<parameter>prefix</parameter><filename>/bin</filename>).
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>zoom/zclient</filename></term>
+      <listitem><para>
+       ZOOM C++ demonstration client that uses the ZOOM C++ classes.
+       This client does not get installed in the system directories.
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>src/yaz-my-client</filename></term>
+      <listitem><para>
+       YAZ C++ demonstration client. This client does not
+       get installed in the system directories.
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><filename>src/yaz-my-server</filename></term>
+      <listitem><para>
+        YAZ C++ demonstration server. This server does not
+        get installed in the system directories.
+       </para></listitem>
+     </varlistentry>
+    </variablelist>
+   </para>
+  </section>
+  <section id="windows">
+   <title>Installation on Windows</title>
+   <para>
+    YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
+    with <ulink url="&url.vstudio;">Microsoft Visual Studio</ulink>.
+    Version 2003 (7) and 2005 (8) has been tested.
+    We expect that YAZ++ compiles with versions 5 and 6 as well.
+   </para>
+   <para>
+    Start a command prompt and switch the sub directory
+    <filename>WIN</filename> where the file <filename>makefile</filename>
+    is located. Customize the installation by editing the
+    <filename>makefile</filename> file (for example by using notepad).
+   </para>
+   <para>
+    The following summarizes the most important settings in that file:
+    <variablelist>
+     <varlistentry><term><literal>DEBUG</literal></term>
+      <listitem><para>
+	If set to 1, the software is
+	compiled with debugging libraries (code generation is
+	multi-threaded debug DLL).
+	If set to 0, the software is compiled with release libraries
+	(code generation is multi-threaded DLL).
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><filename>YAZ_DIR</filename></term>
+      <listitem><para>
+	Specifies the directory of the YAZ source.
+       </para></listitem>
+     </varlistentry>
+    </variablelist>
+   </para>
+   <para>
+    When satisfied with the settings in the makefile, type
+    <screen>
+     nmake
+    </screen>
+   </para>
+   <tip>
+    <para>
+     If the <filename>nmake</filename> command is not found on your system
+     you probably haven't defined the environment variables required to
+     use that tool. To fix that, find and run the batch file
+     <filename>vcvars32.bat</filename>. You need to run it from within
+     the command prompt or set the environment variables "globally";
+     otherwise it doesn't work.
+    </para>
+   </tip>
+   <para>
+    If you wish to recompile YAZ++ - for example if you modify
+    settings in the <filename>makefile</filename> you can delete
+    object files, etc by running.
+    <screen>
+     nmake clean
+    </screen>
+   </para>
+   <para>
+    The following files are generated upon successful compilation:
+    <variablelist>
+     <varlistentry>
+      <term><filename>bin/yazpp5.dll</filename></term>
+      <listitem><para>
+       YAZ++ DLL . Includes ZOOM C++ as well.
+       For the debug version <filename>lib/yazpp5d.dll</filename>
+       is created instead.
+     </para></listitem></varlistentry>
+     <varlistentry>
+      <term><filename>lib/yazpp5.lib</filename></term>
+      <listitem><para>
+       Import library for <filename>yazpp5.dll</filename>.
+       For the debug version <filename>lib/yazpp5d.lib</filename>
+       is created instead.
+     </para></listitem></varlistentry>
+     <varlistentry>
+      <term><filename>bin/yaz-my-client.exe</filename></term>
+      <listitem><para>
+       Z39.50 client demonstrating the YAZ++ API.
+     </para></listitem></varlistentry>
+     <varlistentry>
+      <term><filename>bin/yaz-my-server.exe</filename></term>
+      <listitem><para>
+       Z39.50 server demonstrating the YAZ++ API.
+     </para></listitem></varlistentry>
+     <varlistentry>
+      <term><filename>bin/zclient.exe</filename></term>
+      <listitem><para>
+       ZOOM C++ demo client. A simple WIN32 console application.
+     </para></listitem></varlistentry>
+    </variablelist>
+   </para>
+  </section>
+ </chapter>
+ <chapter id="zoom">
+  <title>ZOOM-C++</title>
+  <sect1 id="zoom-introduction">
+   <title>Introduction</title>
+   <para>
+    <ulink url="&url.zoom;">ZOOM</ulink>
+    is the emerging standard API for information retrieval programming
+    using the Z39.50 protocol.  ZOOM's
+    <ulink url="&url.zoom.api;">Abstract API</ulink>
+    specifies semantics for classes representing key IR concepts such as
+    connections, queries, result sets and records; and there are various
+    <ulink url="&url.zoom.bind;">bindings</ulink>
+    specifying how those concepts should be represented in various
+    programming languages.
+   </para>
+   <para>
+    The YAZ++ library includes an implementation of the <ulink
+    url="&url.zoom.bind.cplusplus;">C++ binding</ulink>
+    for ZOOM, enabling quick, easy development of client applications.
+   </para>
+   <para>
+    For example, here is a tiny Z39.50 client that fetches and displays
+    the MARC record for Farlow &amp; Brett Surman's
+    <citetitle>The Complete Dinosaur</citetitle>
+    from the Library of Congress's Z39.50 server:
+   </para>
+   <programlisting>
+    #include &lt;iostream&gt;
+    #include &lt;yazpp/zoom.h&gt;
+
+    using namespace ZOOM;
+
+    int main(int argc, char **argv)
+    {
+        connection conn("z3950.loc.gov", 7090);
+        conn.option("databaseName", "Voyager");
+        conn.option("preferredRecordSyntax", "USMARC");
+        resultSet rs(conn, prefixQuery("@attr 1=7 0253333490"));
+        const record *rec = rs.getRecord(0);
+        cout &lt;&lt; rec-&gt;render() &lt;&lt; endl;
+    }
+   </programlisting>
+   <note>
+    <para>
+     For the sake of simplicity, this program does not check
+     for errors: we show a more robust version of the same program
+     <link linkend="revised-sample">later</link>.)
+    </para>
+   </note>
+   <para>
+    YAZ++'s implementation of the C++ binding is a thin layer over YAZ's
+    implementation of the C binding.  For information on the supported
+    options and other such details, see the ZOOM-C documentation, which
+    can be found on-line at
+    <ulink url="&url.yaz.zoom;"/>
+   </para>
+   <para>
+    All of the classes defined by ZOOM-C++ are in the
+    <literal>ZOOM</literal> namespace.  We will now consider
+    the five main classes in turn:
+    <itemizedlist>
+     <listitem>
+      <para>
+       <literal>connection</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>query</literal> and its subclasses
+       <literal>prefixQuery</literal> and
+       <literal>CCLQuery</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>resultSet</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>record</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>exception</literal> and its subclasses
+       <literal>systemException</literal>,
+       <literal>bib1Exception</literal> and
+       <literal>queryException</literal>
+      </para>
+     </listitem>
+    </itemizedlist>
+   </para>
+  </sect1>
+  <sect1 id="zoom-connection">
+   <title><literal>ZOOM::connection</literal></title>
+   <para>
+    A <literal>ZOOM::connection</literal> object represents an open
+    connection to a Z39.50 server.  Such a connection is forged by
+    constructing a <literal>connection</literal> object.
+   </para>
+   <para>
+    The class has this declaration:
+   </para>
+   <synopsis>
+    class connection {
+    public:
+      connection (const char *hostname, int portnum);
+      ~connection ();
+      const char *option (const char *key) const;
+      const char *option (const char *key, const char *val);
+    };
+   </synopsis>
+   <para>
+    When a new <literal>connection</literal> is created, the hostname
+    and port number of a Z39.50 server must be supplied, and the
+    network connection is forged and wrapped in the new object.  If the
+    connection can't be established - perhaps because the hostname
+    couldn't be resolved, or there is no server listening on the
+    specified port - then an
+    <link linkend="zoom-exception"><literal>exception</literal></link>
+    is thrown.
+   </para>
+   <para>
+    The only other methods on a <literal>connection</literal> object
+    are for getting and setting options.  Any name-value pair of
+    strings may be set as options, and subsequently retrieved, but
+    certain options have special meanings which are understood by the
+    ZOOM code and affect the behaviour of the object that carries
+    them.  For example, the value of the
+    <literal>databaseName</literal> option is used as the name of the
+    database to query when a search is executed against the
+    <literal>connection</literal>.  For a full list of such special
+    options, see the ZOOM abstract API and the ZOOM-C documentation
+    (links below).
+   </para>
+   <sect2 id="connection.references">
+    <title>References</title>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.2">
+       Section 3.2 (Connection) of the ZOOM Abstract API</ulink>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <ulink url="&url.yaz.zoom.connections;">
+       The Connections section f the ZOOM-C documentation</ulink>
+      </para>
+     </listitem>
+    </itemizedlist>
+   </sect2>
+  </sect1>
+  <sect1 id="zoom-query">
+   <title><literal>ZOOM::query</literal> and subclasses</title>
+   <para>
+    The <literal>ZOOM::query</literal> class is a virtual base class,
+    representing a query to be submitted to a server.  This class has
+    no methods, but two (so far) concrete subclasses, each implementing
+    a specific query notation.
+   </para>
+   <sect2 id="zoom-prefixQuery">
+    <title><literal>ZOOM::prefixQuery</literal></title>
+    <synopsis>
+    class prefixQuery : public query {
+    public:
+      prefixQuery (const char *pqn);
+      ~prefixQuery ();
+    };
+    </synopsis>
+    <para>
+     This class enables a query to be created by compiling YAZ's
+     cryptic but powerful
+     <ulink url="&url.yaz.pqf;">Prefix Query Notation (PQN)</ulink>.
+    </para>
+   </sect2>
+   <sect2 id="zoom-CCLQuery">
+    <title><literal>ZOOM::CCLQuery</literal></title>
+    <synopsis>
+    class CCLQuery : public query {
+    public:
+      CCLQuery (const char *ccl, void *qualset);
+      ~CCLQuery ();
+    };
+    </synopsis>
+    <para>
+     This class enables a query to be created using the simpler but
+     less expressive
+     <ulink url="&url.yaz.ccl;">Common Command Language (CCL)</ulink>.
+     The qualifiers recognised by the CCL parser are specified in an
+     external configuration file in the format described by the YAZ
+     documentation.
+    </para>
+    <para>
+     If query construction fails for either type of
+     <literal>query</literal> object - typically because the query
+     string itself is not valid PQN or CCL - then an
+     <link linkend="zoom-exception"><literal>exception</literal></link>
+     is thrown.
+    </para>
+   </sect2>
+   <sect2 id="queries.discussion">
+    <title>Discussion</title>
+    <para>
+     It will be readily recognised that these objects have no methods
+     other than their constructors: their only role in life is to be
+     used in searching, by being passed to the
+     <literal>resultSet</literal> class's constructor.
+    </para>
+    <para>
+     Given a suitable set of CCL qualifiers, the following pairs of
+     queries are equivalent:
+    </para>
+    <screen>
+     prefixQuery("dinosaur");
+     CCLQuery("dinosaur");
+
+     prefixQuery("@and complete dinosaur");
+     CCLQuery("complete and dinosaur");
+
+     prefixQuery("@and complete @or dinosaur pterosaur");
+     CCLQuery("complete and (dinosaur or pterosaur)");
+
+     prefixQuery("@attr 1=7 0253333490");
+     CCLQuery("isbn=0253333490");
+    </screen>
+   </sect2>
+   <sect2 id="query.references">
+    <title>References</title>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.3">
+	Section 3.3 (Query) of the ZOOM Abstract API
+       </ulink>
+      </para>
+    </listitem>
+    <listitem>
+     <para>
+      <ulink url="&url.yaz.zoom.query;">
+       The Queries section of the ZOOM-C documentation
+      </ulink>
+     </para>
+    </listitem>
+    </itemizedlist>
+   </sect2>
+  </sect1>
+  <sect1 id="zoom-resultset">
+   <title><literal>ZOOM::resultSet</literal></title>
+   <para>
+    A <literal>ZOOM::resultSet</literal> object represents a set of
+    records identified by a query that has been executed against a
+    particular connection.  The sole purpose of both
+    <literal>connection</literal> and <literal>query</literal> objects
+    is that they can be used to create new
+    <literal>resultSet</literal>s - that is, to perform a search on the
+    server on the remote end of the connection.
+   </para>
+   <para>
+    The class has this declaration:
+   </para>
+   <synopsis>
+    class resultSet {
+    public:
+      resultSet (connection &amp;c, const query &amp;q);
+      ~resultSet ();
+      const char *option (const char *key) const;
+      const char *option (const char *key, const char *val);
+      size_t size () const;
+      const record *getRecord (size_t i) const;
+    };
+   </synopsis>
+   <para>
+    New <literal>resultSet</literal>s are created by the constructor,
+    which is passed a <literal>connection</literal>, indicating the
+    server on which the search is to be performed, and a
+    <literal>query</literal>, indicating what search to perform.  If
+    the search fails - for example, because the query uses attributes
+    that the server doesn't implement - then an
+    <link linkend="zoom-exception"><literal>exception</literal></link>
+    is thrown.
+   </para>
+   <para>
+    Like <literal>connection</literal>s, <literal>resultSet</literal>
+    objects can carry name-value options.  The special options which
+    affect ZOOM-C++'s behaviour are the same as those for ZOOM-C and
+    are described in its documentation (link below).  In particular,
+    the <literal>preferredRecordSyntax</literal> option may be set to
+    a string such as ``USMARC'', ``SUTRS'' etc. to indicate what the
+    format in which records should be retrieved; and the
+    <literal>elementSetName</literal> option indicates whether brief
+    records (``B''), full records (``F'') or some other composition
+    should be used.
+   </para>
+   <para>
+    The <literal>size()</literal> method returns the number of records
+    in the result set.  Zero is a legitimate value: a search that finds
+    no records is not the same as a search that fails.
+   </para>
+   <para>
+    Finally, the <literal>getRecord</literal> method returns the
+    <parameter>i</parameter>th record from the result set, where
+    <parameter>i</parameter> is zero-based: that is, legitmate values
+    range from zero up to one less than the result-set size.  If the
+    method fails, for example because the requested record is out of
+    range, it <literal>throw</literal>s an
+    <link linkend="zoom-exception"><literal>exception</literal></link>.
+   </para>
+   <sect2 id="resultset.references">
+    <title>References</title>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.4"
+	      >Section 3.4 (Result Set) of the ZOOM Abstract API</ulink>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <ulink url="&url.yaz.zoom.resultsets;"
+	      >The Result Sets section of the ZOOM-C documentation</ulink>
+      </para>
+     </listitem>
+    </itemizedlist>
+   </sect2>
+  </sect1>
+  <sect1 id="zoom-record">
+   <title><literal>ZOOM::record</literal></title>
+   <para>
+    A <literal>ZOOM::record</literal> object represents a chunk of data
+    from a <literal>resultSet</literal> returned from a server.
+   </para>
+   <para>
+    The class has this declaration:
+   </para>
+   <synopsis>
+    class record {
+    public:
+      ~record ();
+      enum syntax {
+	UNKNOWN, GRS1, SUTRS, USMARC, UKMARC, XML
+      };
+      record *clone () const;
+      syntax recsyn () const;
+      const char *render () const;
+      const char *rawdata () const;
+    };
+   </synopsis>
+   <para>
+    Records returned from Z39.50 servers are encoded using a record
+    syntax: the various national MARC formats are commonly used for
+    bibliographic data, GRS-1 or XML for complex structured data, SUTRS
+    for simple human-readable text, etc.  The
+    <literal>record::syntax</literal> enumeration specifies constants
+    representing common record syntaxes, and the
+    <literal>recsyn()</literal> method returns the value corresponding
+    to the record-syntax of the record on which it is invoked.
+    <note>
+     <para>
+      Because this interface uses an enumeration, it is difficult to
+      extend to other record syntaxes - for example, DANMARC, the MARC
+      variant widely used in Denmark.  We might either grow the
+      enumeration substantially, or change the interface to return
+      either an integer or a string.
+     </para>
+    </note>
+   </para>
+   <para>
+    The simplest thing to do with a retrieved record is simply to
+    <literal>render()</literal> it.  This returns a human-readable, but
+    not necessarily very pretty, representation of the contents of the
+    record.  This is useful primarily for testing and debugging, since
+    the application has no control over how the record appears.
+    (The application must <emphasis>not</emphasis>
+    <literal>delete</literal> the returned string - it is ``owned'' by
+    the record object.)
+   </para>
+   <para>
+    More sophisticated applications will want to deal with the raw data
+    themselves: the <literal>rawdata()</literal> method returns it.
+    Its format will vary depending on the record syntax: SUTRS, MARC
+    and XML records are returned ``as is'', and GRS-1 records as a
+    pointer to their top-level node, which is a
+    <literal>Z_GenericRecord</literal> structure as defined in the
+    <literal>&lt;yaz/z-grs.h&gt;</literal> header file.
+    (The application must <emphasis>not</emphasis>
+    <literal>delete</literal> the returned data - it is ``owned'' by
+    the record object.)
+   </para>
+   <para>
+    Perceptive readers will notice that there are no methods for access
+    to individual fields within a record.  That's because the different
+    record syntaxes are so different that there is no even a uniform
+    notion of what a field is across them all, let alone a sensible way
+    to implement such a function.  Fetch the raw data instead, and pick
+    it apart ``by hand''.
+   </para>
+   <sect2 id="zoom.memory.management">
+    <title>Memory Management</title>
+    <para>
+     The <literal>record</literal> objects returned from
+     <literal>resultSet::getRecord()</literal> are ``owned'' by the
+     result set object: that means that the application is not
+     responsible for <literal>delete</literal>ing them - each
+     <literal>record</literal> is automatically deallocated when the
+     <literal>resultSet</literal> that owns it is
+     <literal>delete</literal>d.
+    </para>
+    <para>
+     Usually that's what you want: it means that you can easily fetch a
+     record, use it and forget all about it, like this:
+    </para>
+    <programlisting>
+     resultSet rs(conn, query);
+     cout &lt;&lt; rs.getRecord(0)-&gt;render();
+    </programlisting>
+    <para>
+     But sometimes you want a <literal>record</literal> to live on past
+     the lifetime of the <literal>resultSet</literal> from which it was
+     fetched.  In this case, the <literal>clone(f)</literal> method can
+     be used to make an autonomous copy.  The application must
+     <literal>delete</literal> it when it doesn't need it any longer:
+    </para>
+    <programlisting>
+    record *rec;
+    {
+        resultSet rs(conn, query);
+        rec = rs.getRecord(0)-&gt;clone();
+        // `rs' goes out of scope here, and is deleted
+    }
+    cout &lt;&lt; rec-&gt;render();
+    delete rec;
+    </programlisting>
+   </sect2>
+   <sect2 id="record.references">
+    <title>References</title>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.5"
+	      >Section 3.5 (Record) of the ZOOM Abstract API</ulink>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <ulink url="&url.yaz.zoom.records;"
+	      >The Records section of the ZOOM-C documentation</ulink>
+      </para>
+     </listitem>
+    </itemizedlist>
+   </sect2>
+  </sect1>
+  <sect1 id="zoom-exception">
+   <title><literal>ZOOM::exception</literal> and subclasses</title>
+   <para>
+    The <literal>ZOOM::exception</literal> class is a virtual base
+    class, representing a diagnostic generated by the ZOOM-C++ library
+    or returned from a server.  Its subclasses represent particular
+    kinds of error.
+   </para>
+   <para>
+    When any of the ZOOM methods fail, they respond by
+    <literal>throw</literal>ing an object of type
+    <literal>exception</literal> or one of its subclasses.  This most
+    usually happens with the <literal>connection</literal> constructor,
+    the various query constructors, the <literal>resultSet</literal>
+    constructor (which is actually the searching method) and
+    <literal>resultSet::getRecord()</literal>.
+   </para>
+   <para>
+    The base class has this declaration:
+   </para>
+   <synopsis>
+    class exception {
+    public:
+      exception (int code);
+      int errcode () const;
+      const char *errmsg () const;
+    };
+   </synopsis>
+   <para>
+    It has three concrete subclasses:
+   </para>
+   <sect2 id="zoom-systemException">
+    <title><literal>ZOOM::systemException</literal></title>
+    <synopsis>
+     class systemException: public exception {
+     public:
+       systemException ();
+       int errcode () const;
+       const char *errmsg () const;
+     };
+    </synopsis>
+    <para>
+     Represents a ``system error'', typically indicating that a system
+     call failed - often in the low-level networking code that
+     underlies Z39.50.  <literal>errcode()</literal> returns the value
+     that the system variable <literal>errno</literal> had at the time
+     the exception was constructed; and <literal>errmsg()</literal>
+     returns a human-readable error-message corresponidng to that error
+     code.
+    </para>
+   </sect2>
+   <sect2 id="zoom-bib1Exception">
+    <title><literal>ZOOM::bib1Exception</literal></title>
+    <synopsis>
+     class bib1Exception: public exception {
+     public:
+       bib1Exception (int errcode, const char *addinfo);
+       int errcode () const;
+       const char *errmsg () const;
+       const char *addinfo () const;
+     };
+    </synopsis>
+    <para>
+     Represents an error condition communicated by a Z39.50 server.
+     <literal>errcode()</literal> returns the BIB-1 diagnostic code of
+     the error, and <literal>errmsg()</literal> a human-readable error
+     message corresponding to that code.  <literal>addinfo()</literal>
+     returns any additional information associated with the error.
+    </para>
+    <para>
+     For example, if a ZOOM application tries to search in the
+     ``Voyager'' database of a server that does not have a database of
+     that name, a <literal>bib1Exception</literal> will be thrown in
+     which <literal>errcode()</literal> returns 109,
+     <literal>errmsg()</literal> returns the corresponding error
+     message ``Database unavailable'' and <literal>addinfo()</literal>
+     returns the name of the requested, but unavailable, database.
+    </para>
+   </sect2>
+   <sect2 id="zoom-queryException">
+    <title><literal>ZOOM::queryException</literal></title>
+    <synopsis>
+     class queryException: public exception {
+     public:
+       static const int PREFIX = 1;
+       static const int CCL = 2;
+       queryException (int qtype, const char *source);
+       int errcode () const;
+       const char *errmsg () const;
+       const char *addinfo () const;
+     };
+    </synopsis>
+    <para>
+     This class represents an error in parsing a query into a form that
+     a Z39.50 can understand.  It must be created with the
+     <literal>qtype</literal> parameter equal to one of the query-type
+     constants, which can be retrieved via the
+     <literal>errcode()</literal> method; <literal>errmsg()</literal>
+     returns an error-message specifying which kind of query was
+     malformed; and <literal>addinfo()</literal> returns a copy of the
+     query itself (that is, the value of <literal>source</literal> with
+     which the exception object was created.)
+    </para>
+   </sect2>
+   <sect2 id="revised-sample">
+    <title>Revised Sample Program</title>
+    <para>
+     Now we can revise the sample program from the
+     <link linkend="zoom-introduction">introduction</link>
+     to catch exceptions and report any errors:
+    </para>
+    <programlisting>
+    /* g++ -o zoom-c++-hw zoom-c++-hw.cpp -lzoompp -lyaz */
+
+    #include &lt;iostream&gt;
+    #include &lt;yazpp/zoom.h&gt;
+
+    using namespace ZOOM;
+
+    int main(int argc, char **argv)
+    {
+        try {
+            connection conn("z3950.loc.gov", 7090);
+            conn.option("databaseName", "Voyager");
+            conn.option("preferredRecordSyntax", "USMARC");
+            resultSet rs(conn, prefixQuery("@attr 1=7 0253333490"));
+            const record *rec = rs.getRecord(0);
+            cout &lt;&lt; rec-&gt;render() &lt;&lt; endl;
+        } catch (systemException &amp;e) {
+            cerr &lt;&lt; "System error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; ")" &lt;&lt; endl;
+        } catch (bib1Exception &amp;e) {
+            cerr &lt;&lt; "BIB-1 error " &lt;&lt; 
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; "): " &lt;&lt; e.addinfo() &lt;&lt; endl;
+        } catch (queryException &amp;e) {
+            cerr &lt;&lt; "Query error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; "): " &lt;&lt; e.addinfo() &lt;&lt; endl;
+        } catch (exception &amp;e) {
+            cerr &lt;&lt; "Error " &lt;&lt;
+                e.errcode() &lt;&lt; " (" &lt;&lt; e.errmsg() &lt;&lt; ")" &lt;&lt; endl;
+        }
+    }
+    </programlisting>
+    <para>
+     The heart of this program is the same as in the original version,
+     but it's now wrapped in a <literal>try</literal> block followed by
+     several <literal>catch</literal> blocks which try to give helpful
+     diagnostics if something goes wrong.
+    </para>
+    <para>
+     The first such block diagnoses system-level errors such as memory
+     exhaustion or a network connection being broken by a server's
+     untimely death; the second catches errors at the Z39.50 level,
+     such as a server's report that it can't provide records in USMARC
+     syntax; the third is there in case there's something wrong with
+     the syntax of the query (although in this case it's correct); and
+     finally, the last <literal>catch</literal> block is a
+     belt-and-braces measure to be sure that nothing escapes us.
+    </para>
+   </sect2>
+   <sect2 id="exception.references">
+    <title>References</title>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <ulink url="http://zoom.z3950.org/api/zoom-1.3.html#3.7"
+	      >Section 3.7 (Exception) of the ZOOM Abstract API</ulink>
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <ulink url="&url.z39.50.diagnostics;">Bib-1 Diagnostics</ulink> on the
+       <ulink url="&url.z39.50;">Z39.50 Maintenance Agency</ulink> site.
+      </para>
+     </listitem>
+    </itemizedlist>
+    <para>
+     Because C does not support exceptions, ZOOM-C has no API element
+     that corresponds directly with ZOOM-C++'s
+     <literal>exception</literal> class and its subclasses.  The
+     closest thing is the <literal>ZOOM_connection_error</literal>
+     function described in
+     <ulink url="&url.yaz.zoom.connections;"
+	    >The Connections section</ulink> of the documentation.
+    </para>
+   </sect2>
+  </sect1>
+ </chapter>
+ <chapter id="api">
+  <title>YAZ C++ API</title>
+  <para>
+   The YAZ C++ API is an client - and server API that exposes
+   all YAZ features. The API doesn't hide YAZ C data structures, but
+   provides a set of useful high-level objects for creating clients -
+   and servers.
+  </para>
+  <para>
+   All definitions from YAZ++ are part of namespace
+   <literal>yazpp_1</literal>.
+  </para>
+  <para>
+   The following sections include a short description of the
+   interfaces and implementations (concrete classes).
+  </para>
+  <para>
+   In order to understand the structure, you should look at the
+   example client <filename>yaz-my-client.cpp</filename> and
+   the example server <filename>yaz-my-server.cpp</filename>.
+   If that is too easy, you can always turn to the implementation
+   of the proxy itself and send us a patch if you implement a new
+   useful feature.
+  </para>
+  <note>
+   <para>
+    The documentation here is very limited. We plan to enhance it -
+    provided there is interest for it.
+   </para>
+  </note>
+  <section id="interfaces"><title>Interfaces</title>
+   <section id="ISocketObservable"><title>ISocketObservable</title>
+    <para>
+     This interface is capable of observing sockets.
+     When a socket even occurs it invokes an object implementing the
+     <link linkend="ISocketObserver">ISocketObserver</link>
+     interface.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/socket-observer.h>
+
+     class my_socketobservable : public ISocketObservable {
+        // Add an observer interested in socket fd
+        virtual void addObserver(int fd, ISocketObserver *observer) = 0;
+        // Delete an observer
+        virtual void deleteObserver(ISocketObserver *observer) = 0;
+        // Delete all observers
+        virtual void deleteObservers() = 0;
+        // Specify the events that the observer is interested in.
+        virtual void maskObserver(ISocketObserver *observer,
+                                  int mask) = 0;
+        // Specify timeout
+        virtual void timeoutObserver(ISocketObserver *observer,
+                                     int timeout)=0;
+     };
+    </synopsis>
+   </section>
+   <section id="ISocketObserver">
+    <title>ISocketObserver</title>
+    <para>
+     This interface is interested in socket events supporting
+     the <link linkend="ISocketObservable">ISocketObservable</link>
+     interface.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/socket-observer.h>
+
+     class my_socketobserver : public ISocketObserver {
+         public:
+          // Notify the observer that something happened to socket
+          virtual void socketNotify(int event) = 0;
+     }
+    </synopsis>
+   </section>
+   <section id="IPDU_Observable">
+    <title>IPDU_Observable</title>
+    <para>
+     This interface is is responsible for sending - and receiving PDUs over
+     the network (YAZ COMSTACK). When events occur, an instance
+     implementing <link linkend="IPDU_Observer">IPDU_Observer</link>
+     is notified.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/pdu-observer.h>
+
+     class my_pduobservable : public IPDU_Observable {
+       public:
+         // Send encoded PDU buffer of specified length
+         virtual int send_PDU(const char *buf, int len) = 0;
+         // Connect with server specified by addr.
+         virtual void connect(IPDU_Observer *observer,
+                     const char *addr) = 0;
+         // Listen on address addr.
+         virtual void listen(IPDU_Observer *observer, const char *addr)=0;
+         // Close connection
+         virtual void close() = 0;
+         // Make clone of this object using this interface
+         virtual IPDU_Observable *clone() = 0;
+         // Destroy completely
+         virtual void destroy() = 0;
+         // Set Idle Time
+         virtual void idleTime (int timeout) = 0;
+         // Get peername
+         virtual const char *getpeername() = 0;
+
+         virtual ~IPDU_Observable();
+     };
+    </synopsis>
+   </section>
+   <section id="IPDU_Observer">
+    <title>IPDU_Observer</title>
+    <para>
+     This interface is interested in PDUs and using an object implementing
+     <link linkend="IPDU_Observable">IPDU_Observable</link>.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/pdu-observer.h>
+
+     class my_pduobserver : public IPDU_Observer {
+       public:
+         // A PDU has been received
+         virtual void recv_PDU(const char *buf, int len) = 0;
+         // Called when Iyaz_PDU_Observable::connect was successful.
+         virtual void connectNotify() = 0;
+         // Called whenever the connection was closed
+         virtual void failNotify() = 0;
+         // Called whenever there is a timeout
+         virtual void timeoutNotify() = 0;
+         // Make clone of observer using IPDU_Observable interface
+         virtual IPDU_Observer *sessionNotify(
+         IPDU_Observable *the_PDU_Observable, int fd) = 0;
+     };
+    </synopsis>
+   </section>
+   <section id="query">
+    <title>Yaz_Query</title>
+    <para>
+     Abstract query.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/query.h>
+     class my_query : public Yaz_Query {
+       public:
+         // Print query in buffer described by str and len
+         virtual void print (char *str, int len) = 0;
+     };
+    </synopsis>
+   </section>
+  </section>
+  <section id="implementations">
+   <title>Implementations</title>
+   <section id="Yaz_SocketManager">
+    <title>Yaz_SocketManager</title>
+    <para>
+     This class implements the <link linkend="ISocketObservable">
+     ISocketObservable</link> interface and is a portable
+     socket wrapper around the select call.
+     This implementation is useful for daemons,
+     command line clients, etc.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/socket-manager.h>
+
+     class SocketManager : public ISocketObservable {
+       public:
+         // Add an observer
+         virtual void addObserver(int fd, ISocketObserver *observer);
+         // Delete an observer
+         virtual void deleteObserver(ISocketObserver *observer);
+         // Delete all observers
+         virtual void deleteObservers();
+         // Set event mask for observer
+         virtual void maskObserver(ISocketObserver *observer, int mask);
+         // Set timeout
+         virtual void timeoutObserver(ISocketObserver *observer,
+                                  unsigned timeout);
+         // Process one event. return > 0 if event could be processed;
+         int processEvent();
+         SocketManager();
+         virtual ~SocketManager();
+     };
+    </synopsis>
+   </section>
+   <section id="PDU_Assoc">
+    <title>PDU_Assoc</title>
+    <para>
+     This class implements the interfaces
+     <link linkend="IPDU_Observable">IPDU_Observable</link>
+     and
+     <link linkend="ISocketObserver">ISocketObserver</link>.
+     This object implements a non-blocking client/server channel
+     that transmits BER encoded PDUs (or those offered by YAZ COMSTACK).
+    </para>
+    <synopsis>
+     #include &lt;yazpp/pdu-assoc.h>
+
+     class PDU_Assoc : public IPDU_Observable,
+                                 ISocketObserver {
+       public:
+         COMSTACK comstack(const char *type_and_host, void **vp);
+         // Create object using specified socketObservable
+         PDU_Assoc(ISocketObservable *socketObservable);
+         // Create Object using existing comstack
+         PDU_Assoc(ISocketObservable *socketObservable,
+                  COMSTACK cs);
+         // Close socket and destroy object.
+         virtual ~PDU_Assoc();
+         // Clone the object
+         IPDU_Observable *clone();
+         // Send PDU
+         int send_PDU(const char *buf, int len);
+         // connect to server (client role)
+         void connect(IPDU_Observer *observer, const char *addr);
+         // listen for clients (server role)
+         void listen(IPDU_Observer *observer, const char *addr);
+         // Socket notification
+         void socketNotify(int event);
+         // Close socket
+         void close();
+         // Close and destroy
+         void destroy();
+         // Set Idle Time
+         void idleTime (int timeout);
+         // Child start...
+         virtual void childNotify(COMSTACK cs);
+     };
+    </synopsis>
+   </section>
+   <section id="Z_Assoc">
+    <title>Z_Assoc</title>
+    <para>
+     This class implements the interface
+     <link linkend="IPDU_Observer">IPDU_Obserer</link>.
+     This object implements a Z39.50 client/server channel AKA
+     Z-Association.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/z-assoc.h>
+
+     class Z_Assoc : public IPDU_Observer {
+       public:
+         // Create object using the PDU Observer specified
+         Z_Assoc(IPDU_Observable *the_PDU_Observable);
+         // Destroy association and close PDU Observer
+         virtual ~Z_Assoc();
+         // Receive PDU
+         void recv_PDU(const char *buf, int len);
+         // Connect notification
+         virtual void connectNotify() = 0;
+         // Failure notification
+         virtual void failNotify() = 0;
+         // Timeout notification
+         virtual void timeoutNotify() = 0;
+         // Timeout specify
+         void timeout(int timeout);
+         // Begin Z39.50 client role
+         void client(const char *addr);
+         // Begin Z39.50 server role
+         void server(const char *addr);
+         // Close connection
+         void close();
+
+         // Decode Z39.50 PDU.
+         Z_APDU *decode_Z_PDU(const char *buf, int len);
+         // Encode Z39.50 PDU.
+         int encode_Z_PDU(Z_APDU *apdu, char **buf, int *len);
+         // Send Z39.50 PDU
+         int send_Z_PDU(Z_APDU *apdu);
+         // Receive Z39.50 PDU
+         virtual void recv_Z_PDU(Z_APDU *apdu) = 0;
+         // Create Z39.50 PDU with reasonable defaults
+         Z_APDU *create_Z_PDU(int type);
+         // Request Alloc
+         ODR odr_encode ();
+         ODR odr_decode ();
+         ODR odr_print ();
+         void set_APDU_log(const char *fname);
+         const char *get_APDU_log();
+
+         // OtherInformation
+         void get_otherInfoAPDU(Z_APDU *apdu, Z_OtherInformation ***oip);
+         Z_OtherInformationUnit *update_otherInformation (
+               Z_OtherInformation **otherInformationP, int createFlag,
+               int *oid, int categoryValue, int deleteFlag);
+         void set_otherInformationString (
+               Z_OtherInformation **otherInformationP,
+               int *oid, int categoryValue,
+               const char *str);
+         void set_otherInformationString (
+               Z_OtherInformation **otherInformation,
+               int oidval, int categoryValue,
+               const char *str);
+         void set_otherInformationString (
+               Z_APDU *apdu,
+               int oidval, int categoryValue,
+               const char *str);
+
+         Z_ReferenceId *getRefID(char* str);
+         Z_ReferenceId **get_referenceIdP(Z_APDU *apdu);
+         void transfer_referenceId(Z_APDU *from, Z_APDU *to);
+
+         const char *get_hostname();
+     };
+    </synopsis>
+   </section>
+   <section id="IR_Assoc">
+    <title>IR_Assoc</title>
+    <para>
+     This object is just a specialization of
+     <link linkend="Z_Assoc">Z_Assoc</link> and provides
+     more facilities for the Z39.50 client role.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/ir-assoc.h>
+
+     class IR_Assoc : public Z_Assoc {
+       ...
+     };
+    </synopsis>
+    <para>
+     The example client, <filename>yaz-my-client.cpp</filename>,
+     uses this class.
+    </para>
+   </section>
+   <section id="Z_Server">
+    <title>Z_Server</title>
+    <para>
+     This object is just a specialization of
+     <link linkend="Z_Assoc">Z_Assoc</link> and provides
+     more facilities for the Z39.50 server role.
+    </para>
+    <synopsis>
+     #include &lt;yazpp/z-server.h>
+
+     class My_Server : public Z_Server {
+       ...
+     };
+    </synopsis>
+    <para>
+     The example server, <filename>yaz-my-server.cpp</filename>,
+     uses this class.
+    </para>
+   </section>
+  </section>
+ </chapter>
+ <appendix id="license">
+  <title>License</title>
+  <para>
+   Copyright &copy; &copyright-year; Index Data.
+  </para>
+  <para>
+   All rights reserved.
+  </para>
+  <para>
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Neither the name of Index Data nor the names of its contributors
+     may be used to endorse or promote products derived from this
+     software without specific prior written permission.
+    </para>
+   </listitem>
+  </itemizedlist>
+  <para>
+   THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+   SUCH DAMAGE.
+  </para>
+ </appendix>
+</book>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: nxml
+nxml-child-indent: 1
+End:
+-->
+
