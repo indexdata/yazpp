@@ -1,3 +1,9 @@
+--- 1.6.1 2014/10/27
+
+Build for Ubuntu utopic 14.10.
+
+Documentation: move from sgml to nxml indentation YPP-15
+
 --- 1.6.0 2014/04/19
 
 New method rpn2cql_transform for Yaz_cql2rpn
