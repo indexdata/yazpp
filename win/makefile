@@ -4,7 +4,7 @@
 
 # Parameters 
 DEBUG=0   # 0 for release, 1 for debug
-USE_MANIFEST = 1 # Can be enabled Visual Studio 2005
+USE_MANIFEST = 1 # Can be enabled Visual Studio 2005, 2008
 
 # YAZ
 YAZ_DIR=..\..\yaz
@@ -12,14 +12,6 @@ YAZ_DIR=..\..\yaz
 default: all
 
 all: dirs generated dll myclient zclient yaz
-
-NSIS="c:\program files\nsis\makensis-bz2.exe"
-
-nsis: all
-	$(NSIS) yazpp.nsi
-
-nsishelp:
-	$(NSIS)
 
 # Directories
 # The current directory is supposed to be something like
@@ -115,7 +107,7 @@ LINK=link.exe
 
 LINK_LIBS= kernel32.lib advapi32.lib $(YAZ_LIB)
 
-COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no $(MTOPT)
 
 DEBUG_LNK_OPTIONS= /debug 
 
@@ -195,8 +187,10 @@ RSOPT=/d_NDEBUG
 
 !if $(USE_MANIFEST)
 MT=mt.exe /nologo
+MTOPT=/manifest
 !else
 MT=echo
+MTOPT=
 !endif
 
 
@@ -219,12 +213,13 @@ $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
 generated: $(ZOOMDIR)\zoom.h
 
 "$(ZOOMDIR)\zoom.h": "$(ZOOMDIR)\master-header"
-	sed "s/^*	/	/; s/^*/ /" "$(ZOOMDIR)\master-header" >"$(ZOOMDIR)\zoom.h"
+	sed "s/^*	/	/; s/^*/ /" < "$(ZOOMDIR)\master-header" >"$(ZOOMDIR)\zoom.h"
 
 clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(TMPDIR)\*.
+	-del $(BINDIR)\*.manifest
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
 
