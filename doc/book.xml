@@ -201,8 +201,7 @@
    <para>
     YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
     with <ulink url="&url.vstudio;">Microsoft Visual Studio</ulink>.
-    Version 2003 (7) and 2005 (8) has been tested.
-    We expect that YAZ++ compiles with versions 5 and 6 as well.
+    Version 2003 (7), 2005 (8) and 2013 (12) has been tested.
    </para>
    <para>
     Start a command prompt and switch the sub directory
