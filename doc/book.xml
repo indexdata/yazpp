@@ -201,7 +201,7 @@
    <para>
     YAZ++ is shipped with "makefiles" for the NMAKE tool that comes
     with <ulink url="&url.vstudio;">Microsoft Visual Studio</ulink>.
-    Version 2003 (7), 2005 (8) and 2013 (12) has been tested.
+    Visual Studio 2013 (12.0) has been tested.
    </para>
    <para>
     Start a command prompt and switch the sub directory
@@ -282,7 +282,7 @@
      <varlistentry>
       <term><filename>bin/zclient.exe</filename></term>
       <listitem><para>
-       ZOOM C++ demo client. A simple WIN32 console application.
+       ZOOM C++ demo client. A simple Windows console application.
      </para></listitem></varlistentry>
     </variablelist>
    </para>
