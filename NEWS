@@ -1,3 +1,7 @@
+--- 1.6.2 2014/12/16 (source only release)
+
+Update NMAKE makefile to use Visual Studio 2013.
+
 --- 1.6.1 2014/10/27
 
 Build for Ubuntu utopic 14.10.
