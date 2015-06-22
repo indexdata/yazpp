@@ -1,4 +1,4 @@
-%define idmetaversion %(. ./IDMETA; echo $VERSION|tr -d '\n')
+%define idmetaversion %(. ./IDMETA; echo $VERSION)
 Summary: YAZ++ package (main)
 Name: yazpp
 Version: %{idmetaversion}
