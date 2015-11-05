@@ -11,6 +11,7 @@
 #include <yaz/log.h>
 #include <yazpp/ir-assoc.h>
 #include <yaz/oid_db.h>
+#include <yaz/comstack.h>
 
 using namespace yazpp_1;
 
@@ -302,9 +303,10 @@ void IR_Assoc::client(const char *addr)
     delete [] m_host;
     m_host = new char[strlen(addr)+1];
     strcpy(m_host, addr);
-    const char *dbpart = strchr(m_host, '/');
-    if (dbpart)
-        set_databaseNames (dbpart+1, "+ ");
+    const char *dbpart = 0;
+    cs_get_host_args(m_host, &dbpart);
+    if (dbpart && *dbpart)
+        set_databaseNames (dbpart, "+ ");
     Z_Assoc::client(m_proxy ? m_proxy : m_host);
 }
 
