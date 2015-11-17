@@ -4,7 +4,7 @@
 <refentry id="yazpp-config">
  <refentryinfo>
   <productname>yazpp</productname>
-  <info><orgname>Index Data</orgname></info>
+  <orgname>Index Data</orgname>
  </refentryinfo>
  <refmeta>
   <refentrytitle>yazpp-config</refentrytitle>
