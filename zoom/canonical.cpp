@@ -7,8 +7,8 @@ using namespace ZOOM;
 
 int main(int argc, char **argv)
 {
-    connection conn("z3950.loc.gov", 7090);
-    conn.option("databaseName", "Voyager");
+    connection conn("lx2.loc.gov", 210);
+    conn.option("databaseName", "LCDB");
     conn.option("preferredRecordSyntax", "USMARC");
     resultSet rs(conn, prefixQuery("@attr 1=7 0253333490"));
     const record rec(rs, 0);
