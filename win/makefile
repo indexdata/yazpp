@@ -4,7 +4,6 @@
 
 # Parameters 
 DEBUG=0   # 0 for release, 1 for debug
-USE_MANIFEST = 0 # Can be enabled Visual Studio 2005, 2008
 
 # YAZ
 YAZ_DIR=..\..\yaz
@@ -26,9 +25,9 @@ SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
 ZOOMDIR=$(ROOTDIR)\zoom
 
 !if $(DEBUG)
-OBJDIR=$(WINDIR)\dobj       # where we store intermediate files
+OBJDIR=$(WINDIR)\dobj
 !else
-OBJDIR=$(WINDIR)\obj        # where we store intermediate files
+OBJDIR=$(WINDIR)\obj
 !endif
 
 TMPDIR=$(ROOTDIR)\win\tmp
@@ -119,13 +118,11 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 # Final opt variables
 !if $(DEBUG)
 COPT=   $(COMMON_C_OPTIONS)   $(DEBUG_C_OPTIONS)     $(COMMON_C_INCLUDES)
-RCOPT=  $(COMMON_RC_OPTIONS)  $(DEBUG_RC_OPTIONS)
-LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
+LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)
 
 !else
 COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
-RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
-LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
+LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS)
 !endif
 
 # Source and object modules
@@ -164,51 +161,23 @@ MY_CLIENT_OBJS = \
 ZCLIENT_OBJS = \
    "$(OBJDIR)\zclient.obj"
 
-# Note: This defines where to look for the necessary
-# source files. Funny way of doing it, but it works.
-
 {$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
 {$(ZOOMDIR)}.cpp{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
-### The RC compiler (resource files)
-RSC=rc.exe
-COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
-DEBUG_RC_OPTIONS=/d "_DEBUG"
-RELEASE_RC_OPTIONS=/d "NDEBUG"
-
-!if $(DEBUG)
-RSOPT=/d_DEBUG
-!else
-RSOPT=/d_NDEBUG
-!endif
-
-!if $(USE_MANIFEST)
-MT=mt.exe /nologo
-MTOPT=/manifest
-!else
-MT=echo
-MTOPT=
-!endif
-
-
 LINK_DLL = $(LINK) $(LNKOPT) $(LINK_LIBS) $(DLL_LINK_OPTIONS)
 LINK_PROGRAM = $(LINK) $(LNKOPT) $(CLIENT_LINK_OPTIONS) $(LINK_LIBS) $(YAZPP_IMPLIB)
 
-
 $(DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 	$(LINK_DLL) $(DLL_OBJS) /out:$@ /implib:"$(YAZPP_IMPLIB)" 
-	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
 	$(LINK_PROGRAM) $(MY_CLIENT_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
 	$(LINK_PROGRAM) $(ZCLIENT_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 generated: $(ZOOMDIR)\zoom.h
 
@@ -219,7 +188,6 @@ clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(TMPDIR)\*.
-	-del $(BINDIR)\*.manifest
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
 
