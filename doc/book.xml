@@ -123,7 +123,7 @@
     </variablelist>
     For the whole list of <literal>configure</literal> options, refer
     to the help:
-    <literal>./configure --help</literal>.
+    <literal>./configure --help</literal>
    </para>
    <para>
     Configure uses GNU's C/C++ compiler if available. To specify another
@@ -204,7 +204,7 @@
     Visual Studio 2013 (12.0) has been tested.
    </para>
    <para>
-    Start a command prompt and switch the sub directory
+    Start a command prompt and switch to the sub directory
     <filename>WIN</filename> where the file <filename>makefile</filename>
     is located. Customize the installation by editing the
     <filename>makefile</filename> file (for example by using notepad).
@@ -236,18 +236,18 @@
    </para>
    <tip>
     <para>
-     If the <filename>nmake</filename> command is not found on your system
+     If the <filename>nmake</filename> command is not found on your system,
      you probably haven't defined the environment variables required to
      use that tool. To fix that, find and run the batch file
      <filename>vcvars32.bat</filename>. You need to run it from within
-     the command prompt or set the environment variables "globally";
+     the command prompt, or set the environment variables "globally";
      otherwise it doesn't work.
     </para>
    </tip>
    <para>
-    If you wish to recompile YAZ++ - for example if you modify
-    settings in the <filename>makefile</filename> you can delete
-    object files, etc by running.
+    If you wish to recompile YAZ++ (for example if you modify
+    settings in the <filename>makefile</filename>) you can delete the
+    object files, etc., by running.
     <screen>
      nmake clean
     </screen>
@@ -334,7 +334,7 @@
     <para>
      For the sake of simplicity, this program does not check
      for errors: we show a more robust version of the same program
-     <link linkend="revised-sample">later</link>.)
+     <link linkend="revised-sample">later</link>.
     </para>
    </note>
    <para>
@@ -436,7 +436,7 @@
      <listitem>
       <para>
        <ulink url="&url.yaz.zoom.connections;">
-       The Connections section f the ZOOM-C documentation</ulink>
+       The Connections section of the ZOOM-C documentation</ulink>
       </para>
      </listitem>
     </itemizedlist>
@@ -572,12 +572,12 @@
     is thrown.
    </para>
    <para>
-    Like <literal>connection</literal>s, <literal>resultSet</literal>
+    Like <literal>connection</literal>s, the <literal>resultSet</literal>
     objects can carry name-value options.  The special options which
     affect ZOOM-C++'s behaviour are the same as those for ZOOM-C and
     are described in its documentation (link below).  In particular,
     the <literal>preferredRecordSyntax</literal> option may be set to
-    a string such as ``USMARC'', ``SUTRS'' etc. to indicate what the
+    a string such as ``USMARC'', ``SUTRS'' etc. to indicate the
     format in which records should be retrieved; and the
     <literal>elementSetName</literal> option indicates whether brief
     records (``B''), full records (``F'') or some other composition
@@ -591,7 +591,7 @@
    <para>
     Finally, the <literal>getRecord</literal> method returns the
     <parameter>i</parameter>th record from the result set, where
-    <parameter>i</parameter> is zero-based: that is, legitmate values
+    <parameter>i</parameter> is zero-based: that is, legitimate values
     range from zero up to one less than the result-set size.  If the
     method fails, for example because the requested record is out of
     range, it <literal>throw</literal>s an
@@ -681,8 +681,8 @@
    <para>
     Perceptive readers will notice that there are no methods for access
     to individual fields within a record.  That's because the different
-    record syntaxes are so different that there is no even a uniform
-    notion of what a field is across them all, let alone a sensible way
+    record syntaxes are so different that there is not even a uniform
+    notion of what is a field across them all, let alone a sensible way
     to implement such a function.  Fetch the raw data instead, and pick
     it apart ``by hand''.
    </para>
@@ -755,7 +755,7 @@
     <literal>exception</literal> or one of its subclasses.  This most
     usually happens with the <literal>connection</literal> constructor,
     the various query constructors, the <literal>resultSet</literal>
-    constructor (which is actually the searching method) and
+    constructor (which is actually the searching method), and
     <literal>resultSet::getRecord()</literal>.
    </para>
    <para>
@@ -788,7 +788,7 @@
      underlies Z39.50.  <literal>errcode()</literal> returns the value
      that the system variable <literal>errno</literal> had at the time
      the exception was constructed; and <literal>errmsg()</literal>
-     returns a human-readable error-message corresponidng to that error
+     returns a human-readable error-message corresponding to that error
      code.
     </para>
    </sect2>
@@ -835,7 +835,7 @@
     </synopsis>
     <para>
      This class represents an error in parsing a query into a form that
-     a Z39.50 can understand.  It must be created with the
+     Z39.50 can understand.  It must be created with the
      <literal>qtype</literal> parameter equal to one of the query-type
      constants, which can be retrieved via the
      <literal>errcode()</literal> method; <literal>errmsg()</literal>
@@ -922,9 +922,9 @@
      that corresponds directly with ZOOM-C++'s
      <literal>exception</literal> class and its subclasses.  The
      closest thing is the <literal>ZOOM_connection_error</literal>
-     function described in
+     function described in the
      <ulink url="&url.yaz.zoom.connections;"
-	    >The Connections section</ulink> of the documentation.
+	    >Connections section</ulink> of the documentation.
     </para>
    </sect2>
   </sect1>
@@ -932,9 +932,9 @@
  <chapter id="api">
   <title>YAZ C++ API</title>
   <para>
-   The YAZ C++ API is an client - and server API that exposes
+   The YAZ C++ API is a client and server API that exposes
    all YAZ features. The API doesn't hide YAZ C data structures, but
-   provides a set of useful high-level objects for creating clients -
+   provides a set of useful high-level objects for creating clients
    and servers.
   </para>
   <para>
@@ -963,7 +963,7 @@
    <section id="ISocketObservable"><title>ISocketObservable</title>
     <para>
      This interface is capable of observing sockets.
-     When a socket even occurs it invokes an object implementing the
+     When a socket event occurs, it invokes an object implementing the
      <link linkend="ISocketObserver">ISocketObserver</link>
      interface.
     </para>
@@ -1006,7 +1006,7 @@
    <section id="IPDU_Observable">
     <title>IPDU_Observable</title>
     <para>
-     This interface is is responsible for sending - and receiving PDUs over
+     This interface is responsible for sending and receiving PDUs over
      the network (YAZ COMSTACK). When events occur, an instance
      implementing <link linkend="IPDU_Observer">IPDU_Observer</link>
      is notified.
@@ -1041,7 +1041,7 @@
    <section id="IPDU_Observer">
     <title>IPDU_Observer</title>
     <para>
-     This interface is interested in PDUs and using an object implementing
+     This interface is interested in PDUs, and uses an object implementing
      <link linkend="IPDU_Observable">IPDU_Observable</link>.
     </para>
     <synopsis>
@@ -1084,10 +1084,10 @@
     <title>Yaz_SocketManager</title>
     <para>
      This class implements the <link linkend="ISocketObservable">
-     ISocketObservable</link> interface and is a portable
+     ISocketObservable</link> interface. It is a portable
      socket wrapper around the select call.
      This implementation is useful for daemons,
-     command line clients, etc.
+     command-line clients, etc.
     </para>
     <synopsis>
      #include &lt;yazpp/socket-manager.h>
@@ -1162,7 +1162,7 @@
     <para>
      This class implements the interface
      <link linkend="IPDU_Observer">IPDU_Obserer</link>.
-     This object implements a Z39.50 client/server channel AKA
+     This object implements a Z39.50 client/server channel, aka
      Z-Association.
     </para>
     <synopsis>
@@ -1238,7 +1238,7 @@
     <title>IR_Assoc</title>
     <para>
      This object is just a specialization of
-     <link linkend="Z_Assoc">Z_Assoc</link> and provides
+     <link linkend="Z_Assoc">Z_Assoc</link>. It provides
      more facilities for the Z39.50 client role.
     </para>
     <synopsis>
@@ -1257,7 +1257,7 @@
     <title>Z_Server</title>
     <para>
      This object is just a specialization of
-     <link linkend="Z_Assoc">Z_Assoc</link> and provides
+     <link linkend="Z_Assoc">Z_Assoc</link>. It provides
      more facilities for the Z39.50 server role.
     </para>
     <synopsis>

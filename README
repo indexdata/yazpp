@@ -7,7 +7,7 @@ Introduction
 ------------
 
 YAZ++ is a set of libraries and header files that make it easier to
-use the the YAZ toolkit from C++, together with some utilities written
+use the YAZ toolkit from C++, together with some utilities written
 using these libraries. It includes an implementation of the C++ binding
 for ZOOM.
 
