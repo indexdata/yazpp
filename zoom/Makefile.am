@@ -21,7 +21,7 @@ zclient_SOURCES=zclient.cpp
 EXTRA_DIST=master-header README
 
 test: zclient
-	./zclient bagel.indexdata.dk 210 gils '@and mineral epicenter'
+	./zclient z3950.indexdata.com 210 gils '@and mineral epicenter'
 
 $(mirk_sources): zoom.h
 
