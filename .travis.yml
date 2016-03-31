@@ -30,6 +30,7 @@ addons:
    - g++
    - libicu-dev
    - libreadline-dev
+   - libgnutls-dev
    - libtool
    - libxslt1-dev
    - make
