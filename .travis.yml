@@ -1,5 +1,6 @@
 language: c
 sudo: required
+
 matrix:
   include:
     - os: linux
@@ -7,44 +8,34 @@ matrix:
       compiler: clang
       env:
        - MY_OS=trusty
-    - os: linux
-      dist: precise
-      compiler: gcc
-      env:
-       - MY_OS=precise
-    - os: osx
-      osx_image: xcode7.2
-      env:
-       - MY_OS=macos
+#    - os: linux
+#      dist: precise
+#      compiler: gcc
+#      env:
+#       - MY_OS=precise
+#    - os: osx
+#      osx_image: xcode7.2
+#      env:
+#       - MY_OS=macos
+
 addons:
  apt:
   packages:
    - autoconf
    - autotools-dev
    - automake
-   - bison
    - docbook
    - docbook-xml
    - docbook-xsl
-   - gcc
-   - libgnutls-dev
-   - libhiredis-dev
+   - g++
    - libicu-dev
-   - libmemcached-dev
    - libreadline-dev
    - libtool
-   - libwrap0-dev
    - libxslt1-dev
    - make
    - pkg-config
    - tcl8.5
    - xsltproc
-   - libboost-dev
-   - libboost-system-dev
-   - libboost-thread-dev
-   - libboost-test-dev
-   - libboost-regex-dev
-   - inkscape
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
@@ -54,8 +45,9 @@ before_install:
 
 before_script:
  - ./buildconf.sh
+
 script:
  - ./configure
- - make INKSCAPE=true
- - make INKSCAPE=true check
+ - make 
+ - make check
 
