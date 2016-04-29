@@ -1,3 +1,7 @@
+--- 1.6.5 2016/04/29
+
+Fix typos in documentation.
+
 --- 1.6.4 2015/11/26
 
 Change target z3950.loc.gov:7090/voyager -> lx2.loc.gov:210/LCDB
