@@ -42,7 +42,11 @@ Development libraries and include files for the YAZ++ package.
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
 	--enable-shared --with-yaz=/usr/bin
-make CFLAGS="$RPM_OPT_FLAGS"
+%if %{?make_build:1}%{!?make_build:0}
+%make_build
+%else
+make -j4 CFLAGS="$RPM_OPT_FLAGS"
+%endif
 
 %install
 rm -fr ${RPM_BUILD_ROOT}
