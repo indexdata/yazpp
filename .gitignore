@@ -16,3 +16,5 @@ dox
 build-stamp
 config.guess
 config.sub
+build
+deb-src
