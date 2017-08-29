@@ -472,7 +472,7 @@ int PDU_Assoc::send_PDU(const char *buf, int len)
 
 COMSTACK PDU_Assoc_priv::comstack(const char *type_and_host, void **vp)
 {
-    return cs_create_host(type_and_host, 2, vp);
+    return cs_create_host(type_and_host, CS_FLAGS_NUMERICHOST, vp);
 }
 
 int PDU_Assoc::listen(IPDU_Observer *observer, const char *addr)
