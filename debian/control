@@ -7,21 +7,21 @@ Build-Depends: debhelper (>= 7),
 	libxml2-dev, libxslt1-dev,
 	libyaz5-dev (>= 5.1.0)
 
-Package: libyazpp6
+Package: libyazpp7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: YAZ++ library
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
-Package: libyazpp6-dbg
+Package: libyazpp7-dbg
 Section: debug
 Architecture: any
-Depends: ${misc:Depends}, libyazpp6 (= ${source:Version})
+Depends: ${misc:Depends}, libyazpp7 (= ${source:Version})
 Description: debugging symbols for YAZ++ library
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
-Package: libyazpp6-dev
+Package: libyazpp7-dev
 Section: libdevel
 Architecture: any
 Conflicts: libyazpp-dev, libyazpp2-dev, libyazpp3-dev, libyazpp4-dev
