@@ -81,6 +81,11 @@ int SocketManager::getNumberOfObservers()
 
 void SocketManager::addObserver(ISocketObserver *observer)
 {
+    addObserver(-1, observer);
+}
+
+void SocketManager::addObserver(int fd, ISocketObserver *observer)
+{
     SocketEntry *se;
 
     se = *m_p->lookupObserver(observer);
@@ -91,7 +96,7 @@ void SocketManager::addObserver(ISocketObserver *observer)
         m_p->observers = se;
         se->observer = observer;
     }
-    se->fd = -1;
+    se->fd = fd;
     se->mask = 0;
     se->last_activity = 0;
     se->timeout = -1;
@@ -122,6 +127,11 @@ void SocketManager::deleteObservers()
     m_p->observers = 0;
 }
 
+void SocketManager::maskObserver(ISocketObserver *observer, int mask)
+{
+    maskObserver(observer, mask, -1);
+}
+
 void SocketManager::maskObserver(ISocketObserver *observer, int mask, int fd)
 {
     SocketEntry *se;
@@ -135,7 +145,8 @@ void SocketManager::maskObserver(ISocketObserver *observer, int mask, int fd)
     if (se)
     {
         se->mask = mask;
-        se->fd = fd;
+        if (fd != -1)
+            se->fd = fd;
     }
 }
 

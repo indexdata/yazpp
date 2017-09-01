@@ -63,15 +63,20 @@ namespace yazpp_1 {
 */
     class YAZ_EXPORT ISocketObservable {
     public:
-        /// Add an observer interested in socket fd
+        /// Add an observer
         virtual void addObserver(ISocketObserver *observer) = 0;
+        /// Add an observer interested in socket fd (deprecated)
+        virtual void addObserver(int fd, ISocketObserver *observer) = 0;
         /// Delete an observer
         virtual void deleteObserver(ISocketObserver *observer) = 0;
         /// Delete all observers
         virtual void deleteObservers() = 0;
-        /// Specify the events that the observer is intersted in.
+        /// Specify the events and fd that the observer is intersted in.
         virtual void maskObserver(ISocketObserver *observer,
                                   int mask, int fd) = 0;
+        /// Specify the events that the observer is intersted in. (deprecated)
+        virtual void maskObserver(ISocketObserver *observer,
+                                  int mask) = 0;
         /// Specify timeout
         virtual void timeoutObserver(ISocketObserver *observer,
                                      int timeout)=0;
