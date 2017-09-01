@@ -114,7 +114,6 @@ PDU_Assoc::PDU_Assoc(ISocketObservable *socketObservable,
         yaz_log(m_p->log, "new PDU_Assoc. Accepting");
         // assume comstack is accepting...
         m_p->state = PDU_Assoc_priv::Accepting;
-        m_p->m_socketObservable->addObserver(this);
         yaz_log(m_p->log, "maskObserver 1");
         m_p->m_socketObservable->maskObserver(this,
                                               mask|SOCKET_OBSERVE_EXCEPT,
