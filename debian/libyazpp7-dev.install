@@ -1,7 +1,7 @@
-debian/tmp/usr/include/yazpp/*.h
-debian/tmp/usr/lib/*/lib*.a
-debian/tmp/usr/lib/*/lib*.so
-debian/tmp/usr/bin/yazpp-config
-debian/tmp/usr/share/aclocal/yazpp.m4
-debian/tmp/usr/share/man/man1/yazpp-config.1
+usr/include/yazpp/*.h
+usr/lib/*/lib*.a
+usr/lib/*/lib*.so
+usr/bin/yazpp-config
+usr/share/aclocal/yazpp.m4
+usr/share/man/man1/yazpp-config.1
 
