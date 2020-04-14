@@ -1,3 +1,7 @@
+--- 1.7.1 2020/04/14
+
+Fix libyazpp7-dev dependency for Debian/Ubuntu.
+
 --- 1.7.0 2020/04/14
 
 Provide libyazpp7/libyazpp7-dev{el} for Debian and RPM packages -
