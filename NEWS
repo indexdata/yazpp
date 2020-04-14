@@ -1,3 +1,14 @@
+--- 1.7.0 2020/04/14
+
+Provide libyazpp7/libyazpp7-dev{el} for Debian and RPM packages -
+was libyazpp6/libyazppp6-dev{el} in version 1.6.5.
+
+Extend ISocketObservable interface. Method addObserver has a new veriant
+that does not take a socket (fd). Method maskObserver has a new variant
+that takes the fd at that point instead. Old methods are still present
+but the new ones are necessary for connect-retries (multiple IPs for one
+DNS). YPP-12
+
 --- 1.6.5 2016/04/29
 
 Fix typos in documentation.
