@@ -39,7 +39,8 @@ AC_OUTPUT([
 	doc/common/Makefile
 	doc/common/print.dsl
 ],[
-	sed s%echo_source=yes%echo_source=no%g < yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config
+	sed -e 's%echo_source=yes%echo_source=no%g; s%src_root=.*$%%g; s%build_root=.*%%g' \
+		< yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config
 	diff doc/local.ent doc/local0.ent >/dev/null 2>/dev/null \
 		|| cp doc/local0.ent doc/local.ent
   ]

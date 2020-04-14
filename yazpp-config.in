@@ -10,8 +10,6 @@ echo_tabs=no
 echo_source=yes
 echo_lalibs=no
 echo_zoom=no
-src_root="@abs_top_srcdir@"
-build_root="@abs_top_builddir@"
 yazlibs="@YAZLIB@ @LIBS@"
 yazlalibs="@YAZLALIB@ @LIBS@"
 VERSION=@VERSION@
@@ -78,6 +76,8 @@ YAZPPLALIB="$yazlalibs"
 YAZPPLIB="$yazlibs"
 
 if test "$echo_source" = "yes"; then
+    src_root="@abs_top_srcdir@"
+    build_root="@abs_top_builddir@"
     if test "$echo_zoom" = "yes"; then
         YAZPPLIB="-L${build_root}/zoom/.libs -lzoomzpp $YAZPPLIB"
         YAZPPLALIB="${build_root}/zoom/libzoompp.la $YAZPPLALIB"
