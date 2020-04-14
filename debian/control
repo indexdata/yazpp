@@ -3,7 +3,7 @@ Section: libdevel
 Priority: optional
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Standards-Version: 3.6.2
-Build-Depends: debhelper (>= 7),
+Build-Depends: debhelper (>= 9.0.0),
 	libxml2-dev, libxslt1-dev,
 	libyaz5-dev (>= 5.1.0)
 
