@@ -27,7 +27,7 @@ Architecture: any
 Conflicts: libyazpp-dev, libyazpp2-dev, libyazpp3-dev, libyazpp4-dev
 Provides: libyazpp-dev
 Replaces: libyazpp-dev
-Depends: libyazpp6 (= ${source:Version}), libyaz5-dev
+Depends: libyazpp7 (= ${source:Version}), libyaz5-dev
 Description: development libraries for YAZ++
  YAZ++ is a C++ library with an object oriented interface to YAZ and ZOOM.
 
