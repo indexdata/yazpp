@@ -5,7 +5,7 @@ export DH_VERBOSE=1
 	dh $@ --parallel --without python-support
 
 override_dh_auto_configure:
-	dh_auto_configure -- --with-yaz=/usr/bin
+	dh_auto_configure -- --with-yaz=pkg
 
 override_dh_strip:
 	dh_strip --dbg-package=libyazpp7-dbg

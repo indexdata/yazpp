@@ -9,7 +9,7 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-BuildRequires: pkgconfig, libyaz5-devel >= 5.1.0
+BuildRequires: pkgconfig, libyaz5-devel >= 5.29.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
 
@@ -42,7 +42,7 @@ Development libraries and include files for the YAZ++ package.
 
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
-	--enable-shared --with-yaz=/usr/bin
+	--enable-shared --with-yaz=pkg
 %if %{?make_build:1}%{!?make_build:0}
 %make_build
 %else
