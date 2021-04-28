@@ -57,7 +57,7 @@ myclient: $(MY_CLIENT)
 
 # YAZ includes & libs
 YAZ_LIB="$(YAZ_DIR)\lib\$(YAZD).lib"
-YAZ_DEF=/I"$(YAZ_DIR)\include"
+YAZ_DEF=/I"$(YAZ_DIR)\src"
 yaz: $(BINDIR)\$(YAZD).dll 
 
 $(BINDIR)\$(YAZD).dll: "$(YAZ_DIR)\bin\$(YAZD).dll"
