@@ -16,14 +16,14 @@ mirk_sources = zexcept.cpp zconn.cpp zquery.cpp zrs.cpp zrec.cpp
 libzoompp_la_SOURCES = $(mirk_sources) interface.h
 pkginclude_HEADERS=zoom.h
 
+BUILT_SOURCES = zoom.h
+
 zclient_SOURCES=zclient.cpp
 
 EXTRA_DIST=master-header README
 
 test: zclient
 	./zclient z3950.indexdata.com 210 gils '@and mineral epicenter'
-
-$(mirk_sources): zoom.h
 
 zoom.h: master-header
 	rm -f $@
