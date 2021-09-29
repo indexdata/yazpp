@@ -1,3 +1,7 @@
+--- 1.7.2 2021/09/29
+
+Use pkg-config from YAZ rather than yaz-config.
+
 --- 1.7.1 2020/04/14
 
 Fix libyazpp7-dev dependency for Debian/Ubuntu.
