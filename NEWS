@@ -1,3 +1,7 @@
+--- 1.8.0 2021/09/30
+
+Provide pkg-config yazpp.pc.
+
 --- 1.7.2 2021/09/29
 
 Use pkg-config from YAZ rather than yaz-config.
