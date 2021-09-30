@@ -162,6 +162,16 @@
       </para></listitem>
      </varlistentry>
      <varlistentry>
+      <term><filename>usr/share/pkgconfig/yazpp.pc</filename></term>
+      <listitem><para>
+       pkg-config configuration for making applications linking
+       with the yaz++ library.
+       Use <literal>pkg-config --cflags yazpp</literal> to get
+       compiler flags. Use <literal>pkg-config --libs yazpp</literal>
+       to get libraries.
+      </para></listitem>
+     </varlistentry>
+     <varlistentry>
       <term><filename>yazpp-config</filename></term>
       <listitem><para>
        A Bourne shell-script utility that returns the values of the
@@ -170,7 +180,14 @@
        needed in order to compile your applications with the YAZ++
        library.  This script gets installed in your binaries directory
        (<parameter>prefix</parameter><filename>/bin</filename>).
-      </para></listitem>
+      </para>
+      <note>
+       <para>
+	Using <filename>yazpp-config</filename> is deprecated.
+	Use <filename>yazpp.pc</filename> instead.
+       </para>
+      </note>
+      </listitem>
      </varlistentry>
      <varlistentry>
       <term><filename>zoom/zclient</filename></term>
