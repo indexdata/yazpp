@@ -38,6 +38,7 @@ AC_OUTPUT([
 	doc/local0.ent
 	doc/common/Makefile
 	doc/common/print.dsl
+	yazpp.pc
 ],[
 	sed -e 's%echo_source=yes%echo_source=no%g; s%src_root=.*$%%g; s%build_root=.*%%g' \
 		< yazpp-config >src/yazpp-config && chmod +x yazpp-config src/yazpp-config

@@ -69,6 +69,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_bindir}/yazpp-config
 %{_includedir}/yazpp
+%{_libdir}/pkgconfig/*.pc
 %{_libdir}/*.so
 %{_libdir}/*.a
 %{_datadir}/aclocal/yazpp.m4

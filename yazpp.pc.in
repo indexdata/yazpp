@@ -1,0 +1,13 @@
+#!/bin/sh
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+libdir="@libdir@"
+includedir="@includedir@"
+
+Name: yaz++
+Version: @VERSION@
+Description: C++ library for YAZ
+Requires: yaz
+Libs: -L${libdir} -lyazpp
+Libs.private: @LIBS@
+Cflags: -I${includedir}
