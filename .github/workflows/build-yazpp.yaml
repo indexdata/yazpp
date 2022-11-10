@@ -7,30 +7,31 @@ jobs:
   steps:
    - uses: actions/checkout@v3
      with:
-       fetch-depth: 1
-   - name: Clone yaz
-   - uses: actions/checkout@v3
+      fetch-depth: 1
+   - name: clone yaz
+     uses: actions/checkout@v3
      with:
-       repository: indexdata/yaz
-       path: yaz
-       ref: master
+      repository: indexdata/yaz
+      path: yaz
+      ref: master
    - name: Install required and optional dependencies
      run: >
-       sudo apt install autoconf automake libtool gcc g++ make bison
-       tclsh xsltproc docbook docbook-xml docbook-xsl
-       pkg-config libxslt1-dev libgnutls28-dev icu-dev
+      sudo apt install autoconf automake libtool gcc g++ make bison
+      tclsh xsltproc docbook docbook-xml docbook-xsl
+      pkg-config libxslt1-dev libgnutls28-dev libicu-dev
    - name: Run buildconf for YAZ
      run: cd yaz && ./buildconf.sh
    - name: Run configure for YAZ
      run: >
-       cd yaz && ./configure --disable-shared --enable-static
-       --enable-tcpd --with-xslt --with-gnutls --with-icu
-   - name: Run Make yaz
-     run: cd yaz && make
+      cd yaz && ./configure --disable-shared --enable-static
+   - name: Run make for YAZ
+     run: cd yaz && make -j4
    - name: Run buildconf for YAZ++
      run: ./buildconf.sh
    - name: Run configure for YAZ++
      run: >
-       ./configure --with-yaz=yaz --disable-shared --enable-static
-   - name: Run make for YAZ++
-     run: make check
+      ./configure --with-yaz=yaz --disable-shared --enable-static
+   - name: Run make check for YAZ++
+     run: make -j4 check
+   - name: Run make dist for YAZ++
+     run: make dist
