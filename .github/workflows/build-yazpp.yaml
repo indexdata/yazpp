@@ -21,6 +21,11 @@ jobs:
       pkg-config libxslt1-dev libgnutls28-dev libicu-dev
    - name: Run buildconf for YAZ
      run: cd yaz && ./buildconf.sh
+   - name: Run configure for YAZ
+     run: >
+      cd yaz && ./configure --disable-shared --enable-static
+   - name: Run make for YAZ
+     run: cd yaz && make
    - name: Run buildconf for YAZ++
      run: ./buildconf.sh
    - name: Run configure for YAZ++
