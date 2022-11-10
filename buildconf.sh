@@ -30,18 +30,11 @@ Verify distribution tarball with
 EOF
     if [ -f /etc/debian_version ]; then
         cat <<EOF
-Or just build the Debian packages without configuring
-  dpkg-buildpackage -rfakeroot
-
 When building from Git, you need these Debian packages:
-  autoconf automake libtool g++ tcl8.6
+  autoconf automake libtool g++ tclsh
   xsltproc docbook docbook-xml docbook-xsl
   libxslt1-dev libgnutls-dev libreadline5-dev
   libicu-dev
-
-And if you want to make a Debian package: dpkg-dev fakeroot debhelper
-(Then run "dpkg-buildpackage -rfakeroot" in this directory.)
-
 EOF
     fi
     if [ "`uname -s`" = FreeBSD ]; then
