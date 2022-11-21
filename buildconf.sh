@@ -34,7 +34,6 @@ When building from Git, you need these Debian packages:
   autoconf automake libtool g++ tclsh
   xsltproc docbook docbook-xml docbook-xsl
   libxslt1-dev libgnutls-dev libreadline5-dev
-  libicu-dev
 EOF
     fi
     if [ "`uname -s`" = FreeBSD ]; then
@@ -42,7 +41,6 @@ EOF
 When building from a Git, you need these FreeBSD Ports:
   pkg_add -r autoconf268 automake111 libtool bison tcl84 \\
              docbook-xsl libxml2 libxslt
-  pkg_add -r icu4
 EOF
     fi
 fi
