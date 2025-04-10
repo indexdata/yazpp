@@ -9,7 +9,7 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yazpp-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-BuildRequires: pkgconfig, libyaz5-devel >= 5.29.0
+BuildRequires: pkgconfig, libyaz5-devel >= 5.35.0
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yazplusplus
 

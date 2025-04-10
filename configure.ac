@@ -14,7 +14,7 @@ AC_PROG_EGREP
 
 LT_INIT
 
-YAZ_INIT([],[5.1.0])
+YAZ_INIT([],[5.35.0])
 if test -z "$YAZLIB"; then
 	AC_MSG_ERROR([YAZ development libraries missing])
 fi
