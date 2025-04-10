@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -32,13 +32,19 @@ void Yaz_cql2rpn::set_pqf_file(const char *fname)
         m_transform = cql_transform_open_fname(fname);
 }
 
-
 bool Yaz_cql2rpn::parse_spec_file(const char *fname, int *error)
 {
-    *error = 0;
-    cql_transform_close(m_transform);
-    m_transform = cql_transform_open_fname(fname);
-    return m_transform ? true : false;
+    if (!m_transform)
+        m_transform = cql_transform_create();
+    *error = cql_transform_define_fname(m_transform, fname);
+    return *error == 0 ? true : false;
+}
+
+int Yaz_cql2rpn::define_pattern(const char *pattern, const char *value)
+{
+    if (!m_transform)
+        m_transform = cql_transform_create();
+    return cql_transform_define_pattern(m_transform, pattern, value);
 }
 
 int Yaz_cql2rpn::rpn2cql_transform(Z_RPNQuery *q, WRBUF cql, ODR o,

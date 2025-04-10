@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,6 +35,7 @@ class YAZ_EXPORT Yaz_cql2rpn {
     ~Yaz_cql2rpn();
     void set_pqf_file(const char *fname);
     bool parse_spec_file(const char *fname, int *error);
+    int define_pattern(const char *pattern, const char *value);
     int query_transform(const char *cql, Z_RPNQuery **rpnquery, ODR o,
                         char **addinfop);
     int rpn2cql_transform(Z_RPNQuery *q, WRBUF cql, ODR o, char **addinfop);
