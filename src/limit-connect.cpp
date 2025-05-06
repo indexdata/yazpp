@@ -93,9 +93,9 @@ LimitConnect::Peer **LimitConnect::Rep::lookup(const char *peername)
     Peer **p = &m_peers;
     while (*p)
     {
-	if (!strcmp((*p)->m_peername, peername))
-	    break;
-	p = &(*p)->m_next;
+        if (!strcmp((*p)->m_peername, peername))
+            break;
+        p = &(*p)->m_next;
     }
     return p;
 }
@@ -104,7 +104,7 @@ void LimitConnect::add_connect(const char *peername)
 {
     Peer **p = m_p->lookup(peername);
     if (!*p)
-	*p = new Peer(m_p->m_period, peername);
+        *p = new Peer(m_p->m_period, peername);
     (*p)->add_connect();
 }
 
@@ -112,7 +112,7 @@ int LimitConnect::get_total(const char *peername)
 {
     Peer **p = m_p->lookup(peername);
     if (!*p)
-	return 0;
+        return 0;
     return (*p)->m_bw.get_total();
 }
 
@@ -121,14 +121,14 @@ void LimitConnect::cleanup(bool all)
     Peer **p = &m_p->m_peers;
     while (*p)
     {
-	Peer *tp = *p;
-	if (all || (tp->m_bw.get_total() == 0))
-	{
-	    *p = tp->m_next;
-	    delete tp;
-	}
-	else
-	    p = &tp->m_next;
+        Peer *tp = *p;
+        if (all || (tp->m_bw.get_total() == 0))
+        {
+            *p = tp->m_next;
+            delete tp;
+        }
+        else
+            p = &tp->m_next;
     }
 }
 

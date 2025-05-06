@@ -28,8 +28,8 @@ int tst1(const char *query_str_in, const char *query_expected)
 
     if (strcmp(query_str_out, query_expected))
     {
-	yaz_log(YLOG_LOG, "query mismatch out=%s expected=%s",
-		query_str_out, query_expected);
+        yaz_log(YLOG_LOG, "query mismatch out=%s expected=%s",
+                query_str_out, query_expected);
         return 0;
     }
     return 1;
