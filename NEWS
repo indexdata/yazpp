@@ -1,3 +1,8 @@
+--- 1.9.0 2025/05/06
+
+Use new YAZ utility cql_transform_define_fname;
+so that the cql transform handle is not reset when used.
+
 --- 1.8.1 2022/12/04
 
 Upgrade to autoconf 2.69.
@@ -305,7 +310,7 @@ Updated voyager.xml, config.xml to use it. Default "mods" is still MODS v2.
 
 Make proxy perform keepalive when receiving SIGBUS.
 
-For yaz-proxy, fixed problem with fixup of referenceId's. 
+For yaz-proxy, fixed problem with fixup of referenceId's.
 
 --- 0.7.6 2004/02/05 Internal release.
 
@@ -331,7 +336,7 @@ Fixes for XML formatting for stylesheet conversions.
 
 SRW/SRU gateway for yaz-proxy.
 
-Schema conversion 
+Schema conversion
 
 --- 0.6 2003/09/04 Third release
 
