@@ -61,7 +61,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %postun -n libyazpp7 -p /sbin/ldconfig
 
 %files -n libyazpp7
-%doc README LICENSE NEWS
+%doc README.md LICENSE NEWS
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
