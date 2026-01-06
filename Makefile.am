@@ -11,7 +11,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = yazpp.pc
 
 SPEC_FILE=$(PACKAGE).spec
-EXTRA_DIST= $(SPEC_FILE) IDMETA README LICENSE NEWS m4/id-config.sh \
+EXTRA_DIST= $(SPEC_FILE) IDMETA README.md LICENSE NEWS m4/id-config.sh \
 	yazpp-config.in m4/yaz.m4 m4/yazpp.m4 buildconf.sh Doxyfile.in
 
 dist-hook:
