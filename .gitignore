@@ -18,3 +18,4 @@ config.guess
 config.sub
 build
 deb-src
+yazpp.pc
