@@ -25,7 +25,7 @@ namespace ZOOM {
 
     std::string exception::errmsg() const {
         char buf[40];
-        sprintf(buf, "error #%d", code);
+        snprintf(buf, sizeof(buf), "error #%d", code);
         return buf;
     }
 
