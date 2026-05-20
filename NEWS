@@ -1,3 +1,11 @@
+--- 1.9.2 2026/05/20
+
+Update CSS for documentation.
+
+Minor fixes to OPACXML schema (opacxml.xsd)
+
+Make packages for Ubuntu 26.04 LTS (Resolute Raccoon).
+
 --- 1.9.1 2026/01/06
 
 Build Debian trixie package
