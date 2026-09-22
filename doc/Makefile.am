@@ -39,7 +39,7 @@ dist-hook:
 	done
 
 doc-clean:
-	rm -f *.html *.[0-9] *.pdf toc.hhc htmlhelp.hhp local.ent
+	rm -f *.html *.[0-9] *.pdf toc.hhc htmlhelp.hhp
 
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
