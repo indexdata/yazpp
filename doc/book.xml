@@ -99,14 +99,14 @@
     The most useful ones are:
     <variablelist>
      <varlistentry>
-      <term><literal>--prefix </literal>directory</term>
+      <term><literal>--prefix=</literal>directory</term>
       <listitem><para>
         Specifies installation prefix. By default
         <filename>/usr/local</filename> is used.
        </para></listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>--with-yaz </literal>directory</term>
+      <term><literal>--with-yaz=</literal>directory</term>
       <listitem><para>
         Specifies the location of <filename>yaz-config</filename>.
         The <filename>yaz-config</filename> program is generated in
