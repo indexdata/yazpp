@@ -5,12 +5,27 @@
 # Parameters 
 DEBUG=0   # 0 for release, 1 for debug
 
+# Target architecture: x86 or x64
+!IFNDEF BARCH
+!IFDEF VSCMD_ARG_TGT_ARCH
+BARCH = $(VSCMD_ARG_TGT_ARCH)
+!ELSE
+BARCH = x64
+!ENDIF
+!ENDIF
+
 # YAZ
 YAZ_DIR=..\..\yaz
 
 default: all
 
 all: dirs generated dll myclient zclient yaz
+
+make32:
+	nmake DEBUG=0 BARCH=x86 all
+
+make64:
+	nmake DEBUG=0 BARCH=x64 all
 
 # Directories
 # The current directory is supposed to be something like
@@ -175,9 +190,11 @@ $(DLL) $(YAZPP_IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 
 $(MY_CLIENT) : "$(BINDIR)" $(MY_CLIENT_OBJS) $(YAZPP_IMPLIB)
 	$(LINK_PROGRAM) $(MY_CLIENT_OBJS) /out:$@
+	copy /Y "$(YAZ_DIR)\bin\*.dll" $(BINDIR)
 
 $(ZCLIENT) : "$(BINDIR)" $(ZCLIENT_OBJS) $(YAZPP_IMPLIB)
 	$(LINK_PROGRAM) $(ZCLIENT_OBJS) /out:$@
+	copy /Y "$(YAZ_DIR)\bin\*.dll" $(BINDIR)
 
 generated: $(ZOOMDIR)\zoom.h
 
