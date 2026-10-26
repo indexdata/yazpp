@@ -132,6 +132,13 @@ namespace ZOOM {
 
   // bib1Exception::errcode() returns a code from the
   // Bib-1 Diagnostic Set.
+*#ifdef _MSC_VER
+*// These exported exceptions contain private std::string members.
+*// Preserve their DLL interface; clients must use compatible MSVC runtimes
+*// and standard library settings, including the same debug/release mode.
+*#pragma warning(push)
+*#pragma warning(disable: 4251)
+*#endif
   class YAZ_EXPORT bib1Exception: public exception {
 *   std::string info;
   public:
@@ -150,4 +157,7 @@ namespace ZOOM {
 *   virtual std::string errmsg () const; // Why do I have to repeat this?
     std::string addinfo () const;
   };
+*#ifdef _MSC_VER
+*#pragma warning(pop)
+*#endif
 }
