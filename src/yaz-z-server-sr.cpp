@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -7,9 +7,13 @@
 #include <config.h>
 #endif
 #include <yaz/log.h>
+#include <yaz/diagbib1.h>
 #include <yazpp/z-server.h>
+#include <limits.h>
 
 using namespace yazpp_1;
+
+const int fetch_max = 10000;
 
 Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                                                  const char *resultSetName,
@@ -18,7 +22,8 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                                                  Odr_int *next, Odr_int *pres,
                                                  Odr_oid *format)
 {
-    int recno, total_length = 0, toget = xnum, dumped_records = 0;
+    int total_length = 0, toget = xnum, dumped_records = 0;
+
     Z_Records *records =
         (Z_Records *) odr_malloc (odr_encode(), sizeof(*records));
     Z_NamePlusRecordList *reclist =
@@ -33,7 +38,7 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
     *pres = Z_PresentStatus_success;
     *next = 0;
 
-    for (recno = start; reclist->num_records < toget; recno++)
+    for (int recno = start; reclist->num_records < toget; recno++)
     {
         Z_NamePlusRecord *this_rec =
             (Z_NamePlusRecord *) odr_malloc (odr_encode(), sizeof(*this_rec));
@@ -54,7 +59,8 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
         if (this_rec->which == Z_NamePlusRecord_databaseRecord &&
             this_rec->u.databaseRecord == 0)
         {   // handler did not return a record..
-            create_surrogateDiagnostics(odr_encode(), this_rec, 0, 14, 0);
+            create_surrogateDiagnostics(odr_encode(), this_rec,
+                0, YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS, 0);
         }
         /*
          * we get the number of bytes allocated on the stream before any
@@ -75,7 +81,8 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
             {   /* too big entirely */
                 reclist->records[reclist->num_records] = this_rec;
                 create_surrogateDiagnostics(odr_encode(), this_rec,
-                                            this_rec->databaseName, 17, 0);
+                    this_rec->databaseName,
+                    YAZ_BIB1_RECORD_EXCEEDS_MAXIMUM_RECORD_SIZE, 0);
                 reclist->num_records++;
                 *next = recno + 1;
                 dumped_records += this_length;
@@ -88,8 +95,8 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
                     yaz_log(YLOG_DEBUG, "  Dropped it");
                     reclist->records[reclist->num_records] = this_rec;
                     create_surrogateDiagnostics(odr_encode(), this_rec,
-                                                this_rec->databaseName,
-                                                16, 0);
+                        this_rec->databaseName,
+                        YAZ_BIB1_RECORD_EXCEEDS_PREFERRED_MESSAGE_SIZE, 0);
                     reclist->num_records++;
                     // *next = freq.last_in_set ? 0 : recno + 1;
                     *next = recno + 1;
@@ -109,19 +116,21 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
                                                   Z_SearchRequest *req,
                                                   Z_SearchResponse *res)
 {
-    bool_t *sr = (bool_t *)odr_malloc (odr_encode(), sizeof(*sr));
-    *sr = 1;
+    if (*req->smallSetUpperBound < 0 ||
+        *req->mediumSetPresentNumber < 0 ||
+        *req->largeSetLowerBound < 0)
+    {
+        res->records = create_nonSurrogateDiagnostics(odr_encode(),
+            YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
+        res->presentStatus = odr_intdup(odr_encode(), Z_PresentStatus_failure);
+        return;
+    }
 
-    int toget = 0;
-
-    Z_RecordComposition comp, *compp = 0;
-    int hits = *res->resultCount;
-
-    Odr_int *nulint = (Odr_int *)odr_malloc (odr_encode(), sizeof(*nulint));
-    *nulint = 0;
-
-    comp.which = Z_RecordComp_simple;
     /* how many records does the user agent want, then? */
+    Odr_int toget = 0;
+    Z_RecordComposition comp, *compp = 0;
+    comp.which = Z_RecordComp_simple;
+    Odr_int hits = *res->resultCount;
     if (hits <= *req->smallSetUpperBound)
     {
         toget = hits;
@@ -137,32 +146,33 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
             compp = &comp;
     }
 
-    if (toget && !res->records)
+    if (toget > 0 && !res->records)
     {
-        res->presentStatus = (Odr_int *)
-            odr_malloc (odr_encode(), sizeof(Odr_int));
-        *res->presentStatus = Z_PresentStatus_success;
-        res->records =
-            pack_records(s, req->resultSetName, 1, toget, compp,
-                         res->nextResultSetPosition,
-                         res->presentStatus,
-                         req->preferredRecordSyntax);
+        res->presentStatus = odr_intdup(odr_encode(), Z_PresentStatus_success);
+        if (toget > fetch_max)
+        {
+            res->records = create_nonSurrogateDiagnostics(odr_encode(),
+                YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
+            *res->presentStatus = Z_PresentStatus_failure;
+        }
+        else
+        {
+            res->records =
+                pack_records(s, req->resultSetName, 1, (int) toget, compp,
+                    res->nextResultSetPosition,
+                    res->presentStatus,
+                    req->preferredRecordSyntax);
+        }
         if (!res->records)
             return;
         if (res->records->which == Z_Records_DBOSD)
             *res->numberOfRecordsReturned =
                 res->records->u.databaseOrSurDiagnostics->num_records;
-        res->searchStatus = sr;
-        res->resultSetStatus = 0;
     }
     else
     {
         if (hits)
             *res->nextResultSetPosition = 1;
-        res->numberOfRecordsReturned = nulint;
-        res->searchStatus = sr;
-        res->resultSetStatus = 0;
-        res->presentStatus = 0;
     }
 }
 
@@ -170,13 +180,30 @@ void Yaz_Facility_Retrieval::fetch_via_present (Z_Server *s,
                                                 Z_PresentRequest *req,
                                                 Z_PresentResponse *res)
 {
+    Odr_int toget = *req->numberOfRecordsRequested;
+    if (toget < 0 || toget > INT_MAX || toget > fetch_max)
+    {
+        res->records = create_nonSurrogateDiagnostics(odr_encode(),
+            YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
+        *res->presentStatus = Z_PresentStatus_failure;
+        return;
+    }
+    Odr_int start = *req->resultSetStartPoint;
+    if (start < 1 || start > INT_MAX - toget)
+    {
+        res->records = create_nonSurrogateDiagnostics(odr_encode(),
+            YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
+        *res->presentStatus = Z_PresentStatus_failure;
+        return;
+    }
     res->records =
-        pack_records (s, req->resultSetId,*req->resultSetStartPoint,
-                      *req->numberOfRecordsRequested,
-                      req->recordComposition,
-                      res->nextResultSetPosition,
-                      res->presentStatus,
-                      req->preferredRecordSyntax);
+        pack_records(s, req->resultSetId,
+                     (int) start,
+                     (int) toget,
+                     req->recordComposition,
+                     res->nextResultSetPosition,
+                     res->presentStatus,
+                     req->preferredRecordSyntax);
     if (res->records->which == Z_Records_DBOSD)
         *res->numberOfRecordsReturned =
             res->records->u.databaseOrSurDiagnostics->num_records;
@@ -217,8 +244,8 @@ int Yaz_Facility_Retrieval::recv(Z_Server *s, Z_APDU *apdu_request)
     case Z_APDU_searchRequest:
         apdu_response = s->create_Z_PDU(Z_APDU_searchResponse);
         s->transfer_referenceId(apdu_request, apdu_response);
-        sr_search (apdu_request->u.searchRequest,
-                       apdu_response->u.searchResponse);
+        sr_search(apdu_request->u.searchRequest,
+            apdu_response->u.searchResponse);
         if (!apdu_response->u.searchResponse->records)
         {
             fetch_via_piggyback(s, apdu_request->u.searchRequest,
@@ -228,12 +255,12 @@ int Yaz_Facility_Retrieval::recv(Z_Server *s, Z_APDU *apdu_request)
         return 1;
     case Z_APDU_presentRequest:
         apdu_response = s->create_Z_PDU(Z_APDU_presentResponse);
+        Z_PresentRequest *req = apdu_request->u.presentRequest;
         s->transfer_referenceId(apdu_request, apdu_response);
-        sr_present (apdu_request->u.presentRequest,
-                    apdu_response->u.presentResponse);
+        sr_present(req, apdu_response->u.presentResponse);
         if (!apdu_response->u.presentResponse->records)
             fetch_via_present(s, apdu_request->u.presentRequest,
-                              apdu_response->u.presentResponse);
+                apdu_response->u.presentResponse);
         s->send_Z_PDU(apdu_response, 0);
         return 1;
     }
