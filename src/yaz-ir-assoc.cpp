@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -42,24 +42,24 @@ IR_Assoc::~IR_Assoc()
     delete [] m_cookie;
 }
 
-void IR_Assoc::get_databaseNames (int *num, char ***list)
+void IR_Assoc::get_databaseNames(int *num, char ***list)
 {
     *num = m_num_databaseNames;
     *list = m_databaseNames;
 }
 
 typedef char *charp;
-void IR_Assoc::set_databaseNames (int num, const char **list)
+void IR_Assoc::set_databaseNames(int num, const char **list)
 {
     int i;
-    yaz_log (m_log, "IR_Assoc::set_databaseNames num=%d", num);
-    for (i = 0; i<m_num_databaseNames; i++)
+    yaz_log(m_log, "IR_Assoc::set_databaseNames num=%d", num);
+    for (i = 0; i < m_num_databaseNames; i++)
         delete [] m_databaseNames[i];
     delete [] m_databaseNames;
     m_num_databaseNames = num;
 
     m_databaseNames = new char *[num];
-    for (i = 0; i<m_num_databaseNames; i++)
+    for (i = 0; i < m_num_databaseNames; i++)
     {
         m_databaseNames[i] = new char[strlen(list[i])+1];
         strcpy(m_databaseNames[i], list[i]);
@@ -93,7 +93,7 @@ void IR_Assoc::set_databaseNames(const char *dblist, const char *sep)
     delete [] list;
 }
 
-void IR_Assoc::set_preferredRecordSyntax (const char *syntax)
+void IR_Assoc::set_preferredRecordSyntax(const char *syntax)
 {
     xfree(m_preferredRecordSyntax);
     m_preferredRecordSyntax = 0;
@@ -101,7 +101,7 @@ void IR_Assoc::set_preferredRecordSyntax (const char *syntax)
         m_preferredRecordSyntax = xstrdup(syntax);
 }
 
-void IR_Assoc::get_preferredRecordSyntax (const char **dst)
+void IR_Assoc::get_preferredRecordSyntax(const char **dst)
 {
     if (m_preferredRecordSyntax)
         *dst = m_preferredRecordSyntax;
@@ -109,7 +109,7 @@ void IR_Assoc::get_preferredRecordSyntax (const char **dst)
         *dst = "";
 }
 
-void IR_Assoc::set_elementSetName (const char *elementSetName)
+void IR_Assoc::set_elementSetName(const char *elementSetName)
 {
     if (m_elementSetNames)
         delete [] m_elementSetNames->u.generic;
@@ -124,12 +124,12 @@ void IR_Assoc::set_elementSetName (const char *elementSetName)
     }
 }
 
-void IR_Assoc::get_elementSetName (Z_ElementSetNames **elementSetNames)
+void IR_Assoc::get_elementSetName(Z_ElementSetNames **elementSetNames)
 {
     *elementSetNames = m_elementSetNames;
 }
 
-void IR_Assoc::get_elementSetName (const char **elementSetName)
+void IR_Assoc::get_elementSetName(const char **elementSetName)
 {
     if (!m_elementSetNames ||
         m_elementSetNames->which != Z_ElementSetNames_generic)
@@ -144,7 +144,7 @@ void IR_Assoc::get_elementSetName (const char **elementSetName)
 void IR_Assoc::recv_GDU(Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
-            recv_Z_PDU(apdu->u.z3950, len);
+        recv_Z_PDU(apdu->u.z3950, len);
 }
 
 void IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
@@ -154,39 +154,38 @@ void IR_Assoc::recv_Z_PDU(Z_APDU *apdu, int len)
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
-        yaz_log (m_log, "recv InitResponse");
+        yaz_log(m_log, "recv InitResponse");
         recv_initResponse(apdu->u.initResponse);
         break;
     case Z_APDU_initRequest:
-        yaz_log (m_log, "recv InitRequest");
+        yaz_log(m_log, "recv InitRequest");
         recv_initRequest(apdu->u.initRequest);
         break;
     case Z_APDU_searchRequest:
-        yaz_log (m_log, "recv searchRequest");
+        yaz_log(m_log, "recv searchRequest");
         recv_searchRequest(apdu->u.searchRequest);
         break;
     case Z_APDU_searchResponse:
-        yaz_log (m_log, "recv searchResponse");
+        yaz_log(m_log, "recv searchResponse");
         recv_searchResponse(apdu->u.searchResponse);
         break;
     case Z_APDU_presentRequest:
-        yaz_log (m_log, "recv presentRequest");
+        yaz_log(m_log, "recv presentRequest");
         recv_presentRequest(apdu->u.presentRequest);
         break;
     case Z_APDU_presentResponse:
-        yaz_log (m_log, "recv presentResponse");
+        yaz_log(m_log, "recv presentResponse");
         recv_presentResponse(apdu->u.presentResponse);
         break;
     case Z_APDU_extendedServicesResponse:
-        yaz_log (m_log, "recv extendedServiceResponse");
+        yaz_log(m_log, "recv extendedServiceResponse");
         recv_extendedServicesResponse(apdu->u.extendedServicesResponse);
         break;
     }
 }
 
 int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
-                                     char* pResultSetId,
-                                     char* pRefId)
+    char* pResultSetId, char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
@@ -203,8 +202,8 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
             = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, recordSyntax,
                                     odr_encode());
     }
-    yaz_log (m_log, "send_searchRequest");
-    assert (req->otherInfo == 0);
+    yaz_log(m_log, "send_searchRequest");
+    assert(req->otherInfo == 0);
     if (m_cookie)
     {
         set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
@@ -212,12 +211,12 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
         assert (req->otherInfo);
     }
 
-    if ( pRefId )
+    if (pRefId)
     {
         req->referenceId = getRefID(pRefId);
     }
 
-    if ( pResultSetId )
+    if (pResultSetId)
     {
         req->resultSetName = pResultSetId;
     }
@@ -226,9 +225,7 @@ int IR_Assoc::send_searchRequest(Yaz_Z_Query *query,
 }
 
 int IR_Assoc::send_presentRequest(Odr_int start,
-                                  Odr_int number,
-                                  char* pResultSetId,
-                                  char* pRefId)
+    Odr_int number, char* pResultSetId, char* pRefId)
 {
     Z_APDU *apdu = create_Z_PDU(Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
@@ -237,7 +234,7 @@ int IR_Assoc::send_presentRequest(Odr_int start,
     req->numberOfRecordsRequested = &number;
 
     const char *recordSyntax;
-    get_preferredRecordSyntax (&recordSyntax);
+    get_preferredRecordSyntax(&recordSyntax);
     if (recordSyntax && *recordSyntax)
     {
         req->preferredRecordSyntax =
@@ -246,7 +243,7 @@ int IR_Assoc::send_presentRequest(Odr_int start,
     }
     Z_RecordComposition compo;
     Z_ElementSetNames *elementSetNames;
-    get_elementSetName (&elementSetNames);
+    get_elementSetName(&elementSetNames);
     if (elementSetNames)
     {
         req->recordComposition = &compo;
@@ -258,12 +255,12 @@ int IR_Assoc::send_presentRequest(Odr_int start,
         set_otherInformationString(&req->otherInfo, yaz_oid_userinfo_cookie,
                                    1, m_cookie);
 
-    if ( pRefId )
+    if (pRefId)
     {
         req->referenceId = getRefID(pRefId);
     }
 
-    if ( pResultSetId )
+    if (pResultSetId)
     {
         req->resultSetId = pResultSetId;
     }
@@ -306,7 +303,7 @@ void IR_Assoc::client(const char *addr)
     const char *dbpart = 0;
     cs_get_host_args(m_host, &dbpart);
     if (dbpart && *dbpart)
-        set_databaseNames (dbpart, "+ ");
+        set_databaseNames(dbpart, "+ ");
     Z_Assoc::client(m_proxy ? m_proxy : m_host);
 }
 
@@ -382,7 +379,7 @@ int IR_Assoc::send_initRequest(char* pRefId)
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
-    if ( pRefId )
+    if (pRefId)
     {
         req->referenceId = getRefID(pRefId);
     }
@@ -403,7 +400,7 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
     Z_APDU *apdu = create_Z_PDU(Z_APDU_deleteResultSetRequest);
     Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
 
-    if ( pResultSetId )
+    if (pResultSetId)
     {
         *req->deleteFunction = Z_DeleteResultSetRequest_list;
         req->num_resultSetList = 1;
@@ -415,7 +412,7 @@ int IR_Assoc::send_deleteResultSetRequest(char* pResultSetId, char* pRefId)
         *req->deleteFunction = Z_DeleteResultSetRequest_all;
     }
 
-    if ( pRefId )
+    if (pRefId)
     {
         req->referenceId = getRefID(pRefId);
     }

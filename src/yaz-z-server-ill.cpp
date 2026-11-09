@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -32,7 +32,7 @@ int Yaz_Facility_ILL::recv(Z_Server *s, Z_APDU *apdu_request)
     if (!req->taskSpecificParameters || req->taskSpecificParameters->which !=
         Z_External_itemOrder)
         return 0;
-    yaz_log (YLOG_LOG, "got ill p=%p", this);
+    yaz_log(YLOG_LOG, "got ill p=%p", this);
     apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
     ill_service(req, req->taskSpecificParameters->u.itemOrder,
         apdu_response->u.extendedServicesResponse);

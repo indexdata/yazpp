@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -23,7 +23,7 @@ Z_Server::~Z_Server()
     facility_reset();
 }
 
-void Z_Server::facility_reset ()
+void Z_Server::facility_reset()
 {
     Z_Server_Facility_Info *p = m_facilities;
     while (p)
@@ -52,7 +52,7 @@ void Z_Server::facility_add(IServer_Facility *facility,
     (*p)->m_facility = facility;
 }
 
-void Z_Server::recv_GDU (Z_GDU *apdu, int len)
+void Z_Server::recv_GDU(Z_GDU *apdu, int len)
 {
     if (apdu->which == Z_GDU_Z3950)
         recv_Z_PDU(apdu->u.z3950, len);
@@ -60,7 +60,7 @@ void Z_Server::recv_GDU (Z_GDU *apdu, int len)
         delete this;
 }
 
-void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
+void Z_Server::recv_Z_PDU(Z_APDU *apdu_request, int len)
 {
     Z_Server_Facility_Info *f = m_facilities;
 
@@ -113,12 +113,12 @@ void Z_Server::recv_Z_PDU (Z_APDU *apdu_request, int len)
 /*
  * database record.
  */
-void Z_ServerUtility::create_databaseRecord (
+void Z_ServerUtility::create_databaseRecord(
     ODR odr, Z_NamePlusRecord *rec, const char *dbname, const Odr_oid *format,
     const void *buf, int len)
 {
     Odr_oid *oid = odr_oiddup(odr, format);
-    rec->databaseName = dbname ? odr_strdup (odr, dbname) : 0;
+    rec->databaseName = odr_strdup_null(odr, dbname);
     rec->which = Z_NamePlusRecord_databaseRecord;
     rec->u.databaseRecord = z_ext_record_oid(odr, oid,
                                              (const char *) buf, len);

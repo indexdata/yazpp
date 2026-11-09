@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -12,7 +12,7 @@
 using namespace yazpp_1;
 
 int Yaz_Facility_Update::init(Z_Server *s, Z_InitRequest *initRequest,
-                           Z_InitResponse *initResponse)
+    Z_InitResponse *initResponse)
 {
     Z_Options *req = initRequest->options;
     Z_Options *res = initResponse->options;
@@ -34,7 +34,7 @@ int Yaz_Facility_Update::recv(Z_Server *s, Z_APDU *apdu_request)
     {
         apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
         update_service(req, req->taskSpecificParameters->u.update,
-                       apdu_response->u.extendedServicesResponse);
+            apdu_response->u.extendedServicesResponse);
         s->transfer_referenceId(apdu_request, apdu_response);
         s->send_Z_PDU(apdu_response, 0);
         return 1;
@@ -43,8 +43,8 @@ int Yaz_Facility_Update::recv(Z_Server *s, Z_APDU *apdu_request)
              req->taskSpecificParameters->which == Z_External_update0)
     {
         apdu_response = s->create_Z_PDU(Z_APDU_extendedServicesResponse);
-        update_service0 (req, req->taskSpecificParameters->u.update0,
-                         apdu_response->u.extendedServicesResponse);
+        update_service0(req, req->taskSpecificParameters->u.update0,
+            apdu_response->u.extendedServicesResponse);
         s->transfer_referenceId(apdu_request, apdu_response);
         s->send_Z_PDU(apdu_response, 0);
         return 1;
