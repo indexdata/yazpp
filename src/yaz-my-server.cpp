@@ -1,5 +1,5 @@
 /* This file is part of the yazpp toolkit.
- * Copyright (C) Index Data 
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 
@@ -19,17 +19,17 @@ using namespace yazpp_1;
 
 class MyILL : public Yaz_Facility_ILL {
 public:
-    void ill_service (Z_ExtendedServicesRequest *req,
-                      Z_ItemOrder *io,
-                      Z_ExtendedServicesResponse *res);
+    void ill_service(Z_ExtendedServicesRequest *req,
+                     Z_ItemOrder *io,
+                     Z_ExtendedServicesResponse *res);
 };
 
 class MyUpdate : public Yaz_Facility_Update {
 public:
-    void update_service (Z_ExtendedServicesRequest *req,
-                         Z_IUUpdate *io,
-                         Z_ExtendedServicesResponse *res);
-    void update_service0 (Z_ExtendedServicesRequest *req,
+    void update_service(Z_ExtendedServicesRequest *req,
+                        Z_IUUpdate *io,
+                        Z_ExtendedServicesResponse *res);
+    void update_service0(Z_ExtendedServicesRequest *req,
                          Z_IU0Update *io,
                          Z_ExtendedServicesResponse *res);
 };
@@ -37,18 +37,18 @@ public:
 
 class MyRetrieval : public Yaz_Facility_Retrieval, Yaz_USMARC {
 public:
-    int sr_init (Z_InitRequest *initRequest,
-                 Z_InitResponse *initResponse);
-    void sr_search (Z_SearchRequest *searchRequest,
-                        Z_SearchResponse *searchResponse);
-    void sr_present (Z_PresentRequest *presentRequest,
-                         Z_PresentResponse *presentResponse);
-    void sr_record (const char *resultSetName,
-                    int position,
-                    Odr_oid *format,
-                    Z_RecordComposition *comp,
-                    Z_NamePlusRecord *namePlusRecord,
-                    Z_Records *records);
+    int sr_init(Z_InitRequest *initRequest,
+                Z_InitResponse *initResponse);
+    void sr_search(Z_SearchRequest *searchRequest,
+                   Z_SearchResponse *searchResponse);
+    void sr_present(Z_PresentRequest *presentRequest,
+                    Z_PresentResponse *presentResponse);
+    void sr_record(const char *resultSetName,
+                   int position,
+                   Odr_oid *format,
+                   Z_RecordComposition *comp,
+                   Z_NamePlusRecord *namePlusRecord,
+                   Z_Records *records);
 };
 
 class MyServer : public Z_Server {
@@ -68,38 +68,35 @@ private:
     int m_no;
 };
 
-void MyILL::ill_service (Z_ExtendedServicesRequest *req,
-                         Z_ItemOrder *io,
-                         Z_ExtendedServicesResponse *res)
+void MyILL::ill_service(Z_ExtendedServicesRequest *req,
+    Z_ItemOrder *io, Z_ExtendedServicesResponse *res)
 {
-    yaz_log (YLOG_LOG, "MyServer::ill_service");
+    yaz_log(YLOG_LOG, "MyServer::ill_service");
 }
 
-void MyUpdate::update_service (Z_ExtendedServicesRequest *req,
-                           Z_IUUpdate *io,
-                           Z_ExtendedServicesResponse *res)
+void MyUpdate::update_service(Z_ExtendedServicesRequest *req,
+    Z_IUUpdate *io, Z_ExtendedServicesResponse *res)
 {
-    yaz_log (YLOG_LOG, "MyServer::update_service (v1.1)");
+    yaz_log(YLOG_LOG, "MyServer::update_service (v1.1)");
 }
 
-void MyUpdate::update_service0 (Z_ExtendedServicesRequest *req,
-                           Z_IU0Update *io,
-                                Z_ExtendedServicesResponse *res)
+void MyUpdate::update_service0(Z_ExtendedServicesRequest *req,
+    Z_IU0Update *io, Z_ExtendedServicesResponse *res)
 {
-    yaz_log (YLOG_LOG, "MyServer::update_service (v1.0)");
+    yaz_log(YLOG_LOG, "MyServer::update_service (v1.0)");
 }
 
-int MyRetrieval::sr_init (Z_InitRequest *initRequest,
-                       Z_InitResponse *initResponse)
+int MyRetrieval::sr_init(Z_InitRequest *initRequest,
+    Z_InitResponse *initResponse)
 {
-    yaz_log (YLOG_LOG, "MyServer::sr_init");
+    yaz_log(YLOG_LOG, "MyServer::sr_init");
     return 1;
 }
 
-void MyRetrieval::sr_search (Z_SearchRequest *searchRequest,
-                             Z_SearchResponse *searchResponse)
+void MyRetrieval::sr_search(Z_SearchRequest *searchRequest,
+    Z_SearchResponse *searchResponse)
 {
-    yaz_log (YLOG_LOG, "MyServer::recv_Z_search");
+    yaz_log(YLOG_LOG, "MyServer::recv_Z_search");
     if (searchRequest->query->which == Z_Query_type_1)
     {
         Z_RPNStructure *s = searchRequest->query->u.type_1->RPNStructure;
@@ -108,7 +105,7 @@ void MyRetrieval::sr_search (Z_SearchRequest *searchRequest,
             s->u.simple->u.attributesPlusTerm->term->which == Z_Term_general)
         {
             Odr_oct *term = s->u.simple->u.attributesPlusTerm->term->u.general;
-            char *str = (char *) odr_malloc (odr_encode(), term->len+1);
+            char *str = (char *) odr_malloc(odr_encode(), term->len+1);
             if (term->len)
                 memcpy (str, term->buf, term->len);
             str[term->len] = '\0';
@@ -117,20 +114,17 @@ void MyRetrieval::sr_search (Z_SearchRequest *searchRequest,
     }
 }
 
-void MyRetrieval::sr_present (Z_PresentRequest *presentRequest,
-                               Z_PresentResponse *presentResponse)
+void MyRetrieval::sr_present(Z_PresentRequest *presentRequest,
+    Z_PresentResponse *presentResponse)
 {
-    yaz_log (YLOG_LOG, "MyServer::recv_Z_present");
+    yaz_log(YLOG_LOG, "MyServer::recv_Z_present");
 }
 
-void MyRetrieval::sr_record (const char *resultSetName,
-                             int position,
-                             Odr_oid *format,
-                             Z_RecordComposition *comp,
-                             Z_NamePlusRecord *namePlusRecord,
-                             Z_Records *records)
+void MyRetrieval::sr_record(const char *resultSetName,
+    int position, Odr_oid *format, Z_RecordComposition *comp,
+    Z_NamePlusRecord *namePlusRecord, Z_Records *records)
 {
-    yaz_log (YLOG_LOG, "MyServer::recv_Z_record");
+    yaz_log(YLOG_LOG, "MyServer::recv_Z_record");
     const char *rec = get_record(position);
     if (rec)
         create_databaseRecord(odr_encode(), namePlusRecord, 0,
@@ -167,13 +161,13 @@ MyServer::MyServer(IPDU_Observable *the_PDU_Observable) :
 
 void MyServer::timeoutNotify()
 {
-    yaz_log (YLOG_LOG, "connection timed out");
+    yaz_log(YLOG_LOG, "connection timed out");
     delete this;
 }
 
 void MyServer::failNotify()
 {
-    yaz_log (YLOG_LOG, "connection closed by client");
+    yaz_log(YLOG_LOG, "connection closed by client");
     delete this;
 }
 
@@ -183,8 +177,8 @@ void MyServer::connectNotify()
 
 void usage(const char *prog)
 {
-    fprintf (stderr, "%s: [-a log] [-v level] [-T] @:port\n", prog);
-    exit (1);
+    fprintf(stderr, "%s: [-a log] [-v level] [-T] @:port\n", prog);
+    exit(1);
 }
 
 int main(int argc, char **argv)
@@ -217,7 +211,7 @@ int main(int argc, char **argv)
             cert_fname = xstrdup(arg);
             break;
         case 'v':
-            yaz_log_init_level (yaz_log_mask_str(arg));
+            yaz_log_init_level(yaz_log_mask_str(arg));
             break;
         case 'T':
             thread_flag = 1;
@@ -242,7 +236,7 @@ int main(int argc, char **argv)
     z->server(addr);
     if (apdu_log)
     {
-        yaz_log (YLOG_LOG, "set_APDU_log %s", apdu_log);
+        yaz_log(YLOG_LOG, "set_APDU_log %s", apdu_log);
         z->set_APDU_log(apdu_log);
     }
 

@@ -15,21 +15,18 @@ using namespace yazpp_1;
 
 const int fetch_max = 10000;
 
-Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
-                                                 const char *resultSetName,
-                                                 int start, int xnum,
-                                                 Z_RecordComposition *comp,
-                                                 Odr_int *next, Odr_int *pres,
-                                                 Odr_oid *format)
+Z_Records *Yaz_Facility_Retrieval::pack_records(Z_Server *s,
+    const char *resultSetName, int start, int xnum, Z_RecordComposition *comp,
+    Odr_int *next, Odr_int *pres, Odr_oid *format)
 {
     int total_length = 0, toget = xnum, dumped_records = 0;
 
     Z_Records *records =
-        (Z_Records *) odr_malloc (odr_encode(), sizeof(*records));
+        (Z_Records *) odr_malloc(odr_encode(), sizeof(*records));
     Z_NamePlusRecordList *reclist =
-        (Z_NamePlusRecordList *) odr_malloc (odr_encode(), sizeof(*reclist));
+        (Z_NamePlusRecordList *) odr_malloc(odr_encode(), sizeof(*reclist));
     Z_NamePlusRecord **list =
-        (Z_NamePlusRecord **) odr_malloc (odr_encode(), sizeof(*list) * toget);
+        (Z_NamePlusRecord **) odr_malloc(odr_encode(), sizeof(*list) * toget);
 
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
@@ -41,14 +38,14 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
     for (int recno = start; reclist->num_records < toget; recno++)
     {
         Z_NamePlusRecord *this_rec =
-            (Z_NamePlusRecord *) odr_malloc (odr_encode(), sizeof(*this_rec));
+            (Z_NamePlusRecord *) odr_malloc(odr_encode(), sizeof(*this_rec));
         this_rec->databaseName = 0;
         this_rec->which = Z_NamePlusRecord_databaseRecord;
         this_rec->u.databaseRecord = 0;
 
         int this_length = 0;
 
-        sr_record (resultSetName, recno, format, comp, this_rec, records);
+        sr_record(resultSetName, recno, format, comp, this_rec, records);
 
         if (records->which != Z_Records_DBOSD)
         {
@@ -112,9 +109,8 @@ Z_Records *Yaz_Facility_Retrieval::pack_records (Z_Server *s,
     return records;
 }
 
-void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
-                                                  Z_SearchRequest *req,
-                                                  Z_SearchResponse *res)
+void Yaz_Facility_Retrieval::fetch_via_piggyback(Z_Server *s,
+    Z_SearchRequest *req, Z_SearchResponse *res)
 {
     if (*req->smallSetUpperBound < 0 ||
         *req->mediumSetPresentNumber < 0 ||
@@ -176,9 +172,8 @@ void Yaz_Facility_Retrieval::fetch_via_piggyback (Z_Server *s,
     }
 }
 
-void Yaz_Facility_Retrieval::fetch_via_present (Z_Server *s,
-                                                Z_PresentRequest *req,
-                                                Z_PresentResponse *res)
+void Yaz_Facility_Retrieval::fetch_via_present(Z_Server *s,
+    Z_PresentRequest *req, Z_PresentResponse *res)
 {
     Odr_int toget = *req->numberOfRecordsRequested;
     if (toget < 0 || toget > INT_MAX || toget > fetch_max)
