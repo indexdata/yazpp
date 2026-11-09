@@ -9,9 +9,12 @@ yazpp-config.in
 yaz-my-client
 yaz-my-server
 yaz-proxy
-test_gdu*
-test_query*
+test_gdu
+test_query
+test_server
 *.lo
 *.o
 tstquery
+*.log
+*.trs
 *~
