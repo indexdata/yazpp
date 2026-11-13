@@ -12,6 +12,7 @@ yaz-proxy
 test_gdu
 test_query
 test_server
+test_cache
 *.lo
 *.o
 tstquery

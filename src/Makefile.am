@@ -1,5 +1,5 @@
 
-check_PROGRAMS = test_query test_gdu test_server
+check_PROGRAMS = test_query test_gdu test_server test_cache
 noinst_PROGRAMS = yaz-my-server yaz-my-client
 bin_SCRIPTS = yazpp-config
 
@@ -30,5 +30,6 @@ yaz_my_server_SOURCES=yaz-my-server.cpp yaz-marc-sample.cpp
 test_query_SOURCES=test_query.cpp
 test_gdu_SOURCES=test_gdu.cpp
 test_server_SOURCES=test_server.cpp
+test_cache_SOURCES=test_cache.cpp
 
 LDADD=libyazpp.la $(YAZLALIB)
