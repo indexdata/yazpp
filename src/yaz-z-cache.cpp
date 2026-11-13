@@ -113,7 +113,8 @@ void RecordCache::add(ODR o, Z_NamePlusRecordList *npr, int start,
             nmem_malloc(m_p->nmem, sizeof(*entry));
         entry->m_record =
             yaz_clone_z_NamePlusRecord(npr->records[i], m_p->nmem);
-        entry->m_comp = yaz_clone_z_RecordComposition(comp, m_p->nmem);
+        entry->m_comp = comp ?
+            yaz_clone_z_RecordComposition(comp, m_p->nmem) : 0;
         entry->m_offset = i + start;
         entry->m_next = m_p->entries;
         m_p->entries = entry;
