@@ -1,0 +1,103 @@
+# Build and test a distribution archive with Clang on FreeBSD.
+name: Build YAZ++ on FreeBSD
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-freebsd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Clone YAZ
+        uses: actions/checkout@v6
+        with:
+          repository: indexdata/yaz
+          path: yaz
+          ref: master
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Build distribution archive and test on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: '14'
+          usesh: true
+          prepare: |
+            set -eu
+            pkg install -y autoconf automake libtool gmake bison git \
+              tcl86 pkgconf libxml2 libxslt gnutls readline icu \
+              snowballstemmer docbook-xml docbook-xsl
+          run: |
+            set -eu
+            source_dir=$(pwd)
+            show_failures()
+            {
+              result=$?
+              if test "$result" -ne 0; then
+                for build in "$source_dir" "$source_dir/yaz" "$source_dir"/dist-test/yazpp-*; do
+                  for log in config.log src/test-suite.log; do
+                    if test -f "$build/$log"; then
+                      echo "::group::$build/$log"
+                      cat "$build/$log"
+                      echo "::endgroup::"
+                    fi
+                  done
+                done
+              fi
+              exit "$result"
+            }
+            trap show_failures EXIT
+
+            export CC=clang
+            export CXX=clang++
+            export CFLAGS='-g -O2 -Wall'
+            export CXXFLAGS='-g -O2 -Wall'
+            export CPPFLAGS='-I/usr/local/include'
+            export LDFLAGS='-L/usr/local/lib'
+            export TCLSH=tclsh8.6
+            export XML_CATALOG_FILES=/usr/local/share/xml/catalog.ports
+
+            freebsd-version
+            "$CC" --version
+            "$CXX" --version
+
+            cd yaz
+            ./buildconf.sh
+            ./configure --disable-shared --enable-static \
+              --with-xslt --with-gnutls --with-icu --with-stemmer=/usr/local \
+              --disable-tcpd --without-memcached --without-redis \
+              --with-docbook-dtd=/usr/local/share/xml/docbook/4.5 \
+              --with-docbook-xsl=/usr/local/share/xsl/docbook
+            gmake -j3
+            cd "$source_dir"
+
+            ./buildconf.sh
+            ./configure --with-yaz="$source_dir/yaz" --disable-shared --enable-static \
+              --with-docbook-dtd=/usr/local/share/xml/docbook/4.5 \
+              --with-docbook-xsl=/usr/local/share/xsl/docbook
+            gmake -j3 dist
+
+            . ./IDMETA
+            mkdir dist-test
+            tar -xzf "yazpp-$VERSION.tar.gz" -C dist-test
+            cd "dist-test/yazpp-$VERSION"
+            ./configure --with-yaz="$source_dir/yaz" --disable-shared --enable-static \
+              --with-docbook-dtd=/usr/local/share/xml/docbook/4.5 \
+              --with-docbook-xsl=/usr/local/share/xsl/docbook
+            gmake -j3 check
